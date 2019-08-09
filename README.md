@@ -1,3 +1,2 @@
-# Algos
+# CP Algorithms
 
-Algorithms
