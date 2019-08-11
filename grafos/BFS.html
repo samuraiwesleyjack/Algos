@@ -1,16 +1,151 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Competitive Porgramming Algorithms</title>
+		<title>BFS - CP Algoritmos</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
 		<meta name="author" content="Weslley Matheus">
 		<link rel="stylesheet" href="styles.css">
-		<base href="https://samuraiwesleyjack.github.io/Algos/"/>
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
 	</head>
 	<body>
-	<div id="c">
-		<a href=""><</a>
-		
-	</div>
+		<a href="https://samuraiwesleyjack.github.io/Algos/">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Busca em Largura</h1>
+			<p>Busca em largura ou em amplitude(Breadth for Search) é um dos algoritmos essenciais para busca e travessia em grafos.</p>
+			<p>Como uma consequência de como o algoritmo funciona, o caminho encontrado pela BFS para qualquer nó é o caminho mais curto para aquele nó, 
+			i.e o caminho que contém o menor número de arestas em um grafo sem pesos ou valores nas arestas(unweighted graphs).</p>
+			<p>O algoritmo funciona em tempo $O(n+m)$, em que $n$ é o número de vértices e $m$ é o número de arestas.</p>
+			<h2>Descrição</h2>
+			<p>O algoritmo recebe como input um grafo sem pesos e o index de um vértice fonte $s$. O grafo recebido no input pode ser direcionado ou indirecionado,
+            não importa para o algoritmo.</p>
+			<p>O algoritmo pode ser entendido como um incêndio no grafo: na etapa inicial apenas o vértice fonte $s$ está em chamas. Em cada passo, o fogo incendiando cada vértice alastra-se para todos os seus vizinhos conectados. Em uma iteração do algoritmo, o "anel de
+			fogo" é expandido em largura por uma unidade (consequentemente o nome do algoritmo).</p>
+			<img src="img/fire.gif" width="200" height="150"/>
+			<p>Mais precisamente, o algoritmo pode ser declarado como: Crie uma queue $q$ que irá conter os vértices para serem processados e uma
+            array de Booleans $usados[]$ que irá indicar para cada vértice se ele foi incendiado(visitado) ou não.</p>
+			<p>Inicialmente, pegue a fonte $s$ para a queue e declare $usados[s] = true$, e para todos os outros vértices $v$ declare $usados[v] = false$.
+            Então, loop até que a queue esteja vazia e em cada iteração, exclua um vértice da queue. Itere por todas as arestas saindo desse vértice
+            e se alguma dessas arestas revelarem vértices não incendiados, declare-os em chama e coloque eles dentro da queue.</p>
+			<p>Como consequência, quando a queue estiver vazia, o "anel de fogo" contém todos os vértices alcançáveis pela fonte $s$, com cada vértice alcançado no menor caminho possível.
+            Você também pode calcular o tamanho dos caminhos(que apenas requer manter uma array das distâncias dos caminhos $d[]$) como também salvar informações para restaurar todos estes caminhos (para isso, é necessário manter uma array de "parentes" $p[]$, que guarda, para cada vértice, o vértice no qual alcançamos).</p>
+			
+			<h2>Implementação</h2>
+			<pre><code class="cpp">
+	    vector&lt;vector&lt;int&gt;&gt; adj;  // grafo como lista de adjacência
+            int n; // número de nós
+            int s; // vértice fonte
+
+            queue&lt;int&gt; q;
+            vector&lt;bool&gt; usados(n);
+            vector&lt;int&gt; d(n), p(n);
+
+            q.push(s);
+            usados[s] = true;
+            p[s] = -1;
+            while (!q.empty()) {
+               int v = q.front();
+               q.pop();
+               for (int u : adj[v]) {
+                  if (!usados[u]) {
+                    usados[u] = true;
+                    q.push(u);
+                    d[u] = d[v] + 1;
+                    p[u] = v;     //o parente do vértice u é o nó v
+                }
+              }
+            }
+			</code></pre>
+			<p>Se tivermos que restaurar e exibir o menor caminho da fonte até algum vértice $u$, pode ser feito na seguinte maneira:</p>
+			<pre><code class="cpp">
+			if (!usados[u]) {
+                               cout &lt;&lt; "Sem caminho!";
+			} 
+			else {
+				vector&lt;int&gt; caminhos;
+				for (int v = u; v != -1; v = p[v])
+				  caminhos.push_back(v);
+				  reverse(caminhos.begin(), caminhos.end());
+				  cout &lt;&lt; "Caminho: ";
+				  for (int v : caminhos)
+				    cout &lt;&lt; v &lt;&lt; " ";
+                          }
+            </code></pre>
+			<h2>Aplicações de BFS</h2>
+			<ul>
+				<li><p>Encontre o menor caminho de uma fonte para outros vértices em um grafo sem pesos(unweighted graph).</p></li>
+				<li><p>Encontre todos os componentes conectados em um grafo não direcionado em tempo $O(n + m)$:
+				Para fazer isso, nós apenas executamos BFS começando de cada vértice, exceto para vértices no qual ja foram visitados de execuções anteriores.
+				Portanto, nós realizamos uma BFS normal a partir de cada vértice, mas não resete a array $usados[]$ cada vez que conseguimos um novo componente conectado, e o tempo total de execução ainda irá ser $O(n + m)$ (execultar múltiplas BFS no grafo sem zerar a array $usados []$ é chamado series de buscas em largura).</p></li>
+				<li><p>Encontrando uma solução para um problema ou jogo com o número mínimo de movimentos, se cada estado do jogo puder ser representado por um vértice do grafo, e as transições de um estado para o outro serem arestas do grafo.</p></li>
+				<li><p>Encontrar o menor caminho em um grafo com pesos 0 ou 1:
+				Requer apenas uma pequena modificação na BFS normal: se a aresta atual de valor zero e distância para o vértice é menor que a distância atual encontrada, portanto adcione este vértice não atrás, mas na frente da queue.</p></li>
+				<li><p>Encontrar o menor ciclo em um grafo direcionado sem pesos:
+				Inicie uma BFS de cada vértice.
+				Logo que tentamos voltar do vértice atual para a fonte, achamos o menor ciclo contendo o vértice fonte.
+				Nesse momento nós podemos parar a BFS, e começar uma nova BFS no próximo vértice.
+				De todos esses ciclos(no máximo um de cada BFS) escolha o menor.</p></li>
+				<li><p>Encontrar todas as arestas dentre qualquer caminho mínimo dado por um par de vértices $(a, b)$.
+				Para fazer isso, inicies duas BFS's:
+				uma de $a$ e uma de $b$.
+				Seja $d_a []$ a array que contém as menores distâncias obtidas pela primeira BFS(de $a$) e $d_b []$ ser a array contendo as menores distâncias obtidas da segunda BFS(de $b$).
+				Agora para cada aresta $(u, v)$ é fácil checar se cada aresta existe em qualquer mínimo caminho  de $a$ e $b$:
+				o critério é a condição $d_a [u] + 1 + d_b [v] = d_a [b]$.</p></li>
+				<li><p>Encontre todos os vértices em qualquer caminho mínimo entre um par dado de vértices $(a, b)$.
+				Para isso, execute 2 BFS's:
+				uma de $a$ e uma de $b$.
+				Seja $d_a []$ a array contendo distâncias mínimas obtidas pela primeira DFS(de $a$) e $d_b []$ ser a array contendo distâncias obtidas pela segunda BFS(de $b$).
+				Agora para cada vértice cheque se existe em qualquer caminho mínimo dentre $a$ and $b$:
+				o critério é a condição $d_a [v] + d_b [v] = d_a [b]$.</p></li>
+				<li><p>Encontre o menor caminho de uma distância par de um vértice fonte $s$ para um vértice alvo $t$ em um grafo sem pesos:
+				Para isso, precisaremos construir um grafo auxiliar, no qual os vértices sejam os estados $(v, c)$, em que $v$ - é o nó atual, $c = 0$ or $c = 1$ - a atual paridade.
+				Qualquer aresta $(a, b)$ do grafo original nessa nova coluna irá se tornar em duas arestas $((u, 0), (v, 1))$ e $((u, 1), (v, 0))$.
+				Depois disso executamos uma BFS do vértice inicial $(s, 0)$ até o vértice final $(t, 0)$.</p></li>
+			</ul>
+			<h2>Problemas</h2>
+			<ul>
+			<li><a href="http://spoj.com/problems/AKBAR">SPOJ: AKBAR</a></li>
+			<li><a href="http://www.spoj.com/problems/NAKANJ/">SPOJ: NAKANJ</a></li>
+			<li><a href="http://www.spoj.com/problems/WATER">SPOJ: WATER</a></li>
+			<li><a href="http://www.spoj.com/problems/MICEMAZE/">SPOJ: MICE AND MAZE</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=2034">Timus: Caravans</a></li>
+			<li><a href="https://devskill.com/CodingProblems/ViewProblem/60">DevSkills - Holloween Party</a></li>
+			<li><a href="https://devskill.com/CodingProblems/ViewProblem/150">DevSkills - Ohani And The Link Cut Tree</a></li>
+			<li><a href="http://www.spoj.com/problems/SPIKES/">SPOJ - Spiky Mazes</a></li>
+			<li><a href="http://www.spoj.com/problems/ADV04F1/">SPOJ - Four Chips (hard)</a></li>
+			<li><a href="http://www.spoj.com/problems/INVESORT/">SPOJ - Inversion Sort</a></li>
+			<li><a href="http://codeforces.com/contest/59/problem/E">Codeforces - Shortest Path</a></li>
+			<li><a href="http://www.spoj.com/problems/MULTII/">SPOJ - Yet Another Multiple Problem</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2387">UVA 11392 - Binary 3xType Multiple</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1909">UVA 10968 - KuPellaKeS</a></li>
+			<li><a href="http://codeforces.com/contest/796/problem/D">Codeforces - Police Stations</a></li>
+			<li><a href="http://codeforces.com/contest/821/problem/D">Codeforces - Okabe and City</a></li>
+			<li><a href="http://www.spoj.com/problems/DIGOKEYS/">SPOJ - Find the Treasure</a></li>
+			<li><a href="http://codeforces.com/contest/653/problem/E">Codeforces - Bear and Forgotten Tree 2</a></li>
+			<li><a href="http://codeforces.com/contest/769/problem/C">Codeforces - Cycle in Maze</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2287">UVA - 11312 - Flipping Frustration</a></li>
+			<li><a href="http://www.spoj.com/problems/ADACYCLE/">SPOJ - Ada and Cycle</a></li>
+			</ul>
+			
+			<div id="footer">
+            (c) 2019 translation by <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>
