@@ -1,0 +1,22 @@
+body {
+    font-family:"Segoe UI",Arial,sans-serif;
+	font-weight:400;
+	margin:10px 0
+    color: #333;
+}
+h1{font-size:36px}h2{font-size:30px}h3{font-size:24px}h4{font-size:20px}h5{font-size:18px}h6{font-size:16px}.w3-serif{font-family:serif}
+h1,h2,h3,h4,h5,h6{
+	font-family:"Segoe UI",Arial,sans-serif;
+	font-weight:400;
+	margin:10px 0
+	}.w3-wide{letter-spacing:4px}
+#intro {
+    font-size: 1.3em;
+}
+#c {
+    width: 960px;
+    margin: 10px auto;
+    padding: 20px;
+    border-radius: 7px;
+    background: #fff;
+}
