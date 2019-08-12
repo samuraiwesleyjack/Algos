@@ -51,7 +51,7 @@ int n; // número de nós
 int s; // vértice fonte
 
 queue&lt;int&gt; q;
-vector&lt;bool&gt; used(n);
+vector&lt;bool&gt; usados(n);
 vector&lt;int&gt; d(n), p(n);
 
 q.push(s);
@@ -71,20 +71,18 @@ while (!q.empty()) {
 }
 </code></pre>
 			<p>Se tivermos que restaurar e exibir o menor caminho da fonte até algum vértice $u$, pode ser feito na seguinte maneira:</p>
-			<pre><code class="cpp">
-			if (!usados[u]) {
-                               cout &lt;&lt; "Sem caminho!";
-			} 
-			else {
-				vector&lt;int&gt; caminhos;
-				for (int v = u; v != -1; v = p[v])
-				  caminhos.push_back(v);
-				  reverse(caminhos.begin(), caminhos.end());
-				  cout &lt;&lt; "Caminho: ";
-				  for (int v : caminhos)
-				    cout &lt;&lt; v &lt;&lt; " ";
-                          }
-            </code></pre>
+			<pre><code class="cpp">if (!usados[u]) {
+    cout &lt;&lt; "Sem caminho!";
+} else {
+    vector&lt;int&gt; caminhos;
+    for (int v = u; v != -1; v = p[v])
+        caminhos.push_back(v);
+    reverse(caminhos.begin(), caminhos.end());
+    cout &lt;&lt; "Caminhos: ";
+    for (int v : caminhos)
+        cout &lt;&lt; v &lt;&lt; " ";
+}
+</code></pre>
 			<h2>Aplicações de BFS</h2>
 			<ul>
 				<li><p>Encontre o menor caminho de uma fonte para outros vértices em um grafo sem pesos(unweighted graph).</p></li>
