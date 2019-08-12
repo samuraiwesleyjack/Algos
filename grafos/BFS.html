@@ -39,7 +39,7 @@
 			<img src="img/fire.gif" width="200" height="150"/> <img src="img/bfs.jpg" width="200" height="150"/>
 			<p>Mais precisamente, o algoritmo pode ser declarado como: Crie uma queue $q$ que irá conter os vértices para serem processados e uma
             array de Booleans $usados[]$ que irá indicar para cada vértice se ele foi incendiado(visitado) ou não.</p>
-			<p>Inicialmente, pegue a fonte $s$ para a queue e declare $usados[s] = true$, e para todos os outros vértices $v$ declare $usados[v] = false$.
+			<p>Inicialmente, integre a fonte $s$ na queue e declare $usados[s] = true$, e para todos os outros vértices $v$ declare $usados[v] = false$.
             Então, loop até que a queue esteja vazia e em cada iteração, exclua um vértice da queue. Itere por todas as arestas saindo desse vértice
             e se alguma dessas arestas revelarem vértices não incendiados, declare-os em chama e coloque eles dentro da queue.</p>
 			<p>Como consequência, quando a queue estiver vazia, o "anel de fogo" contém todos os vértices alcançáveis pela fonte $s$, com cada vértice alcançado no menor caminho possível.
