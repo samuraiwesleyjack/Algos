@@ -44,24 +44,6 @@ pre {
     background: #e8e8e8;
 }
 
-#toc {
-    padding-left: 30px;
-    font-size: 85%;
-}
-#toc div {
-    display: list-item;
-    list-style-position: inside;
-}
-#toc .toc-H2 {
-    padding-left: 20px;
-    display: list-item;
-    list-style-type: circle;
-}
-#toc .toc-H3 {
-    padding-left: 40px;
-    list-style-type: square;
-}
-
 
 
 
