@@ -1,1 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>DFS - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Busca em Profundidade - DFS</h1>
+			<div id="toc">
+			<div class="toc-H2"><a href="http://cp-algorithms-brasil.com/grafos/DFS.html#toc-tgt-0">Descrição do algoritmo</a><a></a></div>
+			<div class="toc-H2"><a href="http://cp-algorithms-brasil.com/grafos/DFS.html#toc-tgt-1">Aplicações de Busca em profundidade</a><a></a></div>
+			<div class="toc-H2"><a href="http://cp-algorithms-brasil.com/grafos/DFS.html#toc-tgt-2">Classificações das arestas de um grafo</a><a></a></div>
+			<div class="toc-H2"><a href="http://cp-algorithms-brasil.com/grafos/DFS.html#toc-tgt-3">Implementação</a><a></a></div>
+			<div class="toc-H2"><a href="http://cp-algorithms-brasil.com/grafos/DFS.html#toc-tgt-4">Problemas</a><a></a></div></div>
+			
+			<p>Busca em profundidade é um dos principais algoritmos de grafos.</p>
+			<p>O algoritmo encontra o primeiro caminho lexicográfico<a href="https://pt.wikipedia.org/wiki/Ordem_lexicográfica">(wiki)</a>(ou seja, na ordem que você fizer as ligações durante o código, de um vértice para o outro) no grafo a partir de um vértice(nó) fonte $u$ para cada outro vértice.
+			 Busca em profundidade também encontra os menores caminhos em uma <strong>árvore</strong>, porém, em grafos genéricos, este não é o caso.</p>
+			<p>O algoritmo funciona em tempo $O(m + n)$, onde $n$ é o número de vértices(nós) e $m$ é o número de arestas(ligações entre os nós).</p>
+			<h2>Descrição</h2>
+			<p>A idéia por trás da DFS é ir o mais fundo possível no grafo, e voltar atrás quando você estiver em um vértice sem vértices adjacentes(nós filhos) <strong>não visitados</strong>.</p>
+			<p>Nós começamos a procura em um vértice.
+			Depois de visitar o vértice, nós executamos uma DFS para cada vértice adjacente(nós filhos) que não foram visitados antes.
+			Nesse caminho nós visitamos todos os vértices que são alcançáveis pelo vértice inicial.</p>
+			
+			<h2>Aplicações</h2>
+			<ul>
+				<li><p>Encontrar qualquer caminho no grafo pelo vértice fonte $u$ para todos os vértices.</p></li>
+				<li><p>Encontrar o primeiro caminho lexicográfico no grafo por um vértice fonte $u$ para todos os vértices.</p></li>
+				<li><p>Checar se o vértice em uma árvore é um ancestral(nó parente) de algum outro vértice(nó filho):</p>
+				<p>No começo e fim de cada iteração da função de procura(dfs) nós guardamos o "tempo" de entrada e saída de cada vértice.
+				Agora você pode encontrar a resposta para qualquer par de vértices $ (i, j) $ em $ O (1) $:
+				vértice $i$ é um ancestral do vértice $j$, se os tempos $\text{entrada}[i] &lt; \text{entrada}[j]$ e $\text{saída}[i] > \text{saída}[j]$.</p></li>
+				<li><p>Encontrar o menor ancestral comum de dois vértices.</p></li>
+				<li><p><strong>Ordenação(sorting) Topológica<a href="https://pt.wikipedia.org/wiki/Ordena%C3%A7%C3%A3o_topol%C3%B3gica">(wiki)</a>:</strong></p>
+				<p>Execute uma série de DFS's para poder visitar cada vértice exatamente uma vez em tempo $O(n + m)$.
+                A ordem topológica será os vértices ordenados em <strong>ordem descendente</strong> de tempo de saída.</p></li>
+				<li><p>Checar se um grafo é acíclico ou encontrar ciclos em um grafo. (Como mencionado acima, contando as arestas anteriores(back edges) em todos os componentes conectados).</p></li>
+				<img src="img/ciclos.jpg" width="200" height="150"/>
+				<li><p>Encontre componentes fortemente conectados em um grafo direcionado:</p>  
+				<img src="img/direcionado.jpg" width="200" height="150"/>
+                <p>Primeiro: fazer uma ordenação topológica do grafo.
+                Então <a href="https://en.wikipedia.org/wiki/Transpose_graph"><strong>transponha</strong></a> o grafo e execute outra série de DFS's na ordem definida pela ordenação topológica. Para cada chamada da DFS o componente criado é um componente fortemente conectado.</p></li>
+				<img src="img/transpose.jpg" width="200" height="150"/>
+				<li><p>Encontrar <a href="https://pt.wikipedia.org/wiki/Ponte_(teoria_dos_grafos)"><strong>pontes</strong></a> em um grafo não direcionado:</p>
+                <img src="img/naodirecionado.jpg" width="200" height="150"/>
+                <p>Primeiro: converta o grafo em um grafo direcionado executando uma série de DFS's e fazendo cada aresta ser direcionada enquanto a DFS está sendo executada, na direção em que fomos. Segundo: encontre os componentes fortemente conectados nesse grafo direcionado. Pontes são as arestas em que suas pontas pertencem a diferentes componentes fortemente conectados.</p></li>
+			</ul>
+			
+			<h2>Classificação das arestas de um grafo</h2>
+			<p>Nós podemos classificar as arestas usando os tempos de entrada e saída dos nós finais $u$ e $v$ das arestas $(u,v)$.</p>
+			<p>Nós executamos uma DFS e classificamos as arestas encontradas usando as seguintes regras:</p>
+			<p>Se $v$ não foi visitado:</p>
+			<ul>
+			<li>Tree Edge - Se $v$ é visitado depois $u$ então a aresta $(u,v)$ é chamada de tree edge(aresta árvore). Em outras palavras, se $v$ é visitado pela primeira vez e $u$ está atualmente sendo visitado então $(u,v)$ é chamado de aresta árvore.
+            Essas arestas formam uma árvore de DFS's e consequentemente o nome 'arestas árvores'.</li>
+			</ul>
+			<p>Se $v$ é visitado antes que $u$:</p>
+			<ul>
+			<li><p>Back edges(arestas anteriores) - Se $v$ é um ancestral(parente) de $u$, então a aresta $(u,v)$ é uma back edge. $v$ é um ancestral exatamente se nós já entramos em $v$, mas não saímos ainda. Back edges completam um ciclo assim que existe um caminho do ancestral $ v $ para o descendente $ u $ (na <a href="https://pt.wikipedia.org/wiki/Recursividade_(ci%C3%AAncia_da_computa%C3%A7%C3%A3o)">recursão</a> da DFS) e uma aresta do descendente $u$ para o ancestral $v$ (back edge), portanto, um ciclo é formado. Ciclos podem ser detectados usando back edges(arestas anteriores).</p></li>
+			<li><p>Forward Edges(arestas posteriores) - Se $v$ é um descendente(filho) de $u$, então a aresta $(u, v)$ é uma aresta posterior. Em outras palavras, se nós ja visitamos e saímos de $v$ e $\text{entrada}[u] &lt; \text{entrada}[v]$ então a aresta $(u,v)$ forma uma forward edge(aresta posterior).</p></li>
+			<li>Cross Edges(arestas cruzantes): se $v$ não é nem um ancestral ou descendente de $u$, então a aresta $(u, v)$ é uma cross edge. Em outras palavras, se nós já visitamos e saímos de $v$ e $\text{entrada}[u] > \text{entrada}[v]$ então $(u,v)$ é uma cross edge.</li>
+			</ul>
+		    <p>Nota: Forward edges e cross edges apenas existem em grafos direcionados.</p>
+			<h2>Implementação</h2>
+			<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; g; // grafo como lista de adjacência
+int n; // número de vértices(nós)
 
+vector&lt;bool&gt; vis;   //vetor para marcar os visitados
+
+void dfs(int v) {
+    vis[v] = true;
+    for (int u : g[v]) {
+        if (!vis[u])
+            dfs(u);
+    }
+}
+			</code></pre>
+			<p> Esta é a implementação mais simples da Busca em Profundidade(dfs).
+            Conforme descrito, pode ser útil também calcular os tempos de entrada e saída e a cor dos vértices.
+            Vamos colorir todos os vértices com a cor 0, se não os tivermos visitado, com a cor 1 se os tivermos visitado, e com a cor 2, se já saímos do vértice. </p>
+			<p>Aqui está uma implementação genérica que adcionalmente programam os 'tempos' e 'cores':</p>
+			<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; g; //grafo
+int n; // número de vértices(nós)
+
+vector&lt;int&gt; cor;
+
+vector&lt;int&gt; time_in, time_out;   //marca o preciso instante do nó(entrada e saída)
+int dfs_timer = 0;   //funciona como um relógio para a dfs
+
+void dfs(int v) {
+    time_in[v] = dfs_timer++;
+    cor[v] = 1;
+    for (int u : adj[v])
+        if (cor[u] == 0)
+            dfs(u);
+    cor[v] = 2;
+    time_out[v] = dfs_timer++;
+}
+			</code></pre>
+			<h2>Problemas</h2>
+			<ul>
+			<li><a href="http://www.spoj.com/problems/ABCPATH/">SPOJ: ABCPATH</a></li>
+			<li><a href="http://www.spoj.com/problems/EAGLE1/">SPOJ: EAGLE1</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/580/C">Codeforces: Kefa and Park</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1242">Timus:Werewolf</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1709">Timus:Penguin Avia</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1106">Timus:Two Teams</a></li>
+			<li><a href="http://www.spoj.com/problems/ADASEA/">SPOJ - Ada and Island</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=598">UVA 657 - The die is cast</a></li>
+			<li><a href="http://www.spoj.com/problems/KOZE/">SPOJ - Sheep</a></li>
+			<li><a href="http://www.spoj.com/problems/RIOI_2_3/">SPOJ - Path of the Rightenous Man</a></li>
+			<li><a href="http://www.spoj.com/problems/MAKEMAZE/">SPOJ - Validate the Maze</a></li>
+			<li><a href="http://www.spoj.com/problems/GHOSTS/">SPOJ - Ghosts having Fun</a></li>
+			<li><a href="http://codeforces.com/contest/781/problem/C">Codeforces - Underground Lab</a></li>
+			<li><a href="https://devskill.com/CodingProblems/ViewProblem/3">DevSkills - Maze Tester</a></li>
+			<li><a href="https://devskill.com/CodingProblems/ViewProblem/17">DevSkills - Tourist</a></li>
+			<li><a href="http://codeforces.com/contest/734/problem/E">Codeforces - Anton and Tree</a></li>
+			<li><a href="http://codeforces.com/contest/727/problem/A">Codeforces - Transformation: From A to B</a></li>
+			<li><a href="http://codeforces.com/contest/723/problem/E">Codeforces - One Way Reform</a></li>
+			<li><a href="http://codeforces.com/contest/709/problem/E">Codeforces - Centroids</a></li>
+			<li><a href="http://codeforces.com/contest/710/problem/E">Codeforces - Generate a String</a></li>
+			<li><a href="http://codeforces.com/contest/758/problem/E">Codeforces - Broken Tree</a></li>
+			<li><a href="http://codeforces.com/contest/761/problem/E">Codeforces - Dasha and Puzzle</a></li>
+			<li><a href="http://codeforces.com/contest/638/problem/B">Codeforces - Making genome In Berland</a></li>
+			<li><a href="http://codeforces.com/contest/638/problem/C">Codeforces - Road Improvement</a></li>
+			<li><a href="http://codeforces.com/contest/767/problem/C">Codeforces - Garland</a></li>
+			<li><a href="http://codeforces.com/contest/794/problem/D">Codeforces - Labeling Cities</a></li>
+			<li><a href="http://codeforces.com/contest/802/problem/K">Codeforces - Send the Fool Futher!</a></li>
+			<li><a href="http://codeforces.com/contest/813/problem/C">Codeforces - The tag Game</a></li>
+			<li><a href="http://codeforces.com/contest/841/problem/D">Codeforces - Leha and Another game about graphs</a></li>
+			<li><a href="http://codeforces.com/contest/845/problem/G">Codeforces - Shortest path problem</a></li>
+			<li><a href="http://codeforces.com/contest/844/problem/E">Codeforces - Upgrading Tree</a></li>
+			<li><a href="http://codeforces.com/contest/849/problem/C">Codeforces - From Y to Y</a></li>
+			<li><a href="http://codeforces.com/contest/846/problem/E">Codeforces - Chemistry in Berland</a></li>
+			<li><a href="http://codeforces.com/contest/861/problem/F">Codeforces - Wizards Tour</a></li>
+			<li><a href="http://codeforces.com/contest/24/problem/A">Codeforces - Ring Road</a></li>
+			<li><a href="http://codeforces.com/contest/29/problem/C">Codeforces - Mail Stamps</a></li>
+			<li><a href="http://codeforces.com/contest/29/problem/D">Codeforces - Ant on the Tree</a></li>
+			<li><a href="http://www.spoj.com/problems/CAC/">SPOJ - Cactus</a></li>
+			<li><a href="http://www.spoj.com/problems/AMR10J/">SPOJ - Mixing Chemicals</a></li>
+			</ul>
+			
+			<div id="footer">
+            (c) 2019 translation by <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>      
