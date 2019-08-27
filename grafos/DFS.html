@@ -57,14 +57,14 @@
 				<p>Execute uma série de DFS's para poder visitar cada vértice exatamente uma vez em tempo $O(n + m)$.
                 A ordem topológica será os vértices ordenados em <strong>ordem descendente</strong> de tempo de saída.</p></li>
 				<li><p>Checar se um grafo é acíclico ou encontrar ciclos em um grafo. (Como mencionado acima, contando as arestas anteriores(back edges) em todos os componentes conectados).</p></li>
-				<img src="img/ciclos.jpg" width="300" height="300"/>
+				<img src="img/ciclos.jpg" width="600" height="300"/>
 				<li><p>Encontre componentes fortemente conectados em um grafo direcionado:</p>  
-				<img src="img/direcionado.jpg" width="400" height="400"/>
+				<img src="img/direcionado.jpg" width="800" height="400"/>
                 <p>Primeiro: fazer uma ordenação topológica do grafo.
                 Então <a href="https://en.wikipedia.org/wiki/Transpose_graph"><strong>transponha</strong></a> o grafo e execute outra série de DFS's na ordem definida pela ordenação topológica. Para cada chamada da DFS o componente criado é um componente fortemente conectado.</p></li>
-				<img src="img/transpose.jpg" width="400" height="400"/>
+				<img src="img/transpose.jpg" width="800" height="400"/>
 				<li><p>Encontrar <a href="https://pt.wikipedia.org/wiki/Ponte_(teoria_dos_grafos)"><strong>pontes</strong></a> em um grafo não direcionado:</p>
-                <img src="img/naodirecionado.jpg" width="400" height="400"/>
+                <img src="img/naodirecionado.jpg" width="800" height="400"/>
                 <p>Primeiro: converta o grafo em um grafo direcionado executando uma série de DFS's e fazendo cada aresta ser direcionada enquanto a DFS está sendo executada, na direção em que fomos. Segundo: encontre os componentes fortemente conectados nesse grafo direcionado. Pontes são as arestas em que suas pontas pertencem a diferentes componentes fortemente conectados.</p></li>
 			</ul>
 			
