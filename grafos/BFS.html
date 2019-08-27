@@ -88,7 +88,7 @@ while (!q.empty()) {
 				<li><p>Encontre o menor caminho de uma fonte para outros vértices em um grafo sem pesos(unweighted graph).</p></li>
 				<li><p>Encontre todos os componentes conectados em um grafo não direcionado em tempo $O(n + m)$:
 				Para fazer isso, nós apenas executamos BFS começando de cada vértice, exceto para vértices no qual ja foram visitados de execuções anteriores.
-				Portanto, nós realizamos uma BFS normal a partir de cada vértice, mas não resete a array $usados[]$ cada vez que conseguimos um novo componente conectado, e o tempo total de execução ainda irá ser $O(n + m)$ (execultar múltiplas BFS no grafo sem zerar a array $usados []$ é chamado series de buscas em largura).</p></li>
+				Portanto, nós realizamos uma BFS normal a partir de cada vértice, mas não resete a array $usados[]$ cada vez que conseguimos um novo componente conectado, e o tempo total de execução ainda irá ser $O(n + m)$ (execultar múltiplas BFS no grafo sem zerar a array $usados []$ é chamado de séries de buscas em largura).</p></li>
 				<li><p>Encontrando uma solução para um problema ou jogo com o número mínimo de movimentos, se cada estado do jogo puder ser representado por um vértice do grafo, e as transições de um estado para o outro serem arestas do grafo.</p></li>
 				<li><p>Encontrar o menor caminho em um grafo com pesos 0 ou 1:
 				Requer apenas uma pequena modificação na BFS normal: se a aresta atual de valor zero e distância para o vértice é menor que a distância atual encontrada, portanto adcione este vértice não atrás, mas na frente da queue.</p></li>
