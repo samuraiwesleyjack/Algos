@@ -38,7 +38,7 @@
 			<p>Primeiramente, para cada ponto de query $p\ (x&#95;0, y&#95;0)$ queremos encontrar uma aresta que, se o ponto pertencer a alguma aresta, o ponto pertence a aresta que encontramos, caso contrário, essa aresta deve cruzar a linha $x = x&#95;0$ at some unique point $(x&#95;0, y)$ onde $y &lt; y&#95;0$ e esse $y$ é máximo dentre todas essas arestas.
 			A imagem a seguir mostra os dois casos.</p>
 
-			<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/point_location_goal.png" alt="Image of Goal" /></center></p>
+			<p><center><img src="img/ponto1.png" alt="Image of Goal" /></center></p>
 
 			<p>Iremos resolver esse problema usando o algoritmo sweep line. Vamos iterar sobre a coordenadas x dos pontos da query e os pontos finais das arestas em ordem crescente e mantendo um conjunto de arestas $s$. Para coordenada x iremos adcionar alguns eventos antecipadamente.</p>
 
@@ -50,7 +50,7 @@
 			<p>Para cada coordenada x, ordenaremos os eventos por seus tipos: (<em>vertical</em>, <em>get</em>, <em>remove</em>, <em>add</em>).
 			A imagem a seguir mostra todos os eventos em ordem para cada coordenada x.</p>
 
-			<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/point_location_events.png" alt="Image of Events" /></center></p>
+			<p><center><img src="img/ponto2.png" alt="Image of Events" /></center></p>
 
 			<p>Manteremos dois conjuntos durante o processo da sweep line.
             Um conjunto $ t $ para todas as arestas não verticais e um conjunto $ vert $, especialmente para as verticais.
