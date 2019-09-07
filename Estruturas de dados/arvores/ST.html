@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore Segmentária - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="stylee.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Árvore Segmentária</h1>
+				<p>Uma Árvore Segmentária é uma estrutura de dados que permite responder questões de intervalos sobre uma array de forma eficiente, além de ser flexível o bastante para modificar a array. 
+				Isso inclui encontrar a soma de elementos consecutivos da array $a[l \dots r]$, ou encontrar o elemento mínimo nesse alcance em tempo $O(\log n)$. 
+				A Árvore de segmentos também permite modificar a array substituindo um elemento, ou até alterar os elementos de um segmento inteiro (e.g. atribuir todos os elementos em $a[l \dots r]$ para um certo valor, ou adcionar um valor <strong>x</strong> para todos os elementos do segmento).</p>
+				<p>No geral, a Árvore Segmentária é uma estrutura de dados muito flexível, e um grande número de problemas pode ser resolvido com ela. 
+				Adicionalmente também é possível aplicar operações mais complexas e responder questões mais complicadas.
+				Em particular a Árvore Segmentária pode ser generalizada para maiores dimensões. 
+				Por exemplo, com uma Árvore Segmentária 2D você pode responder a soma ou o mínimo de um alcance sobre algum subretângulo de uma matriz.
+				Apenas em tempo $O(\log^2 n)$.</p>
+				<p>Uma importante propriedade da árvore segmentária é que elas requerem apenas uma quantidade linear de memória.
+				Uma árvore segmentária padrão requer $4n$ vértices para trabalhar em uma array de tamanho $n$.</p>
+			
+			<h2>Forma mais simples de uma árvore segmentária</h2>
+			
+				<p> Para começar com facilidade, iremos considerar uma forma simples de árvore segmentária. 
+				Nós queremos responder a soma de um alcance com eficiência. 
+				Nossa tarefa é:
+				nós temos uma array $a[0 \dots n-1]$, e a Árvore Segmentária deve ser capaz de encontrar a soma dos elementos entre os índices $l$ e $r$ (i.e. calcular a soma $\sum_{i=l}^r a[i]$), e também ser capaz de mudar os valores dos elementos na array (i.e. performar $a[i] = x$). 
+				A Árvore Segmentária deve ser capaz de processar ambas as tarefas em tempo $O(\log n)$.</p>
+				
+			<h3>Estrutura</h3>
+			<p>Então, o que é uma árvore segmentária?</p>
+			<p>Calculamos e armazenamos a soma dos elementos de toda a array, i.e. a soma do segmento $a[0 \dots n-1]$. 
+            Em seguida, <strong>dividimos a array em duas metades</strong> $a[0 \dots n/2]$ and $a[n/2+1 \dots n-1]$ e calculamos a soma de cada metade e guardamos elas. 
+            Cada uma dessas duas metades também se dividem, as somas são calculadas e guardadas. 
+            Esse processo se repete até todos os segmentos atingirem tamanho $1$. 
+            Em outras palavras nós começamos com o segmento $a[0 \dots n-1]$, dividimos o atual segmento em metades (se ainda não se transformou em um segmento contendo apenas um elemento), e então o processo acontece novamente nas duas metades. 
+            Para cada segmento nós armazenamos a soma dos números contidos nele.</p>
+			<p>Nós podemos dizer que esses segmentos formam uma árvore binária: 
+            a raiz dessa árvore é o segmento $a[0 \dots n-1]$, e cada vértice (exceto as folhas) tem exatamente dois vértices filhos. 
+            Essa é a idéia da estrutura de dados <strong>"Árvore de Segmentos"</strong>.</p>
+			<p>Representação de uma árvore segmentária sobre a array $a = [1, 3, -2, 8, -7]$:</p>
+			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sum-segment-tree.png" alt="&quot;Sum Segment Tree&quot;" /></p>
+			<p>Pela descrição da estrutura de dados, podemos concluir que uma Árvore Segmentária apenas requer um número linear de vértices. 
+            O primeiro nível da árvore contém apenas um único nó (a raiz), o segundo nível irá conter 2 vértices, no terceiro irá conter 4, até que o número de vértices alcance $n$. 
+            Portanto o número de vértices no pior caso pode ser estimado pela soma $1 + 2 + 4 + \dots + 2^{\lceil\log_2 n\rceil} = 2^{\lceil\log_2 n\rceil + 1} \lt 4n$.</p>
+			<p>Vale a pena notar que quando $n$ não é uma potência de 2, nem todos os níveis da Árvore Segmentária serão completamente preenchidos. 
+            Podemos notar esse comportamento na imagem.
+            Por enquanto, podemos esquecer esse fato, mas ele se tornará importante mais tarde durante a implementação.</p>
+			
+			<p>A altura da árvore de segmentos é $O(\log n)$, porque ao descer da raiz para as folhas, o tamanho dos segmentos diminui aproximadamente pela metade.</p>
+			
+			<h3>Construção</h3>
+			<p>Uma árvore de segmentos pode ser construída eficientemente
+            começando no nível inferior, com os vértices das folhas.
+            Um vértice é um vértice folha, se o segmento correspondente cobrir apenas um valor.
+            Portanto, podemos simplesmente copiar os valores dos elementos $a[i]$. 
+            Com base nesses valores, podemos calcular as somas do nível anterior(i.e o nível acima do último, já que o último guarda as folhas).
+            E com base nisso, podemos calcular as somas das anteriores e repetir o procedimento até chegarmos ao vértice raiz. 
+            É conveniente descrever esta operação recursivamente:
+            iniciamos a construção no vértice raiz e o procedimento de construção, se chamado em um vértice que não seja uma folha, <strong>primeiro constrói recursivamente os dois vértices filhos</strong> e depois calcula toda a soma dessas crianças. 
+            Se for chamado em um vértice folha, simplesmente usará o valor da array.</p>
+			<p>A complexidade do tempo de construção é $O(n)$.</p>
+			
+			<h3>Somar elementos</h3>
+			
+			<p>Como entrada, recebemos dois números inteiros $l$ e $r$, e precisamos calcular a soma do segmento $a[l \dots r]$ em tempo $O(\log n)$.</p>
+			<p>Para fazer isso, percorreremos a Árvore de segmentos e usaremos as somas pré calculadas dos segmentos.
+            Vamos assumir que estamos atualmente no vértice que cobre o segmento $a[tl \dots tr]$. Existem três casos possíveis.</p>
+			<p>O caso mais fácil é quando o segmento $a[l \dots r]$ é igual ao segmento correspondente do vértice atual (i.e. $a[l \dots r] = a[tl \dots tr]$, <strong>lembre-se que o vértice representa um alcance da array em que você pode armazenar o máximo,mínimo,soma... dos elementos da array que fazem parte desse alcance</strong>), então terminamos e podemos retornar a soma pré calculada que está armazenada no vértice.</p>
+			<p>Como alternativa, o segmento da consulta pode cair completamente no domínio do filho esquerdo ou direito.
+            Lembre-se de que o filho esquerdo cobre o segmento $a[tl \dots tm]$ e o vértice direito cobre o segmento $a[tm + 1 \dots tr]$ com $tm = (tl + tr) / 2$. 
+            Nesse caso, podemos simplesmente ir para o vértice filho, que corresponde ao segmento que cobre o segmento de consulta(o de teste, input), e executar o algoritmo descrito aqui com esse vértice.</p>
+			<p>E então temos o último caso, o segmento da consulta intersecta com as duas crianças. 
+            Nesse caso, não temos outra opção se não fazer duas chamadas recursivas, uma para cada criança.
+            Primeiro vamos para o filho esquerdo, calcule uma resposta parcial para esse vértice (i.e. a soma dos valores da interseção entre o segmento da consulta e o segmento do filho esquerdo), então vá para o filho direito, calcule uma resposta parcial usando esse vértice, então combine as respostas somando-as. 
+            Em outras palavras, como o filho esquerdo representa o segmento $a[tl \dots tm]$ e o filho direito representa o segmento $a[tm+1 \dots tr]$, nós calculamos a soma do segmento $a[l \dots tm]$ usando a criança esquerda, e a soma do segmento $a[tm+1 \dots r]$ usando a criança direita.
+			Encontrando a soma do intervalo $a[tl \dots tr]$.</p>
+			<p>Portanto, processar uma consulta de soma é uma função que se chama recursivamente uma vez com o filho esquerdo ou direito (sem mudar os limites do segmento da consulta), ou duas vezes, uma vez para o filho esquerdo e outra para o filho direito (dividindo o segmento de consulta em dois subsegmentos). 
+            <strong>E a recursão termina, sempre que os limites do segmento de consulta atual coincidem com os limites do segmento do vértice atual.</strong> 
+            Nesse caso, a resposta será o valor pré-computado da soma deste segmento, que é armazenado na árvore.</p>
+			<p> Em outras palavras, o cálculo da consulta é uma travessia da árvore, que se espalha por todos os ramos necessários da árvore e usa os valores de soma pré-computados dos segmentos da árvore.</p>
+            <p> Obviamente, iniciamos a travessia a partir do vértice raiz da Árvore de Segmentos. </p>
+			<p>Novamente a array $a = [1, 3, -2, 8, -7]$ é usada, e aqui queremos calcular a soma $\sum_{i=2}^4 a[i]$ ou $a[2] + a[3] + a[4]$.
+            Os vértices coloridos serão visitados e usaremos os valores pré-computados dos vértices verdes.
+            Isso nos dá o resultado $-2 + 1 = -1$.</p>
+			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sum-segment-tree-query.png" alt="&quot;Sum Segment Tree Query&quot;" /></p>
+			<p>Por que a complexidade desse algoritmo é $O(\log n)$?
+            Para mostrar essa complexidade, examinamos cada nível da árvore. 
+            Acontece que, para cada nível nós visitamos não mais que quatro vértices.
+            E já que a altura da árvore é $O(\log n)$, nós recebemos o tempo de execução desejado.</p>
+			<p>Podemos mostrar que essa proposição (no máximo quatro vértices por nível) é verdadeira por indução.
+            No primeiro nível, visitamos apenas um vértice, o vértice raiz, então aqui visitamos menos de quatro vértices. 
+            Agora vamos ver um nível arbitrário.
+            Por hipótese de indução, visitamos no máximo quatro vértices.
+            Se apenas visitarmos no máximo dois vértices, o próximo nível terá no máximo quatro vértices. Cada vértice só pode causar no máximo duas chamadas recursivas.
+            Então, vamos supor que visitamos três ou quatro vértices no nível atual.
+            A partir desses vértices, analisaremos os vértices no meio com mais cuidado.
+            Como a consulta de soma solicita a soma de uma sub-array contínua, sabemos que os segmentos correspondentes aos vértices visitados no meio são completamente cobertos pelo segmento da consulta de soma.
+            Portanto, esses vértices não farão chamadas recursivas.
+            Portanto, apenas o vértice extremo esquerdo e extremo direito terão o potencial de fazer chamadas recursivas.
+            E essas apenas criarão no máximo quatro chamadas recursivas, e o próximo nível também satisfará a afirmação.
+            Podemos dizer que um ramo se aproxima do limite esquerdo da consulta e o segundo ramo se aproxima do direito.</p>
+			<p>Portanto, visitamos no máximo $4 \log n$ vértices no total, portanto o tempo de complexidade é de $O(\log n)$.</p>
+			<p><strong>Em conclusão, a consulta funciona dividindo o segmento de entrada em vários sub-segmentos para os quais todas as somas já estão pré-calculadas e armazenadas na árvore</strong>. 
+            E se pararmos de particionar sempre que o segmento de consulta coincidir com o segmento de vértice, precisamos apenas $O(\log n)$ segmentos, o que fornece a eficácia da árvore de segmentos.</p>
+			
+			<h3>Atualizar elementos</h3>
+			
+			<p>Agora queremos modificar um elemento específico na array, digamos que queremos fazer a operação $a[i] = x$. 
+            E temos que reconstruir a Árvore de Segmentos, de modo que ela corresponda à nova array modificada.</p>
+			<p>Essa operação é mais fácil de que a da soma. 
+            Cada nível de uma árvore de segmentos forma uma partição da array. 
+            Portanto, um elemento $a[i]$ apenas contribui para um segmento de cada nível. 
+            Assim, apenas $O(\log n)$ vértices necessitam ser atualizadas.</p>
+			<p>É fácil ver que a solicitação de atualização dos elementos pode ser implementada usando uma função recursiva. 
+            A função passa pelo vértice atual da árvore e recursivamente chama a si mesma com um dos dois vértices filhos (aquele que contém $a[i]$ em seu segmento), e depois disso recalcula seu valor, semelhante à maneira como é feita no método de construção (que é a soma dos dois filhos).</p>
+            <p>Novamente, aqui está uma visualização usando a mesma array.
+            Aqui fazemos a operação $a[2] = 3$.
+            Os vértices verdes são os vértices que visitamos e atualizamos.</p>
+			<p>Temos que ir "quebrando" a soma dos intervalos até acharmos a soma do elemento individual, que portanto é seu valor.</p>
+			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sum-segment-tree-update.png" alt="&quot;Sum Segment Tree Update&quot;" /></p>
+            
+			<h3>Implementação</h3>
+			
+			<p>A principal consideração é como armazenar a Árvore de Segmentos.
+			Armazenamos apenas as somas em uma array.
+			A soma do vértice raiz no índice 1, a soma de seus dois vértices filhos nos índices 2 e 3, a soma dos filhos desses dois vértices nos índices 4 a 7 e assim por diante. 
+			O filho esquerdo de um vértice no índice $i$ é armazenado no índice $2i$, e o filho direito no índice $2i + 1$.</p>
+			<p>Precisamos apenas de uma array que contenha as somas de todos os segmentos.</p>
+			<p>Como observado anteriormente, precisamos armazenar no máximo $4n$ vértices.
+            Pode ser menor, mas por conveniência, sempre alocamos uma array de tamanho $4n$.
+            Haverá alguns elementos na array de soma, que não corresponderão a nenhum vértice na árvore real, mas isso não complica a implementação.</p>
+			
+			<p>Então, armazenamos a Árvore de Segmentos simplesmente como uma array $tree[]$ com um tamanho 4 vezes maior que o tamanho máximo que a array pode chegar $n$:</p>
+			
+			<pre><code class="cpp">int n, tree[4*MAXN];
+</code></pre>
+
+<p>O processo de construção de uma Árvore de Segmentos para uma array $a[]$ :</p>
+
+<pre><code class="cpp">
+void build(int node, int left, int right)     //índice do nó atual(node), range da array de tamanho n(i.e 0..n-1) no começo
+{
+	if(left > right)
+		return;
+	if(left == right)          //quando o range se comprimir na recursividade, teremos uma vértice folha
+	{
+		tree[node] = a[left];  
+		return;
+	}
+	int mid = left + (right - left)/2;   //int mid = (right+left)/2 pode causar overflow
+	build(2*node,left,mid);              //índice do filho esquerdo(2*node), range da metade esquerda(0...mid) 
+	build(2*node+1,mid+1,right);         //índice do filho direito(2*node+1), range da metade direita(mid+1...right)
+	tree[node] = tree[2*node] + tree[2*node+1];
+}
+</code></pre>
+            <p>Além disso, a função para responder a consultas(testes) de soma em um certo alcance dentro da array também é uma função recursiva, que recebe como parâmetros informações sobre o vértice/segmento atual (ou seja, o índice $n$ e os limites $l$ e $r$) e também os limites do range de input(query), $tl$ e $tr$. 
+            Para simplificar o código, essa função sempre realiza duas chamadas recursivas, mesmo que apenas uma seja necessária - nesse caso, a chamada recursiva supérflua será  se $tl > tr$, e isso pode ser capturado usando uma verificação adicional no início da função.</p>
+            <pre><code class="cpp">int sum(int node, int l, int r, int tl, int tr) {  //índice nó atual, range da array, range do teste(query) 
+    if (tl &gt; tr) 
+        return 0;
+    if (tl == l &amp;&amp; tr == r) {    
+        return tree[node];
+    }
+    int tm = l + (r - l)/ 2;
+    return sum(n*2, l, m, tl, min(tr, tm))
+           + sum(n*2+1, tm+1, r, max(tl, tm+1), r);
+}
+</code></pre>
+            <p>Finalmente, a consulta de atualização. A função também receberá informações sobre o vértice / segmento atual e, adicionalmente, também o parâmetro da consulta de atualização (ou seja, a posição do elemento e seu novo valor).</p>
+			<pre><code class="cpp">void update(int node, int l, int r, int id, int val) {  //índice nó atual, range left right, index do elemento, novo valor para o elemento
+    if (l == r) {
+        tree[node] = val;
+    } else {
+        int mid = l + (r - l)/ 2;
+        if (id &lt;= mid)
+            update(2*node, l, m, id, val);
+        else
+            update(2*node+1, mid+1, r, id, val);
+        tree[node] = tree[2*node] + tree[2*node+1];
+    }
+}
+</code></pre>
+            <h2><a name="versoes-avancadas-arvore-segmentaria"></a>Versões Avançadas da Árvore Segmentária</h2>
+			<p>Uma árvore de segmentos é uma estrutura de dados muito flexível e permite variações e extensões em várias direções diferentes. 
+            Vamos tentar categorizá-las abaixo.</p>
+			<h3>Casos de teste(queries) mais complexos</h3>
+            <p>Pode ser bastante fácil alterar a Árvore de segmentos em uma direção, de modo que calcule consultas diferentes (por exemplo, calculando o mínimo / máximo em vez da soma), mas também pode ser muito não trivial.</p>
+            <p>Lembre-se que durante as funções podemos alterar o retorno das funções, ou seja, alterar como elas enviam as operações.</p>
+			<pre><code class="cpp">tree[node] = min(tree[2*node], tree[2*node+1]); //ou max para retornar máximo </pre></code>
+			
+			<h4>Máximo</h4>
+            <p>Vamos alterar um pouco a condição do problema descrito acima: em vez de consultar a soma, faremos agora a consulta do máximo.</p>
+			<p>A árvore terá exatamente a mesma estrutura que a árvore descrita acima. 
+			Nós apenas precisamos mudar o modo em que $tree[node]$ é calculado nas funções $\text{build}$ e $\text{update}$.
+			$tree[node]$ agora armazenará o máximo do segmento correspondente. 
+			E também precisamos alterar o cálculo do valor retornado da função $\text{sum}$ (modificando a soma pelo máximo).</p>
+			
+			<p>Obviamente, esse problema pode ser facilmente alterado para calcular o mínimo em vez do máximo.</p>
+
+            <p>Em vez de mostrar uma implementação para esse problema, a implementação será fornecida para uma versão mais complexa desse problema na próxima seção.</p>
+			
+			<h4>Encontrando o máximo e o número de vezes em que ele aparece</h4>
+			
+			<p>Esta tarefa é muito semelhante à anterior.
+            Além de encontrar o máximo, também precisamos encontrar o número de ocorrências do máximo.</p>
+			
+			<p>Para resolver esse problema, armazenamos um <strong>par</strong> de números em cada vértice da árvore: 
+			além do máximo, também armazenamos o número de ocorrências no segmento correspondente.
+            Determinando o par correto para armazenar em $tree[node]$ ainda pode ser feito em tempo constante, usando as informações dos pares armazenados nos vértices filhos. 
+			A combinação de dois desses pares deve ser feita em uma função separada, pois essa será uma operação que faremos enquanto construimos a árvore, e enquanto respondemos as consultas máximas e realizamos modificações.</p>
+			<pre><code class="cpp">pair&lt;int, int&gt; tree[4*MAXN];
+
+pair&lt;int, int&gt; combine(pair&lt;int, int&gt; a, pair&lt;int, int&gt; b) {   //função de combinação dos pares
+    if (a.first &gt; b.first)             //o primeiro elemento do par indica o próprio máximo que estamos tentando encontrar, e aqui se julga qual o maior entre os pares para retornamos 
+        return a;                         
+    if (b.first &gt; a.first)
+        return b;
+    return make_pair(a.first, a.second + b.second);       //aqui somamos o número de ocorrências que se encontra no segundo elemento dos pares
+}
+
+void build(int a[], int node, int tl, int tr) {   //array da árvore, índice nó atual, range da árvore
+    if (tl == tr) {
+        tree[node] = make_pair(a[tl], 1);
+    } else {
+        int tm = tl + (tr - tl)/ 2;
+        build(a, 2*node, tl, tm);
+        build(a, 2*node+1, tm+1, tr);
+        tree[node] = combine(tree[2*node], tree[2*node+1]);
+    }
+}
+
+pair&lt;int, int&gt; get_max(int node, int tl, int tr, int l, int r) {  //índice nó atual, range árvore treeleft treeright, range teste(query)
+    if (l &gt; r)                   //caso absurdo
+        return make_pair(-INF, 0);    //INF pode ser const INF = numeric_limits<int>::max();
+    if (l == tl &amp;&amp; r == tr)
+        return tree[node];
+    int tm = tl + (tr - tl)/ 2;
+    return combine(get_max(2*node, tl, tm, l, min(r, tm)), 
+                   get_max(2*node + 1, tm+1, tr, max(l, tm+1), r));
+}
+
+void update(int node, int tl, int tr, int id, int val) {   //índice nó atual, range árvore, index do elemento, novo valor do elemento 
+    if (tl == tr) {
+        tree[node] = make_pair(val, 1);
+    } else {
+        int tm = tl + (tr - tl) / 2;
+        if (id &lt;= tm)
+            update(2*node, tl, tm, id, val);
+        else
+            update(2*node+1, tm+1, tr, id, val);
+        tree[node] = combine(tree[2*node], tree[2*node+1]);  //por fim é importante notar que as operações sempre necessitaram da função combine 
+    }
+}
+</code></pre>
+			<h4>Calcular MDC / MMC</h4>
+
+			<p>Nesse problema, queremos calcular o MDC / MMC de todos os números de determinados intervalos da array.</p>
+
+			<p>Essa variação interessante da Árvore de segmentos pode ser resolvida exatamente da mesma maneira que as Árvores de segmentos que derivamos para consultas de soma / mínimo / máximo:
+            basta armazenar o MDC / MMC do vértice correspondente em cada vértice da árvore. 
+			A combinação de dois vértices pode ser feita calculando o MDC / MMC de ambos os vértices.</p>
+			
+			<h4><a name="counting-zero-search-kth"></a>Contando o número de zeros, procurando o $k$-ésimo(th) zero</h4>
+
+			<p>Nesse problema, queremos encontrar o número de zeros em um determinado intervalo e, adicionalmente, encontrar o índice do $k$-th zero usando uma segunda função.</p>
+
+			<p>Novamente, temos que alterar um pouco os valores armazenados da árvore:
+            Desta vez, armazenaremos o número de zeros em cada segmento em $t[]$. 
+			É bem claro como implementar as funções $\text{build}$, $\text{update}$ e $\text{count_zero}$, podemos simplesmente usar as idéias do problema de consulta de soma.
+			Assim, resolvemos a primeira parte do problema.</p>
+
+			<p>Agora aprendemos como resolver o problema de encontrar o $k$-th zero na array $a[]$. 
+			Para executar esta tarefa, desceremos a Árvore de Segmentos, começando no vértice raiz e movendo-nos cada vez para o filho esquerdo ou direito, dependendo de qual segmento contenha o $k$-th zero.
+			Para decidir para qual filho precisamos ir, basta observar o número de zeros que aparecem no segmento correspondente ao vértice esquerdo.
+			Se essa contagem for maior ou igual a $k$, é necessário descer para a criança esquerda e, caso contrário, descer para a criança certa.
+			Observe que, se escolhermos o filho direito, temos que subtrair o número de zeros do filho esquerdo de $k$.</p>
+			
+			<p>Na implementação, podemos lidar com o caso especial, $a[]$ contendo menos de $k$ zeros, retornando -1.</p>
+			<pre><code class="cpp">int kth(int node, int tl, int tr, int k) {
+    if (k &gt; tree[node])
+        return -1;
+    if (tl == tr)
+        return tl;
+    int tm = tl + (tr - tl)/ 2;
+    if (tree[2*node] &gt;= k)
+        return kth(2*node, tl, tm, k);
+    else 
+        return kth(2*node+1, tm+1, tr, k - tree[2*node]); 
+}
+</code></pre>
+            <h4>Procurando um prefixo de array com uma determinada quantidade</h4>
+
+			<p>A tarefa é:
+            para um determinado valor $x$ temos que encontrar rapidamente o menor índice $i$ de modo que a soma dos primeiros $i$ elementos da array $a[]$ é maior ou igual a $x$ (assumindo que a array $a[]$ contém apenas valores não negativos).</p>
+
+			<p>Esta tarefa pode ser resolvida usando <strong>binary search</strong>, calculando a soma dos prefixos na Árvore de Segmentos.
+			No entanto, isso levará a uma solução $O(\log^2 n)$.</p>
+
+			<p>Em vez disso, podemos usar a mesma ideia da seção anterior e encontrar a posição descendo a árvore:
+            movendo cada vez para a esquerda ou direita, dependendo da soma do filho esquerdo.
+            Assim, encontrar a resposta em tempo $O(\log n)$.</p>
+			
+			<h4>Localizando subsegmentos com a soma máxima</h4>
+
+			<p>Aqui, novamente, recebemos um range $a[l \dots r]$ para cada teste(query), desta vez temos que encontrar um subsegmento $a[l^\prime \dots r^\prime]$ de modo que $l \le l^\prime$ e $r^\prime \le r$ e a soma dos elementos dess segmento é máxima. 
+			Como antes, também queremos modificar elementos individuais da array. 
+			Os elementos da array podem ser negativos e o subsegmento ideal pode estar vazio (e.g. se todos os elementos forem negativos).</p>
+
+			<p>Esse problema é um uso não trivial de uma árvore de segmentos.
+            Desta vez, armazenaremos quatro valores para cada vértice: 
+			a soma do segmento, a soma máxima do prefixo, a soma máxima do sufixo e a soma do subsegmento máximo nela.
+			Em outras palavras, para cada segmento da Árvore de Segmentos, a resposta já está pré-computada, bem como as respostas para os segmentos que tocam nos limites esquerdo e direito do segmento.</p>
+
+			<p>Como construir uma árvore com esses dados?
+            Novamente, calculamos de uma forma recursiva: 
+			primeiro calculamos todos os quatro valores para o filho esquerdo e direito e depois os combinamos para arquivar os quatro valores do vértice atual.
+            Observe que a resposta para o vértice atual é:</p>
+			
+			<ul>
+			<li>a resposta do filho esquerdo, o que significa que o subsegmento ideal está inteiramente no segmento do filho esquerdo</li>
+			<li>a resposta do filho direito, o que significa que o subsegmento ideal está inteiramente no segmento do filho direito</li>
+			<li>a soma da soma máxima do sufixo do filho esquerdo e a soma máxima do prefixo do filho direito, o que significa que o subsegmento ideal faz interseção com os dois filhos.</li>
+			</ul>
+			
+			<p>Portanto, a resposta para o vértice atual é o máximo desses três valores. 
+            Calcular a soma máxima do prefixo / sufixo é ainda mais fácil. 
+            Aqui está a implementação da função $\text{combine}$, que recebe apenas dados do filho esquerdo e direito e retorna os dados do vértice atual.</p>
+			<pre><code class="cpp">struct data {
+    int sum, pref, suff, ans;
+};
+
+data combine(data l, data r) {
+    data res;
+    res.sum = l.sum + r.sum;
+    res.pref = max(l.pref, l.sum + r.pref);
+    res.suff = max(r.suff, r.sum + l.suff);
+    res.ans = max(max(l.ans, r.ans), l.suff + r.pref);
+    return res;
+}
+</code></pre>
+            <p>Usando a função $\text{combine}$ fica mais fácil construir a árvore de segmentos. 
+			Podemos implementar exatamente da mesma maneira que nas implementações anteriores.
+			Para inicializar os vértices das folhas, criamos adicionalmente a função auxiliar $\text{make_data}$, que retornará um objeto $\text{data}$ que contém as informações de um único valor.</p>
+            <pre><code class="cpp">data make_data(int new_val) {
+    data res;
+    res.sum = new_val;
+    res.pref = res.suff = res.ans = max(0, new_val);
+    return res;
+}
+
+void build(int a[], int node, int tl, int tr) {
+    if (tl == tr) {
+        tree[node] = make_data(a[tl]);
+    } else {
+        int tm = tl + (tr - tl)/ 2;
+        build(a, 2*node, tl, tm);
+        build(a, 2*node+1, tm+1, tr);
+        tree[node] = combine(t[2*node], t[2*node+1]);
+    }
+}
+
+void update(int node, int tl, int tr, int id, int val) {
+    if (tl == tr) {
+        tree[node] = make_data(val);
+    } else {
+        int tm = tl + (tr - tl)/ 2;
+        if (id &lt;= tm)
+            update(2*node, tl, tm, id, val);
+        else
+            update(2*node+1, tm+1, tr, id, val);
+        tree[node] = combine(tree[2*node], t[2*node+1]);
+    }
+}
+</code></pre>			
+			<p>Resta apenas, como calcular a resposta para uma consulta(query). 
+            Para respondê-la, <strong>descemos a árvore como antes, dividindo a consulta em vários subsegmentos que coincidem com os segmentos da Árvore de Segmentos</strong> e combinamos as respostas nelas em uma única resposta para a consulta.
+            Então, deve ficar claro que o trabalho é exatamente o mesmo da <strong>Árvore de Segmentos simples</strong>, mas em vez de somar / minimizar / maximizar os valores, usamos a função $\text{combine}$.</p>
+			<pre><code class="cpp">data query(int node, int tl, int tr, int l, int r) {  //índice nó atual, range árvore, range query
+    if (l &gt; r) 
+        return make_data(0);
+    if (l == tl &amp;&amp; r == tr) 
+        return tree[node];
+    int tm = tl + (tr - tl) / 2;
+    return combine(query(2*node, tl, tm, l, min(r, tm)), 
+                   query(2*node+1, tm+1, tr, max(l, tm+1), r));
+}
+</code></pre>
+            <h3>Salvando as sub-arrays inteiras em cada vértice</h3>
+			
+			<p>Esta é uma subseção separada que se destaca das demais, porque em cada vértice da Árvore de Segmentos não armazenamos informações sobre o segmento correspondente em uma forma individual(soma, mínimo, máximo, ...), mas armazenamos todos os elementos do segmento.
+			Assim, a raiz da Árvore de segmentos armazenará todos os elementos da array, o vértice filho esquerdo armazenará a primeira metade da array, o vértice direito a segunda metade e assim por diante. </p>
+
+			<p>Em sua aplicação mais simples dessa técnica, armazenamos os elementos em ordenadamente(sorted).
+            Nas versões mais complexas, os elementos não são armazenados em vetores lineares, mas estruturas de dados mais avançadas (sets, maps, ...). Para esses tipos de problemas vale a pena lembrar da natureza dessas estruturas, pois elas podem aumentar o tempo de execução do programa. 
+			Mas todos esses métodos têm o fator comum: cada vértice requer memória linear (ou seja, proporcional ao comprimento do segmento correspondente).</p>
+
+			<p>A primeira questão natural, ao considerar essas árvores de segmento, é sobre o consumo de memória.
+			Intuitivamente, isso pode parecer memória $O(n^2)$, mas acontece que a árvore completa só precisará de $O(n \log n)$ de memória.
+			Porque isto é assim?
+			Simplesmente, porque cada elemento da array se "encaixa" em $O(\log n)$ segmentos (<strong>lembre-se a altura da árvore é $O(\log n)$</strong>).</p>
+
+			<p>Portanto, apesar da aparente extravagância de uma tal árvore de segmentos, ela consome apenas um pouco mais de memória do que a árvore de segmentos usual.</p>
+
+			<p>Várias aplicações típicas dessa estrutura de dados são descritas abaixo.
+            Vale a pena notar a semelhança dessas árvores de segmentos com estruturas de dados 2D (<strong>na verdade, essa é uma estrutura de dados 2D, Árvore de Segmentos 2D, mas com recursos bastante limitados</strong>).</p>
+			
+			<h4>Encontre o menor número maior ou igual a um valor especificado. Nenhuma consulta de modificação(update).</h4>
+
+			<p>Queremos responder a perguntas da seguinte forma:
+            dado três números $(l, r, x)$ temos que encontrar o número mínimo no segmento $a[l \dots r]$ que é maior ou igual a $x$.</p>
+
+			<p>Construímos uma árvore de segmentos.
+            Em cada vértice, armazenamos uma lista ordenado(sorted) de todos os números que ocorrem no segmento correspondente, que satisfaçam como descrito acima. 
+			Como criar uma árvore de segmentos da maneira mais eficaz possível?
+            Como sempre, abordamos esse problema de forma recursiva: as listas dos filhos esquerdo e direito já sejam construídas e queremos criar a lista para o vértice atual.
+			Nesta visão, a operação é conhecida como trivial e pode ser realizada em tempo linear:
+            Só precisamos combinar as duas listas ordenadas em uma, o que pode ser feito por iteração sobre elas usando dois pointers.
+            <strong>O C ++ STL já possui uma implementação desse algoritmo.</strong></p>
+
+			<p>Como essa estrutura da Árvore de segmentos e as semelhanças com o algoritmo "Merge Sort", a estrutura de dados também é frequentemente chamada <strong>"Merge Sort Tree"</strong>.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; tree[4*MAXN];
+
+void build(int a[], int node, int tl, int tr) {
+    if (tl == tr) {
+        tree[node] = vector&lt;int&gt;(1, a[tl]);
+    } else { 
+        int tm = tl + (tr - tl)/ 2;
+        build(a, 2*node, tl, tm);
+        build(a, 2*node+1, tm+1, tr);
+        merge(tree[2*node].begin(), t[2*node].end(), t[2*node+1].begin(), t[2*node+1].end(),
+              back_inserter(tree[node]));
+    }
+}
+</code></pre>
+            <p>A Árvore de Segmentos construída dessa maneira exigirá $O(n \log n)$ de memória.
+			E graças a essa implementação, sua construção também exige tempo $O(n \log n)$, afinal, cada lista é construída em tempo linear em relação ao seu tamanho.</p>
+
+			<p>Agora considere a questão:
+            vamos descer a árvore, como na Árvore de segmentos normal, e quebrar nosso segmento $a[l \dots r]$ em vários subsegmentos (em no máximo $O(\log n)$ pedaços). 
+			É claro que a resposta de toda a questão é o mínimo de cada uma das subconsultas(queries).
+            Portanto, agora precisamos entender apenas como responder a um teste em um desses subsegmentos que corresponde a algum vértice da árvore.</p>
+
+			<p>Estamos em algum vértice da árvore de segmentos e queremos calcular a resposta para a query, i.e. encontre o mínimo número maior ou igual a um determinado número $x$. 
+			Como o vértice contém a lista de elementos em ordem, podemos simplesmente realizar uma 'binary search' nesta lista e retornar o primeiro número, maior ou igual a $x$.</p>
+
+			<p>Assim, a resposta para a query em um segmento da árvore leva tempo $O(\log n)$, e a query é processada em $O(\log^2 n)$.</p>
+
+<pre><code class="cpp">int query(int node, int tl, int tr, int l, int r, int x) {  //índice nó atual, range arvore, rangue query, valor x
+    if (l &gt; r)
+        return INF;   // const INF = numeric_limits<int>::max();
+    if (l == tl &amp;&amp; r == tr) {
+        vector&lt;int&gt;::iterator it = lower_bound(tree[node].begin(), tree[node].end(), x);
+        if (it != tree[node].end())
+            return *it;
+        return INF;
+    }
+    int tm = tl + (tr - tl)/ 2;
+    return min(query(2*node, tl, tm, l, min(r, tm), x), 
+               query(2*node+1, tm+1, tr, max(l, tm+1), r, x));
+}
+</code></pre>
+
+			<p>A constante $\text{INF}$ é algum número muito largo that que é maior que qualquer número na array. 
+			Seu uso significa que não há número maior ou igual a $x$ no segmento. 
+			Tem o significado de "não há resposta no intervalo especificado".</p>
+			
+			<h4>Encontre o menor número maior ou igual a um valor especificado. Com queries de modificação(update).</h4>
+
+			<p>Esta tarefa é semelhante à anterior.
+            A última abordagem tem uma desvantagem, não é possível modificar a array entre as perguntas respondidas.
+			Agora queremos fazer exatamente isso: fará a atualização de um elemento da array em outro elemento $a[i] = y$.</p>
+
+			<p>A solução é semelhante à solução do problema anterior, mas, em vez de listas em cada vértice da Árvore de Segmentos, armazenaremos uma lista equilibrada que permite procurar rapidamente números, excluir números e inserir novos números. 
+			Como a array pode conter um número repetido, a melhor opção é a estrutura de dados $\text{multiset}$.</p>
+
+			<p>A construção dessa árvore de segmentos é praticamente da mesma maneira que no problema anterior, só que agora precisamos combinar $\text{multiset}$s e listas não ordenadas.
+			Isso leva a um tempo de construção de $O(n \log^2 n)$ (em geral, mesclar duas <strong>Árvores rubro-negra(red-black trees)</strong> pode ser feito em tempo linear(linear time), mas o C ++ STL não garante essa complexidade de tempo).</p>
+
+			<p>A função $\text{query}$ também é quase equivalente, só que agora a função $\text{lower_bound}$ da função $\text{multiset}$ deve ser chamada em vez da ($\text{std::lower_bound}$ apenas funciona em tempo $O(\log n)$ se usado com iteradores de acesso aleatório).</p>
+
+			<p>Finalmente, a solicitação de modificação(update).
+            Para processá-lo, precisamos fazer a travessia da árvore e modificar todos $\text{multiset}$ dos segmentos correspondentes que contêm o elemento efetuado.
+			Simplesmente excluímos o valor antigo desse elemento e inserimos o novo valor.</p>
+
+<pre><code class="cpp">void update(int node, int tl, int tr, int id, int val) {
+    tree[node].erase(tree[node].find(a[id]));
+    tree[node].insert(val);
+    if (tl != tr) {
+        int tm = tl + (tr - tl)/ 2;   //tm = (tr + tl)/2;
+        if (id &lt;= tm)
+            update(2*node, tl, tm, id, val);
+        else
+            update(2*node+1, tm+1, tr, id, val);
+    } else {
+        a[id] = val;
+    }
+}
+</code></pre>
+
+            <p>O processamento dessa query de modificação leva tempo $O(\log^2 n)$.</p>
+			
+			<h4>Encontre o menor número maior ou igual a um valor especificado. Aceleração com <strong>"fractional cascading</strong>".</h4>
+
+			<p>Temos a mesma declaração do problema, queremos encontrar o número mínimo maior ou igual a $x$ em um segmento, mas agora em tempo $O(\log n)$.
+			Vamos melhorar a complexidade do tempo usando a técnica <a href="https://en.wikipedia.org/wiki/Fractional_cascading">"fractional cascading"</a>.</p>
+
+			<p>Fractional cascading é uma técnica simples que permite melhorar o tempo de execução de várias procuras binárias(binary searches), na qual são conduzidas ao mesmo tempo. 
+			Nossa abordagem anterior à query foi dividir a tarefa em várias subtarefas, cada uma delas resolvida com uma pesquisa binária. 
+			Fractional cascading permite substituir todas essas pesquisas binárias por uma única.</p>
+
+			<p>O exemplo mais simples de fractional cascading é o seguinte problema:
+			existem $k$ listas ordenadas de números, e devemos encontrar em cada lista o primeiro número maior ou igual ao número fornecido.</p>
+
+			<p>Em vez de realizar uma binary search para cada lista, poderíamos juntar todas as listas em uma grande lista ordenada.
+			Adcionalmente para cada elemento $y$ nós armazenamos uma lista de resultados da pesquisa por $y$ em cada uma das $k$ listas.
+			Portanto, se queremos encontrar o menor número maior que ou igual a $x$, só precisamos realizar uma única pesquisa binária e, a partir da lista de índices, podemos determinar o menor número em cada lista.
+			Essa abordagem, no entanto, requer $O(n \cdot k)$ ($n$ é o comprimento das listas combinadas), o que pode ser bastante ineficiente.</p>
+
+			<p>Fractional cascading reduz essa complexidade de memória para $O(n)$, criando a partir do input $k$, $k$ novas listas, em que cada lista contém a lista correspondente e, adicionalmente, também cada segundo elemento da nova lista a seguir.
+			Usando essa estrutura, é necessário armazenar apenas dois índices, o índice do elemento na lista original e o índice do elemento na nova lista a seguir.
+			Portanto, essa abordagem usa apenas memória $O(n)$, e ainda consegue responder as queries com uma única busca binária.</p>
+
+			<p>Mas, para nossa aplicação, não precisamos de todo o poder da fractional cascading.
+			Na nossa Árvore de segmentos, um vértice contém a lista de todos os elementos que ocorrem no vértice filho esquerdo ou direito. 
+			Portanto, para evitar a pesquisa binária nas listas dos filhos, basta armazenar a posição de cada elemento na lista do filho à esquerda e à direita.</p>
+
+			<p>Assim, em vez de armazenar a lista usual de todos os números, armazenamos três valores para cada elemento: 
+			<strong>o valor do elemento em si, a posição dele na lista do filho esquerdo e a posição dele na lista do filho direito.</strong>
+			Isso nos permite determinar a posição na lista dos filhos da esquerda e direita em $O(1)$, em vez de tentar encontrar com busca binária.</p>
+
+			<p>É simples aplicar esta técnica a um problema, que não requer queries de modificação.
+			Nesse problema, as duas posições são apenas números e podem ser facilmente calculadas contando ao mesclar duas sequências ordenadas.</p>
+
+			<p>Atualmente, esse tipo de árvore de segmentos é conhecido como <a href="https://en.wikipedia.org/wiki/Wavelet_Tree">"Wavelet Tree"</a>.
+			E alguns usos mais avançados foram explorados (e.g. suporte nas queries de modificação para "swap de vértices vizinhos").</p>
+			
+			<h4>Outras possíveis variações</h4>
+
+			<p>Essa técnica implica uma nova classe de aplicações possíveis.
+            Em vez de armazenar o $\text{vector}$ ou o $\text{multiset}$ em cada vértice, outras estruturas de dados podem ser usadas:
+			outras Árvores de Segmentos, "Fenwick Trees", "Cartesian trees", etc.</p>
+			
+			<h3>Atualizações em um Range de elementos (<strong>Lazy Propagation</strong>)</h3>
+
+			<p>Todos os problemas nas seções acima discutiram queries de modificação que afetaram apenas um único elemento de cada array.
+			No entanto, a Árvore de segmentos permite aplicar modificações a um segmento inteiro de elementos, e executar a query em tempo $O(\log n)$.</p>
+
+			<h4>Adicionar em segmentos</h4>
+
+			<p>Começamos considerando problemas da forma mais simples: precisamos adicionar um número $x$ para todos os números no segmento $a[l \dots r]$.</p>
+
+			<p>Para ser eficiente, armazenaremos em cada vértice da Árvore de Segmentos quanto devemos adcionar para todos os elementos no segmento. 
+			Por exemplo, "adcionar 3 para toda a array $a[0 \dots n-1]$", então adicionamos 3 no nó raiz da Árvore(que cobre todo o range da array).
+			Portanto, não precisamos mudar todos os $O(n)$ valores, mas apenas a quantidade $O(\log n)$.</p>
+
+			<p>Será necessário fazer uma travessia pela árvore.</p>
+
+<pre><code class="cpp">void build(int a[], int node, int tl, int tr) {
+    if (tl == tr) {
+        tree[node] = a[tl];
+    } else {
+        int tm = tl + (tr - tl)/ 2;
+        build(a, 2*node, tl, tm);
+        build(a, 2*node+1, tm+1, tr);
+        tree[node] = 0;
+    }
+}
+
+void update(int node, int tl, int tr, int l, int r, int add) {
+    if (l &gt; r)
+        return;
+    if (l == tl &amp;&amp; r == tr) {
+        tree[node] += add;
+    } else {
+        int tm = tl + (tr - tl)/ 2;
+        update(2*node, tl, tm, l, min(r, tm), add);
+        update(2*node+1, tm+1, tr, max(l, tm+1), r, add);
+    }
+}
+
+int get(int node, int tl, int tr, int id) {
+    if (tl == tr)
+        return tree[node];
+    int tm = tl + (tr - tl)/ 2;
+    if (id &lt;= tm)
+        return tree[node] + get(2*node, tl, tm, id);
+    else
+        return tree[node] + get(2*node+1, tm+1, tr, id);
+}
+</code></pre>
+            <h4>Atribuições em segmentos</h4>
+
+			<p>Agora precisamos atribuir cada elemento de um segmento $a[l \dots r]$ para algum valor $p$.</p>
+
+			<p>Para executar essa modificação em um segmento inteiro, você precisa armazenar em cada vértice da Árvore de Segmentos se o segmento correspondente é coberto inteiramente com o mesmo valor ou não.
+			Isoo nos permite fazer uma "lenta" atualização: 
+			em vez de alterar todos os segmentos na árvore que cobrem o segmento da query, apenas alteramos alguns e deixamos outros inalterados.
+			Um vértice marcado irá representar que cada elemento do segmento foi atribuído com o valor, e também uma subárvore completa deverá conter apenas esse valor.
+			Em certo sentido, somos preguiçosos e atrasamos a atribuição do novo valor para todos esses vértices.
+			Podemos fazer essa tarefa tediosa mais tarde, se necessário.</p>
+
+			<p>Portanto, após a execução da query, algumas partes da árvore se tornam irrelevantes - algumas modificações permanecem não realizadas nela.</p>
+
+			<p>Por exemplo "atribua um número para toda a array $a[0 \dots n-1]$" se a query for executada, na Árvore de Segmentos apenas uma única mudança é feita - o número é colocado na raiz do vértice e esse vértice fica <strong>marcado</strong>.
+			Os segmentos restantes permanecem não modificados, embora de fato o número deveria ser atribuído para toda a árvore.</p>
+
+			<p>Suponha agora que a segunda query queira que a primeira metade da array $a[0 \dots n/2]$ deve ser atribuída com outro valor. 
+			Para processar isso, devemos atribuir cada elemento em todo o segmento do filho esquerdo do vértice raiz com esse valor. 
+			Mas antes, precisamos ordenar o segmento do vértice raiz. 
+			A sutileza aqui é que a metade direita da array ainda deve ser atribuída ao valor da primeira query e, no momento, não há informações para a metade direita armazenada.</p>
+
+			<p>A maneira de resolver isso é empurrar as informações da raiz para seus filhos, i.e. se a raiz da árvore foi atribuída com qualquer número, então atribuímos os vértices filho esquerdo e direito a esse número e removemos a marca do vértice da raiz.
+			Depois disso, podemos atribuir o filho esquerdo com o novo valor, sem perder nenhuma informação necessária.</p>
+
+			<p>Resumindo, temos:
+			para qualquer query (de modificação ou leitura) durante a descida(travessia) ao longo da árvore, devemos sempre enviar informações do vértice atual para os dois filhos. 
+			Podemos entender isso de tal maneira que, quando fazemos a travessia pela árvore, aplicamos modificações necessárias "preguiçosas", somente essas para não degradar a complexidade de $O(\log n)$.</p>
+
+			<p>Para a implementação precisamos criar uma função $\text{push}$, que irá receber o vértice atual, e irá propagar a informação desse vértice para os dois filhos. 
+			Chamaremos essa função no começo das funções de query (mas não chamaremos ela para os vértices da folhas).</p>
+
+<pre><code class="cpp">void push(int node) {
+    if (marked[node]) {
+        tree[2*node] = t[2*node+1] = tree[node];
+        marked[2*node] = marked[2*node+1] = true;
+        marked[node] = false;
+    }
+}
+
+void update(int node, int tl, int tr, int l, int r, int new_val) {
+    if (l &gt; r) 
+        return;
+    if (l == tl &amp;&amp; tr == r) {
+        tree[node] = new_val;
+        marked[node] = true;
+    } else {
+        push(node);
+        int tm = tl = (tr - tl)/ 2;
+        update(2*node, tl, tm, l, min(r, tm), new_val);
+        update(2*node+1, tm+1, tr, max(l, tm+1), r, new_val);
+    }
+}
+
+int get(int node, int tl, int tr, int id) {
+    if (tl == tr) {
+        return tree[node];
+    }
+    push(node);
+    int tm = tl + (tr - tl)/ 2;
+    if (id &lt;= tm) 
+        return get(2*node, tl, tm, id);
+    else
+        return get(2*node+1, tm+1, tr, id);
+}
+</code></pre>
+
+			<p>Nota: a função $\text{get}$ pode ser implementada de outra maneira: 
+			não faça atualizações demoradas, imediatamente retorne o valor $tree[ node ]$ se $marked [ node ]$ for verdadeiro(true).</p>
+			
+			
+			<h4>Adicionando em Segmentos, Máximo</h4>
+
+			<p>Agora a modificação é adicionar um número a todos os elementos em um intervalo e encontrar o máximo desse intervalo.</p>
+
+			<p>Para cada vértice da Árvore de Segmentos precisamos armazenar o máximo de cada segmento. </p>
+
+			<p>Para esse propósito, armazenaremos um valor adcional para cada vértice.
+			Nesse valor, armazenamos as somas que ainda não foram passadas para os vértices filhos.
+			Antes de fazer a travessia para os vértices filhos, a função $\text{push}$ é inicializada e assim propaga o valor para os dois vértices filhos.
+			Precisamos fazer isso nas funções $\text{update}$ e a função $\text{query}$.</p>
+
+<pre><code class="cpp">void push(int node) {
+    tree[2*node] += lazy[node];
+    lazy[2*node] += lazy[node];
+	
+    tree[2*node+1] += lazy[node];
+    lazy[2*node+1] += lazy[node];
+	
+    lazy[node] = 0;
+}
+
+void update(int node, int tl, int tr, int l, int r, int add) {
+    if (l &gt; r) 
+        return;
+    if (l == tl &amp;&amp; tr == r) {
+        tree[node] += add;
+        lazy[node] += add;
+    } else {
+        push(node);
+        int tm = tl + (tr - tl)/ 2;
+        update(2*node, tl, tm, l, min(r, tm), add);
+        update(2*node+1, tm+1, tr, max(l, tm+1), r, add);
+        tree[node] = max(tree[2*node], tree[2*node+1]);
+    }
+}
+
+int query(int node, int tl, int tr, int l, int r) {
+    if (l &gt; r)
+        return -INF;
+    if (l &lt;= tl &amp;&amp; tr &lt;= r)
+        return tree[node];
+    push(node);
+    int tm = tl + (tr - tl)/ 2;
+    return max(query(2*node, tl, tm, l, min(r, tm)), 
+               query(2*node+1, tm+1, tr, max(l, tm+1), r));
+}
+</code></pre>
+            <h3>Generalização para dimensões maiores</h3>
+
+            <p>Uma Árvore de Segmentos pode ser generalizada de maneira bastante natural para dimensões mais altas.
+            Se, no caso unidimensional, dividimos os índices da array em segmentos, na bidimensional criamos uma Árvore de Segmentos comum em relação aos primeiros índices e, para cada segmento, construímos uma Árvore de Segmentos comum em relação à segundos índices.</p>
+			
+			<h4>Árvore de Segmentos 2D</h4>
+
+			<p>Uma matriz $a[0 \dots n-1, 0 \dots m-1]$ é fornecida, e precisamos encontrar a soma (ou mínimo/máximo) em alguma submatriz $a[x_1 \dots x_2, y_1 \dots y_2]$, como também executar modificações em elementos individuais da matriz (i.e. $a[x][y] = p$).</p>
+
+			<p>Então construimos uma Árvore Segmentária 2D: primeiro uma Árvore de Segmentos usando a primeira coordenada ($x$), então depois a segunda ($y$).</p>
+
+			<p>Para tornar o processo de construção mais compreensível, você pode esquecer por um tempo que a matriz é bidimensional, e apenas deixar a primeira coordenada;
+			Construiremos uma Árvore de Segmentos unidimensional comum usando apenas a primeira coordenada.
+			Mas, em vez de armazenar um número em um segmento, armazene uma Árvore de Segmentos inteira: 
+			i.e. neste momento, lembramos que também temos uma segunda coordenada; a primeira coordenada já está fixa em algum intervalo $[l \dots r]$, trabalhamos com esse alcance $a[l \dots r, 0 \dots m-1]$ e para isso construímos uma Árvore de Segmentos.</p>
+
+			<p>Aqui está a implementação da construção de uma árvore de segmentos 2D.
+			Na verdade, representa dois blocos separados:
+            a construção de uma árvore de segmentos ao longo da coordenada $x$ ($\text{build}_x$), e da coordenada $y$ ($\text{build}_y$).
+			Para os nós das folhas $\text{build}_y$ nós precisamos separar dois casos: 
+			quando o segmento atual da primeira coordenada $[tlx \dots trx]$ tem tamanho 1, e quando tem um tamanho maior que 1. No primeiro caso, nós apenas pegamos o elemento correspondente da matriz, e no segundo caso, podemos combinar os valores de duas árvores de segmentos do filho esquerdo e direito na coordenada $x$.</p>
+<pre><code class="cpp">void build_y(int vx, int lx, int rx, int vy, int ly, int ry) {
+    if (ly == ry) {
+        if (lx == rx)
+            t[vx][vy] = a[lx][ly];
+        else
+            t[vx][vy] = t[vx*2][vy] + t[vx*2+1][vy];
+    } else {
+        int my = ly + (ry - ly) / 2;
+        build_y(vx, lx, rx, 2*vy, ly, my);
+        build_y(vx, lx, rx, 2*vy+1, my+1, ry);
+        t[vx][vy] = t[vx][vy*2] + t[vx][vy*2+1];
+    }
+}
+
+void build_x(int vx, int lx, int rx) {
+    if (lx != rx) {
+        int mx = lx + (rx - lx)/ 2;
+        build_x(2*vx, lx, mx);
+        build_x(2*vx+1, mx+1, rx);
+    }
+    build_y(vx, lx, rx, 1, 0, m-1);   //nó raiz : 1, range de y : 0 ... m-1
+}
+</code></pre>
+
+			<p>Essa árvore de segmentos ainda usa uma quantidade linear de memória, mas com uma constante maior: $16 n m$.
+			É claro que o procedimento descrito $\text{build}_x$ também funciona em tempo linear.</p>
+
+			<p>Agora nos voltamos para o processamento de queries. Responderemos à queries(testes) bidimensional usando o mesmo princípio: 
+			primeiro exerça a query na primeira coordenada, então para cada vértice alcançado, chamamos a Árvore de Segmentos correspondente da segunda coordenada.</p>
+
+<pre><code class="cpp">int sum_y(int vx, int vy, int tly, int try_, int ly, int ry) {
+    if (ly &gt; ry) 
+        return 0;
+    if (ly == tly &amp;&amp; try_ == ry)
+        return t[vx][vy];
+    int tmy = tly + (try_ - tly)/ 2;
+    return sum_y(vx, 2*vy, tly, tmy, ly, min(ry, tmy))
+         + sum_y(vx, 2*vy+1, tmy+1, try_, max(ly, tmy+1), ry);
+}
+
+int sum_x(int vx, int tlx, int trx, int lx, int rx, int ly, int ry) {
+    if (lx &gt; rx)
+        return 0;
+    if (lx == tlx &amp;&amp; trx == rx)
+        return sum_y(vx, 1, 0, m-1, ly, ry);
+    int tmx = tlx + (trx - tlx)/ 2;
+    return sum_x(2*vx, tlx, tmx, lx, min(rx, tmx), ly, ry)
+         + sum_x(2*vx+1, tmx+1, trx, max(lx, tmx+1), rx, ly, ry);
+}
+</code></pre>
+
+			<p>Esta função funciona em tempo $O(\log n \log m)$, desde que primeiro faz a travessia da árvore na primeira coordenada, e para a travessia em cada vértice na árvore faz uma query na Árvore de Segmentos da segunda coordenada.</p>
+
+			<p>Finalmente iremos considerar a query de modificação ou atualização(updates). 
+			Nós precisamos aprender como modificar a Árvore de Segmentos tal que um elemento da matriz $a[x][y] = p$.
+			É claro que as alterações ocorrerão apenas nos vértices da primeira árvore de segmentos que cobrem a coordenada $x$ (e isto será em $O(\log n)$), e para as árvores de segmentos correspondentes a elas, as alterações ocorrerão apenas nos vértices que cobrem a coordenada $y$ (este será $O(\log m)$).
+			Portanto, a implementação não será muito diferente do caso unidimensional, somente agora descemos primeiro a primeira coordenada e depois a segunda.</p>
+
+<pre><code class="cpp">void update_y(int vx, int lx, int rx, int vy, int ly, int ry, int x, int y, int new_val) {   //índices atuais(v), ranges das árvores(l...r)(xy), coordenada do elemento [x][y], valor de modificação
+    if (ly == ry) {                       //a query update y necessita das coordenadas de x pois a árvore descende de x para y                                                                                 
+        if (lx == rx)
+            t[vx][vy] = new_val;
+        else
+            t[vx][vy] = t[2*vx][vy] + t[2*vx+1][vy];
+    } else {
+        int my = ly + (ry - ly)/ 2;
+        if (y &lt;= my)
+            update_y(vx, lx, rx, vy*2, ly, my, x, y, new_val);
+        else
+            update_y(vx, lx, rx, vy*2+1, my+1, ry, x, y, new_val);
+        t[vx][vy] = t[vx][vy*2] + t[vx][vy*2+1];
+    }
+}
+
+void update_x(int vx, int lx, int rx, int x, int y, int new_val) {
+    if (lx != rx) {
+        int mx = lx + (rx - lx)/ 2;
+        if (x &lt;= mx)
+            update_x(2*vx, lx, mx, x, y, new_val);
+        else
+            update_x(2*vx+1, mx+1, rx, x, y, new_val);
+    }
+    update_y(vx, lx, rx, 1, 0, m-1, x, y, new_val);
+}
+</code></pre>
+            <h4>Compressão da Árvore de Segmentos 2D</h4>
+
+			<p>Problema: existem $n$ pontos em um plano, fornecidos pelas coordenadas $(x_i, y_i)$ e queries da forma "conte o número de pontos dentro do retângulo de coordenadas $((x_1, y_1), (x_2, y_2))$".
+			É claro que, no caso de um problema desse tipo, torna-se desnecessariamente inútil construir uma Árvore de Segmentos bidimensional com elementos $O(n^2)$.
+			A maior parte dessa memória será desperdiçada, uma vez que cada ponto só pode entrar em $O(\log n)$ segmentos da árvore ao longo da primeira coordenada, e, portanto, o tamanho "útil" total de todos os segmentos de árvore na segunda coordenada é $O(n \log m)$.</p>
+
+			<p>Então, procedemos da seguinte forma:
+            em cada vértice da árvore de segmentos em relação à primeira coordenada, armazenamos uma árvore de segmentos construída apenas pelas segundas coordenadas que ocorrem no segmento atual das primeiras coordenadas. 
+			Em outras palavras, ao construir uma Árvore de segmentos dentro de algum vértice com índice $vx$ e os limites $tlx$ e $trx$, consideramos apenas os pontos que estão nesse intervalo $x \in [tlx, trx]$, construindo uma árvore segmento somente neles.</p>
+
+			<p>Assim, conseguiremos que cada árvore de segmentos na segunda coordenada ocupe exatamente a quantidade de memória que deveria.
+			Como resultado, a quantidade total de memória diminuirá para $O(n \log n)$.
+			Ainda podemos responder às queries em tempo $O(\log^2 n)$, só precisamos fazer uma busca binária na segunda coordenada, mas isso não vai piorar a complexidade.</p>
+
+			<p>Queries de modificação serão impossíveis nessa estrutura:
+			de fato, se um novo ponto aparecer, precisamos adicionar um novo elemento no meio de alguma Árvore de Segmentos ao longo da segunda coordenada, o que não pode ser efetivamente realizado.</p>
+
+			<p>Concluindo, notamos que a Árvore de Segmentos bidimensional feita da maneira descrita se torna praticamente equivalente à modificação da Árvore de Segmentos unidimensional, como salvar sub-arrays inteiras nos vértices de uma Árvore de Segmentos 1D.
+			Em particular, a Árvore de segmentos bidimensional é apenas um caso especial de armazenamento de uma sub-array em cada vértice da árvore.
+			Daqui resulta que, se você abandonou uma Árvore de Segmentos bidimensional devido à impossibilidade de executar uma query, faz sentido tentar substituir a Árvore de Segmentos aninhada por alguma estrutura de dados mais poderosa, por exemplo, uma árvore Cartesiana.</p>
+			
+			<h3>Preservando o histórico de seus valores (Persistent Segment Tree)</h3>
+
+			<p><strong>Uma estrutura de dados persistente é uma estrutura de dados que lembra o estado anterior para cada modificação</strong>.
+			Isso permite acessar qualquer versão dessa estrutura de dados que nos interesse e executar uma consulta nela.</p>
+
+			<p>Árvore Segmentária é uma estrutura de dados que pode ser transformada em uma estrutura de dados persistente com eficiência (tanto no tempo quanto no consumo de memória).
+			Queremos evitar copiar a árvore completa antes de cada modificação e não queremos perder o comportamento do tempo $O(\log n)$ para responder a queries de range.</p>
+
+			<p>De fato, qualquer alteração na Árvore de Segmentos leva a uma alteração nos dados de apenas $O(\log n)$ vértices ao longo do caminho da raiz até suas últimas folhas. 
+			Então, se armazenarmos a Árvore de Segmentos usando pointers (i.e. um vértice armazena pointers para os vértices filho esquerdo e direito), então quando performar a query de modificação(update), simplesmente precisamos <strong>criar novos vértices em vez de alterar os vértices disponíveis</strong>.
+			Os vértices que não são afetados pela query de modificação ainda podem ser usados ​​com pointers para os vértices antigos.
+			Portanto, para uma query de modificação $O(\log n)$ novos vértices serão criados, incluindo um novo vértice raiz da Árvore Segmentária, e toda a versão anterior da árvore enraizada no vértice raiz antigo permanecerá inalterada.</p>
+
+			<p>Vamos dar um exemplo de implementação para a Árvore de Segmentos mais simples: quando houver apenas uma query solicitando somas e queries de modificação de elementos únicos.</p>
+
+<pre><code class="cpp">struct Vertex {
+    Vertex *l, *r;
+    int sum;
+
+    Vertex(int val) : l(nullptr), r(nullptr), sum(val) {}
+    Vertex(Vertex *l, Vertex *r) : l(l), r(r), sum(0) {
+        if (l) sum += l-&gt;sum;
+        if (r) sum += r-&gt;sum;
+    }
+};
+
+Vertex* build(int a[], int tl, int tr) {   //array, range árvore
+    if (tl == tr)
+        return new Vertex(a[tl]);  //"tree[node] = a[left]"
+    int tm = tl + (tr - tl)/ 2;    //mid = (tr + tl)/2
+    return new Vertex(build(a, tl, tm), build(a, tm+1, tr)); 
+}
+
+int get_sum(Vertex* v, int tl, int tr, int l, int r) {
+    if (l &gt; r)
+        return 0;
+    if (l == tl &amp;&amp; tr == r)
+        return v-&gt;sum;
+    int tm = tl + (tr - tl)/ 2;
+    return get_sum(v-&gt;l, tl, tm, l, min(r, tm))
+         + get_sum(v-&gt;r, tm+1, tr, max(l, tm+1), r);
+}
+
+Vertex* update(Vertex* v, int tl, int tr, int id, int val) {
+    if (tl == tr)
+        return new Vertex(val);
+    int tm = tl + (tr - tl)/ 2;
+    if (id &lt;= tm)
+        return new Vertex(update(v-&gt;l, tl, tm, id, val), v-&gt;r);
+    else
+        return new Vertex(v-&gt;l, update(v-&gt;r, tm+1, tr, id, val));
+}
+</code></pre>
+            <p>Para cada modificação da árvore de segmentos, receberemos um novo vértice raiz.
+			Para saltar rapidamente entre duas versões diferentes da Árvore de segmentos, precisamos armazenar essas raízes em uma array.
+			Para usar uma versão específica da Árvore de segmentos, chamamos simplesmente uma query usando o vértice raiz específico</p>
+
+			<p>Com a abordagem descrita acima, quase qualquer árvore de segmentos pode ser transformada em uma estrutura de dados persistente.</p>
+			
+			<h4>Encontrando o $k$-ésimo(th) menor número em um range</h4>
+
+			<p>"Qual é o $k$-ésimo menor elemento no range $a[l \dots r]$". 
+			Pode ser respondido usando uma pesquisa binária e uma Merge Sort Tree, mas a complexidade de tempo para uma única query seria $O(\log^3 n)$.
+			Realizaremos a mesma tarefa usando uma Árvore de Segmentos <strong>persistente</strong> em $O(\log n)$.</p>
+
+			<p>Primeiro, discutiremos uma solução para um problema mais simples:
+			Consideraremos apenas arrays nas quais os elementos são vinculados por $0 \le a[i] \lt n$.
+			E nós apenas queremos encontrar o $k$-ésimo menor elemento em algum prefixo da array $a$.</p>
+
+			<p>Usaremos uma Árvore de segmentos que conta todos os números que aparecem, i.e. na Árvore de segmentos, armazenaremos o histórico da array.
+			Portanto, os vértices das folhas armazenam com que frequência os valores $0$, $1$, $\dots$, $n-1$ aparecerão na array, e os outros vértices armazenam quantos números em algum intervalo estão na array.
+			Em outras palavras, criamos uma Árvore de segmentos regular com soma de queries sobre o histograma da array.
+			Ao invés de criar $n$ Árvores Segmentárias para cada possível prefixo, criaremos uma persistente, que conterá as mesmas informações.
+			Começaremos com uma Árvore de segmentos vazia (todas as contagens serão $0$), e adcionar os elementos $a[0]$, $a[1]$, $\dots$, $a[n-1]$ um depois do outro.
+			Para cada modificação, receberemos um novo vértice raiz, vamos chamar $root_i$ a raiz da árvore de segmentos após inserir o primeiros $i$ elementos da array $a$.
+			A Árvore de segmentos enraizada em $root_i$ conterá o histograma do perfixo $a[0 \dots i-1]$.
+			Usando esta árvore de segmentos, podemos encontrar em  tempo $O(\log n)$ a posição do $k$-ésimo elemento usando a mesma técnica discutida em "Contando o número de zeros, procurando pelo $k$-ésimo zero".</p>
+
+			<p>Agora, a versão não restrita do problema.</p>
+
+			<p>Primeiro para a restrição na array:
+			Na verdade, podemos transformar qualquer array em uma array por compressão de índice.
+			O menor elemento da array recebe o valor 0, o segundo menor o valor 1 e assim por diante.
+			É fácil gerar tabelas de pesquisa (e.g. usando $\text{map}$), que convertem um valor em seu índice e vice-versa em tempo $O(\log n)$.</p>
+
+			<p>Agora, para a restrição de consultas:
+            em vez de apenas executar essas consultas sobre um prefixo de $a$, nós queremos usar qualquer segmento arbitrário $a[l \dots r]$.
+			Aqui precisamos de uma árvore de segmentos que represente o histograma dos elementos no intervalo $a[l \dots r]$. 
+			Tente notar que essa árvore de segmentos é apenas a diferença entre a árvore de segmentos enraizada em $root_{r+1}$ e a Árvore de Segmentos enraizada em $root_l$, i.e. todo vértice em $[l \dots r]$ pode ser calculado com o vértice da raiz $root_{r+1}$ menos o vértice da árvore enraizada em $root_l$.
+			Na implementação da função $\text{get_kth}$ isso pode ser feito passando dois pointers de vértice e calculando a contagem / soma do segmento atual como diferença das duas contagens / somas dos vértices.</p>
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>                   
