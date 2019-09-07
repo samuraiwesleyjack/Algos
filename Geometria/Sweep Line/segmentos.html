@@ -130,7 +130,7 @@ bool operator&lt;(const seg&amp; a, const seg&amp; b)      //overflow de operado
     return a.get_y(x) &lt; b.get_y(x) - EPS;
 }
 
-struct event {
+struct event {      //estrutura dos eventos      
     double x;
     int tp, id;
 
@@ -144,8 +144,8 @@ struct event {
     }
 };
 
-set&lt;seg&gt; s;
-vector&lt;set&lt;seg&gt;::iterator&gt; where;
+set&lt;seg&gt; s;      //fila de segmentos
+vector&lt;set&lt;seg&gt;::iterator&gt; where;  //iteradores com a posição de cada segmento na fila 
 
 set&lt;seg&gt;::iterator prev(set&lt;seg&gt;::iterator it) {
     return it == s.begin() ? s.end() : --it;
