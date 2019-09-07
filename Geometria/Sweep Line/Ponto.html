@@ -191,7 +191,7 @@ vector&lt;Edge*&gt; sweepline(vector&lt;Edge*&gt; planar, vector&lt;pt&gt; queri
         }
     }
 
-    // perform sweep line algorithm
+    // executar o algoritmo sweep line
     vector&lt;Edge*&gt; ans(queries.size(), nullptr);
     for (int x = 0; x &lt; cid; x++) {
         sort(events[x].begin(), events[x].end());
