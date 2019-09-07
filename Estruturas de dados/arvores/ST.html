@@ -102,7 +102,7 @@
 			<p>Novamente a array $a = [1, 3, -2, 8, -7]$ é usada, e aqui queremos calcular a soma $\sum_{i=2}^4 a[i]$ ou $a[2] + a[3] + a[4]$.
             Os vértices coloridos serão visitados e usaremos os valores pré-computados dos vértices verdes.
             Isso nos dá o resultado $-2 + 1 = -1$.</p>
-			<p><img src="img/ST-Update.png" alt="&quot;Sum Segment Tree Query&quot;" /></p>
+			<p><img src="img/sum-segment-tree-color-sum.png" alt="&quot;Sum Segment Tree Query&quot;" /></p>
 			<p>Por que a complexidade desse algoritmo é $O(\log n)$?
             Para mostrar essa complexidade, examinamos cada nível da árvore. 
             Acontece que, para cada nível nós visitamos não mais que quatro vértices.
@@ -137,7 +137,7 @@
             Aqui fazemos a operação $a[2] = 3$.
             Os vértices verdes são os vértices que visitamos e atualizamos.</p>
 			<p>Temos que ir "quebrando" a soma dos intervalos até acharmos a soma do elemento individual, que portanto é seu valor.</p>
-			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sum-segment-tree-update.png" alt="&quot;Sum Segment Tree Update&quot;" /></p>
+			<p><img src="img/ST-Update.png" alt="&quot;Sum Segment Tree Update&quot;" /></p>
             
 			<h3>Implementação</h3>
 			
