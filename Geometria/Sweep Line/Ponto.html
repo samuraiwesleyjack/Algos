@@ -145,7 +145,7 @@ vector&lt;Edge*&gt; sweepline(vector&lt;Edge*&gt; planar, vector&lt;pt&gt; queri
 {
     using pt_type = decltype(pt::x);
 
-    // collect all x-coordinates
+    // coletando todas as coordenadas x
     auto s =
         set&lt;pt_type, std::function&lt;bool(const pt_type&amp;, const pt_type&amp;)&gt;&gt;(lt);
     for (pt p : queries)
@@ -155,7 +155,7 @@ vector&lt;Edge*&gt; sweepline(vector&lt;Edge*&gt; planar, vector&lt;pt&gt; queri
         s.insert(e-&gt;r.x);
     }
 
-    // map all x-coordinates to ids
+    // mapear todas as coordenadas x para ids
     int cid = 0;
     auto id =
         map&lt;pt_type, int, std::function&lt;bool(const pt_type&amp;, const pt_type&amp;)&gt;&gt;(
@@ -163,7 +163,7 @@ vector&lt;Edge*&gt; sweepline(vector&lt;Edge*&gt; planar, vector&lt;pt&gt; queri
     for (auto x : s)
         id[x] = cid++;
 
-    // create events
+    // criando eventos
     auto t = set&lt;Edge*, decltype(*edge_cmp)&gt;(edge_cmp);
     auto vert_cmp = [](const pair&lt;pt_type, int&gt;&amp; l,
                        const pair&lt;pt_type, int&gt;&amp; r) {
