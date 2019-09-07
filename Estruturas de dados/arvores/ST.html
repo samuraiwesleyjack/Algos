@@ -58,7 +58,7 @@
             a raiz dessa árvore é o segmento $a[0 \dots n-1]$, e cada vértice (exceto as folhas) tem exatamente dois vértices filhos. 
             Essa é a idéia da estrutura de dados <strong>"Árvore de Segmentos"</strong>.</p>
 			<p>Representação de uma árvore segmentária sobre a array $a = [1, 3, -2, 8, -7]$:</p>
-			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sum-segment-tree.png" alt="&quot;Sum Segment Tree&quot;" /></p>
+			<p><img src="./img/sum-segment-tree.png" alt="&quot;Sum Segment Tree&quot;" /></p>
 			<p>Pela descrição da estrutura de dados, podemos concluir que uma Árvore Segmentária apenas requer um número linear de vértices. 
             O primeiro nível da árvore contém apenas um único nó (a raiz), o segundo nível irá conter 2 vértices, no terceiro irá conter 4, até que o número de vértices alcance $n$. 
             Portanto o número de vértices no pior caso pode ser estimado pela soma $1 + 2 + 4 + \dots + 2^{\lceil\log_2 n\rceil} = 2^{\lceil\log_2 n\rceil + 1} \lt 4n$.</p>
