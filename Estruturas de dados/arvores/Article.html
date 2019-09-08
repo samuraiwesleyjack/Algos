@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>DSU - Programação Competitiva Algoritmos </title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="stylee.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Disjoint Set Union ou União Busca</h1>
+			
+			<p>Este artigo discute a estrutura de dados <strong>"Disjoint Set Union"</strong> ou <strong>DSU</strong>.
+            Também chamado de <strong>União Busca</strong> por causa de suas duas principais operações.</p>
+			<p>Essa estrutura de dados fornece os seguintes recursos.
+			São dados vários elementos, cada um deles é um conjunto separado.
+			Uma DSU terá uma operação para combinar dois conjuntos, e será capaz de dizer em qual conjunto um elemento específico está.
+			A versão clássica também introduz uma terceira operação, ele pode criar um conjunto a partir de um novo elemento.</p>
+
+			<p>Portanto, a interface básica dessa estrutura de dados consiste em apenas três operações:</p>
+
+			<ul>
+			<li><code>make_set(v)</code> - cria um novo conjunto que consiste no novo elemento <code>v</code></li>
+			<li><code>union_sets(a, b)</code> - mescla os dois conjuntos especificados (o conjunto no qual o elemento <code>a</code> está localizado, e o conjunto em que o elemento <code>b</code> está localizado)</li>
+			<li><code>find_set(v)</code> - retorna o representante (também chamado líder) do conjunto que contém o elemento <code>v</code>.
+			Esse representante é um elemento de seu set correspondente.
+			Ele é selecionado em cada conjunto pela própria estrutura de dados (e pode mudar com o tempo, ou seja, após <code>union_sets</code> é chamada).
+			Este representante pode ser usado para verificar se dois elementos fazem parte do mesmo conjunto ou não.
+			<code>a</code> e <code>b</code> estão exatamente no mesmo conjunto, se <code>find_set(a) == find_set(b)</code>.
+			Caso contrário, eles estão em conjuntos diferentes.</li>
+			</ul>
+
+			<p>Conforme descrito em mais detalhes posteriormente, a estrutura de dados permite que você execute cada uma dessas operações em quase tempo constante $O(1)$ em média.</p>
+
+			<p>Também em uma das subseções, é explicada uma estrutura alternativa de um DSU, que alcança uma complexidade média mais lenta de $O(\log n)$, mas pode ser mais poderoso que a estrutura DSU comum.</p>
+
+			<h2>Construa uma estrutura de dados eficiente</h2>
+
+			<p>Armazenaremos os conjuntos na forma de <strong>árvores</strong>: cada árvore corresponderá a um conjunto.
+			E a raiz da árvore será o representante / líder do conjunto.</p>
+
+			<p>Na imagem a seguir, a representação dessas árvores.</p>
+
+			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/DSU_example.png" alt="Example-image of the set representation with trees" /></p>
+
+			<p>No início, cada elemento começa como um único conjunto, portanto, cada vértice é sua própria árvore.
+			Em seguida, combinamos o conjunto que contém o elemento 1 e o conjunto que contém o elemento 2.
+			Em seguida, combinamos o conjunto que contém o elemento 3 e o conjunto que contém o elemento 4.
+			E na última etapa, podemos mesclar os conjuntos que contêm os elementos 1 e 3. </p>
+
+			<p>Para a implementação, teremos que manter uma array <code>parent</code> que armazena uma referência ao seu ancestral imediato na árvore.</p>
+
+			<h3>Implementação de Bruta Força</h3>
+
+			<p>Já podemos escrever a primeira implementação da estrutura de dados Disjoint Set Union.
+			No início, será bastante ineficiente, mas mais tarde podemos melhorá-la usando duas otimizações, para que leve um tempo quase constante para cada chamada de função.</p>
+
+			<p>Todas as informações sobre os conjuntos de elementos serão mantidas em um array <code>parent</code>.</p>
+
+			<p>Para criar um novo conjunto (operação <code>make_set(v)</code>), simplesmente criamos uma árvore com raiz no vértice <code>v</code>, significando que é seu próprio ancestral.</p>
+
+			<p>Para combinar dois conjuntos (operação <code>union_sets(a, b)</code>), primeiro encontramos o representante do conjunto em que <code>a</code> está localizado, e o representante do conjunto em que <code>b</code> está localizado.
+			Se os representantes são idênticos, os conjuntos já estão mesclados.
+			Caso contrário, podemos simplesmente especificar que um dos representantes é o pai do outro representante - combinando assim as duas árvores.</p>
+
+			<p>Finalmente, a implementação da função para achar o líder (operação <code>find_set(v)</code>):
+			simplesmente escalamos os ancestrais do vértice <code>v</code> até chegarmos à raiz, i.e. um vértice tal que a referência ao ancestral seja ele mesmo.
+			Esta operação é implementada recursivamente.</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = v;
+}
+
+int find_set(int v) {
+    if (v == parent[v])
+        return v;
+    return find_set(parent[v]);
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b)
+        parent[b] = a;
+}
+</code></pre>
+
+			<p>No entanto, esta implementação é ineficiente.
+            É fácil construir um exemplo, para que as árvores se degenerem em longas cadeias.
+			Nesse caso, cada chamada de <code>find_set(v)</code> pode levar tempo $O(n)$.</p>
+
+			<p>Isso está longe da complexidade que queremos ter (tempo quase constante).
+			Portanto, consideraremos duas otimizações que permitirão acelerar significativamente o trabalho.</p>
+
+			<h3>Compressão do caminho</h3>
+
+			<p>Essa otimização foi projetada para acelerar o <code>find_set</code>.</p>
+
+			<p>Se chamarmos <code>find_set(v)</code> para algum vértice <code>v</code>, na verdade, encontramos o representante(líder) <code>p</code> para todos os vértices que visitamos no caminho entre <code>v</code> e o líder <code>p</code>.
+			O truque é tornar os caminhos para todos esses nós mais curtos, definindo o pai de cada vértice visitado diretamente como <code>p</code>.</p>
+
+			<p>Você pode ver a operação na imagem a seguir.
+			À esquerda, há uma árvore e, no lado direito, há a árvore compactada depois de chamar <code>find_set(7)</code>, que reduz os caminhos para os nós visitados 7, 5, 3 e 2. Achando assim um "parente absoluto".</p>
+
+			<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/DSU_path_compression.png" alt="Path compression of call <code>find_set(7)</code>" /></p>
+
+			<p>A nova implementação de <code>find_set</code> é a seguinte:</p>
+
+<pre><code class="cpp">int find_set(int v) {
+    if (v == parent[v])
+        return v;
+    return parent[v] = find_set(parent[v]);
+}
+</code></pre>
+
+			<p>A implementação simples faz o que foi planejado:
+			encontre primeiro o representante do conjunto (vértice raiz), e no processo os nós visitados são anexados diretamente ao representante.</p>
+
+			<p>Essa simples modificação da operação já atinge a complexidade do tempo $O(\log n)$ por chamada, em média.
+			Há uma segunda modificação, que o tornará ainda mais rápido.</p>
+			
+			<h3>União por tamanho / rank</h3>
+
+			<p>Nesta otimização, mudaremos a operação do <code>union_set</code>. 
+			Para ser mais preciso, mudaremos qual árvore é anexada à outra.
+            Na implementação nativa, a segunda árvore sempre era anexada à primeira.
+			Na prática, isso pode levar a árvores contendo cadeias de comprimento $O(n)$.
+			Com essa otimização, evitaremos isso escolhendo com muito cuidado qual árvore será anexada.</p>
+
+			<p>Existem muitas heurísticas(ideias) possíveis que podem ser usadas.
+			Mais populares são as duas abordagens a seguir:
+			Na primeira abordagem, usamos o tamanho das árvores como classificação, e na segunda usamos a profundidade da árvore (mais precisamente, o upper_bound da profundidade da árvore, porque a profundidade será menor ao aplicar a compactação de caminho).</p>
+
+			<p>Em ambas as abordagens, a essência da otimização é a mesma: anexamos a árvore com a classificação mais baixa àquela com a maior.</p>
+
+			<p>Implementação "union-by-size":</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = v;
+    size[v] = 1;
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (size[a] &lt; size[b])
+            swap(a, b);
+        parent[b] = a;
+        size[a] += size[b];
+    }
+}
+</code></pre>
+
+            <p>E aqui está a implementação da união por rank com base na profundidade das árvores:</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = v;
+    rank[v] = 0;
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (rank[a] &lt; rank[b])
+            swap(a, b);
+        parent[b] = a;
+        if (rank[a] == rank[b])
+            rank[a]++;
+    }
+}
+</code></pre>
+
+			<p>Ambas as otimizações são equivalentes em termos de complexidade de tempo e espaço. Portanto, na prática, você pode usar qualquer um deles.</p>
+
+			<h3>Complexidade do tempo</h3>
+
+			<p>Como mencionado anteriormente, se combinarmos as duas otimizações - compactação do caminho com união por tamanho / rank - chegaremos ao tempo quase constante.
+			Acontece que a complexidade do tempo amortizado final é $O(\alpha(n))$, onde $\alpha(n)$ é a função inversa de Ackermann, que cresce muito lentamente.
+			De fato, cresce tão lentamente que não excede $4$ para todos razoáveis $n$ (aproximadamente $n &lt; 10^{600}$).</p>
+
+			<p>Complexidade amortizada é o tempo total por operação, avaliado em uma sequência de várias operações.
+			A idéia é garantir o tempo total de toda a sequência, enquanto permite que operações únicas sejam muito mais lentas que o tempo amortizado.
+			E.g. no nosso caso, uma única chamada de função pode demorar $O(\log n)$ no pior dos casos, mas se fizermos $m$ chamadas consecutivas, terminaremos com um tempo médio de $O(\alpha(n))$.</p>
+
+			<p>Também não apresentaremos uma prova para essa complexidade de tempo, pois é bastante longa e complicada.</p>
+
+			<p>Além disso, vale ressaltar que o DSU com união por tamanho / rank, mas sem compressão de caminho, funciona em tempo $O(\log n)$ por query.</p>
+
+			<h3>Vinculação por index / coin-flip linking</h3>
+
+			<p>União por rank e união por tamanho exigem que você armazene dados adicionais para cada conjunto mantenha esses valores durante cada operação de união.
+			Também existe um algoritmo aleatório, que simplifica um pouco a operação de união: vinculação por index.</p>
+
+			<p>Atribuímos a cada conjunto um valor aleatório chamado index, e anexamos o conjunto com o menor index para aquele com o maior.
+			É provável que um conjunto maior tenha maior index do que o conjunto menor, portanto, esta operação está intimamente relacionada à união por tamanho.
+			De fato, pode-se provar que esta operação possui a mesma complexidade de tempo que a união por tamanho.
+			No entanto, na prática, é um pouco mais lento que a união por tamanho.</p>
+
+			<p>Você pode encontrar uma prova da complexidade e ainda mais técnicas de união <a href="http://www.cis.upenn.edu/~sanjeev/papers/soda14_disjoint_set_union.pdf">aqui(conteúdo em inglês)</a>.</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = v;
+    index[v] = rand();
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (index[a] &lt; index[b])
+            swap(a, b);
+        parent[b] = a;
+    }
+}
+</code></pre>
+
+			<p>É um equívoco comum que apenas o lançamento de uma moeda, para decidir qual conjunto atribuímos ao outro, tenha a mesma complexidade.
+			No entanto, isso não é verdade.
+			O artigo vinculado acima cita que coin-flip linking combinado com compressão de caminhos tem complexidade $\Omega\left(n \frac{\log n}{\log \log n}\right)$.
+			E nos <a href="https://pt.wikipedia.org/wiki/Benchmark_(computa%C3%A7%C3%A3o)">benchmarks</a>, o desempenho é muito pior que a união por tamanho / rank ou a vinculação por index(índice).</p>
+
+<pre><code class="cpp">void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (rand() % 2)
+            swap(a, b);
+        parent[b] = a;
+    }
+}
+</code></pre>
+
+			<h2>Aplicações e várias melhorias</h2>
+
+			<p>Nesta seção, consideramos várias aplicações da estrutura de dados, além de algumas melhorias na estrutura de dados.</p>
+
+			<h3>Componentes conectados em um grafo</h3>
+
+			<p>Formalmente, o problema é definido da seguinte maneira:
+            Inicialmente, temos um grafo vazio.
+			Temos que adicionar vértices e arestas não direcionadas e responder queries como $(a, b)$ - "os vértices $a$ e $b$ estão no mesmo componente conectado do grafo?"</p>
+
+			<p>Aqui, podemos aplicar diretamente a estrutura de dados e obter uma solução que lida com a adição de um vértice ou uma aresta e uma query em tempo quase constante, em média.</p>
+
+			<p>Esta aplicação é muito importante, porque quase o mesmo problema aparece no Algoritmo de Kruskal para encontrar uma árvore geradora mínima.
+			Usando o DSU, podemos melhorar a complexidade $ O (m \ log n + n ^ 2) $ para $ O (m \ log n) $.</p>
+
+			<h3>Procurar componentes conectados em uma imagem</h3>
+
+			<p>Uma das aplicações do DSU é a seguinte tarefa:
+            existe uma imagem de $n \times m$ pixels.
+			Originalmente, todos são brancos, mas depois alguns pixels pretos são desenhados.
+			Você deseja determinar o tamanho de cada componente conectado branco na imagem final.</p>
+
+			<p>Para a solução, simplesmente iteramos sobre todos os pixels brancos da imagem, para cada célula iterar sobre seus quatro vizinhos(<strong>como um grid</strong>), e se o vizinho é branco chamar <code>union_sets</code>.
+			Assim, teremos uma DSU com $n m$ nós correspondente aos pixels da imagem.
+			<strong>As árvores resultantes no DSU são os componentes conectados desejados</strong>.</p>
+
+			<p>O problema também pode ser resolvido por <a href="./grafos/DFS.html">DFS</a> ou <a href="./grafos/BFS.html">BFS</a>, mas o método descrito aqui tem uma vantagem:
+			ele pode processar a matriz linha por linha (i.e. para processar uma linha, precisamos apenas da linha anterior e da atual, e precisamos apenas de um DSU criado para os elementos de uma linha) em memória $O(\min(n, m))$.</p>
+
+			<h3>Armazene informações adicionais para cada conjunto</h3>
+
+			<p>O DSU permite que você armazene facilmente informações adicionais nos conjuntos.</p>
+
+			<p>Um exemplo simples é o tamanho dos conjuntos:
+            o armazenamento dos tamanhos já foi descrito na seção Union by size(união por tamanho) (as informações foram armazenadas pelo atual representante/líder do conjunto).</p>
+
+			<p>Da mesma maneira - armazenando-o nos nós representativos - você também pode armazenar qualquer outra informação sobre os conjuntos.</p>
+
+			<h3>Compressão de saltos ao longo de um segmento / Colorindo subarrays </h3>
+
+			<p>Uma aplicação comum do DSU é a seguinte:
+			Há um conjunto de vértices e cada vértice possui uma aresta de saída para outro vértice.
+			Com o DSU, você pode encontrar o ponto final, ao qual chegamos após seguir todas as arestas de um determinado ponto inicial, em tempo quase constante.</p>
+
+			<p>Um bom exemplo dessa aplicação é o <strong>problema de colorir subarrays</strong>.
+			Temos um segmento de tamanho $L$, cada elemento inicialmente tem cor 0.
+			Temos que colorir a subarray $[l; r]$ com a cor $c$ para cada caso de teste $(l, r, c)$.
+			No final, queremos encontrar a cor final de cada célula.
+			Assumimos que conhecemos todas as consultas antecipadamente, ou seja, a tarefa está <i>offline</i>.</p>
+
+			<p>Para a solução, podemos criar um DSU, que para cada célula armazena um link para a próxima célula não colorida.
+			Assim, inicialmente cada célula aponta para si mesma.
+			Depois de colorir um segmento, todas as células daqeuele segmento irão apontar para a célula depois daquele segmento.</p>
+
+			<p>Agora, para resolver esse problema, consideramos as queries <strong>em ordem reversa</strong>: da última para a primeira.
+			Dessa forma quando executarmos uma query, nós só temos que pintar exatamente as células não pintadas no subarray $[l; r]$.
+			Todas as outras células já contêm sua cor final.
+			Para iterar rapidamente sobre todas as células não pintadas, usamos o DSU.
+			Encontramos a célula mais extrema esquerda que ainda não foi pintada dentro de um segmento, colorimos ela e, com o pointer, passamos para a próxima célula vazia à direita.</p>
+
+			<p>Aqui podemos usar o DSU com compressão de caminho, mas não podemos usar união por rank / tamanho (porque é importante quem se torna o líder após a união).
+			Portanto, a complexidade será $O(\log n)$ por união (também é bastante rápido).</p>
+
+			<p>Implementação:</p>
+
+<pre><code class="cpp">for (int i = 0; i &lt;= L; i++) {
+    make_set(i);
+}
+
+for (int i = m-1; i &gt;= 0; i--) {
+    int l = query[i].l;
+    int r = query[i].r;
+    int c = query[i].c;
+    for (int v = find_set(l); v &lt;= r; v = find_set(v)) {
+        answer[v] = c;
+        parent[v] = v + 1;
+    }
+}
+</code></pre>
+
+			<p>Há uma otimização:
+			Podemos usar <strong>união por rank</strong>, se armazenarmos a próxima célula não colorida em uma array adicional <code>end[]</code>.
+			Então podemos mesclar dois conjuntos em um rankeado de acordo com a ideia do algoritmo, assim obtendo a solução em $O(\alpha(n))$.</p>
+
+			<h3>Suportar distância até o vértice representativo/líder</h3>
+
+			<p>Às vezes, em aplicações específicas do DSU, é necessário manter a distância entre um vértice e o representante de seu conjunto. (i.e. o comprimento do caminho na árvore do nó atual até a raiz da árvore).</p>
+
+			<p>Se não usarmos a compressão de caminho, a distância será o número de chamadas recursivas.
+            Mas isso será ineficiente.</p>
+
+			<p>É possível executar uma compressão de caminhos, se nós armazenarmos a <strong>distância até o parente</strong> como um dado adicional para cada vértice.</p>
+
+			<p>Na implementação, é conveniente usar uma array de pares para <code>parent[]</code> e a função <code>find_set</code> agora retornar dois números: o líder do conjunto, e a distância até ele.</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = make_pair(v, 0);
+    rank[v] = 0;
+}
+
+pair&lt;int, int&gt; find_set(int v) {
+    if (v != parent[v].first) {
+        int len = parent[v].second;
+        parent[v] = find_set(parent[v].first);
+        parent[v].second += len;
+    }
+    return parent[v];
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a).first;
+    b = find_set(b).first;
+    if (a != b) {
+        if (rank[a] &lt; rank[b])
+            swap(a, b);
+        parent[b] = make_pair(a, 1);
+        if (rank[a] == rank[b])
+            rank[a]++;
+    }
+}
+</code></pre>
+
+			<h3>Paridade do tamanho dos caminhos / Checar bipartividade(grafos bipartidos) </h3>
+
+			<p>Da mesma forma que calculamos o comprimento do caminho até o líder, é possível manter a paridade do comprimento do caminho antes dele. Há várias raíze / representantes / líderes na DSU.</p>
+
+			<p>O requisito incomum de armazenar a paridade do caminho surge na seguinte tarefa:
+			inicialmente nos é dado um grafo vazio, nele pode ser adicionado arestas e temos que responder queries da forma "este componente conectado contém esse vértice <strong>bipartido</strong>?".</p>
+
+			<p>Para resolver esse problema, criamos uma DSU para armazenar os componentes e armazenar a paridade do caminho até o representante/líder de cada vértice.
+			Assim, podemos verificar rapidamente se a adição de uma aresta leva a uma violação da bipartividade ou não:
+			se as extremidades da aresta estiverem no mesmo componente conectado e tiverem o mesmo comprimento de paridade para o líder, adicionar essa aresta produzirá um ciclo de comprimento ímpar, e o componente irá perder sua propriedade de bipartividade.</p>
+
+			<p>A dificuldade que enfrentamos é calcular a paridade no método <code>union_find</code>.</p>
+
+			<p>Se adicionarmos uma aresta $ (a, b) $ que conecte dois componentes conectados em um, então quando você anexa uma árvore a outra, precisamos ajustar a paridade.</p>
+
+			<p>Vamos derivar uma fórmula, que calcula a paridade emitida para o líder do conjunto que será anexado a outro conjunto.
+            Seja $ x $ a paridade do comprimento do caminho do vértice $ a $ até o líder $ A $ e $ y $ como a paridade do comprimento do caminho do vértice $ b $ até o líder $ B $ e $ t $ a paridade desejada que devemos atribuir a $ B $ após a mesclagem.
+			O caminho contém as três partes:
+            de $ B $ a $ b $, de $ b $ a $ a $, que é conectado por uma borda e, portanto, tem paridade de $ 1 $ e de $ a $ a $ A $.
+			Portanto, temos a fórmula ($ \oplus $ indica a operação XOR):</p>
+
+			<p>$$t = x \oplus y \oplus 1$$</p>
+
+			<p>Portanto, independentemente de quantas uniões realizamos, a paridade das arestas é transportada de um líder para outro.</p>
+
+			<p>Implementação do DSU que suporta paridade. Como na seção anterior, usamos um par para armazenar o ancestral e a paridade. Além disso, para cada conjunto, armazenamos no array <code> bipartite [] </code>, se ainda é bipartido ou não.</p>
+
+<pre><code class="cpp">void make_set(int v) {
+    parent[v] = make_pair(v, 0);
+    rank[v] = 0;
+    bipartite[v] = true;
+}
+
+pair&lt;int, int&gt; find_set(int v) {
+    if (v != parent[v].first) {
+        int parity = parent[v].second;
+        parent[v] = find_set(parent[v].first);
+        parent[v].second ^= parity;
+    }
+    return parent[v];
+}
+
+void add_edge(int a, int b) {
+    pair&lt;int, int&gt; pa = find_set(a);
+    a = pa.first;
+    int x = pa.second;
+
+    pair&lt;int, int&gt; pb = find_set(b);
+    b = pb.first;
+    int y = pb.second;
+
+    if (a == b) {
+        if (x == y)
+            bipartite[a] = false;
+    } else {
+        if (rank[a] &lt; rank[b])
+            swap (a, b);
+        parent[b] = make_pair(a, x^y^1);
+        bipartite[a] &amp;= bipartite[b];
+        if (rank[a] == rank[b])
+            ++rank[a];
+    }
+}
+
+bool is_bipartite(int v) {
+    return bipartite[find_set(v).first];
+}
+</code></pre>
+
+			<h3 id="arpa">RMQ (query de range mínimo) em $O(\alpha(n))$ em média / truque de Arpa</h3>
+
+			<p>Fornecida uma array <code>a[]</code> precisamos calcular alguns mínimos em segmentos da array.</p>
+
+			<p>A idéia para resolver esse problema com o DSU é a seguinte:
+			Iremos iterar sobre a array e quando estivermos no <code>i</code>ésimo elemento iremos responder todas as queries <code>(L, R)</code> com <code>R == i</code>.
+			Para fazer isso com eficiência, manteremos um DSU usando os primeiros <code>i</code> elementos com a seguinte estrutura: o pai de um elemento é o próximo elemento menor à direita dele.
+			Usando essa estrutura a resposta dessa query será <code>a[find_set(L)]</code>, o menor número à direita de <code>L</code>.</p>
+
+			<p>Essa ideia apenas funciona offline, i.e. se soubermos dos casos de teste(queries) antecipadamente.</p>
+
+			<p>Podemos aplicar compressão de caminhos.
+			Também podemos usar união por rank, se armazenarmos o líder atual em uma array separada.</p>
+
+<pre><code class="cpp">struct Query {
+    int L, R, idx;
+};
+
+vector&lt;int&gt; answer;
+vector&lt;vector&lt;Query&gt;&gt; container;
+</code></pre>
+
+<p><code>container[i]</code> contém todos os casos(queries) com <code>R == i</code>.</p>
+
+<pre><code class="cpp">stack&lt;int&gt; s;
+for (int i = 0; i &lt; n; i++) {
+    while (!s.empty() &amp;&amp; a[s.top()] &gt; a[i]) {
+        parent[s.top()] = i;
+        s.pop();
+    }
+    s.push(i);
+    for (Query q : container[i]) {
+        answer[q.idx] = a[find_set(q.L)];
+    }
+}
+</code></pre>
+
+			<p>Atualmente, esse algoritmo é conhecido como truque de Arpa.
+			É nomeado após AmirReza Poorakhavan, que descobriu e popularizou independentemente essa técnica.
+			Embora esse algoritmo já existisse.</p>
+
+			<h3>LCA (Menor Ancestral Comum em uma Árvore) em $O(\alpha(n))$ em média</h3>
+
+			<p>O algoritmo para encontrar o LCA é discutido em <a href="https://cp-algorithms.com/graph/lca_tarjan.html">Menor Ancestral Comum - algoritmo de Tarjan</a>.
+			Este algoritmo compara-se favorável com outros algoritmos para encontrar o LCA devido à sua simplicidade (especialmente comparado à um algoritmo otimizado como <a href="https://cp-algorithms.com/graph/lca_farachcoltonbender.html">Farach-Colton and Bender</a>).</p>
+
+			<h3>Armazenando o DSU explicitamente em uma lista de conjuntos / Aplicações dessa ideia juntando várias estruturas de dados</h3>
+
+			<p>Uma das formas alternativas de armazenar o DSU é a preservação de cada conjunto na forma de um <strong>lista explícita de armazenamento de seus elementos</strong>.
+			Cada elemento da lista armazena uma referência ao seu representativo/líder.</p>
+
+			<p>À primeira vista, isso parece uma estrutura de dados ineficiente:
+			combinando dois conjuntos, teremos que adicionar uma lista ao final de outra e precisar atualizar a liderança em todos os elementos de uma das listas.</p>
+
+			<p>No entanto, o uso de uma outra ideia (similar com a união por tamanho) pode reduzir significativamente a complexidade :
+			$O(m + n \log n)$ para executar $m$ queries nos $n$ elementos.</p>
+
+			<p>A ideia é que sempre iremos <strong>adicione o menor dos dois conjuntos ao conjunto maior</strong>.
+			A adição de um conjunto a outro pode ser implementada na função <code>union_sets</code> e levará um tempo proporcional ao tamanho do conjunto adicionado.
+			And the search for the leader in <code>find_set</code> will take $O(1)$ with this method of storing.</p>
+
+			<p>Vamos provar a <strong>complexidade do tempo</strong> $O(m + n \log n)$ para a execução de $m$ queries.
+			Vamos assumir um elemento arbitrário $x$ e contar quantas vezes ele foi afetado na operação de mesclagem(junção) <code>union_sets</code>.
+			Quando o elemento $x$ é afetado pela primeira vez, o tamanho do novo conjunto será pelo menos $2$.
+			Quando é afetado pela segunda vez, o conjunto resultante terá um tamanho de pelo menos $4$, porque o conjunto menor é adicionado ao maior.
+			E assim por diante.
+			Isso significa, que $x$ só pode ser movido no máximo $\log n$ operações de junção(união).
+			Assim, a soma de todos os vértices dá $O(n \log n)$ + $O(1)$ para cada chamada.</p>
+
+			<p>Implementação:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; listt[MAXN];
+int parent[MAXN];
+
+void make_set(int v) {
+    listt[v] = vector&lt;int&gt;(1, v);
+    parent[v] = v;
+}
+
+int find_set(int v) {
+    return parent[v];
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (listt[a].size() &lt; listt[b].size())
+            swap(a, b);
+        while (!listt[b].empty()) {
+            int v = listt[b].back();
+            listt[b].pop_back();
+            parent[v] = a;
+            listt[a].push_back (v);
+        }
+    }
+}
+</code></pre>
+
+			<p>Essa ideia de adicionar a parte menor a uma parte maior também pode ser usada em muitas soluções que nada têm a ver com DSU.</p>
+
+			<p>Por exemplo, considere o problema:
+			nos é dada uma árvore, cada folha tem um número atribuído (um mesmo número pode aparecer várias vezes em folhas diferentes).
+			Queremos calcular o número de diferentes números na subárvore para cada nó da árvore.</p>
+
+			<p>Aplicando a mesma ideia para esse problema:
+			podemos implementar uma <a href="./grafos/DFS.html">DFS</a>, que retornará um pointer para um conjunto de números inteiros - uma lista de números naquela subárvore.
+			Portanto, para conseguir a resposta para o nó atual (a não ser que seja uma folha), chamamos a DFS para cada criança daquele nó, e juntamos(união) os conjuntos recebidos.
+			O tamanho do conjunto resultante será a resposta para o nó atual.
+			Para combinar com eficiência vários conjuntos, apenas aplicamos a receita acima descrita:
+			juntamos os conjuntos simplesmente adicionando os menores aos maiores.
+			No final temos uma solução $O(n \log^2 n)$, porque um número será adicionado apenas a um conjunto no máximo $O(\log n)$ vezes.</p>
+
+			<h3>Armazenando o DSU e mantendo uma estrutura em árvore / Econtrando pontes online em $O(\alpha(n))$ (média)</h3>
+
+			<p>Uma das aplicações mais poderosas do DSU é que ele permite armazenar ambas <strong>árvores comprimidas(compressas) e não comprimidas</strong>.
+			A forma compressa pode ser usada para unir árvores e para verificar se dois vértices estão na mesma árvore, e a forma não compressa pode ser aplicada - por exemplo - para procurar caminhos entre dois vértices, ou outras <strong>travessias</strong> da estrutura da árvore.</p>
+
+			<p>Na implementação, isso significa que, além da <strong>array ancestral compressa</strong> <code>parent[]</code> precisaremos manter a array de ancestrais não compressos <code>real_parent[]</code>.
+			É importante que mantendo essa array adicional não irá piorar a complexidade:
+			mudanças só ocorrem quando unimos duas árvores, e apenas em um elemento.</p>
+
+			<p>Por outro lado, quando aplicados na prática, geralmente precisamos conectar árvores usando uma aresta especificada diferente daquela usando os dois nós raiz.
+			Isso significa que não temos outra escolha senão mudar a raiz uma das árvores (fazer das extremidades da aresta a nova raiz da árvore).</p>
+
+			<p>À primeira vista, parece que esse novo enraizamento é muito caro e piora bastante a complexidade do tempo.
+			De fato, para enraizar uma árvore no vértice $v$ devemos ir do vértice para a raiz antiga e mudar de direção <code>parent[]</code> e <code>real_parent[]</code> para todos os nós nesse caminho.</p>
+
+			<p>No entanto, na realidade, não é tão ruim, podemos simplesmente mudar a raiz da menor das duas árvores, semelhante às idéias nas seções anteriores, e obter $O(\log n)$ em média.</p>
+
+			<p>Mais detalhes (incluindo a prova da complexidade do tempo) podem ser encontrados em <a href="https://cp-algorithms.com/graph/bridge-searching-online.html">"Encontrando Pontes"</a>.</p>
+
+			<h2>Retrospectiva Histórica</h2>
+
+			<p>A estrutura de dados DSU é conhecida há muito tempo.</p>
+
+			<p>Essa maneira de armazenar essa estrutura no formato de uma <strong>floresta de árvores</strong> aparentemente, foi descrito pela primeira vez por Galler e Fisher em 1964 (Galler, Fisher, "Um algoritmo de equivalência aprimorado), no entanto, a análise completa da complexidade do tempo foi conduzida muito mais tarde.</p>
+
+			<p>As otimizações "compressão de caminhos" e "União por rank" foram desenvolvidas por McIlroy e Morris, e independente deles, também por Tritter.</p>
+
+			<p>Hopcroft e Ullman mostraram em 1973 a complexidade do tempo $O(\log^\star n)$ (Hopcroft, Ullman "Set-merging algorithms") - aqui $\log^\star$ é o <strong>logaritmo iterado</strong> (essa é uma função de crescimento lento, mas ainda não tão lenta quanto a função inversa de Ackermann).</p>
+
+			<p>Pela primeira vez a avaliação de $O(\alpha(n))$ foi mostrada em 1975 (Tarjan "Efficiency of a Good But Not Linear Set Union Algorithm").
+			Mais tarde em 1985 ele, junto com Leeuwen, publicaram várias análises de complexidade e ideias de comprimir o caminho (Tarjan, Leeuwen "Worst-case Analysis of Set Union Algorithms").</p>
+
+			<p>Finalmente em 1989 Fredman e Sachs 
+            provou que no modelo de computação adotado <strong>qualquer</strong> algoritmo para o problema do disjoint set union tem que trabalhar em tempo, pelo menos $O(\alpha(n))$  (Fredman, Saks, "The cell probe complexity of dynamic data structures").</p>
+
+			<p>No entanto, deve-se notar também que existem vários artigos <strong>disputando</strong> avaliação provisória e afirmando que o DSU com compressão de caminhos e União por rank é executado em $O(1)$ em média (Zhang "The Union-Find Problem Is Linear", Wu, Otoo "A Simpler Proof of the Average Case Complexity of Union-Find with Path Compression").</p>
+
+			<h2>Problemas</h2>
+
+			<ul>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1671">TIMUS - Anansi's Cobweb</a></li>
+			<li><a href="http://codeforces.com/contest/25/problem/D">Codeforces - Roads not only in Berland</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1003">TIMUS - Parity</a></li>
+			<li><a href="http://www.spoj.com/problems/CHAIN/">SPOJ - Strange Food Chain</a></li>
+			<li><a href="https://www.spoj.com/problems/CLFLARR/">SPOJ - COLORFUL ARRAY</a></li>
+			</ul>
+
+
+			
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>                   
