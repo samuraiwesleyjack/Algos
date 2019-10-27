@@ -195,7 +195,7 @@ void dijkstra(int s){               //algoritmo de dijkstra
 	while(!pq.empty()){
 		auto f = pq.top();
 		pq.pop();
-		if(dis[f.second] < f.first) continue;    //dis[node] < dis[atual sendo checada] (para aprimoramento), se esse no ja tiver uma distancia menor, apenas continue 
+		if(dis[f.second] < f.first) continue;    //dis[node] < dis[atual sendo checada] (para aprimoramento),i.e se esse no ja tiver uma distancia menor  
 		for(auto e : v[f.second]){               //checar arestas 
 			if(f.first + e.second < dis[e.first]){   //e.second = c (peso da aresta) | e.first = próximo nó 
 				dis[e.first] = f.first + e.second;   //atualizando a distanca minima do próximo nó (aprimoramento)
