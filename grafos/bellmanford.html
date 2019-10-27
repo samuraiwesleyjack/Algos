@@ -1,0 +1,298 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<base href="https://cp-algorithms-brasil.com"/>
+		<title>Bellman-Ford Algoritmo</title>
+		
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+		</script>
+		<script type="text/javascript"
+			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		</script>
+		<link rel="stylesheet" href="styles.css"/>
+
+		<!-- highlightjs for code highlighting -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+		<!-- end highlightjs -->
+
+	</head>
+    <body>
+        <a href="http://cp-algorithms-brasil.com">
+					<button> < </button>
+	    </a>
+			
+	    <div id="container">
+    
+			<h1>Algoritmo de Bellman-Ford</h1>
+			
+			<p><strong>Caminho mais curto de uma fonte única com arestas de peso negativo</strong></p>
+
+			<p>Suponha que recebemos um grafo direcionado com pesos nas arestas, $G$ com $n$ vertices e $m$ arestas, e um específico vértice $v$. Você precisa encontrar o comprimento dos caminhos mais curtos do vértice $v$ para todos os outros vértices.</p>
+
+			<p>Ao contrário do algoritmo de Dijkstra, esse algoritmo pode ser aplicado para grafos contendo arestas com pesos negativos. Entretanto, se o grafo tiver um ciclo negativo, então, claramente, os caminhos mais curtos para alguns vértices podem não existir (devido ao fato de que o peso do caminho mais curto deve ser igual a $-$ $INF$); entretanto, o algoritmo pode ser modificado para sinalizar a presença de um ciclo de pesos negativos, ou até deduzir o ciclo.</p>
+
+			<p>O algoritmo leva o nome de dois cientistas americanos: Richard Bellman e Lester Ford. Ford, na realidade, inventou esse algoritmo em 1956 durante o estudo de outro problema matemático, no qual eventualmente foi reduzido a um subproblema de encontrar o caminho mais curto em um grafo, e Ford deu um esboço do algoritmo para resolver esse problema. Bellman em 1958 publicou um artigo devotado especificamente para o problema de achar o caminho mais curto, e nesse artigo, ele claramente formulou o algoritmo na forma como a qual nós o conhecemos hoje em dia.</p>
+
+			<h2>Descrição do algoritmo</h2>
+
+			<p>Assumindo que o grafo não contenha ciclos negativos. Esse caso será discutido abaixo em uma seção separada.</p>
+
+			<p>Criamos uma array de distâncias $d[0 \ldots n-1]$, depois da execução do algoritmo, a array conterá a resposta do problema. No começo, preenchemos da seguinte forma: $d[v] = 0$, e todos os outros elementos de $d[$ $]$ são iguais ao infinito $\infty$.</p>
+
+			<p>O algoritmo consiste de várias fases. Cada fase checa por todas as arestas do grafo, e o algoritmo tenta produzir <b>aprimoramentos</b> dentre cada aresta $(a,b)$ tendo peso $c$. Os aprimoramentos ao longo das arestas são tentativas de melhorar o valor $d[b]$ usando o valor $d[a] + c$. De fato, isso significa que estamos tentando melhorar a resposta para esse vértice usando a aresta $(a,b)$ e a resposta atual do vértice $a$.</p>
+
+			<p>Alega-se que $n-1$ fases são suficientes para calcular os comprimentos de todos os caminhos mais curtos no grafo (admitindo que ele não contenha ciclos negativos). Para vértices inalcançáveis, a distância $d[$ $]$ permanecerá igual ao infinito $\infty$.</p>
+			
+
+			<h2>Implementação</h2>
+
+			<p>Ao contrário de outros algoritmos de grafos, para o algoritmo de Bellman-Ford, convém representar o grafo usando uma lista de todas as arestas (em vez de $n$ listas de arestas - arestas de cada vértice). Começamos a implementação com a estrutura $\rm edge$ para representar arestas. O input para o algoritmo serão os números $n$, $m$, lista $e$ de arestas e o vértice inicial $v$. Todos os vértices são numerados de $0$ até $n - 1$.</p>
+
+			<h3>Implementação mais simples</h3>
+
+			<p>A constante $\rm INF$ denota o número "infinito" — maior que todos os comprimentos de caminhos possíveis.</p>
+
+<pre><code class="cpp">struct edge       //aresta
+{
+    int a, b, cost;     // a -(+-c)> b
+};
+
+int n, m, v;                   //numero de nos/vertices, arestas e o vertice inicial
+vector&lt;edge&gt; e;          //grafo como a lista de todas as arestas
+const int INF = 1000000000;
+
+void solve()
+{
+    vector&lt;int&gt; d (n, INF);    //inicialmente a distancia de todos os vertices é inifinito
+    d[v] = 0;                        //distancia do vertice inicial começa com 0
+    for (int i=0; i&lt;n-1; ++i)           
+        for (int j=0; j&lt;m; ++j)
+            if (d[e[j].a] &lt; INF)
+                d[e[j].b] = min (d[e[j].b], d[e[j].a] + e[j].cost);    //aprimorando o valor d[b] usando d[a] + c(peso)
+    
+}
+</code></pre>
+
+			<h3>Implementação aprimorada</h3>
+
+			<p>Esse algoritmo pode ser melhorado: podemos conseguir a resposta apenas em algumas fases e o trabalho restante do algoritmo pode não ser útil, apenas um gasto visitar todas as arestas. Então, iremos manter um sinalizador, para dizer se algo mudou na fase atual ou não, e se em alguma fase, nada mudou, o algoritmo pode ser parado. ( Alguns grafos ainda precisarão de todas as $n-1$ fases )</p>
+
+			<p>Com essa otimização, é geralmente desnecessário restringir manualmente o número de fases do algoritmo para $n-1$ — o algoritmo irá parar depois do número desejado de fases.</p>
+
+<pre><code class="cpp">void solve()
+{
+    vector&lt;int&gt; d (n, INF);
+    d[v] = 0;
+    for (;;)
+    {
+        bool any = false;
+
+        for (int j=0; j&lt;m; ++j)
+            if (d[e[j].a] &lt; INF)
+                if (d[e[j].b] &gt; d[e[j].a] + e[j].cost)
+                {
+                    d[e[j].b] = d[e[j].a] + e[j].cost;
+                    any = true;              //mudou 
+                }
+
+        if (!any) break;
+    }
+}
+</code></pre>
+
+			<h3>Recuperando o caminho</h3>
+
+			<p>Vamos agora considerar como modificar o algoritmo para que ele não apenas encontre o comprimento dos caminhos mais curtos, mas também permita reconstruir os caminhos mais curtos.</p>
+
+			<p>Para isso, vamos criar outra array $p[0 \ldots n-1]$, na qual para cada vértice armazenamos seu "predecessor", i.e. o penultimo vértice no caminho mais curto anterior ao vértice em questão. De fato, o caminho mais curto para qualquer vértice $a$ tem dentro dele, um caminho mais curto para o vértice $p[a]$, que no qual adicionamos $a$ no final desse caminho.</p>
+
+			<p>O algoritmo funciona na mesma lógica: ele assume que a distância mais curta para um vértice ja foi calculada, e tenta aprimorar a distância para outros vértices a partir desse vértice calculado. Portanto, a partir desse aprimoramento, precisamos apenas armazenar o predecessor em $p[$ $]$, i.e, o vértice pelo qual esse aprimoramento ocorreu.</p>
+
+			<p>Abaixo, uma implementação do algoritmo de Bellman-Ford com a recuperação do caminho mais curto até um nó/vértice $t$:</p>
+
+<pre><code class="cpp">void solve()
+{
+    vector&lt;int&gt; d (n, INF);
+    d[v] = 0;
+    vector&lt;int&gt; p (n - 1);   //array de predecessores
+
+    for (;;)
+    {
+        bool any = false;
+        for (int j = 0; j &lt; m; ++j)
+            if (d[e[j].a] &lt; INF)
+                if (d[e[j].b] &gt; d[e[j].a] + e[j].cost)
+                {
+                    d[e[j].b] = d[e[j].a] + e[j].cost;
+                    p[e[j].b] = e[j].a;          // p[b] = a 
+                    any = true;
+                }
+        if (!any)  break;
+    }
+
+    if (d[t] == INF)    //não houve possibilidade de atingir t
+        cout &lt;&lt; "Sem caminho de " &lt;&lt; v &lt;&lt; " para " &lt;&lt; t &lt;&lt; ".";
+    else
+    {
+        vector&lt;int&gt; path;                       //armazenando os predecessores e formando o caminho
+        for (int cur = t; cur != -1; cur = p[cur])
+            path.push_back (cur);
+        reverse (path.begin(), path.end());    //reverte
+
+        cout &lt;&lt; "Caminho de " &lt;&lt; v &lt;&lt; " para " &lt;&lt; t &lt;&lt; ": ";
+        for (size_t i=0; i&lt;path.size(); ++i)
+            cout &lt;&lt; path[i] &lt;&lt; ' ';
+    }
+}
+</code></pre>
+
+			<p>Começando do vértice $t$, passamos pelos predecessores até alcançar o vértice inicial sem predecessor, e armazenamos todos os vértices no caminho $\rm path$. Essa lista é o caminho mais curto de $v$ para $t$, em ordem reversa, então chamamos a função $\rm reverse()$ sobre $\rm path$ e então printamos o caminho.</p>
+
+			<h2>Prova do algoritmo</h2>
+
+			<p>Primeiro, note que para todos os vértices inalcançáveis $u$ o algoritmo funciona corretamente, o valor $d[u]$ permanecerá como infinito (o algoritmo Bellman-Ford encontrará caminhos para todos os vértices alcançáveis começando pelo vértice inicial $v$, e o aprimoramento para todos os vértices restantes nunca acontecerá).</p>
+
+			<p>Vamos provar a seguinte afirmação: Depois da execução da $i_{th}$ fase, o algoritmo de Bellman-Ford encontra corretamente todos os caminhos mais curtos no qual o número de arestas não excede $i$.</p>
+
+			<p>Em outras palavras, para qualquer vértice $a$ iremos denotar $k$ números de arestas no caminho mais curto para ele (se existir vários caminhos, você pode pegar qualquer um). De acordo com essa declaração, o algoritmo garante que, depois da $k_{th}$ fase, o caminho mais curto para o vértice $a$ será encontrado.</p>
+
+			<p><b>Prova</b>: Considere um vértice arbitrário $a$ para o qual existe um caminho a partir do vértice inicial $v$, e considere o caminho mais curto para ele $(p_0=v, p_1, \ldots, p_k=a)$. Antes da primeira fase, o caminho mais curto para o vértice $p_0 = v$ foi encontrado corretamente. Durante a primeira fase, a aresta $(p_0,p_1)$ foi checada pelo algoritmo, e portanto, a distância para o vértice $p_1$ foi corretamente calculada depois da primeira fase. Rpetindo essa declaração $k$ vezes, notamos que depois da $k_{th}$ fase, a distância para o vértice $p_k = a$ é calculada corretamente, o que queríamos provar.</p>
+
+			<p>A última coisa a notar é que qualquer caminho mais curto não pode ter mais do que $n - 1$ arestas. Portanto, o algoritmo suficientemente pode ser executado até a $(n-1)_{th}$ fase. Depois disso, nenhuma iteração é garantida de aprimorar a distância para algum vértice.</p>
+
+			<h2>O caso de ciclo negativo</h2>
+
+			<p>Tudo acima foi considerado se não existisse um ciclo negativo no grafo (estamos interessados em um ciclo negativo que seja alcançável a partir do vértice inicial $v$, e, para ciclos negativos inalcançáveis, nada no algoritmo acima irá mudar). Na presença de um ciclo negativo(s), a complicação é que, as distâncias até os vértices desses ciclo e do ciclo para outros vértices não estão definidas — elas deveriam ser igual a menos infinito $(- \infty)$.</p>
+
+			<p>O algoritmo de Bellman-Ford pode ficar tentando indefinidamente aprimorar as distâncias do vértices do ciclo e dos vértices alcançáveis pelo ciclo (loop não desejado). Portanto, se você não limitar o número de fases para $n - 1$, o algoritmo irá ser executado por indefinidas vezes, constantemente aprimorando as distâncias desses vértices.</p>
+
+			<p>Consequentemente, obtemos o <b>critério para a presença de um ciclo de pesos negativos alcançáveis a partir do vértice inicial $v$</b>: depois da $(n-1)_{th}$ fase, se executarmos o algoritmo mais uma vez, e ele performar um aprimoramento, então o grafo contém um ciclo negativo que é alcançável a partir de $v$; caso contrário, esse ciclo não existe.</p>
+
+			<p>Além disso, se esse ciclo for encontrado, o algoritmo de Bellman-Ford pode ser modificado para mostrar esse ciclo como uma sequência de vértices dentro dele. Para isso, precisa lembrar do vértice $x$ no qual houve um aprimoramento na $n_th$ fase. Esse vértice existirá dentro do ciclo negativo ou é alcançável por esse ciclo. Para conseguir os vértices dentro do ciclo, começando do vértice $x$, passe pelos predecessores $n$ vezes. Consequentemente passaremos pelo vértice $y$, o vértice dentro do ciclo mais perto do vértice inicial. Precisamos ir desse vértice, pelos predecessores, até que atingimos o mesmo vértice $y$ novamente (isso irá acontecer pois os aprimoramentos em um ciclo negativo ocorrem de maneira circular).</p>
+
+			<h3>Implementação:</h3>
+
+<pre><code class="cpp">void solve()
+{
+    vector&lt;int&gt; d (n, INF);
+    d[v] = 0;
+    vector&lt;int&gt; p (n - 1);
+    int x;
+    for (int i=0; i&lt;n; ++i)
+    {
+        x = -1;
+        for (int j=0; j&lt;m; ++j)
+            if (d[e[j].a] &lt; INF)
+                if (d[e[j].b] &gt; d[e[j].a] + e[j].cost)
+                {
+                    d[e[j].b] = max (-INF, d[e[j].a] + e[j].cost);
+                    p[e[j].b] = e[j].a;
+                    x = e[j].b;
+                }
+    }
+
+    if (x == -1)
+        cout &lt;&lt; "Sem ciclo negativo alcançavel por " &lt;&lt; v;
+    else
+    {
+        int y = x;
+        for (int i=0; i&lt;n; ++i)
+            y = p[y];
+
+        vector&lt;int&gt; path;
+        for (int cur=y; ; cur=p[cur])
+        {
+            path.push_back (cur);
+            if (cur == y &amp;&amp; path.size() &gt; 1)
+                break;
+        }
+        reverse (path.begin(), path.end());
+
+        cout &lt;&lt; "Ciclo Negativo: ";
+        for (size_t i=0; i&lt;path.size(); ++i)
+            cout &lt;&lt; path[i] &lt;&lt; ' ';
+    }
+}
+</code></pre>
+
+			<p>Devido a presença do ciclo negativo, para $n$ iterações do algoritmo, as distâncias negativas são altas (aparentemente, para números negativos de ordem $-2^n$). Consequentemente, no código adotamos procedimentos contra o overflow dos inteiros:</p>
+
+			<pre><code class="cpp">d[e[j].b] = max (-INF, d[e[j].a] + e[j].cost);
+			</code></pre>
+
+			<p>A implementação acima procura um ciclo negativo acessível a partir de algum vértice inicial $v$; entretanto, o algoritmo pode ser modificado para apenas procurar por qualquer ciclo negativo no grafo. Para isso precisamos colocar todas as distâncias $d[i]$ para zero e não infinito — como se estivéssemos procurando pelos caminhos mais curtos de todos os vértices simultâneamente.</p>
+
+			<p>Para mais desse tópico — veja o artigo, <a href="./graph/finding-negative-cycle-in-graph.html">Finding a negative cycle in the graph</a>.</p>
+
+			<h2>Caminho mais curto algoritmo mais rápido (SPFA)</h2>
+
+			<p>SPFA é um aprimoramento do algoritmo de Bellman-Ford no qual leva vantagem do fato de que nem todas as tentativas de aprimoramento irão funcionar. A ideia principal é criar uma queue que contenha apenas os vértices que foram aprimorados mas que seus vizinhos ainda não tenham sido aprimorados.
+			E quando você conseguir aprimorar a distância de um vizinho, você deve colocá-lo na queue. Esse algoritmo também pode detectar ciclos negativos como o de Bellman-Ford.</p>
+
+			<p>O pior caso desse algoritmo é igual ao $O(n m)$ de Bellman-Ford, mas em prática, funciona mais rápido e algumas <a href="https://en.wikipedia.org/wiki/Shortest_Path_Faster_Algorithm#Average-case_performance">pessoas acreditam que funciona em $O(m)$ em média</a>. Entretanto é fácil criar exemplos contrários que fazem o algoritmo ser executado em $O(n m)$.</p>
+
+			<p>Se existir um ciclo negativo, o algoritmo pode entrar em um loop infinito.
+			Para evitar isso, é possível criar um recipiente para contar o número de vezes que um vértice foi aprimorado e parar o algoritmo assim que algum vértice for aprimorado pela $n$-th vez.</p>
+
+<pre><code class="cpp">const int INF = 1000000000;
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
+
+bool spfa(int s, vector&lt;int&gt;&amp; d) {
+    int n = adj.size();
+    d.assign(n, INF);
+    vector&lt;int&gt; cnt(n, 0);
+    vector&lt;bool&gt; inqueue(n, false);
+    queue&lt;int&gt; q;
+
+    d[s] = 0;
+    q.push(s);
+    inqueue[s] = true;
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        inqueue[v] = false;
+
+        for (auto edge : adj[v]) {
+            int to = edge.first;
+            int len = edge.second;
+
+            if (d[v] + len &lt; d[to]) {
+                d[to] = d[v] + len;
+                if (!inqueue[to]) {
+                    q.push(to);
+                    inqueue[to] = true;
+                    cnt[to]++;
+                    if (cnt[to] &gt; n)
+                        return false;  // ciclo negativo
+                }
+            }
+        }
+    }
+    return true;
+}
+</code></pre>
+
+			<h2>Problemas</h2>
+
+			<ul>
+			<li><a href="http://www.e-olimp.com.ua/problems/1453">E-OLIMP #1453 "Ford-Bellman"</a></li>
+			<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=364">UVA #423 "MPI Maelstrom"</a></li>
+			<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=7&amp;page=show_problem&amp;problem=475">UVA #534 "Frogger"</a></li>
+			<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=12&amp;page=show_problem&amp;problem=1040">UVA #10099 "The Tourist Guide"</a></li>
+			<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=456">UVA #515 "King"</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3964">UVA 12519 - The Farnsworth Parabox</a></li>
+			</ul>
+
+			
+
+			<div>
+			(c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+			</div>
+        </div>
+    </body>
+</html>
