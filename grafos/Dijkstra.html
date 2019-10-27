@@ -114,8 +114,8 @@
 			<p>Essa complexidade é optmizada para grafos densos(dense graphs, muitas conexões), i.e. quando $m \approx n^2$.
 			Entretanto em grafos esparsos(sparse graph), quando $m$ é bem menor que o número máximo de arestas $n^2$, o problema pode ser resolvido em complexidade $O(n \log n + m)$. O algoritmo e sua implementação podem ser encontrados <a href="./graph/dijkstra_sparse.html">Dijkstra em grafos esparsos</a>.</p>
 
-<pre><code class="cpp">const int INF = 1000000000;
-vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
+<pre><code class="cpp">const int INF = 1000000000;     
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;   //grafo como lista de adjacência, o pair armazena dois objetos 'pair<int,int>'
 
 void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
     int n = adj.size();
@@ -141,7 +141,7 @@ void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
 
             if (d[v] + len &lt; d[to]) {     //atualizando distancia minima para o proximo vertice
                 d[to] = d[v] + len;
-                p[to] = v;
+                p[to] = v;                   //atualizando predecessor
             }
         }
     }
