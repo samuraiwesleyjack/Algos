@@ -165,7 +165,7 @@ void solve()
 
 			<p>A última coisa a notar é que qualquer caminho mais curto não pode ter mais do que $n - 1$ arestas. Portanto, o algoritmo suficientemente pode ser executado até a $(n-1)_{th}$ fase. Depois disso, nenhuma iteração é garantida de aprimorar a distância para algum vértice.</p>
 
-			<h2>O caso de ciclo negativo</h2>
+			<h2>O caso do ciclo negativo</h2>
 
 			<p>Tudo acima foi considerado se não existisse um ciclo negativo no grafo (estamos interessados em um ciclo negativo que seja alcançável a partir do vértice inicial $v$, e, para ciclos negativos inalcançáveis, nada no algoritmo acima irá mudar). Na presença de um ciclo negativo(s), a complicação é que, as distâncias até os vértices desses ciclo e do ciclo para outros vértices não estão definidas — elas deveriam ser igual a menos infinito $(- \infty)$.</p>
 
