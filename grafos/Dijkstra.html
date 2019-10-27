@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<base href="https://cp-algorithms-brasil.com"/>
+		<title>Dijkstra Algoritmo</title>
+		
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+		</script>
+		<script type="text/javascript"
+			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		</script>
+		<link rel="stylesheet" href="styles.css"/>
+
+		<!-- highlightjs for code highlighting -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+		<!-- end highlightjs -->
+
+	</head>
+    <body>
+        <a href="http://cp-algorithms-brasil.com">
+					<button> < </button>
+	    </a>
+			
+	    <div id="container">
+    
+			<h1>Algoritmo de Dijkstra</h1>
+
+			<p>Você recebe um grafo, direto ou indireto, com pesos em suas arestas e que possui $n$ vértices e $m$ arestas. Os pesos de todas as arestas são não-negativos. Possui um vértice inicial $s$. Este artigo descreve como encontrar os comprimentos dos caminhos mais curtos de um vértice inicial $s$ para todos os outros vértices.</p>
+
+			<p>Esse problema também é chamado <strong>caminhos mais curtos de fonte única</strong>.</p>
+
+			<h2>Algoritmo</h2>
+
+			<p>Aqui está um algoritmo descrito pelo cientista da computação <strong>Edsger W. Dijkstra</strong> em 1959.</p>
+
+			<p>Iremos criar uma array $d[$ $]$ onde para cada vértice $v$ guardaremos o comprimento atual do caminho mais curto, de $s$ para $v$, em $d[v]$.
+			Inicialmente $d[s] = 0$, e para todos os outros vértices esse comprimento é igual ao infinito.
+			Na implementação, um número suficientemente grande (garantindo que seja maior que qualquer comprimento de caminho possível) é escolhido como o infinito.</p>
+
+			<p>$$d[v] = \infty,~ v \ne s$$</p>
+
+			<p>Além do mais, mantemos uma array Boolean $u[$ $]$ que armazena para cada vértice $v$ se ele foi visitado/marcado. Inicialmente todos os vértices não estão marcados:</p>
+
+			<p>$$u[v] = {\rm false}$$</p>
+
+			<p>O algoritmo de Dijkstra é executado por $n$ iterações. Em cada iteração, um vértice $v$ é escolhido como vértice não marcado que tem o menor valor $d[v]$:</p>
+
+			<p>Evidentemente, na primeira iteração o vértice inicial $s$ será selecionado.</p>
+
+			<p>O vértice selecionado $v$ é marcado. Em seguida, do vértice $v$, <strong>aproximações (relaxations)</strong> são performadas: todas as arestas da forma $(v,\text{to})$ são consideradas, e para cada vértice $\text{to}$ o algoritmo tenta aprimorar o valor $d[\text{to}]$. Se o comprimento da aresta atual for igual a $len$:</p>
+
+			<p>$$d[\text{to}] = \min (d[\text{to}], d[v] + len)$$</p>
+
+			<p>Depois que todas essas arestas são consideradas, a iteração atual termina. Finalmente, depois de $n$ iterações, todos os vértices serão marcados, e o algoritmo termina. Afirmamos que os valores encontrados $d[v]$ são os comprimentos dos caminhos mais curtos de $s$ para todos os vértices $v$.</p>
+
+			<p>Observe que, se alguns vértices são inacessíveis, do vértice inicial $s$, os valores $d[v]$ irão permanecer como infinito. Obviamente, as últimas iterações do algoritmo escolherão esses vértices, mas nenhum trabalho útil será feito para eles. Portanto, o algoritmo pode ser parado assim que o vértice selecionado tiver uma distância infinita.</p>
+
+			<h3>Restaurando Caminhos Curtos</h3>
+
+			<p>Geralmente, é necessário conhecer não apenas os comprimentos dos caminhos mais curtos, mas o próprio caminho curto de um vértice inicial $s$ para outros vértices. Manteremos uma array de predecessores $p[$ $]$ na qual para cada vértice $v \ne s$, $p[v]$ será o penultimo vértice no caminho mais curto de $s$ para $v$. Aqui usamos o fato de que, se tomarmos o caminho mais curto para algum vértice $v$ e removermos $v$ desse caminho, teremos um caminho que termina no vértice $p[v]$, e esse caminho será o mais curto para o vértice $p[v]$. Esse array de predecessores pode ser usado para restaurar o caminho mais curto para qualquer vértice: começando com $v$, repetidamente pegue o predecessor do vértice atual até atingir o vértice inicial $s$ para obter o caminho mais curto com vértices listados em ordem reversa. Então, o caminho mais curto $P$ para o vértice $v$ é igual a:</p>
+
+			<p>$$P = (s, \ldots, p[p[p[v]]], p[p[v]], p[v], v)$$</p>
+
+			<p>Construindo essa array de predecessores é bem simples: para cada iteração, i.e. para algum vértice selecionado $v$, haverá uma melhora na distância para algum vértice $\text{to}$, atualizamos o vértice predecessor para $\text{to}$ com o vértice $v$:</p>
+
+			<p>$$p[\text{to}] = v$$</p>
+
+			<h2>Prova</h2>
+
+			<p>A principal afirmação, na qual a certeza do algoritmo de Dijkstra se encontra, se baseia no seguinte:</p>
+
+			<p><strong>Depois que passamos pelo vértice $v$ ou que qualquer vértice $v$ seja marcado, a distância atual $d[v]$ é a mais curta, e não irá mais mudar.</strong></p>
+
+			<p>A prova é feita por indução. Para a primeira iteração essa declaração é óbvia: o único vértice marcado é $s$, e a distância para ele é $d[s] = 0$ que é o menor caminho para $s$. Agora suponha que essa declaração é verdadeira para todas as iterações prévias, i.e. para todos os vértice previamente marcados; vamos provar que ela não será negada depois que a iteração atual se complete. $v$ é o vértice selecionado na iteração, i.e. $v$ é vértice que o algoritmo irá marcar. Precisamos provar que $d[v]$ é realmente igual ao comprimento do menor caminho para ele $l[v]$.</p>
+
+			<p>Considere o caminho mais curto $P$ para o vértice $v$. Esse caminho pode ser dividido em duas partes: $P_1$ que consiste apenas de nós marcados (pelo menos o vértice inicial $s$ é parte de $P_1$), e o resto do caminho $P_2$ (pode incluir um vértice marcado, mas sempre começa com um vértice não marcado). Vamos denotar o primeiro vértice de $P_2$ como $p$, e o último vértice do caminho $P_1$ como $q$.</p>
+
+			<p>Primeiro provamos nossa declaração para $p$, i.e. vamos provar que $d[p] = l[p]$. Isso é quase óbvio: em uma das iterações prévias escolhemos o vértice $q$ e performamos uma iteração sobre ele. Desde que o caminho mais curto para $p$ é o caminho mais curto para $q$ $+$ a aresta $(p,q)$, a iteração de $q$ iguala o valor $d[p]$ para o caminho mais curto $l[q]$.</p>
+
+			<p>Desde que o peso das arestas não sejam negativos, o comprimento do caminho mais curto $l[p]$ (que acabamos de provar que é igual a $d[p]$) não excede o comprimento $l[v]$ do caminho mais curto para o vértice $v$. Dado que $l[v] \le d[v]$ (porque o algoritmo de Dijkstra não pôde encontrar um caminho mais curto que o mais curto possível(triste, não?)), conseguimos a inequação:</p>
+
+			<p>$$d[p] = l[p] \le l[v] \le d[v]$$</p>
+
+			<p>Por outro lado, ja que ambos os vértices $p$ e $v$ não foram marcados, e a iteração atual escolhe o vértice $v$, não $p$, temos outra inequação:</p>
+
+			<p>$$d[p] \ge d[v]$$</p>
+
+			<p>Dessas duas inequações, podemos concluir que $d[p] = d[v]$, e então:</p>
+
+			<p>$$d[v] = l[v]$$</p>
+
+			<p>Q.E.D.</p>
+
+			<h2>Implementação</h2>
+
+			<p>Dijkstra executa $n$ iterações. Em cada iteração ele marca um vértice $v$ com o menor valor possível $d[v]$, marca e checa todas as arestas $(v, \text{to})$ tentando aprimorar(minimizar) o valor $d[\text{to}]$.</p>
+
+			<p>O tempo de execução do algoritmo consiste em:</p>
+
+			<ul>
+			<li>$n$ procuras para um vértice com o valor mínimo $d[v]$ dentre $O(n)$ vértices não marcados</li>
+			<li>$m$ tentativas de aprimoramento do valor</li>
+			</ul>
+
+			<p>Para uma implementação simples dessas operações em cada iteração a procura do vértice requer $O(n)$ operações, e cada aprimoramento pode ser performado em $O(1)$. Consequentemente, o resultado do comportamento do algoritmo é:</p>
+
+			<p>$$O(n^2+m)$$</p>
+
+			<p>Essa complexidade é optmizada para grafos densos(dense graphs, muitas conexões), i.e. quando $m \approx n^2$.
+			Entretanto em grafos esparsos(sparse graph), quando $m$ é bem menor que o número máximo de arestas $n^2$, o problema pode ser resolvido em complexidade $O(n \log n + m)$. O algoritmo e sua implementação podem ser encontrados <a href="./graph/dijkstra_sparse.html">Dijkstra em grafos esparsos</a>.</p>
+
+<pre><code class="cpp">const int INF = 1000000000;
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
+
+void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
+    int n = adj.size();
+    d.assign(n, INF);
+    p.assign(n, -1);
+    vector&lt;bool&gt; u(n, false);
+
+    d[s] = 0;
+    for (int i = 0; i &lt; n; i++) {
+        int v = -1;
+        for (int j = 0; j &lt; n; j++) {
+            if (!u[j] &amp;&amp; (v == -1 || d[j] &lt; d[v]))
+                v = j;
+        }
+
+        if (d[v] == INF)
+            break;
+
+        u[v] = true;
+        for (auto edge : adj[v]) {
+            int to = edge.first;
+            int len = edge.second;
+
+            if (d[v] + len &lt; d[to]) {
+                d[to] = d[v] + len;
+                p[to] = v;
+            }
+        }
+    }
+}
+</code></pre>
+
+			<p>Aqui o grafo $\text{adj}$ é armazenado como uma lista de adjacência: para cada vértice $v$ $\text{adj}[v]$ contém a lista de arestas vindas desse vértice, i.e. a lista do par <code>pair&lt;int,int&gt;</code> onde o <strong>primeiro elemento no par é o vértice no final da aresta, e o segundo elemento é o peso da aresta</strong>.</p>
+
+			<p>A função armazena o vértice inicial $s$ e dois vetores que serão usados para retornar valores.</p>
+
+			<p>Primeiramente, o código inicializa arrays: distâncias $d[$ $]$, booleanos(indicação de marcados) $u[$ $]$ e predecessores $p[$ $]$. Performando $n$ iterações. Em cada iteração o vértice $v$ é selecionado/marcado na qual ele possui a mínima distância $d[v]$ dentre todos os vértices não marcados. Se a distância para selecionar $v$ é igual ao infinito, o algoritmo para. Caso contrário o vértice é marcado, e todas as arestas que saem desse vértice são checadas. Se um aprimoramento dentre as arestas é possível (i.e. distância $d[\text{to}]$ pode ser aprimorada/minimizada), a distância $d[\text{to}]$ e o predecessor $p[\text{to}]$ são atualizados.</p>
+
+			<p>Depois de performar todas as iterações, a array $d[]$ armazena os comprimentos dos caminhos mais curtos para todos os vértices, e a array $p[]$ armazena os predecessores de todos os vértices (exceto o vértice inicial $s$). O caminho para qualquer vértice $t$ pode ser restaurado da seguinte maneira:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; restore_path(int s, int t, vector&lt;int&gt; const&amp; p) {
+    vector&lt;int&gt; path;
+
+    for (int v = t; v != s; v = p[v])
+        path.push_back(v);
+    path.push_back(s);
+
+    reverse(path.begin(), path.end());
+    return path;
+}
+</code></pre>
+            <p>De forma similar utilizando uma <a href="https://en.cppreference.com/w/cpp/container/priority_queue">priority queue</a> porém, sem a utilização da array de predecessores e booleanos,  a implementação pode ser feita da seguinte forma:</p>
+			<pre><code class="cpp">const int INF = 1000000007;
+const int maxn = 10000009;
+vector&lt;pair&lt;int,int&gt;&gt; v[maxn];  // grafo
+int dis[maxn];       // array com as distâncias mínimas
+int n;               // número de nós
+ 
+void inf(){                          //infinitar as distâncias
+	for(int i = 0; i < n; ++i){
+		dis[i] = INF;
+	}
+}
+ 
+void aresta(int a, int b, int c){    //aresta com peso
+	v[a].push_back({b,c});
+	v[b].push_back({a,c});
+}
+ 
+void dijkstra(int s){               //algoritmo de dijkstra
+	inf();
+ 
+	dis[s] = 0;
+	priority_queue &lt;pair&lt;int,int&gt;, vector&lt;pair&lt;int,int&gt;&gt;, greater&lt;pair&lt;int,int&gt;&gt; &gt; pq;
+	pq.push({0, s});
+ 
+	while(!pq.empty()){
+		auto f = pq.top();
+		pq.pop();
+		if(dis[f.second] < f.first) continue;    //dis[node] < dis[atual sendo checada] (para aprimoramento), se esse no ja tiver uma distancia menor, apenas continue 
+		for(auto e : v[f.second]){               //checar arestas 
+			if(f.first + e.second < dis[e.first]){   //e.second = c (peso da aresta) | e.first = próximo nó 
+				dis[e.first] = f.first + e.second;   //atualizando a distanca minima do próximo nó (aprimoramento)
+				pq.push({dis[e.first], e.first});    
+			}
+		}
+	}
+}
+</code></pre>
+
+			<h2>Referências</h2>
+
+			<ul>
+			<li>"Edsger Dijkstra. A note on two problems in connexion with graphs [1959]"</li>
+			<li>"Thomas Cormen, Charles Leiserson, Ronald Rivest, Clifford Stein. Introduction to Algorithms [2005]"</li>
+			</ul>
+
+			<h2>Problemas</h2>
+
+			<ul>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1930">Timus - Ivan's Car</a></li>
+			<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1004">Timus - Sightseeing Trip</a></li>
+			<li><a href="http://www.spoj.com/problems/SHPATH/">SPOJ - SHPATH</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/20/C">Codeforces - Dijkstra?</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/59/E">Codeforces - Shortest Path</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/449/B">Codeforces - Jzzhu and Cities</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/464/E">Codeforces - The Classic Problem</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/567/E">Codeforces - President and Roads</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/715/B">Codeforces - Complete The Graph</a></li>
+			<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=12468">TopCoder - SkiResorts</a></li>
+			<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=13596">TopCoder - MaliciousPath</a></li>
+			<li><a href="http://www.spoj.com/problems/ADATRIP/">SPOJ - Ada and Trip</a></li>
+			<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1851">LA - 3850 - Here We Go(relians) Again</a></li>
+			<li><a href="http://codeforces.com/gym/100625">GYM - Destination Unknown (D)</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=4829">UVA 12950 - Even Obsession</a></li>
+			<li><a href="http://codeforces.com/gym/100753">GYM - Journey to Grece (A)</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=866&amp;page=show_problem&amp;problem=4918">UVA 13030 - Brain Fry</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3468">UVA 1027 - Toll</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=2372">UVA 11377 - Airport Setup</a></li>
+			<li><a href="http://codeforces.com/problemset/problem/843/D">Codeforces - Dynamic Shortest Path</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2913">UVA 11813 - Shopping</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=226&amp;page=show_problem&amp;problem=2933">UVA 11833 - Route Change</a></li>
+			<li><a href="http://www.spoj.com/problems/EZDIJKST/en/">SPOJ - Easy Dijkstra Problem</a></li>
+			<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=820">LA - 2819 - Cave Raider</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3296">UVA 12144 - Almost Shortest Path</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3198">UVA 12047 - Highest Paid Toll</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=2509">UVA 11514 - Batman</a></li>
+			<li><a href="http://codeforces.com/contest/757/problem/F">Codeforces - Team Rocket Rises Again</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2313">UVA - 11338 - Minefield</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2369">UVA 11374 - Airport Express</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2038">UVA 11097 - Poor My Problem</a></li>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=5083">UVA 13172 - The music teacher</a></li>
+			<li><a href="http://codeforces.com/contest/827/problem/F">Codeforces - Dirty Arkady's Kitchen</a></li>
+			<li><a href="http://www.spoj.com/problems/DELIVER/">SPOJ - Delivery Route</a></li>
+			<li><a href="http://www.spoj.com/problems/CCHESS/">SPOJ - Costly Chess</a></li>
+			</ul>
+
+			<div>
+			(c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+			</div>
+        </div>
+    </body>
+</html>
