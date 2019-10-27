@@ -119,27 +119,27 @@ vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
 
 void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
     int n = adj.size();
-    d.assign(n, INF);
-    p.assign(n, -1);
-    vector&lt;bool&gt; u(n, false);
+    d.assign(n, INF);                 //array de distancias minimas
+    p.assign(n, -1);                  //array de predecessores
+    vector&lt;bool&gt; u(n, false);   //array de marcados
 
-    d[s] = 0;
+    d[s] = 0;                        //distancia para o vertice inicial = 0
     for (int i = 0; i &lt; n; i++) {
         int v = -1;
         for (int j = 0; j &lt; n; j++) {
-            if (!u[j] &amp;&amp; (v == -1 || d[j] &lt; d[v]))
+            if (!u[j] &amp;&amp; (v == -1 || d[j] &lt; d[v]))   //encontrando o nó v com d[v] mínimo(com a menor distancia ate ele)
                 v = j;
         }
 
-        if (d[v] == INF)
+        if (d[v] == INF)   //vértice inacessível
             break;
 
         u[v] = true;
-        for (auto edge : adj[v]) {
-            int to = edge.first;
-            int len = edge.second;
+        for (auto edge : adj[v]) {     //checando arestas do nó selecionado
+            int to = edge.first;      //próximo nó
+            int len = edge.second;    //comprimento da aresta atual
 
-            if (d[v] + len &lt; d[to]) {
+            if (d[v] + len &lt; d[to]) {     //atualizando distancia minima para o proximo vertice
                 d[to] = d[v] + len;
                 p[to] = v;
             }
