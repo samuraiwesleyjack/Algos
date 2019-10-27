@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta charset="UTF-8">
+		<base href="https://cp-algorithms-brasil.com"/>
+		<title>Dijkstra Algoritmo</title>
+		
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+		</script>
+		<script type="text/javascript"
+			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		</script>
+		<link rel="stylesheet" href="styles.css"/>
+
+		<!-- highlightjs for code highlighting -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+		<script>hljs.initHighlightingOnLoad();</script>
+		<!-- end highlightjs -->
+
+	</head>
+    <body>
+        <a href="http://cp-algorithms-brasil.com">
+					<button> < </button>
+	    </a>
+			
+	    <div id="container">
+    
+			<h1>Dijkstra em grafos esparsos</h1>
+
+			<h2>Algoritmo</h2>
+
+			<p>Recordamos que na complexidade do algoritmo de Dijkstra usamos dois fatores::
+			o tempo da procura vértices não marcados com a menor distância $d[v]$, e o tempo do aprimoramento desse valor, i.e. o tempo de mudar o valor $d[\text{to}]$.</p>
+
+			<p>Na implementação essas operações requerem $O(n)$ e $O(1)$.
+			Portanto, executamos a primeira operação $O(n)$ vezes, e a segunda $O(m)$ vezes, obtendo a complexidade $O(n^2 + m)$.</p>
+
+			<p>Fica claro que essa complexidade é otimizada para um grafo denso, i.e. quando $m \approx n^2$.
+			Entretanto em grafos esparsos, quando $m$ é bem menor que o número máximo de arestas $n^2$, a complexidade fica menos otimizada.
+			Assim, é necessário aprimorar o tempo de execução da primeira operação.</p>
+
+			<p>Para conseguir isso, podemos usar uma variação de várias estruturas de dados auxiliares.
+			A mais eficiente é a <strong>"Fibonacci heap"</strong>, permitindo que a primeira operação seja executada em $O(\log n)$, e a segunda operação em $O(1)$.
+			Obtendo a complexidade $O(n \log n + m)$ para o algoritmo de Dijkstra, na qual, teoricamente, é a mínima para o problema dos caminhos mais curtos.
+			Portanto, o algoritmo é otimizado.
+			Não existe nenhuma estrutura de dados, que possa executar as duas operações em tempo $O(1)$, porque isso também permitiria ordenar uma lista de números aleatórios em tempo linear, o que é impossível.
+			Curiosamente, existe um algoritmo por Thorup que encontra o caminho mais curto em tempo $O(m)$, entretanto ele funciona apenas com pesos inteiros, e usa uma ideia completamente diferente.
+			Fibonacci heaps fornece a complexidade otimizada para essa tarefa.
+			No entanto, eles são bastante complexos de implementar e também possuem uma constante oculta bastante grande.</p>
+
+			<p>Você pode usar estruturas de dados para performar ambas operações (extrair or mínimo e atualizar um item) em $O(\log n)$.
+			A complexidade do algoritmo de Dijkstra fica $O(n \log n + m \log n) = O(m \log n)$.</p>
+
+			<p>C++ fornece duas estruturas de dados que podem ajudar: <code>set</code> e <code>priority_queue</code>.
+			A primeira é baseada em árvores rubro-negras, e a segunda em heaps.
+			Assim, <code>priority_queue</code> tem uma constante escondida menor, mas também tem uma desvantagem:
+			não suporta a operação de remover um determinado elemento x, como "delete(x)".
+			Por causa disso, precisamos fazer um "trabalho extra", que leva a um pior fator: $\log m$ em vez de $\log n$ (embora em termos de complexidade eles são idênticos).</p>
+
+			<h2>Implementação</h2>
+
+			<h3>set</h3>
+
+			<p>Vamos começar com o recipiente <code>set</code>.
+			Precisamos armazenar nele vértices ordenados por seus valores de distância, $d[$ $]$, convém armazenamos em pares: a distância e o índice do vértice.
+			Em um <code>set</code> pares são automaticamente ordenados por suas distâncias.</p>
+
+<pre><code class="cpp">const int INF = 1000000000;
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
+
+void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
+    int n = adj.size();
+    d.assign(n, INF);
+    p.assign(n, -1);
+
+    d[s] = 0;
+    set&lt;pair&lt;int, int&gt;&gt; q;
+    q.insert({0, s});
+    while (!q.empty()) {
+        int v = q.begin()-&gt;second;
+        q.erase(q.begin());
+
+        for (auto edge : adj[v]) {
+            int to = edge.first;
+            int len = edge.second;
+
+            if (d[v] + len &lt; d[to]) {
+                q.erase({d[to], to});
+                d[to] = d[v] + len;
+                p[to] = v;
+                q.insert({d[to], to});
+            }
+        }
+    }
+}
+</code></pre>
+
+			<p>Não precisamos mais da array $u[$ $]$ da implementação do Dijkstra "normal".
+			Usamos <code>set</code> para armazenar a informação, e também achar o vértice com a menor distância.
+			Os loops são executados até que não haja mais vértices no set/queue.
+			Um vértice com a menor distância é extraído, e para cada aprimoramento de distância nós removemos o par antigo, depois do aprimoramento, armazenamos o novo par na queue.</p>
+
+			<h3>priority_queue</h3>
+
+			<p>A principal diferença para a implementação com <code>set</code> é que não removemos elementos da <code>priority_queue</code> (embora "heaps" suportam essa operação na teoria).
+			Portanto, precisamos trapacear um pouco.
+			Nós não deletaremos o par antigo da queue/set.
+			Como resultado, um vértice pode aparecer múltiplas vezes com distâncias diferentes na queue.
+			Dentre esses pares apenas estamos interessados em pares onde o primeiro elemento é igual ao valor correspondente em $d[$ $]$, todos os outros pares são "antigos".
+			Portanto, precisamos fazer uma modificação:
+			no começo de cada iteração, depois de extrair o próximo par, checamos se é um par "importante" ou se é apenas um par "antigo".
+			Essa checagem é importante, caso contrário a complexidade pode ser incrementada para $O(n m)$.</p>
+
+			<p><strong>Por padrão <code>priority_queue</code> ordena elementos em ordem descendente($maior$ ... $menor$)</strong>.
+			Para poder ordenar em ordem ascendente, podemos executá-la em uma função diferente.</p>
+
+<pre><code class="cpp">const int INF = 1000000000;
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;
+
+void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
+    int n = adj.size();
+    d.assign(n, INF);
+    p.assign(n, -1);
+
+    d[s] = 0;
+    using pii = pair&lt;int, int&gt;;
+    priority_queue&lt;pii, vector&lt;pii&gt;, greater&lt;pii&gt;&gt; q;   //greater: ordem ascendente na priority queue
+    q.push({0, s});
+    while (!q.empty()) {
+        int v = q.top().second;
+        int d_v = q.top().first;
+        q.pop();
+        if (d_v != d[v])
+            continue;
+
+        for (auto edge : adj[v]) {
+            int to = edge.first;
+            int len = edge.second;
+
+            if (d[v] + len &lt; d[to]) {
+                d[to] = d[v] + len;
+                p[to] = v;
+                q.push({d[to], to});
+            }
+        }
+    }
+}
+</code></pre>
+
+			<p>Em prática a versão da <code>priority_queue</code> é um pouco mais rápida que a versão com <code>set</code>.</p>
+
+			<h3>Se livrando de pares</h3>
+
+			<p>Você pode aprimorar a performance um pouco mais se você não armazenar pares nos recipientes, mas apenas os índices dos vértices.
+			Nesse caso precisamos fazer um overload do operador de comparação:
+			precisa comparar dois vértices usando as distâncias armazenadas em $d[$ $]$.</p>
+
+			<p>Como resultado do aprimoramento, a distância de alguns vértices irão mudar.
+			Entretanto, a estrutura de dados não irá reordenar-se automaticamente.
+			Mudar as distâncias dos vértices na queue, pode destruir a estrutura de dados.
+			Como antes, precisamos remover o vértice antes do aprimoramento, e depois disso colocá-lo novamente.</p>
+
+			<p>Desde que apenas podemos remover de <code>set</code>, essa otimização é aplicável apenas no método com <code>set</code>, e não funciona com a implementação da <code>priority_queue</code>.
+			Em prática, isso aumenta o desempenho em casos onde os dados são muito grandes para armazenar as distâncias, como <code>long long</code> ou <code>double</code>.</p>
+
+
+			<div>
+			(c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+			</div>
+        </div>
+    </body>
+</html>
