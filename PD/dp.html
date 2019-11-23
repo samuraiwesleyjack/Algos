@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>DP - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Dividir e Conquistar DP</h1>
+			<p>Dividir e Conquistar é uma otimização de programação dinâmica.</p>
+
+<h3>Pré-condições</h3>
+
+<p>Alguns problemas de programação dinâmica têm uma recorrência da forma: $$dp(i, j) =
+\min_{k \leq j} &#92;{ dp(i - 1, k) + C(k, j) &#92;}$$ onde $C(k, j)$ é alguma função
+de custo.</p>
+
+<p>Deixe que $1 \leq i \leq n$ e $1 \leq j \leq m$, e avaliar $C$ leva tempo constante $O(1)$. 
+A avaliação direta da recorrência acima é $O(n m^2)$. Existem $n \times m$ estados, e $m$ transições para cada estado.</p>
+
+<p>Deixe que $opt(i, j)$ seja o valor de $k$ que minimiza a expressão acima. Se
+$opt(i, j) \leq opt(i, j + 1)$ para todo $i, j$, então podemos aplicar
+dividir-e-conquistar DP. Isso é conhecido como a <em>condição de monotonicidade</em>. O ideal
+"ponto de divisão" para um fixo $i$ é incrementando assim que $j$ aumenta.</p>
+
+<p>Isso nos permite resolver todos os estados com mais eficiência. Calculamos $opt(i, j)$
+para algum fixo $i$ e $j$. Então, para qualquer $j' &lt; j$ sabemos que $opt(i, j') \leq opt(i, j)$.
+Isso significa que enquanto calculamos $opt(i, j')$, não precisaremos considerar tantos
+pontos de divisões!</p>
+
+<p>Para minimizar o tempo de execução, aplicamos a ideia por trás de dividir e conquistar. Primeiro, calcule
+ $opt(i, n / 2)$. Então, calcule $opt(i, n / 4)$, sabendo que é menos
+ ou igual a $opt(i, n / 2)$ e $opt(i, 3 n / 4)$ sabendo que é
+maior que ou igual a $opt(i, n / 2)$. Recursivamente checando os limites inferiores e superiores de $opt$, alcançamos uma complexidade $O(m n \log n)$ de tempo de execução. Cada
+possível valor de $opt(i, j)$ apenas aparece em $\log n$ nós diferentes.</p>
+
+<p>Não importa o quão "equilibrado" $opt(i, j)$ é. Em um fixo
+nível, cada valor de $k$ é usado pelo menos duas vezes, e há no máximo $\log n$
+níveis.</p>
+
+<h2>Implementação Genérica</h2>
+
+<p>Embora a implementação varie com base no problema, aqui está um modelo bastante genérico.
+A função <code>compute</code> calcula uma linha $i$ de estados <code>dp_cur</code>, dada a linha anterior $i-1$ de estados <code>dp_before</code>.
+A função precisa ser chamada com <code>compute(0, n-1, 0, n-1)</code>.</p>
+
+<pre><code class="cpp">int n;   //número de estados
+long long C(int i, int j);      //C é alguma função de custo
+vector&lt;long long&gt; dp_before(n), dp_cur(n);
+
+// calcular dp_cur[l], ... dp_cur[r] (inclusos)
+void compute(int l, int r, int optl, int optr)
+{
+    if (l &gt; r)
+        return;
+    int mid = (l + r) &gt;&gt; 1;
+    pair&lt;long long, int&gt; best = {INF, -1};
+
+    for (int k = optl; k &lt;= min(mid, optr); k++) {
+        best = min(best, {dp_before[k] + C(k, mid), k});
+    }
+
+    dp_cur[mid] = best.first;
+    int opt = best.second;
+
+    compute(l, mid - 1, optl, opt);
+    compute(mid + 1, r, opt, optr);
+}
+</code></pre>
+
+<h3>Algumas coisas para serem observadas</h3>
+
+<p>A maior dificuldade com problemas de Dividir e Conquistar DP é provar a
+monotonicidade de $opt$. Muitos problemas de Dividir e Conquistar DP podem também serem resolvidos
+com o truque do Convex Hull ou vice-versa. É útil conhecer e entender
+ambos!</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://codeforces.com/contest/321/problem/E">Codeforces - Ciel and Gondolas</a></li>
+<li><a href="https://www.spoj.com/problems/LARMY/">SPOJ - LARMY</a></li>
+<li><a href="https://www.codechef.com/problems/CHEFAOR">Codechef - CHEFAOR</a></li>
+<li><a href="https://www.hackerrank.com/contests/ioi-2014-practice-contest-2/challenges/guardians-lunatics-ioi14">Hackerrank - Guardians of the Lunatics</a></li>
+<li><a href="https://open.kattis.com/problems/money">ACM ICPC World Finals 2017 - Money</a></li>
+</ul>
+
+<h2>Recursos</h2>
+
+<ul>
+<li><a href="https://www.youtube.com/watch?v=YBSt1jYwVfU">Errichto - Dynamic Programming #1</a></li>
+<li><a href="https://www.youtube.com/watch?v=1mtvm2ubHCY">Errichto - Dynamic Programming #2</a></li>
+<li><a href="https://www.youtube.com/watch?v=pwpOC1dph6U">Errichto - Dynamic Programming #3</a></li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>      
