@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Floyd-Warshall - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Algoritmo de Floyd-Warshall</h1>
+			<p>Dado um grafo $G$ não-direcionado com pesos nas arestas com $n$ vértices. A tarefa é encontrar o comprimento do caminho mais curto $d_{ij}$ entre cada par de vértices $i$ e $j$.</p>
+
+<p>O grafo pode ter arestas de peso negativo, mas nenhum ciclo negativo (para os ciclos negativos o caminho mais curto é indefinido).</p>
+
+<p>Este algoritmo também pode ser usado para detectar a presença de ciclos negativos.
+O grafo tem um ciclo negativo se, no final do algoritmo, a distância de um vértice $v$ para ele mesmo for negativa.</p>
+
+<p>Esse algoritmo foi publicado simultaneamente em artigos por Robert Floyd e Stephen Warshall em 1962.
+Entretanto, em 1959, Bernard Roy publicou essencialmente o mesmo algoritmo, mas sua publicação passou despercebida.</p>
+
+<h2>Descrição do algoritmo</h2>
+
+<p>A ideia chave do algoritmo é dividir o processo de encontrar o caminho mais curto entre dois vértices para várias fases adcionais.</p>
+
+<p>Iremos numerar os vértices a de 1 até $n$.
+A matriz de distâncias será $d[ ][ ]$.</p>
+
+<p>Antes da $k$-th fase ($k = 1 \dots n$), $d[i][j]$ para quaisquer vértices $i$ e $j$, o algoritmo armazena o comprimento do caminho mais curto entre o vértice $i$ e o vértice $j$, contendo apenas os vértices $&#92;{1, 2, ..., k-1&#92;}$ como vértices internos dentro do caminho.</p>
+
+<p>Em outras palavras, antes da $k$-th fase, o valor de $d[i][j]$ é igual ao comprimento do caminho mais curto do vértice $i$ para o vértice $j$, se os vértices do caminho forem menores que o valor $k$ (o começo e o final do caminho não são restringidos por essa regra).</p>
+
+<p>Para $k = 0$, podemos preencher a matriz $d[i][j] = w_{i j}$ se existir uma aresta entre $i$ e $j$ com peso $w_{i j}$ e $d[i][j] = \infty$ se não existir uma aresta entre esses vértices.
+Na prática, $\infty$ será algum valor muito grande.
+Este é um requisito para o algoritmo.</p>
+
+<p>Suponha agora que estamos na $k$-th fase, e queremos computar a matriz $d[ ][ ]$ para que ela atenda aos requisitos para a $(k + 1)$-th fase.
+Temos que corrigir as distâncias para alguns pares de vértices $(i, j)$.
+Existem dois casos fundamentalmente diferentes:</p>
+
+<ul>
+<li><p>O caminho mais curto do vértice $i$ para o vértice $j$ com vértices internos do conjunto $&#92;{1, 2, \dots, k&#92;}$ coincide com o caminho mais curto dos vértices internos do conjunto $&#92;{1, 2, \dots, k-1&#92;}$.</p>
+
+<p>Nesse caso, $d[i][j]$ não mudará durante a transição.</p></li>
+<li><p>O caminho mais curto com vértices internos do conjunto $&#92;{1, 2, \dots, k&#92;}$ será, de fato, o mais curto.</p>
+
+<p>Isso significa que o novo caminho mais curto passa pelo vértice $k$.
+Podemos dividir o caminho mais curto entre $i$ e $j$ em dois caminhos:
+o caminho entre $i$ e $k$, e o caminho entre $k$ e $j$.
+Ambos os caminhos usam apenas vértices internos do conjunto $&#92;{1, 2, \dots, k-1&#92;}$ e, nesse sentido, são os caminhos mais curtos.
+<strong>Portanto, já calculamos os comprimentos desses caminhos antes, e podemos calcular o comprimento do caminho mais curto entre $i$ e $j$ como $d[i][k] + d[k][j]$.</strong></p></li>
+</ul>
+
+<p>Combinando esses dois casos, descobrimos que podemos recalcular o comprimento de todos os pares $(i, j)$ na $k$-th fase da seguinte maneira:</p>
+
+<p>$$d_{\text{new}}[i][j] = min(d[i][j], d[i][k] + d[k][j])$$</p>
+
+<p><strong>Portanto, todo o trabalho necessário na $k$-th fase será iterar sobre todos os pares de vértices e recalcular o comprimento do caminho mais curto entre eles.
+Como resultado, depois da $n$-th fase, o valor $d[i][j]$ na matriz de distância é o comprimento do caminho mais curto entre $i$ e $j$, ou é $\infty$ se o caminho entre os vértices entre $i$ e $j$ não existir.</strong></p>
+
+<p>Uma última observação - não precisamos criar uma matriz de distância separada $d_{\text{new}}[ ][ ]$ para armazenar temporariamente os caminhos mais curtos da $k$-th fase, i.e. todas as alterações podem ser feitas diretamente na matriz $d[ ][ ]$ em qualquer fase.
+De fato, em qualquer $k$-th fase estamos melhorando a distância de qualquer caminho na matriz de distâncias, assim não podemos piorar o comprimento do caminho mais curto para qualquer par de vértices que devem ser processados na $(k+1)$-th fase ou fases posteriores.</p>
+
+<p>A complexidade deste algoritmo é $O(n^3)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Deixe que $d[$ $]$$[$ $]$ seja uma array 2D de tamanho $n \times n$, na qual é preenchida de acordo com a $0$-th fase, como explicado anteriormente.
+Também vamos definir $d[i][i] = 0$ para qualquer $i$ na $0$-th fase(afinal, a distância de um vértice para ele mesmo é zero e será mínima).</p>
+
+<p>Em seguida, o algoritmo é implementado da seguinte maneira:</p>
+
+<pre><code class="cpp">for (int k = 0; k &lt; n; ++k) {     //iteração das fases do algoritmo
+    for (int i = 0; i &lt; n; ++i) {                        //iteração dos vértices
+        for (int j = 0; j &lt; n; ++j) {
+            d[i][j] = min(d[i][j], d[i][k] + d[k][j]);      //atualização do caminho mais curto
+        }
+    }
+}
+</code></pre>
+
+<p>Supõe-se que, se não houver aresta entre dois vértices $i$ e $j$, então a matriz $d[i][j]$ contém um número enorme (sendo maior que qualquer outro comprimento possível no grafo).
+Então essa aresta sempre será inútil para usar e o algoritmo trabalhará corretamente(esse estágio é semelhante como infinitar as distâncias no algoritmo de Dijkstra).</p>
+
+<p>No entanto, <strong>se houver arestas de peso negativas no grafo</strong>, medidas especiais deverão ser tomadas.
+Caso contrário, os valores resultantes na matriz podem ter a forma $\infty - 1$,  $\infty - 2$, etc., na qual ainda indica que entre os respectivos vértices não existe um caminho definido.
+Portanto, se o grafo tiver arestas de peso negativo, é melhor implementar o algoritmo de Floyd-Warshall da seguinte maneira, para que não realize iterações usando caminhos que não existem.</p>
+
+<pre><code class="cpp">for (int k = 0; k &lt; n; ++k) {
+    for (int i = 0; i &lt; n; ++i) {
+        for (int j = 0; j &lt; n; ++j) {
+            if (d[i][k] &lt; INF &amp;&amp; d[k][j] &lt; INF)
+                d[i][j] = min(d[i][j], d[i][k] + d[k][j]); 
+        }
+    }
+}
+</code></pre>
+
+<h2>Recuperando a sequência de vértices no caminho mais curto</h2>
+
+<p>É fácil manter informações adicionais com as quais será possível recuperar o caminho mais curto entre dois vértices, na forma de uma sequência de vértices.</p>
+<p>Para isso, além da matriz de distância $d[ ][ ]$, a matriz de ancestrais $p[ ][ ]$ deve ser mantida, que conterá o número da fase em que a menor distância entre dois vértices foi modificada pela última vez.
+O número da fase nada mais é do que um vértice no meio do caminho mais curto desejado.
+Agora só precisamos encontrar o caminho mais curto entre os vértices $i$ e $p[i][j]$, e entre $p[i][j]$ e $j$.
+Isso leva a um algoritmo de reconstrução recursiva simples do caminho mais curto.</p>
+
+<h2>Caso dos pesos reais</h2>
+
+<p>Se os pesos das arestas não forem inteiros, mas reais, é necessário levar em consideração os erros que ocorrem ao trabalhar com o tipo <strong>float</strong>.</p>
+
+<p>O algoritmo de Floyd-Warshall tem o efeito desagradável de acumular os erros rapidamente.
+De fato, se houver um erro na primeira fase do $\delta$, esse erro pode se propagar para a segunda iteração como $2 \delta$, para a terceira iteração como $3 \delta$, e assim por diante.</p>
+
+<p>Para evitar isso, o algoritmo pode ser modificado para corrigir o erro (E = $\delta$) em consideração usando a seguinte comparação:</p>
+
+<pre><code class="cpp">if (d[i][k] + d[k][j] &lt; d[i][j] - E)
+    d[i][j] = d[i][k] + d[k][j]; 
+</code></pre>
+
+<h2>Caso de ciclos negativos</h2>
+
+<p>Formalmente, o algoritmo de Floyd-Warshall não se aplica em grafos que contêm ciclos de pesos negativos. 
+Mas para todos os pares de vértices $i$ e $j$ para o qual não existe um caminho começando em $i$, visitando um ciclo negativo, e terminando em $j$, o algoritmo ainda funcionará corretamente.</p>
+
+<p>For the pair of vertices for which the answer does not exist (due to the presence of a negative cycle in the path between them), the Floyd algorithm will store any number (perhaps highly negative, but not necessarily) in the distance matrix.
+
+No entanto, é possível melhorar o algoritmo de Floyd-Warshall, para tratar com cuidado esses pares de vértices e gerá-los, por exemplo, definidos como $-\text{INF}$.</p>
+
+<p>Isso pode ser feito da seguinte maneira:
+iremos executar o algoritmo de Floyd-Warshall para um dado grafo.
+Em seguida, um caminho mais curto entre os vértices $i$ e $j$ não existe se existir um vértice $t$ que é alcançável de $i$ e também por $j$, no qual $d[t][t] &lt; 0$.</p>
+
+<p>Além disso, ao usar o algoritmo de Floyd-Warshall para grafos com ciclos negativos, devemos ter em mente que podem surgir situações nas quais as distâncias podem chegar exponencialmente rápido ao negativo.
+Portanto, overflow de inteiros deve ser controlado limitando a distância mínima com algum valor (e.g. $-\text{INF}$).</p>
+
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=762">UVA: Page Hopping</a></li>
+<li><a href="http://www.spoj.com/problems/SOCIALNE/">SPOJ: Possible Friends</a></li>
+<li><a href="http://codeforces.com/problemset/problem/295/B">CODEFORCES: Greg and Graph</a></li>
+<li><a href="http://www.spoj.com/problems/CHICAGO/">SPOJ: CHICAGO - 106 miles to Chicago</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1665">UVA 10724 - Road Construction</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=53">UVA  117 - The Postal Worker Rings Once</a></li>
+<li><a href="http://codeforces.com/problemset/problem/21/D">Codeforces - Traveling Graph</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3639">UVA - 1198 - The Geodetic Set Problem</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=989">UVA - 10048 - Audiophobia</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=61">UVA - 125 - Numbering Paths</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1221">LOJ - Travel Company</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=364">UVA 423 - MPI Maelstrom</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4162">UVA 1416 - Warfare And Logistics</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3674">UVA 1233 - USHER</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1734">UVA 10793 - The Orc Attack</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1040">UVA 10099 The Tourist Guide</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=810">UVA 869 - Airline Comparison</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=5134">UVA 13211 - Geonosis</a></li>
+<li><a href="http://www.spoj.com/problems/ROHAAN/">SPOJ - Defend the Rohan</a></li>
+<li><a href="http://codeforces.com/contest/25/problem/C">Codeforces - Roads in Berland</a></li>
+<li><a href="http://codeforces.com/contest/33/problem/B">Codeforces - String Problem</a></li>
+<li><a href="http://codeforces.com/gym/101223">GYM - Manic Moving (C)</a></li>
+<li><a href="http://www.spoj.com/problems/ARBITRAG/">SPOJ - Arbitrage</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3331">UVA - 12179 - Randomly-priced Tickets</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1086">LOJ - 1086 - Jogging Trails</a></li>
+<li><a href="http://www.spoj.com/problems/INGRED/">SPOJ - Ingredients</a></li>
+</ul>
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>   
