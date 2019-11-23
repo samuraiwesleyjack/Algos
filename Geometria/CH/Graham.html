@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Convex Hull - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Construção de um Convex Hull utilizando o <a href="https://pt.wikipedia.org/wiki/Exame_de_Graham">Scan de Graham</a></h1>
+			<p>Neste artigo discutiremos o problema de construir um convex hull(casco convexo) a partir de um conjunto de pontos.</p>
+
+<p>Considere $N$ pontos dados em um plano, e o objetivo é gerar um convex hull, i.e. <strong>o menor polígono convexo que contém todos os pontos fornecidos</strong>.</p>
+
+<p>O algoritmo utilizado aqui é o <strong>Scan de Graham</strong> (proposto em 1972 por Graham) com aperfeiçoamentos feitos por Andrew (1979).
+O algoritmo permite a construção de um convex hull em $O(N \log N)$ usando apenas operações de comparação, 
+adição e multiplicação. O algoritmo é otimizado, com exceção de alguns problemas em que o processamento paralelo ou online
+está envolvido.</p>
+
+<h2>Descrição</h2>
+
+<p>O algoritmo encontra primeiro os pontos mais à esquerda e mais à direita A e B. No caso de existirem vários desses pontos,
+o menor entre a esquerda (coordenada Y mais baixa) é tomado como A, e o mais alto entre a direita (coordenada Y mais alta)
+é tomado como B. Claramente, A e B devem pertencer ao convex hull 
+como eles são os pontos mais distantes e que não podem ser contidos
+por qualquer linha formada por um par de pontos internos do convex hull.</p>
+
+<p>Agora, desenhe uma linha através de AB. Isso divide todos os outros pontos em dois conjuntos, S1 e S2, onde S1 contém todos os pontos acima da linha que liga A e B, e S2 contém todos os pontos abaixo da linha que une A e B. Os pontos que estão na linha que une A e B podem pertencer a um dos dois conjuntos. Os pontos A e B pertencem aos dois conjuntos. Agora, o algoritmo constrói o conjunto superior S1 e o conjunto inferior S2 e os combina para obter a resposta.</p>
+
+<p>Para obter o conjunto superior, ordenamos todos os pontos pela coordenada x. Para cada ponto, verificamos se - o ponto atual é o último ponto,
+(no qual definimos como B), ou se a orientação entre a linha entre A e o ponto atual e a linha entre o ponto atual e B for no sentido horário. Nesse caso  
+o ponto atual pertence ao conjunto superior S1. A verificação do sentido horário ou anti-horário pode ser feita verificando a <a href="https://cp-algorithms.com/geometry/oriented-triangle-area.html">orientação</a>.</p>
+
+<p>Se o ponto especificado pertence ao conjunto superior, verificamos o ângulo feito pela linha que liga o segundo último ponto e o último ponto no convex hull superior,
+com a linha conectando o último ponto no convex hull superior e o ponto atual. Se o ângulo não estiver no sentido horário, removeremos o ponto mais recente adicionado
+ao convex hull superior, pois o ponto atual poderá conter o ponto anterior depois que ele for adicionado ao convex hull.</p>
+
+<p>A mesma lógica se aplica ao conjunto inferior S2. Se um ou outro - o ponto atual é B ou a orientação das linhas, formada por A e a
+ponto atual e o ponto atual e B estão no sentido anti-horário - então ele pertence ao S2.</p>
+
+<p>Se o ponto especificado pertence ao conjunto inferior, agimos da mesma forma que para um ponto no conjunto superior, exceto que verificamos uma orientação no sentido anti-horário
+em vez de uma orientação no sentido horário. Assim, se o ângulo feito pela linha que liga o segundo último ponto e o último ponto no convex hull inferior
+com a linha que liga o último ponto no convex hull inferior e o ponto atual não é no sentido anti-horário, removemos o ponto mais recente adicionado ao convex hull inferior, pois o ponto atual poderá conter
+o ponto anterior, uma vez adicionado ao convex hull.</p>
+
+<p>O convex hull final é obtido da união do superior e inferior convex hull, e a implementação fica da seguinte maneira.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct pt {
+    double x, y;
+};
+
+bool cmp(pt a, pt b) {
+    return a.x &lt; b.x || (a.x == b.x &amp;&amp; a.y &lt; b.y);
+}
+
+bool cw(pt a, pt b, pt c) {
+    return a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y) &lt; 0;
+}
+
+bool ccw(pt a, pt b, pt c) {
+    return a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y) &gt; 0;
+}
+
+void convex_hull(vector&lt;pt&gt;&amp; a) {
+    if (a.size() == 1)
+        return;
+
+    sort(a.begin(), a.end(), &amp;cmp);
+    pt p1 = a[0], p2 = a.back();
+    vector&lt;pt&gt; up, down;
+    up.push_back(p1);
+    down.push_back(p1);
+    for (int i = 1; i &lt; (int)a.size(); i++) {
+        if (i == a.size() - 1 || cw(p1, a[i], p2)) {
+            while (up.size() &gt;= 2 &amp;&amp; !cw(up[up.size()-2], up[up.size()-1], a[i]))
+                up.pop_back();
+            up.push_back(a[i]);
+        }
+        if (i == a.size() - 1 || ccw(p1, a[i], p2)) {
+            while(down.size() &gt;= 2 &amp;&amp; !ccw(down[down.size()-2], down[down.size()-1], a[i]))
+                down.pop_back();
+            down.push_back(a[i]);
+        }
+    }
+
+    a.clear();
+    for (int i = 0; i &lt; (int)up.size(); i++)
+        a.push_back(up[i]);
+    for (int i = down.size() - 2; i &gt; 0; i--)
+        a.push_back(down[i]);
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://open.kattis.com/problems/convexhull">Kattis - Convex Hull</a></li>
+<li><a href="https://open.kattis.com/problems/parade">Kattis - Keep the Parade Safe</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1185">Timus 1185: Wall</a></li>
+<li><a href="http://usaco.org/index.php?page=viewproblem2&amp;cpid=382">Usaco 2014 January Contest, Gold - Cow Curling</a></li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
