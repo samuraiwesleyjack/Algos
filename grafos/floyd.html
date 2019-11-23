@@ -71,7 +71,7 @@ Ambos os caminhos usam apenas vértices internos do conjunto $&#92;{1, 2, \dots,
 
 <p>Combinando esses dois casos, descobrimos que podemos recalcular o comprimento de todos os pares $(i, j)$ na $k$-th fase da seguinte maneira:</p>
 
-<p>$$d_{\text{new}}[i][j] = min(d[i][j], d[i][k] + d[k][j])$$</p>
+<p>$$d_{\text{nova distancia}}[i][j] = min(d[i][j], d[i][k] + d[k][j])$$</p>
 
 <p><strong>Portanto, todo o trabalho necessário na $k$-th fase será iterar sobre todos os pares de vértices e recalcular o comprimento do caminho mais curto entre eles.
 Como resultado, depois da $n$-th fase, o valor $d[i][j]$ na matriz de distância é o comprimento do caminho mais curto entre $i$ e $j$, ou é $\infty$ se o caminho entre os vértices entre $i$ e $j$ não existir.</strong></p>
