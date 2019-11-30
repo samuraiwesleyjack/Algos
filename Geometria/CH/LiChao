@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Convex Hull e Li Chao Tree - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Truque do Convex Hull e árvore de Li Chao</h1>
+
+<p>Considere o seguinte problema. Existem $n$ cidades. Você quer viajar da cidade $1$ para a cidade $n$ de carro. Para fazer isso, você precisa comprar gasolina. Sabe-se que um litro de gasolina custa $cost_k$ na $k^{th}$ cidade. Inicialmente, seu tanque de combustível está vazio e você gasta um litro de gasolina por quilômetro. As cidades estão localizadas na mesma linha em ordem crescente, com a $k^{th}$ cidade tendo coordenada $x_k$. Você também tem que pagar $pedagio_k$ para entrar na $k^{th}$ cidade. Sua tarefa é fazer a viagem com o menor custo possível. A solução pode ser calculada por meio de programação dinâmica (DP):</p>
+
+<p>$$dp_i = pedagio_i+\min\limits_{j&lt;i}(cost_j \cdot (x_i - x_j)+dp_j)$$</p>
+
+<p>Uma abordagem ingênua fornecerá complexidade $O(n^2)$, na qual pode ser aprimorada para $O(n \log n)$ ou $O(n \log [C \varepsilon^{-1}])$ onde $C$ é o possível maior $|x_i|$ e $\varepsilon$ é a precisão na qual $x_i$ é considerado ($\varepsilon = 1$ para números inteiros, geralmente a maioria dos casos). Para fazer isso, observe que o problema pode ser reduzido à adição de funções lineares $k \cdot x + b$ ao conjunto e encontrar o valor mínimo das funções em algum ponto específico $x$. Existem duas principais abordagens que você pode usar aqui.</p>
+
+<h2>Truque do Convex hull</h2>
+
+<p>A idéia dessa abordagem é manter um <a href="https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain">convex hull inferior</a> de funções lineares.
+Na verdade, seria um pouco mais conveniente considerá-las não como funções lineares, mas como pontos $(k;b)$ no plano, de modo que teremos que encontrar o ponto que possui o menor produto com um determinado ponto $(x;1)$, ou seja, onde este ponto $kx+b$ é minimizado.
+Esse mínimo estará necessariamente no convex hull inferior desses pontos, como pode ser visto abaixo:</p>
+
+<p><center> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/convex_hull_trick.png" alt="lower convex hull" /> </center></p>
+
+<p>É necessário manter pontos no convex hull e vetores normais das arestas do convex hull.
+Quando você tem uma query $(x;1)$ você terá que encontrar o vetor normal mais próximo dele em termos de ângulos entre eles, então a função linear otimizada corresponderá a um de seus pontos finais.
+Para ver isso, note que os pontos com um produto constante com $(x;1)$ existem em uma linha que é ortogonal à $(x;1)$, então a função linear otimizada será aquela que, tangente ao convex hull e no qual é colinear e normal com $(x;1)$, toca o "casco"(hull).
+Esse é o ponto em que as normais das arestas, situadas à esquerda e à direita, são direcionadas para lados diferentes do $(x;1)$.</p>
+
+<p>
+Essa abordagem é útil quando as consultas de adição de funções lineares são monótonas em termos de $ k $ ou se trabalhamos offline, ou seja, primeiro podemos adicionar todas as funções lineares e responder a consultas posteriormente.
+Portanto, não podemos resolver os problemas das cidades / gasolina dessa maneira. Isso exigiria o tratamento de "queries"(consultas, testes, perguntas) online.
+<strong>No entanto, quando se trata de consultas online, as coisas ficam bastante difíceis e é preciso usar algum tipo de estrutura de dados para implementar um convex hull adequado</strong>.
+Entretanto, a abordagem on-line não será considerada neste artigo devido à sua complexidade e porque a segunda abordagem (que é a árvore de Li Chao) permite resolver o problema de maneira mais simples.
+Vale ressaltar que ainda é possível usar essa abordagem on-line sem complicações por "<a href="https://cp-algorithms.com/data_structures/sqrt_decomposition.html">square root decomposition</a>".
+Isto é, refaça o convex hull do começo a cada $\sqrt n$ novas linhas.</p>
+
+<p>Para implementar a abordagem, deve-se começar com alguma função geométrica útil, aqui sugerimos usar o tipo de número complexo do C++.</p>
+
+<pre><code class="cpp">typedef int ftype;
+typedef complex&lt;ftype&gt; point;
+#define x real
+#define y imag
+
+ftype dot(point a, point b) {
+    return (conj(a) * b).x();
+}
+
+ftype cross(point a, point b) {
+    return (conj(a) * b).y();
+}
+</code></pre>
+
+<p>Aqui, assumiremos que, quando funções lineares são adicionadas, seu k só aumenta e queremos encontrar valores mínimos.
+Manteremos pontos no vetor $hull$ e vetores normais no vetor $vecs$.
+Quando adcionamos um novo ponto, temos que olhar para o ângulo formado entre a última aresta no convex hull e o vetor do último ponto no convex hull para o novo ponto.
+Esse ângulo deve ser diretamente anti-horário, isto é, o produto escalar do último vetor normal no casco (direcionado para dentro do casco(hull)) e o vetor do último ponto ao novo deve ser não negativo.
+Enquanto isso não for verdade, devemos apagar o último ponto no convex hull junto com a aresta correspondente.</p>
+
+<pre><code class="cpp">vector&lt;point&gt; hull, vecs;
+
+void add_line(ftype k, ftype b) {
+    point nw = {k, b};
+    while(!vecs.empty() &amp;&amp; dot(vecs.back(), nw - hull.back()) &lt; 0) {
+        hull.pop_back();
+        vecs.pop_back();
+    }
+    if(!hull.empty()) {
+        vecs.push_back(1i * (nw - hull.back()));
+    }
+    hull.push_back(nw);
+}
+
+</code></pre>
+
+<p>Agora, para obter o valor mínimo em algum momento, encontraremos o primeiro vetor normal no convex hull que é direcionado no sentido anti-horário de $(x;1)$. O ponto final esquerdo dessa aresta será a resposta. Para verificar se o vetor $ a $ não está direcionado no sentido anti-horário do vetor $ b $, devemos verificar se o produto cruzado $ [a, b] $ é positivo.</p>
+
+<pre><code class="cpp">int get(ftype x) {
+    point query = {x, 1};
+    auto it = lower_bound(vecs.begin(), vecs.end(), query, [](point a, point b) {
+        return cross(a, b) &gt; 0;
+    });
+    return dot(query, hull[it - vecs.begin()]);
+}
+</code></pre>
+
+<h2>Árvore de Li Chao</h2>
+
+<p>Suponha que você receba um conjunto de funções e que a cada duas funções possam se cruzar pelo menos uma vez. Vamos manter em cada vértice de uma árvore de segmentos algumas funções de tal maneira que, se formos da raiz para a folha, será garantido que uma das funções que encontramos no caminho será a que fornece o valor mínimo nessa folha. Vamos ver como construí-lo.</p>
+
+<p>Assumindo que estamos em algum vértice que corresponde a metade de um segmento $[l;r)$ e a função $f_{old}$ é mantida ali e depois adicionamos a função $f_{new}$. Então o ponto de interseção estará em $[l;m)$ ou em $[m;r)$, onde $m=\left\lfloor\tfrac{l+r}{2}\right\rfloor$. 
+Podemos descobrir com eficiência comparando os valores das funções em pontos $l$ e $m$. Se a função dominante mudar, então estará em $[l;m)$, se não, estará em $[m;r)$. Agora, para a metade do segmento sem interseção, escolheremos a função inferior e a escreveremos no vértice atual. Você pode ver que sempre será o menor no ponto $ m $. Depois disso, recursivamente vamos para a outra metade do segmento com a função que era a superior. Como você pode ver, isso manterá a correção na primeira metade do segmento e, na outra, a correção será mantida durante a chamada recursiva. Assim, podemos adicionar funções e verificar o valor mínimo no ponto em $O(\log [C\varepsilon^{-1}])$.</p>
+
+<p>Aqui está a ilustração do que está acontecendo no vértice quando adicionamos uma nova função:</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/li_chao_vertex.png" alt="Li Chao Tree vertex" /></center></p>
+
+<p>Vamos para a implementação agora. Mais uma vez, usaremos números complexos para manter funções lineares.</p>
+
+<pre><code class="cpp">typedef int ftype;
+typedef complex&lt;ftype&gt; point;
+#define x real
+#define y imag
+
+ftype dot(point a, point b) {
+    return (conj(a) * b).x();
+}
+
+ftype f(point a,  ftype x) {
+    return dot(a, {x, 1});
+}
+</code></pre>
+
+<p>Manteremos funções na array $line$ e usaremos indexação binária da árvore segmentária. Se você quiser usar em números maiores ou doubles, você deve usar uma árvore de segmentos dinâmica. 
+A árvore de segmentos deve ser inicializada com valores padrão, e.g. com linhas do tipo $0x + \infty$.</p>
+
+<pre><code class="cpp">const int maxn = 2e5;
+
+point line[4 * maxn];
+
+void add_line(point nw, int v = 1, int l = 0, int r = maxn) {
+    int m = (l + r) / 2;
+    bool lef = f(nw, l) &lt; f(line[v], l);
+    bool mid = f(nw, m) &lt; f(line[v], m);
+    if(mid) {
+        swap(line[v], nw);
+    }
+    if(r - l == 1) {
+        return;
+    } else if(lef != mid) {
+        add_line(nw, 2 * v, l, m);
+    } else {
+        add_line(nw, 2 * v + 1, m, r);
+    }
+}
+</code></pre>
+
+<p>Agora para conseguir o mínimo em algum ponto $x$ simplesmente iremos escolher o mínimo valor along junto com o caminho para o ponto.</p>
+
+<pre><code class="cpp">int get(int x, int v = 1, int l = 0, int r = maxn) {
+    int m = (l + r) / 2;
+    if(r - l == 1) {
+        return f(line[v], x);
+    } else if(x &lt; m) {
+        return min(f(line[v], x), get(x, 2 * v, l, m));
+    } else {
+        return min(f(line[v], x), get(x, 2 * v + 1, m, r));
+    }
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://csacademy.com/contest/archive/task/squared-ends">CS Academy - Squared Ends</a></li>
+<li><a href="http://codeforces.com/contest/932/problem/F">Codeforces - Escape Through Leaf</a></li>
+<li><a href="https://www.codechef.com/NOV17/problems/POLY">CodeChef - Polynomials</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
