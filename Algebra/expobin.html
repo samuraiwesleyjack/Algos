@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Exponenciação rápida - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Exponenciação Binária</h1>
+
+<p>A exponenciação binária (ou exponenciação modular rápida) é um truque que permite calcular $a^n$ usando apenas $O(\log n)$ multiplicações (em vez de $O(n)$ multiplicações exigidas por uma abordagem mais forçada).</p>
+
+<p>Também possui aplicações importantes em muitas tarefas não relacionadas à aritmética, uma vez que
+pode ser usado com qualquer operação que tenha a propriedade da <strong>associatividade</strong>:</p>
+
+<p>$$(X \cdot Y) \cdot Z = X \cdot (Y \cdot Z)$$</p>
+
+<p>Isso se aplica à multiplicação modular, à multiplicação de matrizes e
+para outros problemas que discutiremos abaixo.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Elevar $a$ ao índice $n$ é expressado como multiplicação de $a$ feita $n - 1$ vezes:
+$a^{n} = a \cdot a \cdot \ldots \cdot a$. Entretanto, essa abordagem não é prática com valores enormes de $a$ e $n$.</p>
+
+<p>$a^{b+c} = a^b \cdot a^c$ e $a^{2b} = a^b \cdot a^b = (a^b)^2$.</p>
+
+<p>A ideia da exponenciação binária é que nós dividimos o trabalho usando a representação binária do exponente.</p>
+
+<p>Vamos escrever $n$ na base 2, por exemplo:
+$$3^{13} = 3^{1101_2} = 3^8 \cdot 3^4 \cdot 3^1$$</p>
+
+<p>Desde que o número $n$ tenha exatamente $\lfloor \log_2 n \rfloor + 1$ digitos na base 2, nós apenas precisamos performar $O(\log n)$ multiplicações, se já soubermos as exponenciações $a^1, a^2, a^4, a^8, \dots, a^{\lfloor \log n \rfloor}$.</p>
+
+<p>Portanto, precisamos apenas conhecer uma maneira rápida de calculá-los.
+Partimos da ideia de que um elemento na sequência é apenas o quadrado do elemento anterior.</p>
+
+<p>$$\begin{align}
+3^1 &amp;= 3 &#92;&#92;
+3^2 &amp;= \left(3^1\right)^2 = 3^2 = 9 &#92;&#92;
+3^4 &amp;= \left(3^2\right)^2 = 9^2 = 81 &#92;&#92;
+3^8 &amp;= \left(3^4\right)^2 = 81^2 = 6561
+\end{align}$$</p>
+
+<p>Então para conseguir a resposta final $3^{13}$, precisamos apenas multiplicar 3 exponenciações (<strong>pulando $3^3$ pois o bit correspondente em $n$ não está definido(n = 13 = 1101)</strong>):
+$3^{13} = 6561 \cdot 81 \cdot 3 = 1594323$</p>
+
+<p>A complexidade final do algoritmo é $O(\log n)$: precisamos calcular $\log n$ exponenciações de $a$, e então precisamos fazer no máximo $\log n$ multiplicações para conseguir a resposta.</p>
+
+<p>A seguinte abordagem recursiva expressa a mesma ideia:</p>
+
+<p>$$a^n = \begin{cases}
+1 &amp;\text{se } n == 0 &#92;&#92;
+\left(a^{\frac{n}{2}}\right)^2 &amp;\text{se } n > 0 \text{ e } n \text{ par}&#92;&#92;
+\left(a^{\frac{n - 1}{2}}\right)^2 \cdot a &amp;\text{se } n > 0 \text{ e } n \text{ impar}&#92;&#92;
+\end{cases}$$</p>
+
+<h2>Implementação</h2>
+
+<p>Primeiro, a abordagem recursiva, que é uma tradução da fórmula recursiva:</p>
+
+<pre><code class="cpp">long long binpow(long long a, long long b) {
+    if (b == 0)
+        return 1;
+    long long res = binpow(a, b / 2);
+    if (b % 2)
+        return res * res * a;
+    else
+        return res * res;
+}
+</code></pre>
+
+<p>A segunda abordagem consegue completar a mesma tarefa de uma forma não recursiva.
+Calcula todas as exponenciações em um loop, e multiplica as potências com os correspondentes bits(se eles estiverem definidos) em $n$.
+Apesar da complexidade das duas serem a mesma, essa abordagem será mais rápida na prática, pois temos a sobrecarga das chamadas recursivas.</p>
+
+<pre><code class="cpp">long long binpow(long long a, long long b) {
+    long long res = 1;
+    while (b &gt; 0) {
+        if (b &amp; 1)
+            res = res * a;
+        a = a * a;
+        b &gt;&gt;= 1;
+    }
+    return res;
+}
+</code></pre>
+
+<h2>Aplicações</h2>
+
+<h3>Cálculo eficaz de expoentes grandes modulo algum número</h3>
+
+<p><strong>Problema:</strong>
+Calcule $x^n \bmod m$.
+Essa é uma operação bem comum. Por exemplo, é usado para calcular a <a href="https://cp-algorithms.com/algebra/module-inverse.html">multiplicação modular inversa</a>.</p>
+
+<p><strong>Solução:</strong>
+Como sabemos que o operador do módulo não interfere nas multiplicações ($a \cdot b \equiv (a \bmod m) \cdot (b \bmod m) \pmod m$), podemos usar diretamente o mesmo código e apenas substituir cada multiplicação por uma multiplicação modular:</p>
+
+<pre><code class="cpp">long long binpow(long long a, long long b, long long m) {
+    a %= m;
+    long long res = 1;
+    while (b &gt; 0) {
+        if (b &amp; 1)
+            res = res * a % m;
+        a = a * a % m;
+        b &gt;&gt;= 1;
+    }
+    return res;
+}
+</code></pre>
+
+<p><strong>Nota:</strong> Se $m$ é um número primo, podemos acelerar um pouco esse algoritmo calculando $x ^ {n \mod (m-1)}$ em vez de $x ^ n$.
+Isto vem diretamente do pequeno teorema de Fermat (<a href="https://cp-algorithms.com/algebra/module-inverse.html">" Fermat's little theorem "</a>).</p>
+
+<h3>Cálculo eficaz dos números de Fibonacci</h3>
+
+<p><strong>Problema:</strong> Calcule o $n$-th número de Fibonacci $F_n$.</p>
+
+<p><strong>Solução:</strong> Para mais detalhes, veja o artigo <a href="https://cp-algorithms.com/algebra/fibonacci-numbers.html">números de Fibonacci</a>.
+Iremos apenas apresentar uma visão geral do algoritmo.
+Para calcular o próximo número de Fibonacci, são necessários apenas os dois anteriores, como $F_n = F_{n-1} + F_{n-2}$.
+Nós podemos construir uma $2 \times 2$ matriz que descreve essa transformação:
+a transição de $F_i$ e $F_{i+1}$ para $F_{i+1}$ e $F_{i+2}$.
+Por exemplo, aplicando essa transformação ao par $F_0$ e $F_1$ iria mudar para $F_1$ e $F_2$.
+Portanto, podemos elevar essa matriz de transformação ao $n$-th índice para encontrar $F_n$ em tempo de complexidade $O(\log n)$.</p>
+
+<h3>Aplicando uma permutação $k$ vezes</h3>
+
+<p><strong>Problema:</strong> É dada uma sequência de tamanho $n$. Aplique a ela uma dada permutação $k$ vezes.</p>
+
+<p><strong>Solução:</strong> Simplesmente eleve a permutação para o $k$-th índice usando exponenciação binária, e depois aplique na sequência. Isso lhe dará uma complexidade do tempo $O(n \log k)$.</p>
+
+<p><strong>Nota:</strong> Essa tarefa pode ser resolvida com mais eficiência em tempo linear, construindo o grafo de permutação e considerando cada ciclo de forma independente. Então poderia calcular $k$ modulo o tamanho do ciclo e encontrar a posição final para cada número que faz parte desse ciclo.</p>
+
+<h3>Aplicação rápida de um conjunto de operações geométricas a um conjunto de pontos</h3>
+
+<p><strong>Problema:</strong> Dados $n$ pontos $p_i$, aplique $m$ transformações para cada um desses pontos. Cada transformação pode ser uma mudança, uma escala ou uma rotação em torno de um determinado eixo por um determinado ângulo. Também existe uma operação "loop" que aplica uma lista de transformações $k$ vezes (operações de "loop" podem ser aninhadas). Você deve aplicar todas as tranformações em $O(n \cdot t)$, onde $t$ é o número total de transformações a serem aplicadas.</p>
+
+<p><strong>Solução:</strong> Vejamos como os diferentes tipos de transformações alteram as coordenadas:</p>
+
+<ul>
+<li>operação de Mudança: adiciona uma constante diferente a cada uma das coordenadas.</li>
+<li>operação de Escala: multiplica cada uma das coordenadas por uma constante diferente.</li>
+<li>operação de Rotação: a transformação é mais complicada (não entraremos em detalhes aqui), mas cada uma das novas coordenadas ainda pode ser representada como uma combinação linear das antigas.</li>
+</ul>
+
+<p>Como você pode ver, cada uma das transformações pode ser representada como uma operação linear nas coordenadas. Assim, uma transformação pode ser escrita como uma matriz $4 \times 4$ da forma:</p>
+
+<p>$$\begin{pmatrix}
+a_{11} &amp; a_ {12} &amp; a_ {13} &amp; a_ {14} &#92;\
+a_{21} &amp; a_ {22} &amp; a_ {23} &amp; a_ {24} &#92;\
+a_{31} &amp; a_ {32} &amp; a_ {33} &amp; a_ {34} &#92;\
+a_{41} &amp; a_ {42} &amp; a_ {43} &amp; a_ {44} &#92;\
+\end{pmatrix}$$</p>
+
+<p>que, quando multiplicado por um vetor com as coordenadas antigas e uma unidade, gera um novo vetor com as novas coordenadas e uma unidade:</p>
+
+<p>$$\begin{pmatrix} x &amp; y &amp; z &amp; 1 \end{pmatrix} \cdot
+\begin{pmatrix}
+a_{11} &amp; a_ {12} &amp; a_ {13} &amp; a_ {14} &#92;\
+a_{21} &amp; a_ {22} &amp; a_ {23} &amp; a_ {24} &#92;\
+a_{31} &amp; a_ {32} &amp; a_ {33} &amp; a_ {34} &#92;\
+a_{41} &amp; a_ {42} &amp; a_ {43} &amp; a_ {44} &#92;\
+\end{pmatrix}
+ = \begin{pmatrix} x' &amp; y' &amp; z' &amp; 1 \end{pmatrix}$$</p>
+
+<p>(Por que introduzir uma quarta coordenada fictícia, você pergunta? Sem isso, não seria possível implementar a operação de Mudança, pois exige que adicionássemos uma constante às coordenadas. Sem as coordenadas fictícias, poderíamos aplicar apenas uma combinação linear às coordenadas, não sendo possível adicionar uma constante.)</p>
+
+<p>Aqui estão alguns exemplos de como as transformações são representadas na forma de matriz:</p>
+
+<ul>
+<li><p>Operação de Mudança: desloque a coordenada $x$ por $5$, a coordenada $y$ por $7$ e a coordenada $z$ por $9$.
+$$\begin{pmatrix}
+1 &amp; 0 &amp; 0 &amp; 0 &#92;\
+0 &amp; 1 &amp; 0 &amp; 0 &#92;\
+0 &amp; 0 &amp; 1 &amp; 0 &#92;\
+5 &amp; 7 &amp; 9 &amp; 1 &#92;\
+\end{pmatrix}$$</p></li>
+<li><p>Operação de Escala: escale a coordenada $x$ por $10$ e as outras duas por $5$.
+$$\begin{pmatrix}
+10 &amp; 0 &amp; 0 &amp; 0 &#92;\
+0 &amp; 5 &amp; 0 &amp; 0 &#92;\
+0 &amp; 0 &amp; 5 &amp; 0 &#92;\
+0 &amp; 0 &amp; 0 &amp; 1 &#92;\
+\end{pmatrix}$$</p></li>
+<li><p>Operação de Rotação: rotacione $\theta$ graus em torno do eixo $x$ na direção anti-horária.
+$$\begin{pmatrix}
+1 &amp; 0 &amp; 0 &amp; 0 &#92;\
+0 &amp; \cos \theta &amp; -\sin \theta &amp; 0 &#92;\
+0 &amp; \sin \theta &amp; \cos \theta &amp; 0 &#92;\
+0 &amp; 0 &amp; 0 &amp; 1 &#92;\
+\end{pmatrix}$$</p></li>
+</ul>
+
+<p>Agora, uma vez que cada transformação é descrita como uma matriz, a sequência de transformações pode ser descrita como um produto dessas matrizes, e um "loop" de $k$ repetições pode ser descrito como a matriz elevada ao índice $k$ (na qual pode ser calculada usando exponenciação binária $O(\log{k})$). Dessa forma, a matriz que representa todas as transformações pode ser calculada primeiro em $O(m \log{k})$, e depois pode ser aplicada para cada um dos $n$ pontos em $O(n)$ para uma complexidade total de $O(n + m \log{k})$.</p>
+
+<h3>Número de caminhos de tamanho $k$ em um grafo</h3>
+
+<p><strong>Problema:</strong> Dado um grafo direcionado, sem pesos e com $n$ vertices, descubra o número de caminhos de tamanho $k$ de qualquer vértice $u$ para qualquer outro vértice $v$.</p>
+
+<p><strong>Solução:</strong> Esse problema é considerado em mais detalhes em um <a href="https://cp-algorithms.com/graph/fixed_length_paths.html">outro artigo</a>. O algoritmo consiste em elevar a matriz de adjacência $M$ do grafo (uma matriz na qual $m_{ij} = 1$ se tiver uma aresta de $i$ para $j$, ou $0$ caso contrário) para o $k$-th índice. Agora $m_{ij}$ será o número de caminhos de comprimento $k$ de $i$ para $j$. O tempo de complexidade dessa solução é $O(n^3 \log k)$.</p>
+
+<p><strong>Nota:</strong> Nesse mesmo artigo, outra variação desse problema é considerada: quando as arestas tem peso e é requerido encontrar o caminho com menor peso contendo exatamente $k$ arestas. Como mostrado nesse artigo, esse problema também é resolvido pela exponenciação da matriz de adjacência. A matriz teria o peso da aresta de $i$ para $j$, ou $\infty$ se não existir essa aresta.
+Em vez da operação usual de multiplicar duas matrizes, uma modificada deve ser usada:
+em vez de multiplicação, os dois valores são adicionados e, em vez de um somatório, é necessário um mínimo.
+Isto é: $result_{ij} = \min\limits_{1\ \leq\ k\ \leq\ n}(a_{ik} + b_{kj})$.</p>
+
+<h3>Variação da exponenciação binária: multiplicando dois números modulo $m$</h3>
+
+<p><strong>Problema:</strong> Multiplique dois números $a$ e $b$ modulo $m$. Mas o produto de $a$ e $b$ é muito grande para ser armazenado em um inteiro 64-bit. A ideia é calcular $a \cdot b \pmod m$ sem usar nenhum tipo de biblioteca ou aritmética para grandes números.</p>
+
+<p><strong>Solução:</strong> Simplesmente aplicamos o algoritmo de construção binário descrito acima, realizando apenas adições em vez de multiplicações. Em outras palavras, "expandimos" a multiplicação de dois números para $O (\log m)$ operações de adição e multiplicação por dois (na qual, em essência, é uma adição).</p>
+
+<p>$$a \cdot b = \begin{cases}
+0 &amp;\text{if }a = 0 &#92;&#92;
+2 \cdot \frac{a}{2} \cdot b &amp;\text{if }a > 0 \text{ and }a \text{ even} &#92;&#92;
+2 \cdot \frac{a-1}{2} \cdot b + b &amp;\text{if }a > 0 \text{ and }a \text{ odd}
+\end{cases}$$</p>
+
+<p><strong>Nota:</strong> Você pode resolver por um caminho diferente com operações com números do tipo float. Primeiro calcule a expressão $\frac{a \cdot b}{m}$ usando números float(point-float numbers) e jogue-o em um unsigned integer(inteiro sem sinal) $q$. Subtraia $q \cdot m$ de $a \cdot b$ usando aritmética de unsigned integer e pegue o modulo $m$ para encontrar a resposta(meio confuso mas com uma boa prática em usar diferentes tipos em uma liguagem de programação você consegue pegar a prática). Essa solução parece pouco confiável, mas é muito rápida. Veja <a href="https://cs.stackexchange.com/questions/77016/modular-multiplication">aqui</a> para mais informações.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=3671">UVa 1230 - MODEX</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=310">UVa 374 - Big Mod</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1970">UVa 11029 - Leading and Trailing</a></li>
+<li><a href="http://codeforces.com/problemset/problem/630/I">Codeforces - Parking Lot</a></li>
+<li><a href="http://www.spoj.com/problems/LASTDIG/">SPOJ - The last digit</a></li>
+<li><a href="http://www.spoj.com/problems/LOCKER/">SPOJ - Locker</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1723">LA - 3722 Jewel-eating Monsters</a></li>
+<li><a href="http://www.spoj.com/problems/ZSUM/">SPOJ - Just add it</a></li>
+</ul>
+
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>   
