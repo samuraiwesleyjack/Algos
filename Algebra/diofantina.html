@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Equação Diofantina - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Equação Diofantina Linear</h1>
+
+<p>Uma Equação Diofantina Linear (em duas variáveis) é uma equação da forma geral:</p>
+
+<p>$$ax + by = c$$</p>
+
+<p>onde $a$, $b$, $c$ são inteiros dados, enquanto $x$ e $y$ são inteiros desconhecidos.</p>
+
+<p>Neste artigo, consideramos vários problemas clássicos sobre essas equações:</p>
+
+<ul>
+<li>encontrando uma solução</li>
+<li>encontrando todas as soluções</li>
+<li>encontrar o número de soluções e as próprias soluções em um determinado intervalo</li>
+<li>encontrando uma solução com valor mínimo de $x + y$</li>
+</ul>
+
+<h2>Caso degenerado</h2>
+
+<p>Um caso degenerado que precisa ser resolvido é quando $a = b = 0$. É fácil ver que não temos soluções ou infinitas soluções, dependendo se $c = 0$ ou não. No resto deste artigo, ignoraremos esse caso.</p>
+
+<h2>Encontrando uma solução</h2>
+
+<p>Para encontrar uma solução da equação diofantina com 2 incógnitas, você pode usar o algoritmo de euclides estendido. Primeiro, suponha que $a$ e $b$ são não-negativos. Quando aplicamos o algoritmo de euclides para $a$ e $b$, podemos encontrar o máximo divisor comum $g$ e 2 números $x_g$ e $y_g$ de modo que:</p>
+
+<p>$$a x_g + b y_g = g$$</p>
+
+<p>Se $c$ é divisível por $g = \gcd(a, b)$, então a equação diofantina dada tem uma solução, caso contrário, ela não tem solução. A prova é direta: uma combinação linear de dois números é divisível pelo seu divisor comum.</p>
+
+<p>Agora suponha que $c$ seja divisível por $g$, então temos:</p>
+
+<p>$$a \cdot x_g \cdot \frac{c}{g} + b \cdot y_g \cdot \frac{c}{g} = c$$</p>
+
+<p>Portanto, uma das soluções da equação diofantina é:</p>
+
+<p>$$x_0 = x_g \cdot \frac{c}{g},$$
+$$y_0 = y_g \cdot \frac{c}{g}.$$</p>
+
+<p>A idéia acima ainda funciona quando $a$ ou $b$ ou ambos são negativos. Só precisamos alterar o sinal de $x_0$ e $y_0$ quando necessário.</p>
+
+<p>Por fim, podemos implementar essa ideia da seguinte maneira (esse código não considera o caso $a = b = 0$):</p>
+
+<pre><code class="cpp">int gcd(int a, int b, int &amp;x, int &amp;y) {     //gcd = mdc
+    if (a == 0) {
+        x = 0; y = 1;
+        return b;
+    }
+    int x1, y1;
+    int d = gcd(b%a, a, x1, y1);
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return d;
+}
+
+bool find_sol(int a, int b, int c, int &amp;x0, int &amp;y0, int &amp;g) {   //encontra qualquer solução
+    g = gcd(abs(a), abs(b), x0, y0);
+    if (c % g) {
+        return false;
+    }
+
+    x0 *= c / g;
+    y0 *= c / g;
+    if (a &lt; 0) x0 = -x0;
+    if (b &lt; 0) y0 = -y0;
+    return true;
+}
+</code></pre>
+
+<h2>Obtendo todas as soluções</h2>
+
+<p>A partir de uma solução $(x_0, y_0)$, podemos obter todas as soluções da equação dada.</p>
+
+<p>Seja $g = \gcd(a, b)$ e seja $x_0, y_0$ números inteiros que satisfaçam o seguinte:</p>
+
+<p>$$a \cdot x_0 + b \cdot y_0 = c$$</p>
+
+<p>Agora, devemos ver que adicionar $b / g$ to $x_0$, e, ao mesmo tempo, subtrair $a / g$ de $y_0$ não quebrará a igualdade:</p>
+
+<p>$$a \cdot \left(x_0 + \frac{b}{g}\right) + b \cdot \left(y_0 - \frac{a}{g}\right) = a \cdot x_0 + b \cdot y_0 + a \cdot \frac{b}{g} - b \cdot \frac{a}{g} = c$$</p>
+
+<p>Obviamente, esse processo pode ser repetido novamente, portanto, todos os números da forma:</p>
+
+<p>$$x = x_0 + k \cdot \frac{b}{g}$$
+$$y = y_0 - k \cdot \frac{a}{g}$$</p>
+
+<p>são soluções da equação diofantina dada.</p>
+
+<p>Além disso, este é o conjunto de todas as soluções possíveis da equação diofantina dada.</p>
+
+<h2>Encontrando o número de soluções e as soluções em um determinado intervalo</h2>
+
+<p>Na seção anterior, deve ficar claro que, se não impormos restrições às soluções, haverá um número infinito delas. Portanto, nesta seção, adicionamos algumas restrições no intervalo de $x$ e $y$, e tentaremos contar e enumerar todas as soluções.</p>
+
+<p>Sejam dois intervalos: $[min_x; max_x]$ e $[min_y; max_y]$, digamos que queremos apenas encontrar as soluções nesses dois intervalos.</p>
+
+<p>Observe que se $a$ ou $b$ é $0$, o problema terá apenas uma solução. Não consideramos esse caso aqui.</p>
+
+<p>Primeiro, podemos encontrar uma solução que tenha um valor mínimo de $x$, tal que $x \ge min_x$. Para fazer isso, primeiro encontramos qualquer solução da equação diofantina. Em seguida, alteramos essa solução para obter $x \ge min_x$ (usando o que sabemos sobre o conjunto de todas as soluções na seção anterior). Isso pode ser feito em $O(1)$.
+Denote esse mínimo valor de $x$ como $l_{x1}$.</p>
+
+<p>Da mesma forma, podemos encontrar o valor máximo de $x$ que satisfaça $x \le max_x$. Indique esse valor máximo de $x$ como $r_{x1}$.</p>
+
+<p>Da mesma forma, podemos encontrar o valor mínimo de $y$ $(y \ge min_y)$ e valores máximos de $y$ $(y \le max_y)$. Indique os valores correspondentes de $x$ como $l_{x2}$ e $r_{x2}$.</p>
+
+<p>A solução final são todas as soluções com x na interseção de $[l_{x1}, r_{x1}]$ e $[l_{x2}, r_{x2}]$. Iremos denotar essa interseção como $[l_x, r_x]$.</p>
+
+<p>A seguir, está o código que implementa essa ideia. 
+Observe que dividimos $a$ e $b$ no início por $g$.
+Como a equação $a x + b y = c$ é equivalente à equação $\frac{a}{g} x + \frac{b}{g} y = \frac{c}{g}$, podemos usar essa e ter $\gcd(\frac{a}{g}, \frac{b}{g}) = 1$, o que simplifica as fórmulas.</p>
+
+<pre><code class="cpp">void shift_solution(int &amp; x, int &amp; y, int a, int b, int cnt) {
+    x += cnt * b;
+    y -= cnt * a;
+}
+
+int find_all_solutions(int a, int b, int c, int minx, int maxx, int miny, int maxy) {
+    int x, y, g;
+    if (!find_any_solution(a, b, c, x, y, g))
+        return 0;
+    a /= g;
+    b /= g;
+
+    int sign_a = a &gt; 0 ? +1 : -1;
+    int sign_b = b &gt; 0 ? +1 : -1;
+
+    shift_solution(x, y, a, b, (minx - x) / b);
+    if (x &lt; minx)
+        shift_solution(x, y, a, b, sign_b);
+    if (x &gt; maxx)
+        return 0;
+    int lx1 = x;
+
+    shift_solution(x, y, a, b, (maxx - x) / b);
+    if (x &gt; maxx)
+        shift_solution(x, y, a, b, -sign_b);
+    int rx1 = x;
+
+    shift_solution(x, y, a, b, -(miny - y) / a);
+    if (y &lt; miny)
+        shift_solution(x, y, a, b, -sign_a);
+    if (y &gt; maxy)
+        return 0;
+    int lx2 = x;
+
+    shift_solution(x, y, a, b, -(maxy - y) / a);
+    if (y &gt; maxy)
+        shift_solution(x, y, a, b, sign_a);
+    int rx2 = x;
+
+    if (lx2 &gt; rx2)
+        swap(lx2, rx2);
+    int lx = max(lx1, lx2);
+    int rx = min(rx1, rx2);
+
+    if (lx &gt; rx)
+        return 0;
+    return (rx - lx) / abs(b) + 1;
+}
+</code></pre>
+
+<p>Depois de temos $l_x$ e $r_x$, podemos enumerar todas as soluções. É necessário iterar através de $x = l_x + k \cdot \frac{b}{g}$ para todo $k \ge 0$ até que $x = r_x$, e encontrar os valores correspondentes de $y$ usando a equação $a x + b y = c$.</p>
+
+<h2>Encontre a solução com o valor mínimo de $x + y$</h2>
+
+<p>Aqui, $x$ e $y$ também precisam receber alguma restrição, caso contrário, a resposta pode se tornar infinito negativo.</p>
+
+<p>A idéia é semelhante à seção anterior: Encontramos qualquer solução da equação diofantina e depois alteramos a solução para satisfazer algumas condições.</p>
+
+<p>Por fim, use o conhecimento do conjunto de todas as soluções para encontrar o mínimo:</p>
+
+<p>$$x' = x + k \cdot \frac{b}{g},$$
+$$y' = y - k \cdot \frac{a}{g}.$$</p>
+
+<p>Note que $x + y$ mudam da seguinte maneira:</p>
+
+<p>$$x' + y' = x + y + k \cdot \left(\frac{b}{g} - \frac{a}{g}\right) = x + y + k \cdot \frac{b-a}{g}$$</p>
+
+<p>Se $a &lt; b$, precisamos selecionar o menor valor possível de $k$. Se $a > b$, precisamos selecionar o maior valor possível de $k$. Se $a = b$, todas as soluções terão a mesma soma $x + y$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/CEQU/">Spoj - Crucial Equation</a></li>
+<li><a href="http://codeforces.com/problemsets/acmsguru/problem/99999/106">SGU 106</a></li>
+<li><a href="http://codeforces.com/contest/633/problem/A">Codeforces - Ebony and Ivory</a></li>
+<li><a href="https://www.codechef.com/problems/COPR16G">Codechef - Get AC in one go</a></li>
+<li><a href="http://www.lightoj.com/volume_showproblem.php?problem=1306">LightOj - Solutions to an equation</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
