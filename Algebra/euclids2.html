@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Extensão do Algoritmo de Euclides - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Algoritmo de Euclides Estendido</h1>
+
+<p>Enquanto o <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">Algoritmo de Euclides</a> calcula apenas o maior divisor comum (GCD/MDC) de dois números inteiros $a$ e $b$, a versão estendida também encontra uma maneira de representar o MDC em termos de $a$ e $b$, ou seja, coeficientes $x$ e $y$ para os quais:</p>
+
+<p>$$a \cdot x + b \cdot y = \gcd(a, b)$$</p>
+
+<h2>Algoritmo</h2>
+
+<p>As alterações no algoritmo original são muito simples. Tudo o que precisamos fazer é descobrir como os coeficientes $x$ e $y$ mudam durante a transição de $(a, b)$ para $(b \bmod a, a)$.</p>
+
+<p>Vamos supor que encontramos os coeficientes $(x_1, y_1)$ para $(b \bmod a, a)$:</p>
+
+<p>$$ (b \bmod a) \cdot x_1 + a \cdot y_1 = g$$</p>
+
+<p>e queremos encontrar o par $(x, y)$ para $(a, b)$:</p>
+
+<p>$$ a \cdot x + b \cdot y = g$$</p>
+
+<p>Podemos representar $b \bmod a$ como:</p>
+
+<p>$$ b \bmod a = b - \left\lfloor \frac{b}{a} \right\rfloor \cdot a$$</p>
+
+<p>Substituindo esta expressão na equação do coeficiente de $(x_1, y_1)$ obtém-se:</p>
+
+<p>$$ g = (b \bmod a) \cdot x_1 + a \cdot y_1 = \left( b - \left\lfloor \frac{b}{a} \right\rfloor \cdot a \right) \cdot x_1 + a \cdot y_1$$</p>
+
+<p>e depois de reorganizar os termos:</p>
+
+<p>$$g = b \cdot x_1 + a \cdot \left( y_1 - \left\lfloor \frac{b}{a} \right\rfloor \cdot x_1 \right)$$</p>
+
+<p>Encontramos os valores $x$ e $y$:</p>
+
+<p>$$\begin{cases}
+x = y_1 - \left\lfloor \frac{b}{a} \right\rfloor \cdot x_1 \cr
+y = x_1
+\end{cases} $$</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int gcd(int a, int b, int &amp; x, int &amp; y) {
+    if (a == 0) {
+        x = 0;
+        y = 1;
+        return b;
+    }
+    int x1, y1;
+    int d = gcd(b % a, a, x1, y1);
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return d;
+}
+</code></pre>
+
+<p>A função recursiva acima retorna o GCD e os valores dos coeficientes para <code>x</code> and <code>y</code> (que são passados ​​por referência à função).</p>
+
+<p>O caso base da recursão é $a = 0$, quando o GCD é igual a $b$, então os coeficientes $x$ e $y$ são $0$ e $1$, respectivamente. Em todos os outros casos, as fórmulas acima são usadas para recalcular os coeficientes em cada iteração.</p>
+
+<p>Esta implementação do algoritmo de euclides também produz resultados corretos para números inteiros negativos.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1045">10104 - Euclid Problem</a></li>
+<li><a href="http://codeforces.com/gym/100963">GYM - (J) Once Upon A Time</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4628">UVA - 12775 - Gift Dilemma</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
