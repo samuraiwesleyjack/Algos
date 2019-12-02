@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>MDC e MMC - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Algoritmo de Euclides para calcular o maior divisor comum (MDC)</h1>
+
+<p>Dado dois inteiros não negativos $a$ e $b$, temos que encontrar seu <strong>MDC</strong>, i.e. o maior número que é um divisor de $a$ e $b$.
+É geralmente indicado por $\gcd(a, b)$. Matematicamente, é definido como:
+$$\gcd(a, b) = \max_ {k = 1 \dots \infty ~ : ~ k \mid a ~ \wedge k ~ \mid b} k.$$
+(aqui o símbolo "$\mid$" indica divisibilidade, ou seja, "$k \mid a$" significa "$k$ divide $a$")</p>
+
+<p>Quando um dos números é zero, enquanto o outro é diferente de zero, seu maior divisor comum, por definição, é o segundo número. Quando ambos os números são zero, seu maior divisor comum é indefinido (pode ser qualquer número arbitrariamente grande), mas podemos defini-lo como zero. O que nos dá uma regra simples: se um dos números é zero, o maior divisor comum é o outro número.</p>
+
+<p>O algoritmo de Euclides, discutido abaixo, permite encontrar o maior divisor comum de dois números $a$ e $b$ em $O(\log \min(a, b))$.</p>
+
+<p>O algoritmo foi descrito pela primeira vez nos "Elementos" de Euclides (cerca de 300 A.C), mas é possível que o algoritmo tenha origens ainda anteriores.</p>
+
+<h2>Algoritmo</h2>
+
+<p>O algoritmo é extremamente simples:</p>
+
+<p>$$\gcd(a, b) = \begin{cases}a,&amp;\text{ se }b = 0 &#92;&#92; \gcd(b, a \bmod b),&amp;\text{caso contrario}\end{cases}$$</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int gcd (int a, int b) {
+    if (b == 0)
+        return a;
+    else
+        return gcd (b, a % b);
+}
+</code></pre>
+
+<p>Usando o operador em C++, podemos escrevê-lo como:</p>
+
+<pre><code class="cpp">int gcd (int a, int b) {
+    return b ? gcd (b, a % b) : a;
+}
+</code></pre>
+
+<p>E, finalmente, aqui está uma implementação não recursiva:</p>
+
+<pre><code class="cpp">int gcd (int a, int b) {
+    while (b) {
+        a %= b;
+        swap(a, b);
+    }
+    return a;
+}
+</code></pre>
+
+<p>Nota: GCD = MDC, MMC = LCM e % = mod.</p>
+
+<h2>Prova de Correção</h2>
+
+<p>Primeiro, observe que em cada iteração do algoritmo euclidiano o segundo argumento diminui estritamente; portanto (como os argumentos sempre são não negativos), o algoritmo sempre termina.</p>
+
+<p>Para a prova da correção, precisamos mostrar que $\gcd(a, b) = \gcd(b, a \bmod b)$ para todo $a \geq 0$, $b > 0$.</p>
+
+<p>Mostraremos que o valor no lado esquerdo da equação divide o valor no lado direito e vice-versa. Obviamente, isso significaria que os lados esquerdo e direito são iguais, o que provará o algoritmo de Euclides.</p>
+
+<p>Seja $d = \gcd(a, b)$. Então, por definição $d\mid a$ e $d\mid b$.</p>
+
+<p>Agora vamos representar o restante da divisão de $a$ por $b$ da seguinte maneira:
+$$a \bmod b = a - b \cdot \Bigl\lfloor\dfrac{a}{b}\Bigr\rfloor$$</p>
+
+<p>Daí resulta que $d \mid (a \bmod b)$, o que significa que temos o sistema de divisibilidades:
+$$\begin{cases}d \mid b,&#92;&#92; d \mid (a \mod b)\end{cases}$$</p>
+
+<p>Agora usamos o fato de que, para quaisquer três números $p$, $q$, $r$, se $p\mid q$ e $p\mid r$ então $p\mid \gcd(q, r)$. No nosso caso:
+$$d = \gcd(a, b) \mid \gcd(b, a \mod b)$$</p>
+
+<p>Assim, mostramos que o lado esquerdo da equação original divide o direito. A segunda metade da prova é semelhante.</p>
+
+<h2>Complexidade de Tempo</h2>
+
+<p>O tempo de execução do algoritmo é estimado pelo teorema de Lamé, que estabelece uma conexão surpreendente entre o algoritmo euclidiano e a sequência de Fibonacci:</p>
+
+<p>Se $a > b \geq 1$ e $b &lt; F_n$ para algum $n$, o algoritmo de Euclides executa no máximo $n-2$ chamadas recursivas.</p>
+
+<p>Além disso, é possível mostrar que o limite desse teorema é otimizado. Quando $a = F_n$ e $b = F_{n-1}$, $gcd(a, b)$ will executará exatamente $n-2$ chamadas. Em outras palavras, os números consecutivos de Fibonacci são o pior caso de input para o algoritmo de Euclides.</p>
+
+<p>Dado que os números de Fibonacci crescem exponencialmente, concluímos que o algoritmo funciona em $O(\log \min(a, b))$.</p>
+
+<h2>Mínimo Múltiplo Comum</h2>
+
+<p>O cálculo do mínimo múltiplo comum (denotado como <strong>MMC / LCM</strong>) pode ser reduzido calculando o  MDC / GCD com a seguinte fórmula:
+$$\text{lcm}(a, b) = \frac{a \cdot b}{\gcd(a, b)}$$</p>
+
+<p>Assim, MMC / LCM pode ser calculado usando o algoritmo de Euclides com a mesma complexidade de tempo:</p>
+
+<p>Uma possível implementação, que habilmente evita o overflow de números inteiros dividindo primeiro $a$ com o GCD / MDC, é apresentada aqui:</p>
+
+<pre><code class="cpp">int lcm (int a, int b) {
+    return a / gcd(a, b) * b;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/FLOW016">Codechef - GCD and LCM</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
