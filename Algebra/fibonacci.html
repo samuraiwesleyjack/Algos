@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sequência de Fibonacci - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Números de Fibonacci</h1>
+
+<p>A sequência de Fibonacci é definida da seguinte maneira:</p>
+
+<p>$$F_0 = 0, F_1 = 1, F_n = F_{n-1} + F_{n-2}$$</p>
+
+<p>Os primeiros elementos da sequência (<a href="http://oeis.org/A000045">OEIS A000045</a>) são:</p>
+
+<p>$$0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ...$$</p>
+
+<h2>Propriedades</h2>
+
+<p>Os números de Fibonacci possuem muitas propriedades interessantes. Aqui estão algumas delas:</p>
+
+<ul>
+<li><p>Identidade de Cassini::
+$$F_{n-1} F_{n+1} - F_n^2 = (-1)^n$$</p></li>
+<li><p>A regra da "adição":
+$$F_{n+k} = F_k F_{n+1} + F_{k-1} F_n$$</p></li>
+<li><p>Aplicando a identidade anterior ao caso $k = n$, obtemos:
+$$F_{2n} = F_n (F_{n+1} + F_{n-1})$$</p></li>
+<li><p>A partir disso, podemos provar, por indução, que para qualquer número inteiro positivo $k$,  $F_{nk}$ é múltiplo de $F_n$.</p></li>
+<li><p>O inverso também é verdadeiro: se $F_m$ é múltiplo de $F_n$, então $m$ é múltiplo de $n$.</p></li>
+<li><p>Identidade do Maior Divisor Comum (MDC/GCD):
+$$MDC(F_m, F_n) = F_{MDC(m, n)}$$</p></li>
+<li><p>Os números de Fibonacci são os piores inputs possíveis para o algoritmo de euclides. </p></li>
+</ul>
+
+<h2>Codificação de Fibonacci</h2>
+
+<p>Podemos usar a sequência para codificar números inteiros positivos em palavras de código binárias. De acordo com o teorema de Zeckendorf, qualquer número natural $n$ pode ser representado exclusivamente como uma soma dos números de Fibonacci:</p>
+
+<p>$$N = F_{k_1} + F_{k_2} + \ldots + F_{k_r}$$</p>
+
+<p>tal que $k_1 \ge k_2 + 2,\ k_2 \ge k_3 + 2,\  \ldots,\  k_r \ge 2$ (ou seja: a representação não pode usar dois números Fibonacci consecutivos).</p>
+
+<p>Segue-se que qualquer número pode ser codificado na sequência de Fibonacci.
+E podemos descrever essa representação com códigos binários $d_0 d_1 d_2 \dots d_s 1$, onde $d_i$ é $1$ se $F_{i+2}$ for usado na representação.
+O código será anexado com $1$ indicando o final do código da palavra.
+Observe que essa é a única ocorrência em que dois bits consecutivos são exibidos.</p>
+
+<p>$$\begin{eqnarray}
+1 &amp;=&amp; 1 &amp;=&amp; F_2 &amp;=&amp; (11)_F &#92;\
+2 &amp;=&amp; 2 &amp;=&amp; F_3 &amp;=&amp; (011)_F &#92;\
+6 &amp;=&amp; 5 + 1 &amp;=&amp; F_5 + F_2 &amp;=&amp; (10011)_F &#92;\
+8 &amp;=&amp; 8 &amp;=&amp; F_6 &amp;=&amp; (000011)_F &#92;\
+9 &amp;=&amp; 8 + 1 &amp;=&amp; F_6 + F_2 &amp;=&amp; (100011)_F &#92;\
+19 &amp;=&amp; 13 + 5 + 1 &amp;=&amp; F_7 + F_5 + F_2 &amp;=&amp; (1001011)_F
+\end{eqnarray}$$</p>
+
+<p>A codificação de um número inteiro $n$ pode ser feita com um algoritmo guoloso(greedy):</p>
+
+<ol>
+<li><p>Itere sobre os números de Fibonacci do maior para o menor até encontrar um menor ou igual a $n$.</p></li>
+<li><p>Suponha que esse número seja $F_i$. Subtraia $F_i$ de $n$ e coloque $1$ na posição $i-2$ da palavra do código (indexação começando de 0 do bit da esquerda até a direita).</p></li>
+<li><p>Repita até que não haja mais restos.</p></li>
+<li><p>Adicione um $1$ à palavra-código para indicar seu fim.</p></li>
+</ol>
+
+<p>Para decodificar uma palavra de código, remova primeiro o $1$ final. Então, se o $i$-th bit estiver definido(set) (indexando de 0 do bit mais à esquerda para a direita), some $F_{i+2}$ ao número.</p>
+
+<h2>Fórmulas para o n-ésimo número de Fibonacci</h2>
+
+<p>O n-ésimo número de Fibonacci pode ser encontrado em $O(n)$ calculando os números um por um até $n$. Entretanto, existem métodos mais rápidos, como veremos.</p>
+
+<h3>Expressões</h3>
+
+<p>Existe uma fórmula conhecida como "fórmula de Binet", embora já fosse conhecida por Moivre:</p>
+
+<p>$$F_n = \frac{\left(\frac{1 + \sqrt{5}}{2}\right)^n - \left(\frac{1 - \sqrt{5}}{2}\right)^n}{\sqrt{5}}$$</p>
+
+<p>É possível provar esta fórmula por indução, mas pode ser deduzida com a ajuda do conceito de gerar funções ou resolver uma equação funcional.</p>
+
+<p>Você pode perceber imediatamente que o valor absoluto do segundo termo é sempre menor que $1$, e também diminui muito rapidamente (exponencialmente). Portanto, o valor do primeiro termo é "quase" $F_n$. Isso pode ser escrito estritamente como:</p>
+
+<p>$$F_n = \left[\frac{\left(\frac{1 + \sqrt{5}}{2}\right)^n}{\sqrt{5}}\right]$$</p>
+
+<p>onde os colchetes indicam o arredondamento para o número inteiro mais próximo.</p>
+
+<p>Como essas duas fórmulas exigiriam uma precisão muito alta ao trabalhar com números fracionários, elas são de pouca utilidade em cálculos práticos.</p>
+
+<h3>Forma de Matriz</h3>
+
+<p>Usando a seguinte relação:</p>
+
+<p>$$\begin{pmatrix}F_{n-1} &amp; F_{n} \cr\end{pmatrix} = \begin{pmatrix}F_{n-2} &amp; F_{n-1} \cr\end{pmatrix} \cdot \begin{pmatrix}0 &amp; 1 \cr 1 &amp; 1 \cr\end{pmatrix}$$</p>
+
+<p>Definindo $P \equiv \begin{pmatrix}0 &amp; 1 \cr 1 &amp; 1 \cr\end{pmatrix}$, obtemos:</p>
+
+<p>$$\begin{pmatrix}F_n &amp; F_{n+1} \cr\end{pmatrix} = \begin{pmatrix}F_0 &amp; F_1 \cr\end{pmatrix} \cdot P^n$$</p>
+
+<p>Portanto, para encontrar $F_n$, precisamos elevar a matriz $P$ ao índice $n$. Isso pode ser feito em $O(\log n)$ (<a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">Exponenciação binária</a>).</p>
+
+<h3>Método de duplicação rápida</h3>
+
+<p>Usando o método acima, podemos encontrar estas equações:
+$$ \begin{array}{rll}
+                        F_{2k} &amp;= F_k \left( 2F_{k+1} - F_{k} \right). &#92;\
+                        F_{2k+1} &amp;= F_{k+1}^2 + F_{k}^2.
+\end{array}$$
+Assim, usando as duas equações acima, os números de Fibonacci podem ser calculados pelo seguinte código:</p>
+
+<pre><code class="cpp">pair&lt;int, int&gt; fib (int n) {
+    if (n == 0)
+        return {0, 1};
+
+    auto p = fib(n &gt;&gt; 1);
+    int c = p.first * (2 * p.second - p.first);
+    int d = p.first * p.first + p.second * p.second;
+    if (n &amp; 1)
+        return {d, c + d};
+    else
+        return {c, d};
+}
+</code></pre>
+
+<p>O código acima retorna $F_n$ e $F_{n+1}$ como um par.</p>
+
+<h2>Periodicidade módulo p</h2>
+
+<p>Considere a sequência Fibonacci modulo $p$. Vamos provar que a sequência é periódica e o período começa com $F_1 = 1$ (ou seja, o pré-período contém apenas $F_0$).</p>
+
+<p>amos provar isso por contradição. Considere os primeiros pares de números de Fibonacci $p^2 + 1$ modulo $p$:</p>
+
+<p>$$(F_1,\ F_2),\ (F_2,\ F_3),\ \ldots,\ (F_{p^2 + 1},\ F_{p^2 + 2})$$</p>
+
+<p>Só pode haver $p$ diferentes modulos de $p$, e no máximo $p^2$ de restos diferentes; portanto, existem pelo menos dois pares idênticos entre eles. Assim, a sequência é periódica.</p>
+
+<p>Agora, escolhemos dois pares de restos idênticos com os menores índices da sequência. Sejam os pares $(F_a,\ F_{a + 1})$ e $(F_b,\ F_{b + 1})$. Provaremos que $a = 1$. Se isso fosse falso, haveria dois pares anteriores $(F_{a-1},\ F_a)$ e $(F_{b-1},\ F_b)$, nos quais, pela propriedade dos números de Fibonacci, também seriam iguais. No entanto, isso contradiz o fato de termos escolhido pares com os menores índices, completando nossa prova.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/MAIN74/">SPOJ - Euclid Algorithm Revisited</a></li>
+<li><a href="http://www.spoj.com/problems/FIBOSUM/">SPOJ - Fibonacci Sum</a></li>
+<li><a href="https://www.hackerrank.com/contests/codesprint5/challenges/is-fibo/problem">HackerRank - Is Fibo</a></li>
+<li><a href="https://www.hackerrank.com/contests/projecteuler/challenges/euler002/problem">Project Euler - Even Fibonacci numbers</a></li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
