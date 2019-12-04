@@ -46,7 +46,8 @@ $$\gcd(a, b) = \max_ {k = 1 \dots \infty ~ : ~ k \mid a ~ \wedge k ~ \mid b} k.$
 <p>$$\ mdc(a, b) = \begin{cases}a,&amp;\text{ se }b = 0 &#92;&#92; \ mdc(b, a \bmod b),&amp;\text{caso contrario}\end{cases}$$</p>
 
 <h2>Implementação</h2>
-
+<p><strong>Nota: GCD = MDC, MMC = LCM e % = mod</strong>.</p>
+			
 <pre><code class="cpp">int gcd (int a, int b) {
     if (b == 0)
         return a;
@@ -72,8 +73,6 @@ $$\gcd(a, b) = \max_ {k = 1 \dots \infty ~ : ~ k \mid a ~ \wedge k ~ \mid b} k.$
     return a;
 }
 </code></pre>
-
-<p><strong>Nota: GCD = MDC, MMC = LCM e % = mod</strong>.</p>
 
 <h2>Prova de Correção</h2>
 
