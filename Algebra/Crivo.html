@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Crivo de Eratóstenes - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, algorithm and sieve of eratosthenes, crivo de eratóstenes e algoritmo e C++, C++, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Crivo de Eratóstenes</h1>
+
+<p>O Crivo de Eratóstenes é um algoritmo para encontrar todos os números primos em um segmento $[1;n]$ usando $O(n \log \log n)$ operações.</p>
+
+<p>No começo, escrevemos todos os números entre 2 e $n$.
+Marcamos todos os múltiplos de 2 (já que 2 é o menor número primo) como composto. 
+Um múltiplo adequado de um número $x$, é um número maior que $x$ e divisível por $x$.
+Em seguida, encontramos o próximo número que não foi marcado como composto, neste caso, é 3.
+O que significa que 3 é primo, e marcamos todos os múltiplos de 3 como compostos.
+O próximo número não marcado é 5, no qual é o próximo número primo, e marcamos todos os múltiplos apropriados.
+E continuamos esse procedimento até processarmos todos os números na linha.</p>
+
+<p>Na imagem a seguir, você pode visualizar o algoritmo para calcular todos os números primos no intervalo $[1; 16]$. Pode-se ver que muitas vezes marcamos números como compostos várias vezes.</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sieve_eratosthenes.png" alt="Sieve of Eratosthenes" /></p>
+
+<p>A idéia por trás é: Um número é primo, se nenhum dos números primos menores o dividir. 
+Como iteramos os números primos em ordem, já marcamos todos os números(divisíveis por pelo menos um dos números primos) como divisíveis.
+Portanto, se alcançarmos uma célula e ela não estiver marcada, ela não será divisível por nenhum número primo menor e, portanto, terá que ser primo.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int n;
+vector&lt;char&gt; is_prime(n+1, true);
+is_prime[0] = is_prime[1] = false;
+for (int i = 2; i &lt;= n; i++) {
+    if (is_prime[i] &amp;&amp; (long long)i * i &lt;= n) {
+        for (int j = i * i; j &lt;= n; j += i)
+            is_prime[j] = false;
+    }
+}
+</code></pre>
+
+<p>Esse código primeiro marca todos os números(exceto zero e um) como números primos em potencial, depois inicia o processo de selecionar os números compostos.
+Para isso, itera sobre todos os números de $2$ até $n$.
+Se o número atual $i$ for um número primo, ele marcará todos os números que são múltiplos de $i$ como números compostos, começando por $i^2$.
+Esta já é uma otimização sobre a implementação de força bruta, todos os números menores(que $i^2$) que são múltiplos de $i$ necessariamente também tem um fator primo menor que $i$, então todos eles foram analisados antes.
+Já que $i^2$ pode facilmente causar um overflow no tipo <code>int</code>, a análise adicional é feita com <code>long long</code> antes do segundo loop aninhado.</p>
+
+<p>Usando essa implementação, o algoritmo consome $O(n)$ de memória e performa $O(n \log \log n)$ (veja a próxima seção).</p>
+
+<h2>Análise assintótica</h2>
+
+<p>Vamos provar que o tempo de execução do algoritmo é $O(n \log \log n)$.
+O algoritmo executará operações $\frac{n}{p}$ para todo primo $p \le n$ no loop interno.
+Portanto, precisamos avaliar a próxima expressão:</p>
+
+<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac n p = n \cdot \sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac 1 p.$$</p>
+
+<p>Vamos lembrar dois fatos conhecidos.</p>
+
+<ul>
+<li>A quantidade de números primos menor ou igual a $n$ é aproximadamente $\frac n {\ln n}$.</li>
+<li>O $k$-ésimo número primo é igual a aproximadamente $k \ln k$ (isto segue imediatamente do fato anterior).</li>
+</ul>
+
+<p>Assim, podemos escrever a soma da seguinte maneira:</p>
+
+<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac 1 p \approx \frac 1 2 + \sum_{k = 2}^{\frac n {\ln n}} \frac 1 {k \ln k}.$$</p>
+
+<p>Aqui, extraímos o primeiro número primo 2 da soma, pois $k = 1$ na aproximação $k \ln k$ é $0$ e causa uma divisão por zero.</p>
+
+<p>Agora, vamos avaliar essa soma usando a integral de uma mesma função acima de $k$ de $2$ até $\frac n {\ln n}$ (podemos fazer essa aproximação pois, de fato, a soma está relacionada à integral como sua aproximação usando o método do retângulo):</p>
+
+<p>$$\sum_{k = 2}^{\frac n {\ln n}} \frac 1 {k \ln k} \approx \int_2^{\frac n {\ln n}} \frac 1 {k \ln k} dk.$$</p>
+
+<p>A antiderivada para o integrando é $\ln \ln k$. Usando uma substituição e removendo termos de ordem inferior, obteremos o resultado:</p>
+
+<p>$$\int_2^{\frac n {\ln n}} \frac 1 {k \ln k} dk = \ln \ln \frac n {\ln n} - \ln \ln 2 = \ln(\ln n - \ln \ln n) - \ln \ln 2 \approx \ln \ln n.$$</p>
+
+<p>Agora, voltando à soma original, obteremos sua aproximação:</p>
+
+<p>$$\sum_{\substack{p \le n, &#92;\ p\ is\ prime}} \frac n p \approx n \ln \ln n + o(n).$$</p>
+
+<p>Você pode encontrar uma prova mais rigorosa (que fornece uma avaliação mais precisa) no livro de Hardy & Wright "Uma introdução à teoria dos números" (p. 349).</p>
+
+<h2>Diferentes otimizações do Crivo de Eratóstenes</h2>
+
+<p>A maior fraqueza do algoritmo é que ele "percorre" a memória várias vezes, manipulando apenas elementos únicos. 
+Isso não é muito amigável ao cache.
+E por causa disso, a constante que está oculta em $O(n \log \log n)$ é comparativamente grande.</p>
+
+<p>Os métodos apresentados abaixo nos permitem reduzir a quantidade de operações executadas, bem como diminuir a memória consumida.</p>
+
+<h3>Selecionando até a raíz</h3>
+
+<p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
+
+<pre><code class="cpp">int n;
+vector&lt;char&gt; is_prime(n+1, true);
+is_prime[0] = is_prime[1] = false;
+for (int i = 2; i * i &lt;= n; i++) {
+    if (is_prime[i]) {
+        for (int j = i * i; j &lt;= n; j += i)
+            is_prime[j] = false;
+    }
+}
+</code></pre>
+
+<p>Essa otimização não afeta a complexidade (de fato, repetindo a prova apresentada acima, obteremos a expressão $n \ln \ln \sqrt n + o(n)$, que é assintoticamente o mesmo de acordo com as propriedades dos logaritmos ), embora o número de operações seja reduzido notavelmente.</p>
+
+<h3>Selecionando apenas pelos números ímpares</h3>
+
+<p>Como todos os números pares (exceto $2$) são compostos, podemos parar de verificar os números pares. Em vez disso, precisamos operar apenas com números ímpares.</p>
+
+<p>Primeiro, permitirá metade da memória necessária. Segundo, reduzirá o número de operações executadas pelo algoritmo aproximadamente pela metade.</p>
+
+<h3>Reduzindo a memória consumida</h3>
+
+<p>Devemos notar que o algoritmo de Eratóstenes opera com $n$ bits de memória. Portanto, podemos essencialmente reduzir a memória consumida preservando não $n$ bytes, que são as variáveis do tipo Booleano, mas $n$ bits, ou seja, $\frac n 8$ bytes de memória.</p>
+
+<p>No entanto, essa abordagem, na qual é chamada <strong>compressão de dados</strong>, complicará as operações com esses bits. A operação de leitura ou escritura em qualquer bit requer várias operações aritméticas e, finalmente, torna o algoritmo mais lento.</p>
+
+<p>Portanto, essa abordagem é justificada apenas se n for tão grande que não possamos mais alocar n bytes de memória. Nesse caso, trocaremos a economia de memória (8 vezes menos) com uma desaceleração significativa do algoritmo.</p>
+
+<p>Vale a pena mencionar que existem estruturas de dados que fazem automaticamente uma compactação no nível de bits, como <code>vector&lt;bool&gt;</code> e <code>bitset&lt;&gt;</code> no C++.</p>
+
+<h3>Selecionando por blocos</h3>
+
+<p>Segue da otimização "selecionando até a raiz" que não há necessidade de manter a array inteira <code>is_prime[1...n]</code> todo o tempo.
+Basta manter apenas números primos até a raiz de $n$, i.e. <code>prime[1... sqrt(n)]</code>, dividir o intervalo completo em blocos e selecionar cada bloco separadamente.
+Ao fazer isso, nunca precisamos manter vários blocos na memória ao mesmo tempo, e a CPU lida com o cache muito melhor.</p>
+
+<p>Deixe que $s$ seja a constante na qual determina o tamanho do bloco, assim teremos $\lceil {\frac n s} \rceil$ blocos, e o bloco $k$ ($k = 0 ... \lfloor {\frac n s} \rfloor$) contém os números em um segmento $[ks; ks + s - 1]$.
+Podemos trabalhar com blocos apenas por turnos, ou seja, para cada bloco $k$ nós passaremos por todos os números primos (de $1$ até $\sqrt n$) e performaremos a seleção usando eles.
+Vale ressaltar que precisamos modificar um pouco a estratégia ao lidar com os primeiros números: primeiro, todos os números primos de $[1; \sqrt n]$ não devem se remover; e segundo, os números $0$ e $1$ devem ser marcados como números não primos.
+Enquanto está no último bloco, não se deve esquecer que o último número necessário $n$ não está necessariamente encontrado no final do bloco.</p>
+
+<p>Aqui temos uma implementação que conta o número de números primos menores ou iguais a $n$ usando seleção por blocos.</p>
+
+<pre><code class="cpp">int count_primes(int n) {
+    const int S = 10000;
+
+    vector&lt;int&gt; primes;
+    int nsqrt = sqrt(n);
+    vector&lt;char&gt; is_prime(nsqrt + 1, true);
+    for (int i = 2; i &lt;= nsqrt; i++) {
+        if (is_prime[i]) {
+            primes.push_back(i);
+            for (int j = i * i; j &lt;= nsqrt; j += i)
+                is_prime[j] = false;
+        }
+    }
+
+    int result = 0;
+    vector&lt;char&gt; block(S);
+    for (int k = 0; k * S &lt;= n; k++) {
+        fill(block.begin(), block.end(), true);
+        int start = k * S;
+        for (int p : primes) {
+            int start_idx = (start + p - 1) / p;
+            int j = max(start_idx, p) * p - start;
+            for (; j &lt; S; j += p)
+                block[j] = false;
+        }
+        if (k == 0)
+            block[0] = block[1] = false;
+        for (int i = 0; i &lt; S &amp;&amp; start + i &lt;= n; i++) {
+            if (block[i])
+                result++;
+        }
+    }
+    return result;
+}
+</code></pre>
+
+<p>O tempo de execução da seleção por blocos é o mesmo da seleção regular do Crivo de Eratóstenes (a menos que o tamanho dos blocos seja muito pequeno), mas a memória necessária será reduzida para $O(\sqrt{n} + S)$ e teremos melhores resultados de cache.
+Por outro lado, haverá uma divisão para cada par de um bloco e número primo de $[1; \sqrt{n}]$, e isso será muito pior para tamanhos de bloco menores.
+Portanto, é necessário manter o equilíbrio ao selecionar a constante $S$.
+Obtemos melhores resultados para tamanhos de bloco entre $10^4$ e $10^5$.</p>
+
+<h2>Modificação para tempo linear</h2>
+
+<p>Podemos modificar o algoritmo de tal maneira que ele só tenha complexidade de tempo linear.
+Essa abordagem é descrita no artigo <a href="https://cp-algorithms.com/algebra/prime-sieve-linear.html">Crivo de Eratóstenes com Complexidade de Tempo Linear</a>.
+No entanto, esse algoritmo também possui suas próprias fraquezas.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/TDPRIMES/">SPOJ - Printing Some Primes</a></li>
+<li><a href="http://www.spoj.com/problems/HS08PAUL/">SPOJ - A Conjecture of Paul Erdos</a></li>
+<li><a href="http://www.spoj.com/problems/VECTAR8/">SPOJ - Primal Fear</a></li>
+<li><a href="http://www.spoj.com/problems/PTRI/">SPOJ - Primes Triangle (I)</a></li>
+<li><a href="http://codeforces.com/contest/26/problem/A">Codeforces - Almost Prime</a></li>
+<li><a href="http://codeforces.com/contest/776/problem/B">Codeforces - Sherlock And His Girlfriend</a></li>
+<li><a href="http://www.spoj.com/problems/NGIRL/">SPOJ - Namit in Trouble</a></li>
+<li><a href="http://www.spoj.com/problems/DCEPC505/">SPOJ - Bazinga!</a></li>
+<li><a href="https://www.hackerrank.com/contests/projecteuler/challenges/euler134">Project Euler - Prime pair connection</a></li>
+<li><a href="http://www.spoj.com/problems/NFACTOR/">SPOJ - N-Factorful</a></li>
+<li><a href="http://www.spoj.com/problems/BSPRIME/">SPOJ - Binary Sequence of Prime Numbers</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2338">UVA 11353 - A Different Kind of Sorting</a></li>
+<li><a href="http://www.spoj.com/problems/PRIMES2/">SPOJ - Printing some primes (hard)</a></li>
+<li><a href="https://codeforces.com/problemset/problem/17/A">Codeforces - Nodbach Problem</a></li>
+<li><a href="https://codeforces.com/problemset/problem/154/B">Codefoces - Colliders</a></li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>   
