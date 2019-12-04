@@ -43,28 +43,28 @@ $$\gcd(a, b) = \max_ {k = 1 \dots \infty ~ : ~ k \mid a ~ \wedge k ~ \mid b} k.$
 
 <p>O algoritmo é extremamente simples:</p>
 
-<p>$$\ MDC(a, b) = \begin{cases}a,&amp;\text{ se }b = 0 &#92;&#92; \ MDC(b, a \bmod b),&amp;\text{caso contrario}\end{cases}$$</p>
+<p>$$\ mdc(a, b) = \begin{cases}a,&amp;\text{ se }b = 0 &#92;&#92; \ mdc(b, a \bmod b),&amp;\text{caso contrario}\end{cases}$$</p>
 
 <h2>Implementação</h2>
 
-<pre><code class="cpp">int mdc (int a, int b) {
+<pre><code class="cpp">int gcd (int a, int b) {
     if (b == 0)
         return a;
     else
-        return mdc (b, a % b);
+        return gcd (b, a % b);
 }
 </code></pre>
 
 <p>Usando o operador em C++, podemos escrevê-lo como:</p>
 
-<pre><code class="cpp">int mdc (int a, int b) {
-    return b ? mdc (b, a % b) : a;
+<pre><code class="cpp">int gcd (int a, int b) {
+    return b ? gcd (b, a % b) : a;
 }
 </code></pre>
 
 <p>E, finalmente, aqui está uma implementação não recursiva:</p>
 
-<pre><code class="cpp">int mdc (int a, int b) {
+<pre><code class="cpp">int gcd (int a, int b) {
     while (b) {
         a %= b;
         swap(a, b);
@@ -79,11 +79,11 @@ $$\gcd(a, b) = \max_ {k = 1 \dots \infty ~ : ~ k \mid a ~ \wedge k ~ \mid b} k.$
 
 <p>Primeiro, observe que em cada iteração do algoritmo euclidiano o segundo argumento diminui estritamente; portanto (como os argumentos sempre são não negativos), o algoritmo sempre termina.</p>
 
-<p>Para a prova da correção, precisamos mostrar que $\mdc(a, b) = \mdc(b, a \bmod b)$ para todo $a \geq 0$, $b > 0$.</p>
+<p>Para a prova da correção, precisamos mostrar que $\ mdc(a, b) = \ mdc(b, a \bmod b)$ para todo $a \geq 0$, $b > 0$.</p>
 
 <p>Mostraremos que o valor no lado esquerdo da equação divide o valor no lado direito e vice-versa. Obviamente, isso significaria que os lados esquerdo e direito são iguais, o que provará o algoritmo de Euclides.</p>
 
-<p>Seja $d = \mdc(a, b)$. Então, por definição $d\mid a$ e $d\mid b$.</p>
+<p>Seja $d = \ mdc(a, b)$. Então, por definição $d\mid a$ e $d\mid b$.</p>
 
 <p>Agora vamos representar o restante da divisão de $a$ por $b$ da seguinte maneira:
 $$a \bmod b = a - b \cdot \Bigl\lfloor\dfrac{a}{b}\Bigr\rfloor$$</p>
@@ -91,8 +91,8 @@ $$a \bmod b = a - b \cdot \Bigl\lfloor\dfrac{a}{b}\Bigr\rfloor$$</p>
 <p>Daí resulta que $d \mid (a \bmod b)$, o que significa que temos o sistema de divisibilidades:
 $$\begin{cases}d \mid b,&#92;&#92; d \mid (a \mod b)\end{cases}$$</p>
 
-<p>Agora usamos o fato de que, para quaisquer três números $p$, $q$, $r$, se $p\mid q$ e $p\mid r$ então $p\mid \gcd(q, r)$. No nosso caso:
-$$d = \mdc(a, b) \mid \mdc(b, a \mod b)$$</p>
+<p>Agora usamos o fato de que, para quaisquer três números $p$, $q$, $r$, se $p\mid q$ e $p\mid r$ então $p\mid \ mdc(q, r)$. No nosso caso:
+$$d = \ mdc(a, b) \mid \ mdc(b, a \mod b)$$</p>
 
 <p>Assim, mostramos que o lado esquerdo da equação original divide o direito. A segunda metade da prova é semelhante.</p>
 
@@ -109,14 +109,14 @@ $$d = \mdc(a, b) \mid \mdc(b, a \mod b)$$</p>
 <h2>Mínimo Múltiplo Comum</h2>
 
 <p>O cálculo do mínimo múltiplo comum (denotado como <strong>MMC / LCM</strong>) pode ser reduzido calculando o  MDC / GCD com a seguinte fórmula:
-$$\text{mmc}(a, b) = \frac{a \cdot b}{\mdc(a, b)}$$</p>
+$$\text{lcm}(a, b) = \frac{a \cdot b}{\ gcd(a, b)}$$</p>
 
 <p>Assim, MMC / LCM pode ser calculado usando o algoritmo de Euclides com a mesma complexidade de tempo:</p>
 
 <p>Uma possível implementação, que habilmente evita o overflow de números inteiros dividindo primeiro $a$ com o GCD / MDC, é apresentada aqui:</p>
 
-<pre><code class="cpp">int mmc (int a, int b) {
-    return a / mdc(a, b) * b;
+<pre><code class="cpp">int lcm (int a, int b) {
+    return a / gcd(a, b) * b;
 }
 </code></pre>
 
