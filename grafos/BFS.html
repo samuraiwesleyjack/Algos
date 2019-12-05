@@ -46,7 +46,7 @@
             Você também pode calcular o tamanho dos caminhos(que apenas requer manter uma array das distâncias dos caminhos $d[]$) como também salvar informações para restaurar todos estes caminhos (para isso, é necessário manter uma array de "parentes" $p[]$, que guarda, para cada vértice, o vértice no qual alcançamos).</p>
 			
 			<h2>Implementação</h2>
-			<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; adj;  // grafo como lista de adjacência
+			<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; g;  // grafo como lista de adjacência
 int n; // número de nós
 int s; // vértice fonte
 
@@ -60,10 +60,10 @@ p[s] = -1;
 while (!q.empty()) {
     int v = q.front();
     q.pop();
-    for (int u : adj[v]) {
+    for (int u : g[v]) {
         if (!usados[u]) {
             usados[u] = true;
-            q.push(u);
+            q.push(u);  //na bfs apenas vamos puxando o nó filho, na dfs chamamos a função para ir mais fundo no grafo
             d[u] = d[v] + 1;
             p[u] = v;
         }
