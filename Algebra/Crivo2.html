@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Crivo de Eratóstenes - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Algoritmos, Crivo de Eratóstenes, Sieve of Eratosthenes, CP Algoritmos Crivo de Eratóstenes, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Crivo de Eratóstenes com Complexidade de Tempo Linear</h1>
+
+<p>Dado um número $n$, encontre todos os números primos em um segmento $[2;n]$.</p>
+
+<p>A maneira padrão de resolver uma tarefa é usar o <a href="https://cp-algorithms-brasil.com/Algebra/Crivo.html">crivo de Eratóstenes</a>. Esse algoritmo é muito simples, mas possui tempo de execução $O(n \log \log n)$.</p>
+
+<p>Embora existam muitos algoritmos conhecidos, com tempo de execução sublinear (i.e. $o(n)$), o algoritmo descrito abaixo é interessante por sua simplicidade: não é nem um pouco mais complexo que o clássico crivo de Eratóstenes.</p>
+
+<p>Além disso, o algoritmo dado aqui calcula as <strong>fatorações de todos os números</strong> no segmento $[2; n]$ como efeito colateral, e isso pode ser útil em muitas aplicações práticas.</p>
+
+<p>A fraqueza do algoritmo dado está em usar mais memória do que o clássico crivo de Eratóstenes: requer uma array de $n$ números, enquanto que para o crivo de Eratóstenes é suficiente ter $n$ bits de memória (que é 32 vezes menor).</p>
+
+<p>Portanto, faz sentido usar o algoritmo descrito apenas até números da ordem $10^7$ e não maiores.</p>
+
+<p>A autoria do algoritmo parece pertencer a Gries & Misra (Gries, Misra, 1978: ver referências no final do artigo). E, estritamente falando, esse algoritmo não deve ser chamado de "crivo de Eratóstenes", pois é muito diferente do clássico.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Nosso objetivo é calcular o <strong>fator primo mínimo</strong> $lp [i]$ para todo número $i$ no segmento $[2; n]$.</p>
+
+<p>Além disso, precisamos armazenar a lista de todos os números primos encontrados - vamos chamá-la de $pr []$.</p>
+
+<p>Inicializaremos os valores $lp [i]$ com zeros, o que significa que assumimos que todos os números são primos. Durante a execução do algoritmo, essa array será preenchida gradualmente.</p>
+
+<p>Agora iremos dos números de 2 até $n$. Temos dois casos para o número atual $i$:</p>
+
+<ul>
+<li><p>$lp[i] = 0$ - significa que $i$ é primo, i.e. ou seja, não encontramos nenhum fator menor para ele.<br />
+Portanto, atribuímos $lp [i] = i$ e adicionamos $i$ no final da array $pr[]$.</p></li>
+<li><p>$lp[i] \neq 0$ - significa que $i$ é composto, e seu fator primo mínimo é $lp [i]$.</p></li>
+</ul>
+
+<p>Nos dois casos, atualizamos os valores de $lp []$ para os números divisíveis por $i$. No entanto, nosso objetivo é aprender a definir um valor $lp []$ no máximo uma vez para cada número. Podemos fazer da seguinte maneira:</p>
+
+<p>Vamos considerar números $x_j = i \cdot p_j$, onde $p_j$ são todos números primos menores ou iguais à $lp [i]$ (é por isso que precisamos armazenar a lista de todos os números primos)..</p>
+
+<p>Definiremos um novo valor $lp [x_j] = p_j$ para todos os números dessa forma.</p>
+
+<p>A prova de correção desse algoritmo e seu tempo de execução podem ser encontrados após a implementação.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">const int N = 10000000;
+int lp[N+1];
+vector&lt;int&gt; pr;
+
+for (int i=2; i&lt;=N; ++i) {
+    if (lp[i] == 0) {
+        lp[i] = i;
+        pr.push_back (i);
+    }
+    for (int j=0; j&lt;(int)pr.size() &amp;&amp; pr[j]&lt;=lp[i] &amp;&amp; i*pr[j]&lt;=N; ++j)
+        lp[i * pr[j]] = pr[j];
+}
+</code></pre>
+
+<p>Podemos acelerar um pouco, substituindo o vetor $pr$ com uma simples array e um contador, e eliminando a segunda multiplicação no loop <code>for</code> (para isso, precisamos apenas lembrar o produto em uma variável).</p>
+
+<h2>Prova de Correção</h2>
+
+<p>Precisamos provar que o algoritmo define todos os valores $lp []$ corretamente e que todo valor será definido exatamente uma vez. Portanto, o algoritmo terá tempo de execução linear, pois todas as ações restantes do algoritmo funcionam por $O (n)$.</p>
+
+<p>Note que todo número $i$ tem exatamente uma representação:</p>
+
+<p>$i = lp [i] \cdot x$ ,</p>
+
+<p>onde $lp [i]$ é o fator primo mínimo de $i$, e o número $x$ não tem nenhum fator primo menor que $lp [i]$, ou seja</p>
+
+<p>$lp [i] \le lp [x]$.</p>
+
+<p>Agora, vamos comparar isso com as ações do algoritmo: de fato, para cada $x$ ele passa por todos os números primos pelos quais pode ser multiplicado, ou seja, todos os números primos até $lp [x]$, a fim de obter os números na forma dada acima.</p>
+
+<p>Portanto, o algoritmo passará por todos os números compostos exatamente uma vez, definindo os valores corretos de $lp []$.</p>
+
+<h2>Tempo de Execução e Memória</h2>
+
+<p>Apesar de o tempo de execução $O(n)$ ser melhor que $O(n \log \log n)$ do clássico crivo de Eratóstenes, a diferença entre eles não é muito grande. Na prática isso significa apenas o dobro da diferença de velocidade, e as versões otimizadas do crivo funcionam tão rápido quanto o algoritmo fornecido aqui.</p>
+
+<p>Considerando os requisitos de memória desse algoritmo - uma array $lp []$ de tamanho $n$, e uma array $pr []$ de tamanho  $\frac n {\ln n}$, esse algoritmo parece ser pior que o crivo clássica em todos os sentidos..</p>
+
+<p>No entanto, sua qualidade permanece no fato de que ele calcular uma array $lp []$, o que nos permite encontrar a fatoração de qualquer número no segmento $[2; n]$ no tempo da ordem de tamanho dessa fatoração. Além disso, o uso de apenas uma array extra nos permitirá evitar divisões ao procurar a fatoração.</p>
+
+<p>Conhecer as fatorações de todos os números é muito útil para algumas tarefas, e esse algoritmo é um dos poucos que permite encontrá-los em tempo linear.</p>
+
+<h2>Referências</h2>
+
+<ul>
+<li>David Gries, Jayadev Misra. <strong>A Linear Sieve Algorithm for Finding Prime Numbers</strong> [1978]</li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
