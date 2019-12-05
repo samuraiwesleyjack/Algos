@@ -38,23 +38,23 @@ O que significa que 3 é primo, e marcamos todos os múltiplos de 3 como compost
 O próximo número não marcado é 5, no qual é o próximo número primo, e marcamos todos os múltiplos apropriados.
 E continuamos esse procedimento até processarmos todos os números na linha.</p>
 
-<p>Na imagem a seguir, você pode visualizar o algoritmo para calcular todos os números primos no intervalo $[1; 16]$. Pode-se ver que muitas vezes marcamos números como compostos várias vezes.</p>
+<p>Na imagem a seguir, você pode visualizar o algoritmo para calcular todos os números primos no intervalo $[1; 16]$.Note que muitas vezes marcamos números como compostos várias vezes.</p>
 
 <p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/sieve_eratosthenes.png" alt="Sieve of Eratosthenes" /></p>
 
-<p>A idéia por trás é: Um número é primo, se nenhum dos números primos menores o dividir. 
+<p>A idéia por trás é: <strong>um número é primo se nenhum dos números primos menores o dividir</strong>.
 Como iteramos os números primos em ordem, já marcamos todos os números(divisíveis por pelo menos um dos números primos) como divisíveis.
 Portanto, se alcançarmos uma célula e ela não estiver marcada, ela não será divisível por nenhum número primo menor e, portanto, terá que ser primo.</p>
 
 <h2>Implementação</h2>
 
 <pre><code class="cpp">int n;
-vector&lt;char&gt; is_prime(n+1, true);
-is_prime[0] = is_prime[1] = false;
+vector&lt;char&gt; primo(n+1, true);
+primo[0] = primo[1] = false;
 for (int i = 2; i &lt;= n; i++) {
-    if (is_prime[i] &amp;&amp; (long long)i * i &lt;= n) {
+    if (primo[i] &amp;&amp; (long long)i * i &lt;= n) {
         for (int j = i * i; j &lt;= n; j += i)
-            is_prime[j] = false;
+            primo[j] = false;
     }
 }
 </code></pre>
@@ -115,12 +115,12 @@ E por causa disso, a constante que está oculta em $O(n \log \log n)$ é compara
 <p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
 
 <pre><code class="cpp">int n;
-vector&lt;char&gt; is_prime(n+1, true);
-is_prime[0] = is_prime[1] = false;
+vector&lt;char&gt; primo(n+1, true);
+primo[0] = primo[1] = false;
 for (int i = 2; i * i &lt;= n; i++) {
-    if (is_prime[i]) {
+    if (primo[i]) {
         for (int j = i * i; j &lt;= n; j += i)
-            is_prime[j] = false;
+            primo[j] = false;
     }
 }
 </code></pre>
@@ -145,37 +145,37 @@ for (int i = 2; i * i &lt;= n; i++) {
 
 <h3>Selecionando por blocos</h3>
 
-<p>Segue da otimização "selecionando até a raiz" que não há necessidade de manter a array inteira <code>is_prime[1...n]</code> todo o tempo.
-Basta manter apenas números primos até a raiz de $n$, i.e. <code>prime[1... sqrt(n)]</code>, dividir o intervalo completo em blocos e selecionar cada bloco separadamente.
+<p>Segue da otimização "selecionando até a raiz" que não há necessidade de manter a array inteira <code>primo[1...n]</code> todo o tempo.
+Basta manter apenas números primos até a raiz de $n$, i.e. <code>primos[1... sqrt(n)]</code>, dividir o intervalo completo em blocos e selecionar cada bloco separadamente.
 Ao fazer isso, nunca precisamos manter vários blocos na memória ao mesmo tempo, e a CPU lida com o cache muito melhor.</p>
 
 <p>Deixe que $s$ seja a constante na qual determina o tamanho do bloco, assim teremos $\lceil {\frac n s} \rceil$ blocos, e o bloco $k$ ($k = 0 ... \lfloor {\frac n s} \rfloor$) contém os números em um segmento $[ks; ks + s - 1]$.
 Podemos trabalhar com blocos apenas por turnos, ou seja, para cada bloco $k$ nós passaremos por todos os números primos (de $1$ até $\sqrt n$) e performaremos a seleção usando eles.
 Vale ressaltar que precisamos modificar um pouco a estratégia ao lidar com os primeiros números: primeiro, todos os números primos de $[1; \sqrt n]$ não devem se remover; e segundo, os números $0$ e $1$ devem ser marcados como números não primos.
-Enquanto está no último bloco, não se deve esquecer que o último número necessário $n$ não está necessariamente encontrado no final do bloco.</p>
+Enquanto estiver trabalhando no último bloco, não se deve esquecer que o último número $n$ não está necessariamente encontrado no final do bloco.</p>
 
 <p>Aqui temos uma implementação que conta o número de números primos menores ou iguais a $n$ usando seleção por blocos.</p>
 
-<pre><code class="cpp">int count_primes(int n) {
+<pre><code class="cpp">int contar_primos(int n) {
     const int S = 10000;
 
-    vector&lt;int&gt; primes;
+    vector&lt;int&gt; primos;    //array com os números primos
     int nsqrt = sqrt(n);
-    vector&lt;char&gt; is_prime(nsqrt + 1, true);
+    vector&lt;char&gt; primo(nsqrt + 1, true);  //array para ver se é primo ou não
     for (int i = 2; i &lt;= nsqrt; i++) {
-        if (is_prime[i]) {
-            primes.push_back(i);
-            for (int j = i * i; j &lt;= nsqrt; j += i)
-                is_prime[j] = false;
+        if (primo[i]) {
+            primos.push_back(i);
+            for (int j = i * i; j &lt;= nsqrt; j += i)   //iteramos até a raiz de n
+                primo[j] = false;
         }
     }
 
     int result = 0;
-    vector&lt;char&gt; block(S);
+    vector&lt;char&gt; block(S);  //array dos blocos
     for (int k = 0; k * S &lt;= n; k++) {
         fill(block.begin(), block.end(), true);
         int start = k * S;
-        for (int p : primes) {
+        for (int p : primos) {
             int start_idx = (start + p - 1) / p;
             int j = max(start_idx, p) * p - start;
             for (; j &lt; S; j += p)
@@ -188,7 +188,7 @@ Enquanto está no último bloco, não se deve esquecer que o último número nec
                 result++;
         }
     }
-    return result;
+    return result;   //quantidade de números primos
 }
 </code></pre>
 
