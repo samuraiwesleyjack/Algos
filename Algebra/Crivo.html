@@ -112,9 +112,10 @@ E por causa disso, a constante que está oculta em $O(n \log \log n)$ é compara
 
 <h3>Selecionando até a raíz</h3>
 
-<p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a <a href="https://www.quora.com/Why-do-we-first-find-the-prime-numbers-up-to-square-root-of-N-in-segmented-sieve">raiz de $n$</a>.</p>
+<p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
 <p>Os outros compostos depois da raiz de n já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo x, sendo 2 <= x <= sqrt(n)(arredondado para o inteiro mais próximo)).</p>
-<p><img src="https://github.com/samuraiwesleyjack/Algos/blob/gh-pages/Algebra/img/crivo.jpg" alt="Sieve of Eratosthenes" /></p>			
+<p><a href="https://www.quora.com/Why-do-we-first-find-the-prime-numbers-up-to-square-root-of-N-in-segmented-sieve">Prova</a></p>.			
+<p><img src="Algebra/img/crivo.jpg" alt="Sieve of Eratosthenes" /></p>			
 <pre><code class="cpp">int n;
 vector&lt;char&gt; primo(n+1, true);
 primo[0] = primo[1] = false;
