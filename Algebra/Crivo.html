@@ -53,7 +53,7 @@ vector&lt;char&gt; primo(n+1, true);
 primo[0] = primo[1] = false;
 for (int i = 2; i &lt;= n; i++) {
     if (primo[i] &amp;&amp; (long long)i * i &lt;= n) {
-        for (int j = i * i; j &lt;= n; j += i)
+        for (int j = i * i; j &lt;= n; j += i)     //iteramos por todos os divisíveis do primo i
             primo[j] = false;
     }
 }
@@ -172,18 +172,18 @@ Enquanto estiver trabalhando no último bloco, não se deve esquecer que o últi
 
     int result = 0;
     vector&lt;char&gt; block(S);  //array dos blocos
-    for (int k = 0; k * S &lt;= n; k++) {
+    for (int k = 0; k * S &lt;= n; k++) {   //dividindo o intervalo em blocos 
         fill(block.begin(), block.end(), true);
-        int start = k * S;
+        int inicio = k * S;
         for (int p : primos) {
-            int start_idx = (start + p - 1) / p;
-            int j = max(start_idx, p) * p - start;
+            int inicio_idx = (inicio + p - 1) / p;
+            int j = max(inicio_idx, p) * p - inicio;
             for (; j &lt; S; j += p)
                 block[j] = false;
         }
         if (k == 0)
             block[0] = block[1] = false;
-        for (int i = 0; i &lt; S &amp;&amp; start + i &lt;= n; i++) {
+        for (int i = 0; i &lt; S &amp;&amp; start + i &lt;= n; i++) {  //selecionando os blocos
             if (block[i])
                 result++;
         }
