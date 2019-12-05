@@ -53,7 +53,7 @@ vector&lt;char&gt; primo(n+1, true);
 primo[0] = primo[1] = false;
 for (int i = 2; i &lt;= n; i++) {
     if (primo[i] &amp;&amp; (long long)i * i &lt;= n) {
-        for (int j = i * i; j &lt;= n; j += i)     //iteramos por todos os divisíveis do primo i
+        for (int j = i * i; j &lt;= n; j += i)     //iteramos por todos os números divisíveis pelo primo i
             primo[j] = false;
     }
 }
