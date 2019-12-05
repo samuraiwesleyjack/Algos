@@ -121,10 +121,10 @@ Como sabemos que o operador do módulo não interfere nas multiplicações ($a \
     a %= m;
     long long res = 1;
     while (b &gt; 0) {
-        if (b &amp; 1)
-            res = res * a % m;
+        if (b &amp; 1)    //se b for impar  (& operador bitwise and)
+            res = res * a % m;  //o mesmo que (res % m) * (a % m)
         a = a * a % m;
-        b &gt;&gt;= 1;
+        b &gt;&gt;= 1;   // b' = b/2 (com restos, >> operador bitwise shift)
     }
     return res;
 }
