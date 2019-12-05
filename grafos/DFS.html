@@ -87,7 +87,7 @@ void dfs(int v) {
     vis[v] = true;
     for (int u : g[v]) {
         if (!vis[u])
-            dfs(u);
+            dfs(u);  //chamamos a função para ir mais fundo no grafo
     }
 }
 			</code></pre>
