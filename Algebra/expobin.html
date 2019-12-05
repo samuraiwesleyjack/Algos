@@ -233,9 +233,9 @@ Isto é: $result_{ij} = \min\limits_{1\ \leq\ k\ \leq\ n}(a_{ik} + b_{kj})$.</p>
 <p><strong>Solução:</strong> Simplesmente aplicamos o algoritmo de construção binário descrito acima, realizando apenas adições em vez de multiplicações. Em outras palavras, "expandimos" a multiplicação de dois números para $O (\log m)$ operações de adição e multiplicação por dois (na qual, em essência, é uma adição).</p>
 
 <p>$$a \cdot b = \begin{cases}
-0 &amp;\text{if }a = 0 &#92;&#92;
-2 \cdot \frac{a}{2} \cdot b &amp;\text{if }a > 0 \text{ and }a \text{ even} &#92;&#92;
-2 \cdot \frac{a-1}{2} \cdot b + b &amp;\text{if }a > 0 \text{ and }a \text{ odd}
+0 &amp;\text{se }a = 0 &#92;&#92;
+2 \cdot \frac{a}{2} \cdot b &amp;\text{se }a > 0 \text{ e }a \text{ par} &#92;&#92;
+2 \cdot \frac{a-1}{2} \cdot b + b &amp;\text{se }a > 0 \text{ e }a \text{ impar}
 \end{cases}$$</p>
 
 <p><strong>Nota:</strong> Você pode resolver por um caminho diferente com operações com números do tipo float. Primeiro calcule a expressão $\frac{a \cdot b}{m}$ usando números float(point-float numbers) e jogue-o em um unsigned integer(inteiro sem sinal) $q$. Subtraia $q \cdot m$ de $a \cdot b$ usando aritmética de unsigned integer e pegue o modulo $m$ para encontrar a resposta(meio confuso mas com uma boa prática em usar diferentes tipos em uma liguagem de programação você consegue pegar a prática). Essa solução parece pouco confiável, mas é muito rápida. Veja <a href="https://cs.stackexchange.com/questions/77016/modular-multiplication">aqui</a> para mais informações.</p>
