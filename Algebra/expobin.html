@@ -83,7 +83,7 @@ $3^{13} = 6561 \cdot 81 \cdot 3 = 1594323$</p>
     if (b == 0)
         return 1;
     long long res = binpow(a, b / 2);
-    if (b % 2)
+    if (b % 2)   
         return res * res * a;
     else
         return res * res;
@@ -97,10 +97,10 @@ Apesar da complexidade das duas serem a mesma, essa abordagem será mais rápida
 <pre><code class="cpp">long long binpow(long long a, long long b) {
     long long res = 1;
     while (b &gt; 0) {
-        if (b &amp; 1)
+        if (b &amp; 1)  //impar
             res = res * a;
         a = a * a;
-        b &gt;&gt;= 1;
+        b &gt;&gt;= 1;  // /2
     }
     return res;
 }
