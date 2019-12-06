@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Testes de Primalidade - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, C++, Números Primos Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Testes de Primalidade</h1>
+
+<p>Este artigo descreve algoritmos para determinar se um número é primo ou não.</p>
+
+<h2>Trial Division</h2>
+
+<p>Por definição, um número primo não possui divisores além de $1$ e ele mesmo.
+Um número composto tem pelo menos um divisor adicional, vamos chamá-lo de $d$.
+Naturalmente $\frac{n}{d}$ também é um divisor de $n$.
+Note que $d \le \sqrt{n}$ ou $\frac{n}{d} \le \sqrt{n}$, portanto, um dos divisores $d$ e $\frac{n}{d}$ é $\le \sqrt{n}$.
+Podemos usar essa informação para checar a primalidade.</p>
+
+<p>Tentamos encontrar um divisor não trivial, verificando se algum dos números entre $2$ e $\sqrt{n}$ é um divisor de $n$.
+Se for um divisor, então $n$ definitivamente não é primo, caso contrário ele será primo.</p>
+
+<pre><code class="cpp">bool isPrime(int x) {
+    for (int d = 2; d * d &lt;= x; d++) {
+        if (x % d == 0)
+            return false;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Essa é a forma mais simples de checar se o número é primo.
+Você pode otimizar essa função, por exemplo, verificando apenas todos os números ímpares no loop, pois o único número primo par é 2.
+Várias dessas otimizações são descritas no artigo sobre <a href="https://cp-algorithms.com/algebra/factorization.html">fatoração de inteiros</a>.</p>
+
+<h2>Teste de primalidade de Fermat</h2>
+
+<p>Este é um teste probabilístico.</p>
+
+<p>O pequeno teorema de Fermat (veja também <a href="https://cp-algorithms.com/algebra/phi-function.html">Euler's totient function</a>) define que para um número primo $p$ e um inteiro coprimo $a$ (mdc(p,a) = 1) a equação a seguir é válida:</p>
+
+<p>$$a^{p-1} \equiv 1 \bmod p$$</p>
+
+<p>No geral, esse teorema não se aplica a números compostos.</p>
+
+<p>Isso pode ser usado para criar um teste de primalidade. Escolhemos um número inteiro $2 \le a \le p - 2$, e verificamos se a equação é válida ou não.
+Se não for válida, e.g. $a^{p-1} \not\equiv 1 \bmod p$, saberemos que $p$ não poderá ser um número primo.
+Nesse caso, chamamos a base $a$ de "<em>testemunha de Fermat</em>" para a composição de $p$.</p>
+
+<p>No entanto, também é possível que a equação seja válida para um número composto.
+Portanto, se a equação for válida, não temos uma prova de primalidade.
+Só podemos dizer que $p$ é <em>provavelmente primo</em>.
+Se o número for realmente composto, chamamos a base $a$ de <em>mentirosa de Fermat</em>.</p>
+
+<p>Ao executar o teste para todas as bases possíveis $a$, podemos realmente provar que um número é primo.
+No entanto, isso não é feito na prática, pois requer mais esforço do que apenas fazer divisões de teste(trial division).
+Em vez disso, o teste será repetido várias vezes com opções aleatórias para $a$.
+Se não encontrarmos testemunha para a composição, é muito provável que o número seja de fato primo.</p>
+
+<pre><code class="cpp">bool provavelPrimoFermat(int n, int iter=5) {
+    if (n &lt; 4)
+        return n == 2 || n == 3;
+
+    for (int i = 0; i &lt; iter; i++) {
+        int a = 2 + rand() % (n - 3);
+        if (binpower(a, n - 1, n) != 1)   //exponenciação binária
+            return false;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Usamos <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">Exponenciação Binária</a> para eficientemente calcular a exponenciação $a^{p-1}$.</p>
+
+<p>Há uma má notícia: existem alguns números compostos em que $a^{n-1} \equiv 1 \bmod n$ é válido para todo $a$ coprimo até $n$, por exemplo, para o número $561 = 3 \cdot 11 \cdot 17$.
+Esses números são chamados de <em>números de Carmichael</em>.
+O teste de primalidade de Fermat pode identificar esses números apenas se tivermos uma sorte imensa de escolhermos uma base $a$ com $\gcd(a, n) \ne 1$.</p>
+
+<p>O teste de Fermat ainda é utilizado na prática, pois é muito rápido e os números de Carmichael são muito raros. 
+Existem apenas 646 números desse tipo abaixo de $10^9$.</p>
+
+<h2>Teste de primalidade de Miller-Rabin</h2>
+
+<p>O teste de Miller-Rabin amplia as idéias do teste de Fermat.</p>
+
+<p>Para um número ímpar $n$, $n-1$ é par e podemos fatorar todas as potências de 2.
+Podemos escrever:
+$$n - 1 = 2^s \cdot d,~\text{with}~d~\text{odd}.$$</p>
+
+<p>Isso nos permite fatorar a equação do pequeno teorema de Fermat:
+$$\begin{array}{rl}
+a^{n-1} \equiv 1 \bmod n &amp;\Longleftrightarrow a^{2^s d} - 1 \equiv 0 \bmod n &#92;&#92;
+&amp;\Longleftrightarrow (a^{2^{s-1} d} + 1) (a^{2^{s-1} d} - 1) \equiv 0 \bmod n &#92;&#92;
+&amp;\Longleftrightarrow (a^{2^{s-1} d} + 1) (a^{2^{s-2} d} + 1) (a^{2^{s-2} d} - 1) \equiv 0 \bmod n &#92;&#92;
+&amp;\quad\vdots &#92;&#92;
+&amp;\Longleftrightarrow (a^{2^{s-1} d} + 1) (a^{2^{s-2} d} + 1) \cdots (a^{d} + 1) (a^{d} - 1) \equiv 0 \bmod n &#92;&#92;
+\end{array}$$</p>
+
+<p>Se $n$ é primo, então $n$ deve dividir um desses fatores.
+E no teste de Miller-Rabin primality verificamos exatamente essa afirmação, que é uma versão mais rígida da afirmação do teste de Fermat.
+Para uma base $2 \le a \le n-2$ verificamos se
+$$a^d \equiv 1 \bmod n$$
+é válido, ou 
+$$a^{2^r d} \equiv -1 \bmod n$$
+é válido para algum $0 \le r \le s - 1$.</p>
+
+<p>Se encontrarmos uma base $a$ que não satisfaça nenhuma das igualdades acima, então econtramos uma <em>testemunha</em> para a composição de $n$.
+Nesse caso, provamos que $n$ não é um número primo.</p>
+
+<p>Semelhante ao teste de Fermat, também é possível que o conjunto de equações seja válido para um número composto. 
+Nesse caso, a base $a$ é chamada de <em>mentirosa(strong liar)</em>.
+Se uma base $a$ satisfaz as equações (uma delas), $n$ é apenas <em>provavelmente primo</em>.
+No entanto, não existem números como os números de Carmichael, onde todas as bases não triviais mentem.
+De fato, é possível mostrar que no máximo $\frac{1}{4}$ das bases podem ser fortes mentirosas.
+Se $n$ for composto, temos uma probabilidade de $\ge 75\%$ de que uma base aleatória nos diga que é composto.
+Fazendo várias iterações, escolhendo diferentes bases aleatórias, podemos dizer com uma probabilidade muito alta se o número é realmente primo ou se é composto.</p>
+
+<p>Aqui está uma implementação para números inteiros de 64 bits.</p>
+
+<pre><code class="cpp">using u64 = uint64_t;
+using u128 = __uint128_t;
+
+u64 binpower(u64 base, u64 e, u64 mod) {
+    u64 result = 1;
+    base %= mod;
+    while (e) {
+        if (e &amp; 1)
+            result = (u128)result * base % mod;
+        base = (u128)base * base % mod;
+        e &gt;&gt;= 1;
+    }
+    return result;
+}
+
+bool check_composite(u64 n, u64 a, u64 d, int s) {
+    u64 x = binpower(a, d, n);
+    if (x == 1 || x == n - 1)
+        return false;
+    for (int r = 1; r &lt; s; r++) {
+        x = (u128)x * x % n;
+        if (x == n - 1)
+            return false;
+    }
+    return true;
+};
+
+bool MillerRabin(u64 n) { // returns true if n is probably prime, else returns false.
+    if (n &lt; 4)
+        return n == 2 || n == 3;
+
+    int s = 0;
+    u64 d = n - 1;
+    while ((d &amp; 1) == 0) {
+        d &gt;&gt;= 1;
+        s++;
+    }
+
+    for (int i = 0; i &lt; iter; i++) {
+        int a = 2 + rand() % (n - 3);
+        if (check_composite(n, a, d, s))
+            return false;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Antes do teste de Miller-Rabin, você pode testar adicionalmente se um dos primeiros números primos é um divisor. Isso pode acelerar muito o teste, já que a maioria dos números compostos possui divisores primos muito pequenos.
+Por exemplo, $88\%$ de todos os números têm fatores primos menores que $100$.</p>
+
+<h3>Versão determinística</h3>
+
+<p>Miller mostrou que é possível tornar o algoritmo determinístico apenas verificando todas as bases $\le O((\ln n)^2)$.
+Bach mais tarde deu um limite concreto, é necessário apenas testar todas as bases $a \le 2 \ln(n)^2$.</p>
+
+<p>Este ainda é um número bastante grande de bases. Portanto, as pessoas investiram bastante poder computacional na busca de limites mais baixos.
+Acontece que, para testar um número inteiro de 32 bits, é necessário apenas verificar as 4 primeiras bases primárias: 2, 3, 5 e 7.
+O menor número composto que falha nesse teste é $3,215,031,751 = 151 \cdot 751 \cdot 28351$.
+E para testar números inteiros de 64 bits, basta verificar as 12 primeiras bases primárias: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, e 37.</p>
+
+<p>Isso resulta na seguinte implementação determinística:</p>
+
+<pre><code class="cpp">bool MillerRabin(u64 n) { // retorna true se n é primo, caso contrário retorna false.
+    if (n &lt; 2)
+        return false;
+
+    int r = 0;
+    u64 d = n - 1;
+    while ((d &amp; 1) == 0) {
+        d &gt;&gt;= 1;
+        r++;
+    }
+
+    for (int a : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37}) {
+        if (n == a)
+            return true;
+        if (check_composite(n, a, d, r))
+            return false;
+    }
+    return true;
+}
+</code></pre>
+
+<p>Também é possível fazer a verificação com apenas 7 bases: 2, 325, 9375, 28178, 450775, 9780504 e 1795265022.
+No entanto, como esses números (exceto 2) não são primos, é necessário verificar adicionalmente se o número que está verificando é igual a qualquer divisor primário dessas bases: 2, 3, 5, 13, 19, 73, 193, 407521, 299210837.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.spoj.com/problems/PON/">SPOJ - Prime or Not</a></li>
+</ul>
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
