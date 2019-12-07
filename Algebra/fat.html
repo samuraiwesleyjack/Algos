@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fatoração de Inteiros - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, C++, Fatoração C++ Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Fatoração de Inteiros</h1>
+
+<p>Neste artigo, listamos vários algoritmos para fatorar números inteiros, cada um deles pode ser rápido e lento (alguns mais lentos que outros), dependendo de suas entradas.</p>
+
+<p>Se o número que você deseja fatorar for realmente um número primo, a maioria dos algoritmos, especialmente o algoritmo de fatoração de Fermat, o p-1 de Pollard, o algoritmo rho de Pollard, irão ser lentos. Portanto, faz sentido executar um <a href="https://cp-algorithms-brasil.com/Algebra/testesprimo.html">teste de primalidade</a> antes de tentar fatorar o número.</p>
+
+<h2>Trial division</h2>
+
+<p>Este é o algoritmo mais básico para encontrar a fatoração e os fatores primos do número.</p>
+
+<p>Dividimos por cada divisor possível $d$.
+Podemos notar que é impossível que todos os fatores primos de um número composto $n$ sejam maiores que $\sqrt{n}$.
+Portanto, precisamos apenas testar os divisores $2 \le d \le \sqrt{n}$, o que nos fornece a fatoração em $O(\sqrt{n})$.</p>
+
+<p>O menor divisor deve ser um número primo.
+Removemos o fator do número e repetimos o processo.
+Se não conseguirmos encontrar nenhum divisor no intervalo $[2; \sqrt{n}]$, então o próprio número deve ser primo.</p>
+
+<pre><code class="cpp">vector&lt;long long&gt; trial_division1(long long n) {
+    vector&lt;long long&gt; factorization;
+    for (long long d = 2; d * d &lt;= n; d++) {
+        while (n % d == 0) {
+            factorization.push_back(d);
+            n /= d;
+        }
+    }
+    if (n &gt; 1)
+        factorization.push_back(n);
+    return factorization;
+}
+</code></pre>
+
+<h3><a href="https://en.wikipedia.org/wiki/Wheel_factorization">Wheel factorization</a></h3>
+
+<p>Esta é uma otimização do trial division.
+A ideia é a seguinte.
+Uma vez que sabemos que o número não é divisível por 2, não precisamos checar os outros números pares.
+Isso nos deixa com apenas $50\%$ dos números para checar.
+Após marcar 2, podemos simplesmente começar com 3 e pular todos os outros números.</p>
+
+<pre><code class="cpp">vector&lt;long long&gt; trial_division2(long long n) {
+    vector&lt;long long&gt; factorization;
+    while (n % 2 == 0) {
+        factorization.push_back(2);
+        n /= 2;
+    }
+    for (long long d = 3; d * d &lt;= n; d += 2) {
+        while (n % d == 0) {
+            factorization.push_back(d);
+            n /= d;
+        }
+    }
+    if (n &gt; 1)
+        factorization.push_back(n);
+    return factorization;
+}
+</code></pre>
+
+<p>Este método pode ser estendido. Se o número não for divisível por 3, também podemos ignorar todos os outros múltiplos de 3 nos cálculos futuros. 
+Então precisamos checar apenas os números $5, 7, 11, 13, 17, 19, 23, \dots$.
+Podemos observar um padrão desses números restantes.
+Precisamos verificar todos os números com $d \bmod 6 = 1$ e $d \bmod 6 = 5$.
+Portanto, isso nos deixa com apenas $33.3\%$ dos números para checar.
+Podemos implementar isso verificando os números primos 2 e 3 primeiro e, em seguida, verificar com 5 e, alternativamente, pular 1 ou 3 números.</p>
+
+<p>Podemos estender isso ainda mais. Aqui está uma implementação para os números primos 2, 3 e 5. É conveniente usar uma array para armazenar quanto precisamos pular.</p>
+
+<pre><code class="cpp">vector&lt;long long&gt; trial_division3(long long n) {
+    vector&lt;long long&gt; factorization;
+    for (int d : {2, 3, 5}) {
+        while (n % d == 0) {
+            factorization.push_back(d);
+            n /= d;
+        }
+    }
+    static array&lt;int, 8&gt; increments = {4, 2, 4, 2, 4, 6, 2, 6};
+    int i = 0;
+    for (long long d = 7; d * d &lt;= n; d += increments[i++]) {
+        while (n % d == 0) {
+            factorization.push_back(d);
+            n /= d;
+        }
+        if (i == 8)
+            i = 0;
+    }
+    if (n &gt; 1)
+        factorization.push_back(n);
+    return factorization;
+}
+</code></pre>
+
+<p>Se estendermos ainda mais isso com mais números primos, podemos alcançar porcentagens melhores. No entanto, também as listas de pulos ficarão muito maiores.</p>
+
+<h3>Primos pré-calculados</h3>
+
+<p>Estendendo o "wheel factorization" com mais e mais primos deixará exatamente apenas primos para checar.
+Portanto, uma boa maneira de verificar é pré-calcular todos os números primos com o <a href="https://cp-algorithms-brasil.com/Algebra/Crivo.html">crivo de Eratóstenes</a> até $\sqrt{n}$ e testá-los individualmente.</p>
+
+<pre><code class="cpp">vector&lt;long long&gt; primes;
+
+vector&lt;long long&gt; trial_division4(long long n) {
+    vector&lt;long long&gt; factorization;
+    for (long long d : primes) {
+        if (d * d &gt; n)
+            break;
+        while (n % d == 0) {
+            factorization.push_back(d);
+            n /= d;
+        }
+    }
+    if (n &gt; 1)
+        factorization.push_back(n);
+    return factorization;
+}
+</code></pre>
+
+<h2>Método de fatoração de Fermat</h2>
+
+<p>Podemos escrever um número composto ímpar $n = p \cdot q$ como a diferença de dois quadrados $n = a^2 - b^2$:
+$$n = \left(\frac{p + q}{2}\right)^2 - \left(\frac{p - q}{2}\right)^2$$
+O método de fatoração de Fermat tenta explorar o fato, adivinhando o primeiro quadrado $a^2$, e verificando se a parte restante $b^2 = a^2 - n$ também é um número quadrado.
+Se for, encontramos os fatores $a - b$ e $a + b$ de $n$.</p>
+
+<pre><code class="cpp">int fermat(int n) {
+    int a = ceil(sqrt(n));
+    int b2 = a*a - n;
+    int b = round(sqrt(b2));
+    while (b * b != b2) {
+        a = a + 1;
+        b2 = a*a - n;
+        b = round(sqrt(b2));
+    }
+    return a - b;
+}
+</code></pre>
+
+<p>Observe que esse método de fatoração pode ser muito rápido, se a diferença entre os dois fatores $p$ e $q$ for pequena.
+O algoritmo é executado em tempo $O(|p - q|)$.
+No entanto, como é muito lento, uma vez que os fatores estão distantes, raramente é usado na prática.</p>
+
+<p>No entanto, ainda há um grande número de otimizações para essa abordagem.
+Por exemplo, olhando para os quadrados $a^2$ modulo um número fixo pequeno, você pode notar que não precisa olhar para determinados valores de $a$ já que eles não consegue formar um quadrado $a^2 - n$.</p>
+
+<h2>Método $p - 1$ de Pollard</h2>
+
+<p>É muito provável que pelo menos um fator de um número seja $B$.
+$B$-powersmooth significa que toda exponenciação $d^k$ de um primo $d$ que divide $p-1$ é no máximo $B$.
+Por exemplo, a fatoração de $4817191$ são $1303 \cdot 3697$.
+E os fatores máximo são $31$ e $16$ respectivamente, pois $1303 - 1 = 2 \cdot 3 \cdot 7 \cdot 31$ e $3697 - 1 = 2^4 \cdot 3 \cdot 7 \cdot 11$.
+Em 1974 John Pollard inventou um método para extrair esses fatores $B$ de um número composto.</p>
+
+<p>A ideia vem do pequeno <a href="https://cp-algorithms.com/algebra/phi-function.html#application">Teorema de Fermat</a>.
+Deixe que a fatoração de $n$ seja $n = p \cdot q$.
+Ele diz que se $a$ é coprimo para $p$(gcd(a,p)=1), a seguinte declaração é válida:</p>
+
+<p>$$a^{p - 1} \equiv 1 \pmod{p}$$</p>
+
+<p>Isso também significa que</p>
+
+<p>$$a^{(p - 1)^k} \equiv a^{k \cdot (p - 1)} \equiv 1 \pmod{p}.$$</p>
+
+<p>Portanto, para qualquer $M$ com $p - 1 ~|~ M$ sabemos que $a^M \equiv 1$.
+Isso significa que $a^M - 1 = p \cdot r$, e, por causa disso, também $p ~|~ \gcd(a^M - 1, n)$.</p>
+
+<p>Portanto, se $p - 1$ para um fator $p$ de $n$ divide $M$, podemos extrair um fator usando <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">algoritmo de Euclides</a>.</p>
+
+<p>O menor $M$ que é um múltiplo de todo número $B$ é $\text{lcm/mmc}(1,~2~,3~,4~,~\dots,~B)$.
+Ou alternativamente:
+$$M = \prod_{\text{primos } q \le B} q^{\lfloor \log_q B \rfloor}$$</p>
+
+<p>Observe que, se $p-1$ divide $M$ para todos fatores primos $p$ de $n$, então $\gcd(a^M - 1, n)$ será apenas $n$.
+Nesse caso, não recebemos um fator. Portanto, tentaremos executar o $\gcd/mdc$ várias vezes, enquanto calculamos $M$.</p>
+
+<p>Alguns números compostos não têm fatores $B$ para pequenos $B$.
+Por exemplo, os fatores do número composto $100.000.000.000.000.493 = 763.013 \cdot 131.059.365.961$ são $190.753$ e $1092161383$.
+Nós teríamos que escolher $B >= 190.753$ para decompor o número.</p>
+
+<p>Na implementação seguinte. começamos com $B = 10$ e incrementamos $B$ depois de cada iteração.</p>
+
+<pre><code class="cpp">long long pollards_p_minus_1(long long n) {
+    int B = 10;
+    long long g = 1;
+    while (B &lt;= 1000000 &amp;&amp; g &lt; n) {
+        long long a = 2 + rand() %  (n - 3);
+        g = gcd(a, n);
+        if (g &gt; 1)
+            return g;
+
+        // calcula a^M
+        for (int p : primes) {
+            if (p &gt;= B)
+                continue;
+            long long p_power = 1;
+            while (p_power * p &lt;= B)
+                p_power *= p;
+            a = power(a, p_power, n);
+
+            g = gcd(a - 1, n);
+            if (g &gt; 1 &amp;&amp; g &lt; n)
+                return g;
+        }
+        B *= 2;
+    }
+    return 1;
+}
+
+</code></pre>
+
+<p>Nota: Este é um algoritmo probabilístico, portanto, pode acontecer que o algoritmo não encontre um fator.</p>
+
+<p>A complexidade é $O(B \log B \log^2 n)$ por iteração.</p>
+
+<h2>Algoritmo rho de Pollard</h2>
+
+<p>Outro algoritmo de fatoração de John Pollard.</p>
+
+<p>Seja a fatoração primária de um número $n = p q$.
+O algoritmo analisa uma sequência pseudo-aleatória $&#123;x_i&#125; = &#123;x_0,~f(x_0),~f(f(x_0)),~\dots&#125;$ onde $f$ é uma função polinomial, usualmente $f(x) = x^2 + c \bmod n$ é escolhido com $c = 1$.</p>
+
+<p>Na verdade, não estamos muito interessados ​​na sequência $&#123;x_i&#125;$, estamos mais interessados ​​na sequência $&#123;x_i \bmod p&#125;$.
+Como $f$ é uma função polinomial e todos os valores estão no range $[0;~p)$ essa sequência começará um ciclo mais cedo ou mais tarde.
+O <strong><a href="https://en.wikipedia.org/wiki/Birthday_problem">birthday paradox</a></strong> sugere, na verdade, que o número esperado de elementos é $O(\sqrt{p})$ até que a repetição comece.
+Se $p$ for menor que $\sqrt{n}$, a repetição começará muito provavelmente em $O(\sqrt[4]{n})$.</p>
+
+<p>Aqui está uma visualização dessa sequência $&#123;x_i \bmod p&#125;$ com $n = 2206637$, $p = 317$, $x_0 = 2$ e $f(x) = x^2 + 1$.</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/pollard_rho.png" alt="Pollard's rho visualization" /></center></p>
+
+<p>Ainda existe uma grande questão em aberto. Ainda não sabemos $p$, então como podemos discutir sobre a sequência $&#123;x_i \bmod p&#125;$?</p>
+
+<p>Na verdade, é bem fácil. Existe um ciclo na sequência $&#92;{x_i \bmod p&#92;}_{i \le j}$ se, e somente se, houver dois índices $s, t \le j$ e $t$ com $x_s \equiv x_t \bmod p$.
+Essa equação pode ser reescrita como $x_s - x_t \equiv 0 \bmod p$ que é igual a $p ~|~ \gcd(x_s - x_t, n)$.</p>
+
+<p>Portanto, se encontrarmos dois índices $s$ e $t$ com $g = \gcd(x_s - x_t, n) > 1$, então encontramos um ciclo e também um fator $g$ de $n$.
+Note que é possível que $g = n$.
+Nesse caso, não encontramos um fator adequado e precisamos repetir o algoritmo com parâmetro diferente (valor inicial diferente $x_0$, constante diferente $c$ na função polinomial $f$).</p>
+
+<p>Para encontrar o ciclo, podemos usar qualquer algoritmo comum de detecção de ciclo.</p>
+
+<h3>Algoritmo para encontrar ciclos de Floyd</h3>
+
+<p>Esse algoritmo encontra um ciclo usando dois ponteiros.
+Esses ponteiros se movem sobre a sequência em velocidades diferentes. Em cada iteração, o primeiro ponteiro avança para o próximo elemento, mas o segundo ponteiro avança dois elementos.
+Não é difícil ver que, se existir um ciclo, o segundo ponteiro fará pelo menos um ciclo completo e, em seguida, encontrará o primeiro ponteiro durante os próximos loops do ciclo.
+Se o comprimento do ciclo é $\lambda$ e $\mu$ é o primeiro índice onde o ciclo começa, então o algoritmo será executado em tempo $O(\lambda + \mu)$.</p>
+
+<p>Esse algoritmo também é conhecido como <strong>algoritmo da tartaruga e da lebre</strong>, com base na história em que uma tartaruga e uma lebre fazem uma corrida.</p>
+
+<p>Na verdade, é possível determinar o parâmetro $\lambda$ e $\mu$ usando esse algoritmo (também em tempo $O(\lambda + \mu)$ e espaço $O(1)$), mas aqui está apenas a versão simplificada para encontrar o ciclo.
+O algoritmo e retorna verdadeiro assim que detecta um ciclo.
+Se a sequência não tiver um ciclo, a função nunca irá parar.
+No entanto, isso não pode acontecer durante o algoritmo de Pollard.</p>
+
+<pre><code class="text">function floyd(f, x0):
+    tartaruga = x0
+    lebre = f(x0)
+    while tartaruga != lebre:
+        tartaruga = f(tartaruga)
+        lebre = f(f(lebre))
+    return true
+</code></pre>
+
+<h3>Implementação</h3>
+
+<p>Primeiro, aqui está uma implementação usando o <strong>algoritmo de ciclos de Floyd</strong>.
+O algoritmo é executado (normalmente) em tempo $O(\sqrt[4]{n} \log(n))$.</p>
+
+<pre><code class="cpp">long long mult(long long a, long long b, long long mod) {
+    return (__int128)a * b % mod;
+}
+
+long long f(long long x, long long c, long long mod) {
+    return (mult(x, x, mod) + c) % mod;
+}
+
+long long rho(long long n, long long x0=2, long long c=1) {
+    long long x = x0;
+    long long y = x0;
+    long long g = 1;
+    while (g == 1) {
+        x = f(x, c, n);
+        y = f(y, c, n);
+        y = f(y, c, n);
+        g = gcd(abs(x - y), n);
+    }
+    return g;
+}
+</code></pre>
+
+<p>A tabela a seguir mostra os valores de $x$ e $y$ durante a execução do algoritmo com $n = 2206637$, $x_0 = 2$ e $c = 1$.</p>
+
+<p>$$
+\newcommand\T{\Rule{0pt}{1em}{.3em}}
+\begin{array}{|l|l|l|l|l|l|}
+\hline
+i &amp; x_i \bmod n &amp; x_{2i} \bmod n &amp; x_i \bmod 317 &amp; x_{2i} \bmod 317 &amp; \gcd(x_i - x_{2i}, n) &#92;&#92;
+\hline
+0   &amp; 2       &amp; 2       &amp; 2       &amp; 2       &amp; -   &#92;&#92;
+1   &amp; 5       &amp; 26      &amp; 5       &amp; 26      &amp; 1   &#92;&#92;
+2   &amp; 26      &amp; 458330  &amp; 26      &amp; 265     &amp; 1   &#92;&#92;
+3   &amp; 677     &amp; 1671573 &amp; 43      &amp; 32      &amp; 1   &#92;&#92;
+4   &amp; 458330  &amp; 641379  &amp; 265     &amp; 88      &amp; 1   &#92;&#92;
+5   &amp; 1166412 &amp; 351937  &amp; 169     &amp; 67      &amp; 1   &#92;&#92;
+6   &amp; 1671573 &amp; 1264682 &amp; 32      &amp; 169     &amp; 1   &#92;&#92;
+7   &amp; 2193080 &amp; 2088470 &amp; 74      &amp; 74      &amp; 317 &#92;&#92;
+\hline
+\end{array}$$</p>
+
+<p>A implementação usa uma função <code>mult</code>, na qual multiplica dois inteiros $\le 10^{18}$, sem overflow, usando o tipo do GCC: <code>__int128</code> para inteiros 128-bits.
+Se o GCC não estiver disponível, você poderá usar uma ideia semelhante à <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>.</p>
+
+<pre><code class="cpp">long long mult(long long a, long long b, long long mod) {
+    long long result = 0;
+    while (b) {
+        if (b &amp; 1)
+            result = (result + a) % mod;
+        a = (a + a) % mod;
+        b &gt;&gt;= 1;
+    }
+    return result;
+}
+</code></pre>
+
+<p>Como alternativa, você também pode implementar a  <a href="https://cp-algorithms.com/algebra/montgomery_multiplication.html">multiplicação modular rápida</a>.</p>
+
+<p>Como visto anteriormente: se $n$ é composto e o algoritmo retorna $n$ como um fator, você precisa repetir o procedimento com os parâmetros $x_0$ e $c$ diferentes.
+Por exemplo, a opção $x_0 = c = 1$ não vai fatorar $25 = 5 \cdot 5$.
+O algoritmo apenas retornará $25$.
+Entretanto, a escolha $x_0 = 1$, $c = 2$ irá fatorar.</p>
+
+<h3>Algoritmo de Brent</h3>
+
+<p>Brent usa um algoritmo similar ao de Floyd.
+Também utiliza dois ponteiros.
+Ao invés de avançar os ponteiros por um e dois respectivamente, avançamos eles em potências de 2.
+Assim que $2^i$ for maior que $\lambda$ e $\mu$, encontraremos o ciclo.</p>
+
+<pre><code class="text">function floyd(f, x0):
+    tartaruga = x0
+    lebre = f(x0)
+    l = 1
+    while tartaruga != lebre:
+        tartaruga = lebre
+        repete 1 vez:
+            lebre = f(lebre)
+            if tartaruga == lebre:
+                return true
+        l *= 2
+    return true
+</code></pre>
+
+<p>O algoritmo de Brent também é executado em tempo linear, mas geralmente é mais rápido que o algoritmo de Floyd, uma vez que utiliza menos avaliações da função $f$.</p>
+
+<h3>Implementação</h3>
+
+<p>A implementação direta usando os algoritmos de Brent pode ser acelerada com a observação de que podemos omitir os termos $x_l - x_k$ se $k &lt; \frac{3 \cdot l}{2}$.
+Além disso, em vez de executar o cálculo do $\gcd/mdc$ em cada etapa, multiplicamos os termos e calculamos apenas a cada poucas etapas.</p>
+
+<pre><code class="cpp">long long brent(long long n, long long x0=2, long long c=1) {
+    long long x = x0;
+    long long g = 1;
+    long long q = 1;
+    long long xs, y;
+
+    int m = 128;
+    int l = 1;
+    while (g == 1) {
+        y = x;
+        for (int i = 1; i &lt; l; i++)
+            x = f(x, c, n);
+        int k = 0;
+        while (k &lt; l &amp;&amp; g == 1) {
+            xs = x;
+            for (int i = 0; i &lt; m &amp;&amp; i &lt; l - k; i++) {
+                x = f(x, c, n);
+                q = mult(q, abs(y - x), n);
+            }
+            g = gcd(q, n);
+            k += m;
+        }
+        l *= 2;
+    }
+    if (g == n) {
+        do {
+            xs = f(xs, c, n);
+            g = gcd(abs(xs - y), n);
+        } while (g == 1);
+    }
+    return g;
+}
+</code></pre>
+
+<p>A combinação de um trial division para pequenos números primos, juntamente com a versão de Brent do algoritmo rho de Pollard, criará um algoritmo de fatoração muito eficiente.</p>
+
+<h2>Practice Problems</h2>
+
+<ul>
+<li><a href="https://www.spoj.com/problems/FACT0/">SPOJ - FACT0</a></li>
+<li><a href="https://www.spoj.com/problems/FACT1/">SPOJ - FACT1</a></li>
+<li><a href="https://www.spoj.com/problems/FACT2/">SPOJ - FACT2</a></li>
+<li><a href="https://codeforces.com/gym/100753">GCPC 15 - Divisions</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            (c) 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html>  
