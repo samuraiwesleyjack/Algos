@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Função de Euler - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, C++, Fatoração C++ Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Função totiente de Euler</h1>
+
+<p>A função totiente de Euler, também conhecida como <strong>função phi</strong> $\phi (n)$, conta o número de inteiros entre 1 e $n$, no qual são coprimos de $n$. Dois números são coprimos se o maior divisor comum entre eles for $1$ ($1$ é considerado ser coprimo para qualquer número).</p>
+
+<p>Aqui estão valores de $\phi(n)$ para os primeiros números inteiros positivos:
+$$\begin{array}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+n &amp; 1 &amp; 2 &amp; 3 &amp; 4 &amp; 5 &amp; 6 &amp; 7 &amp; 8 &amp; 9 &amp; 10 &amp; 11 &amp; 12 &amp; 13 &amp; 14 &amp; 15 &amp; 16 &amp; 17 &amp; 18 &amp; 19 &amp; 20 &amp; 21 &#92;&#92; \hline
+\phi(n) &amp; 1 &amp; 1 &amp; 2 &amp; 2 &amp; 4 &amp; 2 &amp; 6 &amp; 4 &amp; 6 &amp; 4 &amp; 10 &amp; 4 &amp; 12 &amp; 6 &amp; 8 &amp; 8 &amp; 16 &amp; 6 &amp; 18 &amp; 8 &amp; 12 &#92;&#92; \hline
+\end{array}$$</p>
+
+<h2>Propriedades</h2>
+
+<p>As seguintes propriedades da função totiente de Euler são suficientes para calculá-la para qualquer número:</p>
+
+<ul>
+<li><p>Se $p$ é um número primo, então $\ mdc(p, q) = 1$ para todo $1 \le q &lt; p$. Portanto teremos:
+$$\phi (p) = p - 1.$$</p></li>
+<li><p>Se $p$ é um número primo e $k \ge 1$, então existem exatamente $p^k / p$ números entre $1$ e $p^k$ que são divisíveis por $p$.
+O que nos dá:
+$$\phi(p^k) = p^k - p^{k-1}.$$</p></li>
+<li><p>Se $a$ e $b$ são primos entre si, então:
+$$\phi(a b) = \phi(a) \cdot \phi(b).$$
+Essa relação não é trivial de se ver. Segue-se do <a href="../algebra/chinese-remainder-theorem.html">teorema chinês do resto</a>. O teorema chinês do resto garante que, para cada $0 \le x &lt; a$ e cada $0 \le y &lt; b$, exista um único $0 \le z &lt; a b$ com $z \equiv x \pmod{a}$ e $z \equiv y \pmod{b}$. Não é difícil mostrar que $z$ é coprimo de $a b$ se, e apenas se, $x$ é corpimo de $a$ e $y$ é corpimo de $b$. Portanto, a quantidade de números inteiros coprimos de $a b$ é igual ao produto das quantidades de $a$ e $b$.</p></li>
+<li><p>No geral, para números não coprimos $a$ e $b$, a equação $$\phi(ab) = \phi(a) \cdot \phi(b) \cdot \dfrac{d}{\phi(d)}$$ com $d = \ mdc(a, b)$ é válida.</p></li>
+</ul>
+
+<p>Assim, usando as três primeiras propriedades, podemos calcular $\phi(n)$ por meio da fatoração de $n$ (decomposição de $n$ em um produto de seus fatores primos).
+Se $n = {p_1}^{a_1} \cdot {p_2}^{a_2} \cdots {p_k}^{a_k}$, onde $p_i$ são fatores primos de $n$,</p>
+
+<p>$$\begin{align}
+\phi (n) &amp;= \phi ({p_1}^{a_1}) \cdot \phi ({p_2}^{a_2}) \cdots  \phi ({p_k}^{a_k}) &#92;&#92;
+&amp;= \left({p_1}^{a_1} - {p_1}^{a_1 - 1}\right) \cdot \left({p_2}^{a_2} - {p_2}^{a_2 - 1}\right) \cdots \left({p_k}^{a_k} - {p_k}^{a_k - 1}\right) &#92;&#92;
+&amp;= p_1^{a_1} \cdot \left(1 - \frac{1}{p_1}\right) \cdot p_2^{a_2} \cdot \left(1 - \frac{1}{p_2}\right) \cdots p_k^{a_k} \cdot \left(1 - \frac{1}{p_k}\right) &#92;&#92;
+&amp;= n \cdot \left(1 - \frac{1}{p_1}\right) \cdot \left(1 - \frac{1}{p_2}\right) \cdots \left(1 - \frac{1}{p_k}\right)
+\end{align}$$</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação usando fatoração em $O(\sqrt{n})$:</p>
+
+<pre><code class="cpp">int phi(int n) {
+    int result = n;
+    for (int i = 2; i * i &lt;= n; i++) {
+        if(n % i == 0) {
+            while(n % i == 0)
+                n /= i;
+            result -= result / i;
+        }
+    }
+    if(n &gt; 1)
+        result -= result / n;
+    return result;
+}
+</code></pre>
+
+<h2 id="application">Aplicação no teorema de Euler</h2>
+
+<p>A propriedade mais famosa e importante da função totiente de Euler é expressa no <strong>teorema de Euler</strong>: 
+$$a^{\phi(m)} \equiv 1 \pmod m$$ se $a$ e $m$ forem primos entre si.</p>
+
+<p>No caso específico em que $m$ for primo, o teorema de Euler se transforma no <strong>pequeno teorema de Fermat</strong>:
+$$a^{m - 1} \equiv 1 \pmod m$$</p>
+
+<p>O teorema de Euler e a função totiente de Euler ocorrem com bastante frequência em aplicações práticas, por exemplo, ambos são usados ​​para calcular a <a href="https://cp-algorithms.com/algebra/module-inverse.html">multiplicação modular inversa</a>.
+
+<p>Como conseqüência imediata, também obtemos a equivalência:
+$$a^n \equiv a^{n \bmod \phi(m)} \pmod m$$
+Isso permite calcular $x^n \bmod m$ para grandes valores de $n$, especificamente se $n$ é o resultado de outro cálculo, pois permite calcular $n$ sob um módulo.</p>
+
+<h2>Generalização</h2>
+
+<p>Existe uma versão menos conhecida da última equivalência, que permite calcular eficientemente $x^n \bmod m$ para números não coprimos $x$ e $m$.
+Para arbitrários $x, m$ e $n \geq \log_2 m$:
+$$x^{n}\equiv x^{\phi(m)+[n \bmod \phi(m)]} \mod m$$</p>
+
+<p>Prova:</p>
+
+<p>Seja $p_1, \dots, p_t$ divisores primos comuns de $x$ e $m$, e $k_i$ seus expoentes em $m$.
+Com esses, definimos $a = p_1^{k_1} \dots p_t^{k_t}$, o que torna $\frac{m}{a}$ coprimo de $x$.
+E seja $k$ o menor número, de modo que $a$ divida $x^k$.
+Assumindo $n \ge k$, podemos escrever:</p>
+
+<p>$$\begin{align}x^n \bmod m &amp;= \frac{x^k}{a}ax^{n-k}\bmod m &#92;&#92;
+&amp;= \frac{x^k}{a}\left(ax^{n-k}\bmod m\right) \bmod m &#92;&#92;
+&amp;= \frac{x^k}{a}\left(ax^{n-k}\bmod a \frac{m}{a}\right) \bmod m &#92;&#92;
+&amp;=\frac{x^k}{a} a \left(x^{n-k} \bmod \frac{m}{a}\right)\bmod m &#92;&#92;
+&amp;= x^k\left(x^{n-k} \bmod \frac{m}{a}\right)\bmod m
+\end{align}$$</p>
+
+<p>A equivalência entre a terceira e a quarta linha decorre do fato de que $ab \bmod ac = a(b \bmod c)$.
+De fato, se $b = cd + r$ com $r &lt; c$, então $ab = acd + ar$ com $ar &lt; ac$.</p>
+
+<p>Como $x$ e $\frac{m}{a}$ são coprimos, podemos aplicar o teorema de Euler e obter a fórmula eficiente (já que $k$ é muito pequeno; de fato $k \le \log_2 m$):
+$$x^n \bmod m = x^k\left(x^{n-k \bmod \phi(\frac{m}{a})} \bmod \frac{m}{a}\right)\bmod m.$$</p>
+
+<p>Essa fórmula é difícil de aplicar, mas podemos usá-la para analisar o comportamento de $x^n \bmod m$. Podemos ver que a sequência de potências $(x^1 \bmod m, x^2 \bmod m, x^3 \bmod m, \dots)$ entra em um ciclo de tamanho $\phi\left(\frac{m}{a}\right)$ após os primeiros $k$ (ou menores) elementos. 
+$\phi\left(\frac{m}{a}\right)$ divide $\phi(m)$ (pois $a$ e $\frac{m}{a}$ são coprimos, temos $\phi(a) \cdot \phi\left(\frac{m}{a}\right) = \phi(m)$), portanto também podemos dizer que o período tem duração $\phi(m)$.
+E como $\phi(m) \ge \log_2 m \ge k$, podemos concluir com uma fórmula mais desejada e simples:
+$$ x^n \equiv x^{\phi(m)} x^{(n - \phi(m)) \bmod \phi(m)} \bmod m \equiv x^{\phi(m)+[n \bmod \phi(m)]} \mod m.$$</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/ETF/">SPOJ #4141 "Euler Totient Function" [Difficulty: CakeWalk]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1120">UVA #10179 "Irreducible Basic Fractions" [Difficulty: Easy]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1240">UVA #10299 "Relatives" [Difficulty: Easy]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2302">UVA #11327 "Enumerating Rational Numbers" [Difficulty: Medium]</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1673">TIMUS #1673 "Admission to Exam" [Difficulty: High]</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1931">UVA 10990 - Another New Function</a></li>
+<li><a href="https://www.codechef.com/problems/COZIE">Codechef - Golu and Sweetness</a></li>
+<li><a href="http://www.spoj.com/problems/LCMSUM/">SPOJ - LCM Sum</a></li>
+<li><a href="http://codeforces.com/gym/100975">GYM - Simple Calculations  (F)</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=5043">UVA 13132 - Laser Mirrors</a></li>
+<li><a href="http://www.spoj.com/problems/GCDEX/">SPOJ - GCDEX</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4878">UVA 12995 - Farey Sequence</a></li>
+<li><a href="http://www.spoj.com/problems/TIP1/">SPOJ - Totient in Permutation (easy)</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1007">LOJ - Mathematically Hard</a></li>
+<li><a href="http://www.spoj.com/problems/DCEPCA03/">SPOJ - Totient Extreme</a></li>
+<li><a href="http://www.spoj.com/problems/NAJPWG/">SPOJ - Playing with GCD</a></li>
+<li><a href="http://www.spoj.com/problems/DCEPC12G/">SPOJ - G Force</a></li>
+<li><a href="http://www.spoj.com/problems/INVPHI/">SPOJ - Smallest Inverse Euler Totient Function</a></li>
+<li><a href="http://codeforces.com/problemset/problem/906/D">Codeforces - Power Tower</a></li>
+</ul>
+
+
+			
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
