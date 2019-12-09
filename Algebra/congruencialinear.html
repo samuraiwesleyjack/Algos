@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Equação de Congruência Linear - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Inverso Modular, C++, C++ e Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Equação de Congruência Linear</h1>
+
+<p>Esta equação é da forma:</p>
+
+<p>$$a \cdot x = b \pmod n,$$</p>
+
+<p>onde $a$, $b$ e $n$ são inteiros conhecidos e $x$ é a variável.</p>
+
+<p>É necessário encontrar o valor $x$ do intervalo $[0, n-1]$ (claramente, em toda a linha numérica, existem infinitas soluções que diferem entre si, em $n \cdot k$ , onde $k$ é qualquer inteiro). Se a solução não for única, consideraremos como obter todas as soluções.</p>
+
+<h2>Solução encontrando o Elemento Inverso</h2>
+
+<p>Vamos primeiro considerar um caso mais simples, onde $a$ e $n$ são <strong>coprimos</strong> ($\gcd(a, n) = 1$).
+Então, podemos encontrar o <a href="https://cp-algorithms-brasil.com/Algebra/inversomod.html">inverso</a> de $a$ e, multiplicando ambos os lados da equação com o inverso, podemos obter uma solução <strong>única</strong>.</p>
+
+<p>$$x = b \cdot a ^ {- 1} \pmod n$$</p>
+
+<p>Agora considere o caso em que $a$ e $n$ são <strong>não-coprimos</strong> ($\gcd(a, n) \ne 1$).
+Então a solução nem sempre irá existir (por exemplo $2 \cdot x = 1 \pmod 4$ não tem solução).</p>
+
+<p>Seja $g = \gcd(a, n)$, ou seja, o <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">maior divisor comum</a> de $a$ e $n$ (que, no caso, é maior que 1).</p>
+
+<p>Então, se $b$ não for divisível por $g$, não há solução. De fato, para qualquer $x$, o lado esquerdo da equação $a \cdot x \pmod n$ , sempre é divisível por $g$, enquanto o lado direito não é, portanto, segue-se que não existem soluções.</p>
+
+<p>Se $g$ divide $b$, então dividindo ambos os lados da equação por $g$ (ou seja, dividindo $a$, $b$ e $n$ por $g$), obtemos uma nova equação:</p>
+
+<p>$$a^\prime \cdot x = b^\prime \pmod{n^\prime}$$</p>
+
+<p>na qual $a^\prime$ e $n^\prime$ são coprimos, e já sabemos como lidar com essa equação.
+Nós temos $x^\prime$ como solução para $x$.</p>
+
+<p>É claro que $x^\prime$ também será uma solução da equação original.
+No entanto, <strong>não será a única solução</strong>.
+Pode ser demonstrado que a equação original tem exatamente $g$ soluções, e elas serão da seguinte forma:</p>
+
+<p>$$x_i = (x^\prime + i\cdot n^\prime) \pmod n \quad \text{for } i = 0 \ldots g-1$$</p>
+
+<p>Resumindo, podemos dizer que o <strong>número de soluções</strong> da equação de congruência linear é igual a $g = \gcd(a, n)$ ou zero.</p>
+
+<h2>Solução com o algoritmo de Euclides Estendido</h2>
+
+<p>Podemos reescrever a congruência linear para a seguinte equação diofantina:</p>
+
+<p>$$a \cdot x + n \cdot k = b,$$</p>
+
+<p>onde $x$ e $k$ são inteiros conhecidos.</p>
+
+<p>O método para resolver essa equação é descrito no artigo correspondente: <a href="https://cp-algorithms-brasil.com/Algebra/diofantina.html">equação diofantina linear</a> e consiste em aplicar o <a href="https://cp-algorithms-brasil.com/Algebra/euclids2.html">algoritmo de Euclides estendido</a>.</p>
+
+<p>Ele também descreve o método de obter todas as soluções dessa equação a partir de uma solução encontrada e, aliás, esse método, quando cuidadosamente considerado, é absolutamente equivalente ao método descrito na seção anterior.</p>
+
+			
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
