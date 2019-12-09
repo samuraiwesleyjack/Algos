@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Inverso Modular - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Inverso Modular, C++, C++ e Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Inverso Modular</h1>
+
+<h2>Definição</h2>
+
+<p>Na aritmética modular, não temos uma operação de divisão. No entanto, temos inversos modulares. Um <a href="https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/modular-inverses">inverso multiplicativo modular</a> de um número inteiro $a$ é um número inteiro $x$ de modo que $a \cdot x$ é igual a $1$ sob o módulo de algum número $m$.
+Para escrevê-lo de maneira formal: queremos encontrar um número inteiro $x$ no qual 
+$$a \cdot x \equiv 1 \mod m.$$
+Nota: $mod$ = % e $gcd$ = $mdc$. Também denotaremos $x$ como $a^{-1}$.</p>
+
+<p>Devemos notar que o inverso modular nem sempre existe. Por exemplo, seja $m = 4$, $a = 2$. 
+Ao verificar todos os valores possíveis com módulo $m$ deve ficar claro que é possível não encontrar $a^{-1}$ satisfazendo a equação acima. 
+Pode-se provar que o inverso modular existe se, e somente se, $a$ e $m$ são primos entre si (ou seja, coprimos, o máximo divisor comum entre os dois é 1 ($\gcd/mdc(a, m) = 1$)).</p>
+
+<p>Neste artigo, apresentamos dois métodos para encontrar o inverso modular, caso exista, e um método para encontrar o inverso modular para todos os números em tempo linear.</p>
+
+<h2>Inverso Modular usando o algoritmo de Euclides Estendido</h2>
+
+<p>Considere a seguinte equação (com $x$ e $y$ desconhecidos):</p>
+
+<p>$$a \cdot x + m \cdot y = 1$$</p>
+
+<p>Esta é uma <a href="https://cp-algorithms-brasil.com/Algebra/diofantina.html">equação diofantina linear com duas variáveis</a>.
+Quando o $\ mdc(a, m) = 1$, a equação tem uma solução que pode ser encontrada usando o <a href="https://cp-algorithms-brasil.com/Algebra/euclids2.html">algoritmo de Euclides Estendido</a>.
+ O $\ gcd/mdc(a, m) = 1$ também é a condição para o inverso modular existir.</p>
+
+<p>Agora, se usarmos o módulo $m$ de ambos os lados, podemos nos livrar de $m \cdot y$, e a equação se tornará:</p>
+
+<p>$$a \cdot x \equiv 1 \mod m$$</p>
+
+<p>Assim, o inverso modular de $a$ é $x$.</p>
+
+<p>Implementação:</p>
+
+<pre><code class="cpp">int x, y;
+int g = euclides(a, m, x, y);  //algoritmo de euclides estendido
+if (g != 1) {
+    cout &lt;&lt; "Sem solução!";
+}
+else {
+    x = (x % m + m) % m;
+    cout &lt;&lt; x &lt;&lt; endl;
+}
+</code></pre>
+
+<p>Observe que nós modificamos <code>x</code>.
+O <code>x</code> resultante do algoritmo de Euclides pode ser negativo, portanto, <code>x % m</code> também pode ser negativo, precisamos adicionar <code>m</code> primeiro para torná-lo positivo.</p>
+
+<h2>Inverso Modular usando Exponenciação Binária</h2>
+
+<p>Outro método para encontrar o inverso modular é usar o teorema de Euler, no qual afirma que a seguinte congruência é verdadeira se $a$ e $m$ forem coprimos:</p>
+
+<p>$$a^{\phi (m)} \equiv 1 \mod m$$</p>
+
+<p>$\phi$ é a <a href="https://cp-algorithms-brasil.com/Algebra/euler.html">função totiente de Euler</a>.
+Novamente, observe que $a$ e $m$ serem coprimos também é a condição para o inverso modular existir.</p>
+
+<p>Se $m$ é um número primo, isso simplifica o <a href="http://en.wikipedia.org/wiki/Fermat's_little_theorem">pequeno teorema de Fermat</a>:</p>
+
+<p>$$a^{m - 1} \equiv 1 \mod m$$</p>
+
+<p>Multiplique ambos os lados das equações acima por $a^{-1}$, e obtemos:</p>
+
+<ul>
+<li>Para um módulo arbitrário (mas coprimo) $m$: $a ^ {\phi (m) - 1} \equiv a ^{-1} \mod m$</li>
+<li>Para um módulo primo $m$: $a ^ {m - 2} \equiv a ^ {-1} \mod m$</li>
+</ul>
+
+<p>A partir desses resultados, podemos encontrar o inverso modular usando o <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">algoritmo da exponenciação binária</a>, que funciona em tempo $O(\log m)$.</p>
+
+<p>Embora esse método seja mais fácil de entender do que o descrito no parágrafo anterior, no caso em que $m$ não seja um número primo, precisamos calcular a função de Euler, no qual envolve a fatoração de $m$, o que pode ser bem difícil. Se a fatoração de $m$ é conhecida, então a complexidade desse método é $O(\log m)$.</p>
+
+<h2>Encontrando o inverso modular para todos os números módulo $m$</h2>
+
+<p>O problema é: queremos calcular o inverso modular para cada número no intervalo $[1, m-1]$.</p>
+
+<p>Aplicando os algoritmos descritos nas seções anteriores, podemos obter uma solução com complexidade $O(m \log m)$.</p>
+
+<p>Aqui apresentamos um algoritmo melhor com complexidade $O(m)$.
+No entanto, para este algoritmo específico, é requerido que o módulo $m$ seja primo.</p>
+
+<p>Denotamos como $\text{inv}[i]$ o inverso modular de $i$. Assim, para $i > 1$ a equação seguinte é válida:</p>
+
+<p>$$\text{inv}[i] = - \left\lfloor \frac{m}{i} \right\rfloor \cdot \text{inv}[m \bmod i] \bmod m$$</p>
+
+<p>Portanto, a implementação é:</p>
+
+<pre><code class="cpp">inv[1] = 1;
+for(int i = 2; i &lt; m; ++i)
+    inv[i] = (m - (m/i) * inv[m%i] % m) % m;
+</code></pre>
+
+<h3>Prova</h3>
+
+<p>Nós temos:
+$$m \bmod i = m -  \left\lfloor \frac{m}{i} \right\rfloor \cdot i$$
+Tirando o módulo $m$ de ambos os lados, teremos:
+$$m \bmod i \equiv - \left\lfloor \frac{m}{i} \right\rfloor \cdot i \mod m$$
+Multiplicando ambos os lados por $i^{-1} \cdot (m \bmod i)^{-1}$, temos:
+$$(m \bmod i) \cdot i^{-1} \cdot (m \bmod i)^{-1} \equiv -\left\lfloor \frac{m}{i} \right\rfloor \cdot i \cdot i^{-1} \cdot (m \bmod i)^{-1} \mod m,$$
+simplificando:
+$$i^{-1} \equiv -\left\lfloor \frac{m}{i} \right\rfloor \cdot (m \bmod i)^{-1} \mod m,$$</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3055">UVa 11904 - One Unit Machine</a></li>
+<li><a href="https://www.hackerrank.com/contests/world-codesprint-5/challenges/longest-increasing-subsequence-arrays">Hackerrank - Longest Increasing Subsequence Arrays</a></li>
+<li><a href="http://codeforces.com/problemset/problem/300/C">Codeforces 300C - Beautiful Numbers</a></li>
+<li><a href="http://codeforces.com/problemset/problem/622/F">Codeforces 622F - The Sum of the k-th Powers</a></li>
+<li><a href="http://codeforces.com/problemset/problem/717/A">Codeforces 717A - Festival Organization</a></li>
+<li><a href="http://codeforces.com/problemset/problem/896/D">Codeforces 896D - Nephren Runs a Cinema</a></li>
+</ul>
+
+			
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
