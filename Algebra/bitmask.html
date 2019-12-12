@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Enumeração de Submask - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Bitmask, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Enumeração de Submask</h1>
+
+<h2>Enumerando todas as submasks de uma determinada mask</h2>
+<p><em>bitmask = máscara de bits</em></p>
+<p>Dada uma bitmask $m$, você deseja iterar com eficiência sobre todas as suas submasks, isto é, $s$ máscaras nas quais apenas os bits que foram incluídos na máscara $m$ são setados.</p>
+
+<p>Considere a implementação desse algoritmo, com base em truques nas operações de bits:</p>
+
+<pre><code class="cpp">int s = m;
+while (s &gt; 0) {
+ ... você pode usar s ...
+ s = (s-1) &amp; m;
+}
+</code></pre>
+
+<p>ou, usando uma declaração <code>for</code> mais compacta:</p>
+
+<pre><code class="cpp">for (int s=m; s; s=(s-1)&amp;m)
+ ... você pode usar s ...
+</code></pre>
+
+<p>Nas duas variantes do código, a submask igual a zero não será processada. Podemos processá-la fora do loop ou usar da seguinte forma:</p>
+
+<pre><code class="cpp">for (int s=m; ; s=(s-1)&amp;m) {
+ ... você pode usar s ...
+ if (s==0)  break;
+}
+</code></pre>
+
+<p>Vamos analisar por que o código acima visita todas as submasks de $m$, sem repetições e em ordem decrescente.</p>
+
+<p>Suponha que tenhamos uma bitmask atual $s$, e queremos passar para a próxima bitmask. Subtraindo da máscara $s$ uma unidade, removeremos o bit setado mais à direita e todos os bits à direita dele se tornarão 1. Em seguida, removeremos todos os bits "extras" que não estão incluídos na máscara $m$ e que, portanto, não pode fazer parte da submask. Fazemos essa remoção usando a operação bitwise <code>(s-1) &amp; m</code>. Como resultado, cortamos a máscara(mask) $s-1$ para determinar o maior valor para a próxima iteração, isto é, a próxima submask depois de $s$ em ordem decrescente.</p>
+
+<p>Portanto, esse algoritmo gera todas as submasks dessa máscara em ordem decrescente, realizando apenas duas operações por iteração.</p>
+
+<p>Um caso especial é quando $s = 0$. Depois de executar $s-1$ obtemos uma máscara onde todos os bits estão setados, e após <code>(s-1) &amp; m</code> teremos que $s$ será igual a $m$. Portanto, com a máscara $s = 0$ tenha cuidado - se o loop não terminar em zero, o algoritmo poderá ter um loop infinito.</p>
+
+<h2>Iterando sobre todas as masks com suas submasks. Complexidade $O(3^n)$</h2>
+
+<p>Em muitos problemas, especialmente aqueles que usam programação dinâmica com bitmask, você precisa iterar sobre todas as bitmasks e, para cada máscara, percorrer todas as suas submasks:</p>
+
+<pre><code class="cpp">for (int m=0; m&lt;(1&lt;&lt;n); ++m)
+    for (int s=m; s; s=(s-1)&amp;m)
+ ... s e m ...
+</code></pre>
+
+<p>Vamos provar que o loop interno executará um total de $O(3^n)$ iterações.</p>
+
+<p><strong>Primeira prova</strong>: Considere o $i$-th bit. Existem exatamente três opções para ele:</p>
+
+<ol>
+<li>não está incluído na máscara $m$ (e, portanto, não está incluído na submask $s$),</li>
+<li>está incluído em $m$, mas não está incluído em $s$</li>
+<li>está incluído em $m$ e $s$.</li>
+</ol>
+
+<p>Como há um total de $n$ bits, haverá $3^n$ combinações diferentes.</p>
+
+<p><strong>Segunda prova</strong>: Observe que se a máscara $m$ tiver $k$ bits habilitados, então ela terá $2^k$ submasks. Como temos um total de $\binom{n}{k}$ máscaras com $k$ bits habilitados (veja <a href="https://cp-algorithms.com/combinatorics/binomial-coefficients.html">coeficientes binomiais</a>), então a combinação total de todas as masks será:</p>
+
+<p>$$\sum_{k=0}^n \binom{n}{k} \cdot 2^k$$</p>
+
+<p>Para calcular esse número, observe que a soma acima é igual à expansão de $(1+2)^n$ usando o teorema do binômio. Portanto, temos $3^n$ combinações, como queríamos provar.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://codeforces.com/problemset/problem/71/E">Codeforces - Nuclear Fusion</a></li>
+<li><a href="http://codeforces.com/problemset/problem/599/E">Codeforces - Sandy and Nuts</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4185">Uva 1439 - Exclusive Access 2</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2925">UVa 11825 - Hackers' Crackdown</a></li>
+</ul>
+
+<h2>Recursos</h2>
+<ul>
+<li><a href="https://blog.bitsrc.io/the-art-of-bitmasking-ec58ab1b4c03">the-art-of-bitmasking</a></li>
+</ul>			
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
