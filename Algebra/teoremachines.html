@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Teorema Chinês do Resto - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Teorema Chinês, Teorema e Resto e Algoritmo, C++, C++ e Algoritmos, CP Algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Teorema Chinês do Resto</h1>
+
+<p>O Teorema Chinês do Resto (que será referido como CRT no restante deste artigo) foi descoberto pelo matemático chinês Sun Zi.</p>
+
+<h2>Formulação</h2>
+
+<p>Seja $p = p_1 p_2 \cdots p_k$, onde $p_i$ são pares coprimos. Além de $p_i$, também recebemos um conjunto de equações de congruência
+$$\begin{align}
+    a &amp;\equiv a_1 \pmod{p_1} &#92;&#92;
+    a &amp;\equiv a_2 \pmod{p_2} &#92;&#92;
+      &amp;\ldots &#92;&#92;
+    a &amp;\equiv a_k \pmod{p_k}
+\end{align}$$
+onde $a_i$ são constantes dadas. A forma original do CRT afirma que o conjunto de equações de congruência dado sempre possui uma(exatamente uma) solução módulo $p$.</p>
+
+<h3>Corolário</h3>
+
+<p>Uma conseqüência do CRT é que a equação
+$$
+    x \equiv a \pmod{p}
+$$
+é equivalente ao sistema de equações
+$$\begin{align}
+    x &amp;\equiv a \pmod{p_1} &#92;&#92;
+      &amp;\ldots &#92;&#92;
+    x &amp;\equiv a \pmod{p_k}
+\end{align}$$
+(Como acima, assuma que $p = p_1 p_2 \cdots p_k$ e $p_i$ são pares coprimos).</p>
+
+<h2>Algoritmo de Garner</h2>
+
+<p>Outra consequência do CRT é que podemos representar grandes números usando uma array de pequenos números inteiros. Por exemplo, seja $p$ o produto dos primeiros $1000$ primos. A partir dos cálculos, $p$ irá ter por volta de $3000$ dígitos.</p>
+
+<p>Qualquer número $a$ menor que $p$ pode ser representado como uma array $a_1, \ldots, a_k$, onde $a_i \equiv a \pmod{p_i}$. Mas, para fazer isso, obviamente precisamos saber como recuperar o número $a$ de sua representação. Nessa seção, nós discutimos Algoritmo de Garner, que pode ser usado para esse propósito. Procuramos uma representação na forma
+$$
+    a = x_1 + x_2 p_1 + x_3 p_1 p_2 + \ldots + x_k p_1 \ldots p_{k-1}
+$$
+que é a representação(<a href="https://en.wikipedia.org/wiki/Mixed_radix">mixed radix</a>) de $a$.
+O algoritmo de Garner calcula os coeficientes $x_1, \ldots, x_k$.</p>
+
+<p>Deixe que $r_{ij}$ denote o inverso de $p_i$ módulo $p_j$
+$$
+    r_{ij} = (p_i)^{-1} \pmod{p_j}
+$$
+que pode ser encontrado usando o algoritmo descrito em <a href="https://cp-algorithms-brasil.com/Algebra/inversomod.html">Inverso Modular</a>. Substituindo $a$ da representação "mixed radix" na primeira equação de congruência, obtemos
+$$
+    a_1 \equiv x_1 \pmod{p_1}.
+$$
+Substituindo na segunda equação, então
+$$
+    a_2 \equiv x_1 + x_2 p_1 \pmod{p_2}.
+$$
+que pode ser reescrita subtraindo $x_1$ e dividindo por $p_1$ para conseguir
+$$\begin{array}{rclr}
+    a_2 - x_1 &amp;\equiv&amp; x_2 p_1 &amp;\pmod{p_2} &#92;&#92;
+    (a_2 - x_1) r_{12} &amp;\equiv&amp; x_2 &amp;\pmod{p_2} &#92;&#92;
+    x_2 &amp;\equiv&amp; (a_2 - x_1) r_{12} &amp;\pmod{p_2}
+\end{array}$$
+Similarmente, obtemos
+$$
+    x_3 \equiv ((a_3 - x_1) r_{13} - x_2) r_{23} \pmod{p_3}.
+$$</p>
+
+<p>Agora, podemos ver claramente um padrão emergindo, que pode ser expresso pelo seguinte código:</p>
+
+<pre><code class="cpp">for (int i = 0; i &lt; k; ++i) {
+    x[i] = a[i];
+    for (int j = 0; j &lt; i; ++j) {
+        x[i] = r[j][i] * (x[i] - x[j]);
+
+        x[i] = x[i] % p[i];
+        if (x[i] &lt; 0)
+            x[i] += p[i];
+    }
+}
+</code></pre>
+
+<p>Assim, aprendemos como calcular os coeficientes $x_i$ em tempo $O(k^2)$. O número $a$ agora pode ser calculado usando a fórmula mencionada anteriormente</p>
+
+<p>$$
+    a = x_1 + x_2 p_1 + x_3 p_1 p_2 + \ldots + x_k p_1 \ldots p_{k-1}
+$$</p>
+
+<p>Vale ressaltar que, na prática, quase sempre precisamos calcular a resposta usando grandes inteiros(big integers), mas os coeficientes $x_i$ geralmente podem ser calculados usando 'built-in types' e, portanto, o algoritmo de Garner é muito eficiente.</p>
+
+<h2>Implementação do algoritmo de Garner</h2>
+
+<p>É conveniente implementar esse algoritmo usando Java, porque ele possui suporte para grandes inteiros usando a classe <code>BigInteger</code>.</p>
+
+<p>Aqui, mostramos uma implementação que pode armazenar grandes números na forma de um conjunto de equações de congruência.
+Ele suporta adição, subtração e multiplicação.
+E com o algoritmo de Garner, podemos converter o conjunto de equações em um número inteiro único.
+Nesse código, usamos 100 números primos maiores que $10^9$, o que permite números tão grandes quanto $10^{900}$.</p>
+
+<pre><code class="java">final int SZ = 100;
+int pr[] = new int[SZ];
+int r[][] = new int[SZ][SZ];
+
+void init() {
+    for (int x = 1000 * 1000 * 1000, i = 0; i &lt; SZ; ++x)
+        if (BigInteger.valueOf(x).isProbablePrime(100))
+            pr[i++] = x;
+
+    for (int i = 0; i &lt; SZ; ++i)
+        for (int j = i + 1; j &lt; SZ; ++j)
+            r[i][j] =
+                BigInteger.valueOf(pr[i]).modInverse(BigInteger.valueOf(pr[j])).intValue();
+}
+
+class Number {
+    int a[] = new int[SZ];
+
+    public Number() {
+    }
+
+    public Number(int n) {
+        for (int i = 0; i &lt; SZ; ++i)
+            a[i] = n % pr[i];
+    }
+
+    public Number(BigInteger n) {
+        for (int i = 0; i &lt; SZ; ++i)
+            a[i] = n.mod(BigInteger.valueOf(pr[i])).intValue();
+    }
+
+    public Number add(Number n) {
+        Number result = new Number();
+        for (int i = 0; i &lt; SZ; ++i)
+            result.a[i] = (a[i] + n.a[i]) % pr[i];
+        return result;
+    }
+
+    public Number subtract(Number n) {
+        Number result = new Number();
+        for (int i = 0; i &lt; SZ; ++i)
+            result.a[i] = (a[i] - n.a[i] + pr[i]) % pr[i];
+        return result;
+    }
+
+    public Number multiply(Number n) {
+        Number result = new Number();
+        for (int i = 0; i &lt; SZ; ++i)
+            result.a[i] = (int)((a[i] * 1l * n.a[i]) % pr[i]);
+        return result;
+    }
+
+    public BigInteger bigIntegerValue(boolean can_be_negative) {
+        BigInteger result = BigInteger.ZERO, mult = BigInteger.ONE;
+        int x[] = new int[SZ];
+        for (int i = 0; i &lt; SZ; ++i) {
+            x[i] = a[i];
+            for (int j = 0; j &lt; i; ++j) {
+                long cur = (x[i] - x[j]) * 1l * r[j][i];
+                x[i] = (int)((cur % pr[i] + pr[i]) % pr[i]);
+            }
+            result = result.add(mult.multiply(BigInteger.valueOf(x[i])));
+            mult = mult.multiply(BigInteger.valueOf(pr[i]));
+        }
+
+        if (can_be_negative)
+            if (result.compareTo(mult.shiftRight(1)) &gt;= 0)
+                result = result.subtract(mult);
+
+        return result;
+    }
+}
+</code></pre>
+
+<h3>Nota sobre números negativos</h3>
+
+<ul>
+<li><p>Seja $p$ o produto de todos os números primos.</p></li>
+<li><p>O esquema modular em si não permite representar números negativos. No entanto, pode-se observar que, se soubermos que os valores absolutos de nossos números são menores que $p / 2$, sabemos que deve ser negativo quando o número resultante for maior que $p / 2$. O condicional <code>can_be_negative</code> no código permite convertê-lo em negativo nesse caso.</p></li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.hackerrank.com/contests/w22/challenges/number-of-sequences">Hackerrank - Number of sequences</a></li>
+<li><a href="http://codeforces.com/problemset/problem/687/B">Codeforces - Remainders Game</a></li>
+</ul>
+
+			
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
