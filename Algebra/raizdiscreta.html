@@ -78,11 +78,11 @@
 
 <p>Aqui está uma implementação completa, incluindo procedimentos para localizar a raiz primitiva, log discreto e localizar e imprimir todas as soluções.</p>
 
-<pre><code class="cpp">int gcd(int a, int b) {
+<pre><code class="cpp">int gcd(int a, int b) {  //algoritmo do gcd
     return a ? gcd(b % a, a) : b;
 }
 
-int powmod(int a, int b, int p) {
+int powmod(int a, int b, int p) {  //expo binaria
     int res = 1;
     while (b &gt; 0) {
         if (b &amp; 1) {
