@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Logaritmo Discreto - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Log discreto, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Logaritmo discreto</h1>
+
+<p>O logaritmo discreto é um número inteiro $x$ resolvendo a equação</p>
+
+<p>$$a^x \equiv b \pmod m,$$</p>
+
+<p>onde $a$ e $m$ são coprimos.
+<strong>Nota</strong>, se eles não forem relativamente primos, então o algoritmo descrito abaixo está incorreto, embora possa ser modificado para funcionar.</p>
+
+<p>Neste artigo, descrevemos o algoritmo "<strong>Baby step - giant step</strong>", proposto por Shanks em 1971, que tem a complexidade de tempo $O(\sqrt{m} \log m)$. Esse algoritmo também é conhecido como "<strong>meet-in-the-middle</strong>" orque usa a técnica de separar tarefas pela metade.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Considere a equação:</p>
+
+<p>$$a^x \equiv b \pmod m,$$</p>
+
+<p>onde $a$ e $m$ são coprimos.</p>
+
+<p>Seja $x = np - q$, onde $n$ é alguma constante pré-selecionada (iremos descrever como selecionar $n$ depois). $p$ é conhecido como o "<strong>giant step</strong>", já que aumentá-lo em um aumenta $x$ em $n$. Similarmente, $q$ é conhecido como o "<strong>baby step</strong>".</p>
+
+<p>Obviamente, qualquer número $x$ no intervalo $[0; m)$ pode ser representado nessa forma, onde $p \in [1; \lceil \frac{m}{n} \rceil ]$ e $q \in [0; n]$.</p>
+
+<p>Então, a equação se torna:</p>
+
+<p>$$a^{np - q} \equiv b \pmod m.$$</p>
+
+<p>Usando o fato que $a$ e $m$ são coprimos, obtemos:</p>
+
+<p>$$a^{np} \equiv ba^q \pmod m$$</p>
+
+<p>Esta nova equação pode ser reescrita de uma forma simplificada:</p>
+
+<p>$$f_1(p) = f_2(q).$$</p>
+
+<p>Esse problema pode ser resolvido usando o método meet-in-the-middle, da seguinte maneira:</p>
+
+<ul>
+<li>Calcule $f_1$ para todos os argumentos possíveis $p$. Ordene(sort) a array de pares valores-argumentos.</li>
+<li>Para todos os argumentos possíveis $q$, calcule $f_2$ e procure o correspondente $p$ na array ordenada usando busca binária.</li>
+</ul>
+
+<h2>Complexidade</h2>
+
+<p>We can calculate $f_1(p)$ em $O(\log m)$ usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>. Similar para $f_2(q)$.</p>
+
+<p>Na primeira etapa do algoritmo, precisamos calcular $f_1$ para cada argumento possível $p$ e então, ordenar os valores. Portanto, essa etapa tem complexidade:</p>
+
+<p>$$O\left(\left\lceil \frac{m}{n} \right\rceil \left(\log m + \log \left\lceil \frac{m}{n} \right\rceil \right)\right) = O\left( \left\lceil \frac {m}{n} \right\rceil \log m\right)$$</p>
+
+<p>Na segunda etapa do algoritmo, precisamos calcular $f_2(q)$ para todos os argumentos possíveis $q$ e, em seguida, fazer uma pesquisa binária na array de valores de $f_1$, portanto, essa etapa tem complexidade:</p>
+
+<p>$$O\left(n \left(\log m + \log \frac{m}{n} \right) \right) = O\left(n \log m\right).$$</p>
+
+<p>Agora, quando adicionamos essas duas complexidades, obtemos $\log m$ multiplicado pela soma de $n$ e $m/n$, que é mínimo quando $n = m/n$, ou seja, para obter o desempenho ideal, $n$ deve ser escolhido de forma que:</p>
+
+<p>$$n = \sqrt{m}.$$</p>
+
+<p>Então, a complexidade do algoritmo se torna:</p>
+
+<p>$$O(\sqrt {m} \log m).$$</p>
+
+<h2>Implementação</h2>
+
+<h3>A implementação simplificada</h3>
+
+<p>No código a seguir, a função <code>powmod</code> calcula $a^b \pmod m$ e a função <code>solve</code> produz uma solução adequada para o problema.
+Retorna $-1$ se não houver solução e, caso contrário, retorna uma das soluções possíveis.
+O logaritmo discreto resultante pode ser grande, mas você pode reduzi-lo usando o <a href="https://cp-algorithms-brasil.com/Algebra/euler.html">o teorema de Euler</a>.</p>
+
+<pre><code class="cpp">int powmod(int a, int b, int m) {
+    int res = 1;
+    while (b &gt; 0) {
+        if (b &amp; 1) {
+            res = (res * 1ll * a) % m;
+        }
+        a = (a * 1ll * a) % m;
+        b &gt;&gt;= 1;
+    }
+    return res;
+}
+
+int solve(int a, int b, int m) {
+    int n = (int) sqrt (m + .0) + 1;
+    map&lt;int, int&gt; vals;
+    for (int p = n; p &gt;= 1; --p)
+        vals[powmod(a, p * n, m)] = p;
+    for (int q = 0; q &lt;= n; ++q) {
+        int cur = (powmod(a, q, m) * 1ll * b) % m;
+        if (vals.count(cur)) {
+            int ans = vals[cur] * n - q;
+            return ans;
+        }
+    }
+    return -1;
+}
+</code></pre>
+
+<p>Nesse código, usamos o <code>map</code> da biblioteca padrão C ++ para armazenar os valores de $f_1$.
+Internamente, o <code>map</code> usa uma "red-black tree"(árvore rubro-negra) para armazenar valores.
+Portanto, esse código é um pouco mais lento do que se tivéssemos usado uma array e uma busca binária, mas é muito mais fácil de escrever.</p>
+
+<p>Outro aspecto a ser observado é que, se houver vários argumentos $p$ que mapeiam para o mesmo valor de $f_1$, armazenamos apenas um desses argumentos.
+This works in this case because we only want to return one possible solution.
+Isso funciona neste caso, porque queremos apenas retornar uma solução possível. Se precisarmos retornar todas as soluções possíveis, precisamos alterar o  <code>map&lt;int, int&gt;</code> para, digamos <code>map&lt;int, vector&lt;int&gt;&gt;</code>.
+Também precisamos alterar o segundo passo de acordo.</p>
+
+<h2>Implementação aprimorada</h2>
+
+<p>Uma possível melhoria é se livrar da exponenciação binária. Isso pode ser feito mantendo uma variável que é multiplicada por $a$ cada vez que $q$ é incrementado e uma variável multiplicada por $a^n$ cada vez que $p$ é incrementado.
+Com essa alteração, a complexidade do algoritmo ainda é a mesma, mas agora o fator $\log$ é apenas para o <code>map</code>.
+Em vez de <code>map</code>, também podemos usar uma hash table (<code>unordered_map</code> no C++) que possui a complexidade média de tempo $O(1)$ para inserir e pesquisar.</p>
+
+<pre><code class="cpp">int solve(int a, int b, int m) {
+    int n = (int) sqrt (m + .0) + 1;
+
+    int an = 1;
+    for (int i = 0; i &lt; n; ++i)
+        an = (an * 1ll * a) % m;
+
+    map&lt;int, int&gt; vals;
+    for (int p = 1, cur = an; p &lt;= n; ++p) {
+        if (!vals.count(cur))
+            vals[cur] = p;
+        cur = (cur * 1ll * an) % m;
+    }
+
+    for (int q = 0, cur = b; q &lt;= n; ++q) {
+        if (vals.count(cur)) {
+            int ans = vals[cur] * n - q;
+            return ans;
+        }
+        cur = (cur * 1ll * a) % m;
+    }
+    return -1;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/MOD/">Spoj - Power Modulo Inverted</a></li>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=14386&amp;rd=16801">Topcoder - SplittingFoxes3</a></li>
+</ul>
+
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
