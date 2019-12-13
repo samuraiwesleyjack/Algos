@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Multiplicação Modular Rápida - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, multiplicação modular, multiplicação rápida, montgomery, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Multiplicação de Montgomery</h1>
+
+<p>Muitos algoritmos na teoria dos números, como os <a href="https://cp-algorithms-brasil.com/Algebra/testesprimo.html">testes de primalidade</a> ou <a href="https://cp-algorithms-brasil.com/Algebra/fat.html">fatoração de inteiros</a>, e em criptografia, como RSA, exigem muitas operações, módulo algum número grande.
+Uma multiplicação como $x y \bmod{n}$ é bastante lenta para computar com os algoritmos típicos, pois requer uma divisão para saber quantas vezes $n$ deve ser subtraído do produto.
+E a divisão é uma operação realmente "cara", especialmente com grandes números.</p>
+
+<p>A <strong>multiplicação(modular rápida) de Montgomery</strong> é um método que permite calcular essas multiplicações mais rapidamente.
+Em vez de dividir o produto e subtrair $n$ várias vezes, ele adiciona múltiplos de $n$ para cancelar os bits inferiores e então apenas descartar os bits inferiores.</p>
+
+<h2>Representação de Montgomery</h2>
+
+<p>No entanto, a multiplicação de Montgomery não vem de graça. 
+O algoritmo funciona apenas no <strong>espaço Montgomery</strong>.
+E precisamos transformar nossos números nesse espaço, antes que possamos começar a multiplicar.</p>
+
+<p>Para o espaço, precisamos de um número inteiro positivo $r \ge n$ coprimo de $n$, ou seja, $\gcd/mdc(n, r) = 1$.
+Na prática, sempre escolhemos $r$ sendo $2^m$ para um número inteiro positivo $m$, uma vez que operações de multiplicações, divisões e módulo $r$ podem ser eficientemente implementadas usando operadores de shift e outros operadores que trabalham com bits(bitwise operators).
+$n$ será um número ímpar em praticamente todas as aplicações, pois não é difícil fatorar um número par.
+Portanto, toda potência de $2$ será coprimo com $n$.</p>
+
+<p>O representante $\bar{x}$ de um número $x$ no espaço de Montgomery é definido como: $$\bar{x} := x \cdot r \bmod n$$</p>
+
+<p>Observe que a transformação é realmente uma multiplicação, o que queremos otimizar.
+Portanto, essa ainda é uma operação "cara".
+No entanto, você só precisa transformar um número uma vez no espaço.
+Assim que estiver no espaço de Montgomery, você poderá executar quantas operações quiser com eficiência.
+E no final você transforma o resultado final de volta.
+Portanto, enquanto você estiver realizando muitas operações módulo $n$, isso não será um problema.</p>
+
+<p>Dentro do espaço de Montgomery, você ainda pode executar a maioria das operações, como de costume.
+Você pode adicionar dois elementos ($x \cdot r + y \cdot r \equiv (x + y) \cdot r \bmod n$), subtrair, verificar a igualdade e até calcular o maior fator comum de um número com $n$ (desde que $\gcd(n, r) = 1$).
+Tudo com os algoritmos usuais.</p>
+
+<p>No entanto, este não é o caso da multiplicação.</p>
+
+<p>Esperamos que o resultado seja:
+$$\bar{x} * \bar{y} = \overline{x \cdot y} = (x \cdot y) \cdot r \bmod n.$$
+Mas a multiplicação normal nos dá:
+$$\bar{x} \cdot \bar{y} = (x \cdot y) \cdot r \cdot r \bmod n.$$
+Portanto, a multiplicação no espaço de Montgomery é definida como:
+$$\bar{x} * \bar{y} := \bar{x} \cdot \bar{y} \cdot r^{-1} \bmod n.$$</p>
+
+<h2>Redução de Montgomery</h2>
+
+<p>A multiplicação de dois números no espaço de Montgomery requer um cálculo eficiente de $x \cdot r^{-1} \bmod n$.
+Essa operação é chamada de <strong>redução de Montgomery</strong>, e também é conhecida como o algoritmo <strong>REDC</strong>.</p>
+
+<p>Como $\gcd(n, r) = 1$, sabemos que existem dois números $r^{-1}$ e $n^{\prime}$ com $0 &lt; r^{-1}, n^{\prime} &lt; n$ e com
+$$r \cdot r^{-1} + n \cdot n^{\prime} = 1.$$
+Ambos $r^{-1}$ e $n^{\prime}$ podem ser calculados usando o <a href="https://cp-algorithms-brasil.com/Algebra/euclids2.html">algoritmo de Euclides estendido</a>.</p>
+
+<p>Usando essa identidade, podemos escrever $x \cdot r^{-1}$ como:
+$$\begin{aligned}
+x \cdot r^{-1} &amp;= x \cdot r \cdot r^{-1} / r = x \cdot (-n \cdot n^{\prime} + 1) / r &#92;&#92;
+&amp;= (-x \cdot n \cdot n^{\prime} + x) / r \equiv (-x \cdot n \cdot n^{\prime} + l \cdot r \cdot n + x) / r \bmod n&#92;&#92;
+&amp;\equiv ((-x \cdot n^{\prime} + l \cdot r) \cdot n + x) / r \bmod n&#92;&#92;
+\end{aligned}$$</p>
+
+<p>As equivalências são válidas para qualquer número inteiro arbitrário $l$.
+Isso significa que podemos adicionar ou subtrair um múltiplo arbitrário de $r$ em $x \cdot n^{\prime}$, ou em outras palavras, podemos calcular $q := x \cdot n^{\prime}$ módulo $r$.</p>
+
+<p>Isso nos dá o seguinte algoritmo para calcular $x \cdot r^{-1} \bmod n$:</p>
+
+<pre><code class="text">function reduce(x):
+    q = (x mod r) * n' mod r
+    a = (x - q * n) / r
+    if a &lt; 0:
+        a += n
+    return a
+</code></pre>
+
+<p>Como $x &lt; n \cdot n &lt; r \cdot n$ (mesmo que $x$ seja o produto de uma multiplicação) e $q \cdot n &lt; r \cdot n$, sabemos que $-n &lt; (x - q \cdot n) / r &lt; n$.
+Portanto, a operação de módulo final é implementada usando uma única verificação e uma adição.</p>
+
+<p>Como vemos, podemos realizar a redução de Montgomery sem nenhuma operação de módulo pesada.
+Se escolhermos $r$ como uma potência de $2$, as operações de módulo e divisões no algoritmo podem ser calculadas usando bitmasking e shifting.</p>
+
+<p>Uma segunda aplicação da redução de Montgomery é transferir um número de volta do espaço de Montgomery para o espaço normal.</p>
+
+<h2>Truque inverso rápido</h2>
+
+<p>Para calcular o inverso $n^{\prime} := n^{-1} \bmod r$ com eficiência, podemos usar o seguinte truque (inspirado no método de Newton):
+$$a \cdot x \equiv 1 \bmod 2^k \Longrightarrow a \cdot x \cdot (2 - a \cdot x) \equiv 1 \bmod 2^{2k}$$
+Isso pode ser facilmente comprovado.
+Se tivermos $a \cdot x = 1 + m \cdot 2^k$, então teremos:
+$$\begin{aligned}
+a \cdot x \cdot (2 - a \cdot x) &amp;= 2 \cdot a \cdot x - (a \cdot x)^2 &#92;&#92;
+&amp;= 2 \cdot (1 + m \cdot 2^k) - (1 + m \cdot 2^k)^2 &#92;&#92;
+&amp;= 2 + 2 \cdot m \cdot 2^k - 1 - 2 \cdot m \cdot 2^k - m^2 \cdot 2^{2k} &#92;&#92;
+&amp;= 1 - m^2 \cdot 2^{2k} &#92;&#92;
+&amp;\equiv 1 \bmod 2^{2k}.
+\end{aligned}$$</p>
+
+<p>Isso significa que podemos começar com $x = 1$ como o inverso de $a$ módulo $2^1$, aplique o truque algumas vezes e em cada iteração dobramos o número de bits corretos de $x$.</p>
+
+<h2>Implementação</h2>
+
+<p>Usando o compilador GCC, podemos calcular $x \cdot y \bmod n$ com eficiência, quando todos os 3 números forem inteiros 64 bits, como o compilador suporta inteiros 128 bits com os tipos <code>__int128</code> e <code>__uint128</code>.</p>
+
+<pre><code class="cpp">long long result = (__int128)x * y % n;
+</code></pre>
+
+<p>No entanto, não existe um tipo para número inteiro de 256 bits.
+Portanto, mostraremos aqui uma implementação para uma multiplicação de 128 bits.</p>
+
+<pre><code class="cpp">using u64 = uint64_t;
+using u128 = __uint128_t;
+using i128 = __int128_t;
+
+struct u256 {
+    u128 high, low;
+
+    static u256 mult(u128 x, u128 y) {
+        u64 a = x &gt;&gt; 64, b = x;
+        u64 c = y &gt;&gt; 64, d = y;
+        // (a*2^64 + b) * (c*2^64 + d) =
+        // (a*c) * 2^128 + (a*d + b*c)*2^64 + (b*d)
+        u128 ac = (u128)a * c;
+        u128 ad = (u128)a * d;
+        u128 bc = (u128)b * c;
+        u128 bd = (u128)b * d;
+        u128 carry = (u128)(u64)ad + (u128)(u64)bc + (bd &gt;&gt; 64u);
+        u128 high = ac + (ad &gt;&gt; 64u) + (bc &gt;&gt; 64u) + (carry &gt;&gt; 64u);
+        u128 low = (ad &lt;&lt; 64u) + (bc &lt;&lt; 64u) + bd;
+        return {high, low};
+    }
+};
+
+struct Montgomery {
+    Montgomery(u128 n) : mod(n), inv(1) {
+        for (int i = 0; i &lt; 7; i++)
+            inv *= 2 - n * inv;
+    }
+
+    u128 init(u128 x) {
+        x %= mod;
+        for (int i = 0; i &lt; 128; i++) {
+            x &lt;&lt;= 1;
+            if (x &gt;= mod)
+                x -= mod;
+        }
+        return x;
+    }
+
+    u128 reduce(u256 x) {
+        u128 q = x.low * inv;
+        i128 a = x.high - u256::mult(q, mod).high;
+        if (a &lt; 0)
+            a += mod;
+        return a;
+    }
+
+    u128 mult(u128 a, u128 b) {
+        return reduce(u256::mult(a, b));
+    }
+
+    u128 mod, inv;
+};
+</code></pre>
+
+<h2>Transformação rápida</h2>
+
+<p>O método atual de transformar um número em espaço Montgomery é bem lento. Existem maneiras mais rápidas.</p>
+
+<p>Você pode observar a seguinte relação:
+$$\bar{x} := x \cdot r \bmod n = x \cdot r^2 / r = x * r^2$$</p>
+
+<p>Transformar um número no espaço é apenas uma multiplicação dentro do espaço do número com $r^2$.
+Portanto, podemos pré-calcular $r^2 \bmod n$ e apenas executar uma multiplicação em vez de usar o shift(operador) no número 128 vezes.</p>
+
+<p>No código a seguir, inicializamos <code>r2</code> com <code>-n % n</code>, que é equivalente a $r - n \equiv r \bmod n$, shift 4 vezes para obter $r \cdot 2^4 \bmod n$.
+Este número pode ser interpretado como $2^4$ no espaço de Montgomery.
+Se calcularmos $5$ vezes ao quadrado, obtemos $(2^4)^{2^5} = (2^4)^{32} = 2^{128} = r$ no espaço de Montgomery, que é exatamente $r^2 \bmod n$.</p>
+
+<pre><code>struct Montgomery {
+    Montgomery(u128 n) : mod(n), inv(1), r2(-n % n) {
+        for (int i = 0; i &lt; 7; i++)
+            inv *= 2 - n * inv;
+
+        for (int i = 0; i &lt; 4; i++) {
+            r2 &lt;&lt;= 1;
+            if (r2 &gt;= mod)
+                r2 -= mod;
+        }
+        for (int i = 0; i &lt; 5; i++)
+            r2 = mul(r2, r2);
+    }
+
+    u128 init(u128 x) {
+        return mult(x, r2);
+    }
+
+    u128 mod, inv, r2;
+};
+</code></pre>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
