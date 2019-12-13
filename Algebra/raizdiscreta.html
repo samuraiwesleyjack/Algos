@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Raiz discreta - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Raiz discreta, Discrete root, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Raiz Discreta</h1>
+
+<p>O problema de encontrar uma raiz discreta é definido da seguinte maneira. Dado um número primo $n$ e dois inteiros $a$ e $k$, encontre todos os $x$ para os quais:</p>
+
+<p>$x^k \equiv a \pmod n$</p>
+
+<h2>Algoritmo</h2>
+
+<p>Resolveremos esse problema reduzindo-o para o problema do<a href="https://cp-algorithms-brasil.com/Algebra/log.html">logaritmo discreto</a>.</p>
+
+<p>Vamos aplicar o conceito de uma <a href="https://cp-algorithms-brasil.com/Algebra/raizprimitiva.html">raiz primitiva</a> módulo $n$. Seja $g$ uma raiz primitiva módulo $n$. Observe que, como $n$ é primo, a raiz deve existir, e pode ser encontrada em $O(Ans \cdot \log \phi (n) \cdot \log n) = O(Ans \cdot \log^2 n)$ mais o tempo de fatoração de $\phi (n)$.</p>
+
+<p>Podemos descartar facilmente o caso em que $a = 0$. Nesse caso há apenas uma resposta: $x = 0$.</p>
+
+<p>Como $n$ é primo e qualquer número entre 1 e $n-1$ pode ser representado como uma potência da raiz primitiva, podemos representar o problema da raiz discreta da seguinte maneira:</p>
+
+<p>$(g^y)^k \equiv a \pmod n$</p>
+
+<p>onde</p>
+
+<p>$x \equiv g^y \pmod n$</p>
+
+<p>Isso, por sua vez, pode ser reescrito como</p>
+
+<p>$(g^k)^y \equiv a \pmod n$</p>
+
+<p>Agora temos um $y$ desconhecido, que é um problema do logaritmo discreto. A solução pode ser encontrada usando o algoritmo de Shanks em $O(\sqrt {n} \log n)$ (ou podemos verificar se não há soluções).</p>
+
+<p>Tendo encontrado uma solução $y_0$, uma das soluções para o problema da raiz discreta será $x_0 = g^{y_0} \pmod n$.</p>
+
+<h2>Encontrando todas as soluções de uma solução conhecida</h2>
+
+<p>Para resolver o problema em questão, precisamos encontrar todas as soluções conhecendo uma delas: $x_0 = g^{y_0} \pmod n$.</p>
+
+<p>uma raiz primitiva sempre tem uma ordem de grandeza de $\phi (n)$, ou seja, a menor potência de $g$ que dá 1 é $\phi (n)$. Portanto, se adicionarmos o termo $\phi (n)$ ao exponencial, ainda obteremos o mesmo valor:</p>
+
+<p>$x^k \equiv g^{ y_0 \cdot k + l \cdot \phi (n)} \equiv a \pmod n \forall l \in Z$</p>
+
+<p>Portanto, todas as soluções têm a forma:</p>
+
+<p>$x = g^{y_0 + \frac {l \cdot \phi (n)}{k}} \pmod n \forall l \in Z$.</p>
+
+<p>onde $l$ é escolhido de modo que a fração deva ser um número inteiro. Para que isso seja verdade, o numerador deve ser divisível pelo mínimo múltiplo comum de $\phi (n)$ e $k$. Lembre-se que o mínimo múltiplo comum de dois números $lcm/mmc(a, b) = \frac{a \cdot b}{gcd(a, b)}$; nós obtemos</p>
+
+<p>$x = g^{y_0 + i \frac {\phi (n)}{gcd(k, \phi (n))}} \pmod n \forall i \in Z$.</p>
+
+<p>Essa é a fórmula final para todas as soluções do problema da raiz discreta.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação completa, incluindo procedimentos para localizar a raiz primitiva, log discreto e localizar e imprimir todas as soluções.</p>
+
+<pre><code class="cpp">int gcd(int a, int b) {
+    return a ? gcd(b % a, a) : b;
+}
+
+int powmod(int a, int b, int p) {
+    int res = 1;
+    while (b &gt; 0) {
+        if (b &amp; 1) {
+            res = res * a % p;
+        }
+        a = a * a % p;
+        b &gt;&gt;= 1;
+    }
+    return res;
+}
+
+// Encontra a raiz primitiva modulo p
+int generator(int p) {
+    vector&lt;int&gt; fact;
+    int phi = p-1, n = phi;
+    for (int i = 2; i * i &lt;= n; ++i) {
+        if (n % i == 0) {
+            fact.push_back(i);
+            while (n % i == 0)
+                n /= i;
+        }
+    }
+    if (n &gt; 1)
+        fact.push_back(n);
+
+    for (int res = 2; res &lt;= p; ++res) {
+        bool ok = true;
+        for (int factor : fact) {
+            if (powmod(res, phi / factor, p) == 1) {
+                ok = false;
+                break;
+            }
+        }
+        if (ok) return res;
+    }
+    return -1;
+}
+
+// Esse programa encontra todos os numeros x nos quais x^k = a (mod n)
+int main() {
+    int n, k, a;
+    scanf("%d %d %d", &amp;n, &amp;k, &amp;a);
+    if (a == 0) {
+        puts("1\n0");
+        return 0;
+    }
+
+    int g = generator(n);
+
+    // Baby-step giant-step algoritmo do logaritmo discreto
+    int sq = (int) sqrt (n + .0) + 1;
+    vector&lt;pair&lt;int, int&gt;&gt; dec(sq);
+    for (int i = 1; i &lt;= sq; ++i)
+        dec[i-1] = {powmod(g, i * sq * k % (n - 1), n), i};
+    sort(dec.begin(), dec.end());
+    int any_ans = -1;
+    for (int i = 0; i &lt; sq; ++i) {
+        int my = powmod(g, i * k % (n - 1), n) * a % n;
+        auto it = lower_bound(dec.begin(), dec.end(), make_pair(my, 0));
+        if (it != dec.end() &amp;&amp; it-&gt;first == my) {
+            any_ans = it-&gt;second * sq - i;
+            break;
+        }
+    }
+    if (any_ans == -1) {
+        puts("0");
+        return 0;
+    }
+
+    // Printar todas as possíveis soluções
+    int delta = (n-1) / gcd(k, n-1);
+    vector&lt;int&gt; ans;
+    for (int cur = any_ans % delta; cur &lt; n-1; cur += delta)
+        ans.push_back(powmod(g, cur, n));
+    sort(ans.begin(), ans.end());
+    printf("%d\n", ans.size());
+    for (int answer : ans)
+        printf("%d ", answer);
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://codeforces.com/contest/1106/problem/F">Codeforces - Lunar New Year and a Recursive Sequence</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
