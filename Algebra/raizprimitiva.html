@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Raiz primitiva - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Raiz primitiva, Primitive root, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Raiz primitiva</h1>
+
+<h2>Definição</h2>
+
+<p>Na aritmética modular, um número $g$ é chamado de <code>raiz primitiva modulo n</code> se todo número coprimo de $n$ for congruente à uma potência de $g$ módulo $n$. Matematicamente, $g$ é uma raiz primitiva se, e somente se, para qualquer inteiro $a$ no qual $\gcd(a, n) = 1$, existe um inteiro $k$ que:</p>
+
+<p>$g^k \equiv a \pmod n$.</p>
+
+<p>$k$ é então chamado de <code>index</code> ou <code>logaritmo discreto</code> de $a$ na base $g$ módulo $n$. $g$ também é chamado de <code>gerador</code> do grupo multiplicativo de inteiros módulo $n$.</p>
+
+<p>Em particular, no caso em que $n$ é primo, as potências da raiz primitiva percorrem todos os números de $1$ até $n-1$.</p>
+
+<h2>Existência</h2>
+
+<p>Uma raiz primitiva módulo $n$ existe se:</p>
+
+<ul>
+<li>$n$ é 1, 2, 4, ou</li>
+<li>$n$ é a potência de um número ímpar primo $(n = p^k)$, ou</li>
+<li>$n$ é duas vezes a potência de um número primo ímpar $(n = 2 \cdot p^k)$.</li>
+</ul>
+
+<p>Este teorema foi provado por Gauss em 1801.</p>
+
+<h2>Relação com a função Euler</h2>
+
+<p>Seja $g$ uma raiz primitiva módulo $n$. Então podemos mostrar que o menor número $k$ para o qual $g^k \equiv 1 \pmod n$ é igual a $\phi (n)$. Além disso, o inverso também é verdadeiro, e esse fato será usado neste artigo para encontrar uma raiz primitiva.</p>
+
+<p>Além disso, o número de raízes primitivas módulo $n$, se houver alguma, é igual a $\phi (\phi (n) )$.</p>
+
+<h2>Algoritmo para encontrar uma raiz primitiva</h2>
+
+<p>Um método é considerar todos os números no intervalo $[1, n-1]$. E então verifique se cada uma é uma raiz primitiva, calculando todas as suas exponenciações para ver se são todas diferentes. Esse algoritmo tem complexidade $O(g \cdot n)$, o que seria lento. Nesta seção, propomos um algoritmo mais rápido usando teoremas conhecidos.</p>
+
+<p>Na seção anterior, sabemos que se o menor número $k$ para o qual $g^k \equiv 1 \pmod n$ é $\phi (n)$, então $g$ é uma raiz primitiva. Como para qualquer número $a$ coprimo com $n$, sabemos pelo teorema de Euler que $a ^ { \phi (n) } \equiv 1 \pmod n$, para verificar se $g$ é raiz primitiva, basta verificar isso para todos os $d$ menores que $\phi (n)$, $g^d \not \equiv 1 \pmod n$. Entretanto, esse algoritmo ainda é lento.</p>
+
+<p>Pelo teorema de Lagrange, o índice 1 de qualquer número módulo $n$ deve ser um divisor de $\phi (n)$. Portanto, é suficiente verificar para todos os divisores apropriados $d \mid \phi (n)$ que $g^d \not \equiv 1 \pmod n$. Esse já é um algoritmo muito mais rápido, mas ainda podemos fazer melhor.</p>
+
+<p>Fatore $\phi (n) = p_1 ^ {a_1} \cdots p_s ^ {a_s}$. Provamos que no algoritmo anterior, é suficiente considerar apenas os valores de $d$ que têm a forma $\frac { \phi (n) } {p_j}$. De fato, seja $d$ qualquer divisor adequado de $\phi (n)$. Então, obviamente, existe o $j$ que $d \mid \frac { \phi (n) } {p_j}$, ou seja, $d \cdot k = \frac { \phi (n) } {p_j}$. No entanto, se $g^d \equiv 1 \pmod n$, nós teríamos:</p>
+
+<p>$g ^ { \frac { \phi (n)} {p_j} } \equiv g ^ {d \cdot k} \equiv (g^d) ^k \equiv 1^k \equiv 1 \pmod n$.</p>
+
+<p>ou seja, entre os números da forma $\frac {\phi (n)} {p_i}$, haveria pelo menos um deles para que as condições não fossem atendidas.</p>
+
+<p>Agora temos um algoritmo completo para encontrar a raiz primitiva:</p>
+
+<ul>
+<li>Primeiro, encontre $\phi (n)$ e fatore ele.</li>
+<li><p>Em seguida, itere sobre todos os números $g \in [1, n]$, e, para cada número, para verificar se é raiz primitiva, fazemos o seguinte:</p>
+
+<ul>
+<li>Calcule todos os $g ^ { \frac {\phi (n)} {p_i}} \pmod n$.</li>
+<li>Se todos os valores calculados forem diferentes de $1$, então $g$ será uma raiz primitiva.</li>
+</ul>
+
+<p>O tempo de execução desse algoritmo é $O(Ans \cdot \log \phi (n) \cdot \log n)$ (assumindo que $\phi (n)$ tenha $\log \phi (n)$ divisores).</p></li>
+</ul>
+
+<p>Shoup (1990, 1992) provou, assumindo a <a href="http://en.wikipedia.org/wiki/Generalized_Riemann_hypothesis">hipótese generalizada de Riemann</a>, que $g$ é $O(\log^6 p)$.</p>
+
+<h2>Implementação</h2>
+
+<p>O código a seguir assume que o módulo <code>p</code> é um número primo. Para que funcione com qualquer valor de <code>p</code>, devemos adicionar o cálculo de $\phi (p)$.</p>
+
+<pre><code class="cpp">int powmod (int a, int b, int p) {
+    int res = 1;
+    while (b)
+        if (b &amp; 1)
+            res = int (res * 1ll * a % p),  --b;
+        else
+            a = int (a * 1ll * a % p),  b &gt;&gt;= 1;
+    return res;
+}
+
+int generator (int p) {
+    vector&lt;int&gt; fact;
+    int phi = p-1,  n = phi;
+    for (int i=2; i*i&lt;=n; ++i)
+        if (n % i == 0) {
+            fact.push_back (i);
+            while (n % i == 0)
+                n /= i;
+        }
+    if (n &gt; 1)
+        fact.push_back (n);
+
+    for (int res=2; res&lt;=p; ++res) {
+        bool ok = true;
+        for (size_t i=0; i&lt;fact.size() &amp;&amp; ok; ++i)
+            ok &amp;= powmod (res, phi / fact[i], p) != 1;
+        if (ok)  return res;
+    }
+    return -1;
+}
+</code></pre>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
