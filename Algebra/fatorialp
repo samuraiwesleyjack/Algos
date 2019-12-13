@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fatorial módulo p - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Fatorial, módulo, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Fatorial módulo $p$ em $O(p \log n)$</h1>
+
+<p>Em alguns casos, é necessário considerar fórmulas complexas módulo $p$, contendo fatoriais no numerador e no denominador. Consideramos o caso em que $p$ é relativamente pequeno. Esse problema só faz sentido quando fatores são incluídos no numerador e no denominador das frações. Caso contrário $p!$ e os termos subsequentes serão reduzidos a zero, mas em frações, todos os multiplicadores contendo $p$ podem ser reduzidos, e a expressão resultante será diferente de zero com o módulo $p$.</p>
+
+<p>Assim, formalmente a tarefa é: Calcular $n! \bmod p$, sem levar em consideração todos os múltiplos fatores de $p$ que aparecem no fatorial.
+A fatoração em primos de $n!$, remover todos os fatores $p$, e então calcular o produto módulo $p$.
+Denotaremos esse fatorial modificado como $n!_{\%p}$.</p>
+
+<p>Aprender como calcular efetivamente esse fatorial modificado nos permite calcular rapidamente o valor de várias fórmulas combinatórias (por exemplo, <a href="https://cp-algorithms.com/combinatorics/binomial-coefficients.html">coeficientes binomiais</a>).</p>
+
+<h2>Algoritmo</h2>
+
+<p>Vamos escrever este fatorial explicitamente.</p>
+
+<p>$$\begin{eqnarray}
+n!_{\%p} &amp;=&amp; 1 \cdot 2 \cdot 3 \cdot \ldots \cdot (p-2) \cdot (p-1) \cdot \underbrace{1}&#95;{p} \cdot (p+1) \cdot (p+2) \cdot \ldots \cdot (2p-1) \cdot \underbrace{2}&#95;{2p} &#92;\
+ &amp; &amp;\quad \cdot (2p+1) \cdot \ldots \cdot (p^2-1) \cdot \underbrace{1}&#95;{p^2} \cdot (p^2 +1) \cdot \ldots \cdot n \pmod{p} &#92;&#92;
+&amp;=&amp; 1 \cdot 2 \cdot 3 \cdot \ldots \cdot (p-2) \cdot (p-1) \cdot \underbrace{1}&#95;{p} \cdot 2 \cdot \ldots \cdot (p-1) \cdot \underbrace{2}&#95;{2p} \cdot 1 \cdot 2 &#92;\
+&amp; &amp;\quad \cdot \ldots \cdot (p-1) \cdot \underbrace{1}&#95;{p^2} \cdot 1 \cdot 2 \cdot \ldots \cdot (n \bmod p) \pmod{p}
+\end{eqnarray}$$</p>
+
+<p>Pode-se ver claramente que o fatorial está dividido em vários blocos do mesmo tamanho exceto pelo último.</p>
+
+<p>$$\begin{eqnarray}
+n!_{\%p}&amp;=&amp; \underbrace{1 \cdot 2 \cdot 3 \cdot \ldots \cdot (p-2) \cdot (p-1) \cdot 1}&#95;{1\text{st}} \cdot \underbrace{1 \cdot 2 \cdot 3 \cdot \ldots \cdot (p-2) \cdot (p-1) \cdot 2}&#95;{2\text{nd}} \cdot \ldots &#92;&#92;
+&amp; &amp; \cdot \underbrace{1 \cdot 2 \cdot 3 \cdot \ldots \cdot (p-2) \cdot (p-1) \cdot 1}&#95;{p\text{th}} \cdot \ldots \cdot \quad \underbrace{1 \cdot 2 \cdot \cdot \ldots \cdot (n \bmod p)}&#95;{\text{tail}} \pmod{p}.
+\end{eqnarray}$$</p>
+
+<p>A parte geral dos blocos é apenas $(p-1)!\ \mathrm{mod}\ p$ que você pode calcular programaticamente ou através do teorema de Wilson, de acordo com o qual: $(p-1)! \bmod p = p-1$. Para multiplicar as partes comuns de todos os blocos, podemos exponenciar o valor para um índice mais elevado módulo $p$, o que pode ser feito em $O(\log n)$ operações usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">Exponenciação Binária</a>; no entanto, você pode perceber que o resultado sempre será $1$ ou $p-1$, dependendo da paridade do índice.
+O valor do último bloco parcial pode ser calculado separadamente em $O(p)$. Deixando apenas os últimos elementos dos blocos, podemos examinar que:</p>
+
+<p>$$n!_{\%p} = \underbrace{ \ldots \cdot 1 } \cdot \underbrace{ \ldots \cdot 2} \cdot \ldots \cdot \underbrace{ \ldots \cdot (p-1)} \cdot \underbrace{ \ldots \cdot 1 } \cdot \underbrace{ \ldots \cdot 1} \cdot \underbrace{ \ldots \cdot 2} \cdots$$</p>
+
+<p>E novamente, removendo os blocos que já calculamos, recebemos um fatorial "modificado", mas com uma dimensão menor ($\lfloor n / p \rfloor$ blocos restantes).
+Assim, no cálculo do "modificado", o fatorial $n&#33;_{\%p}$, fizemos $O(p)$ operações e ficamos com o cálculo de $(n/p)!_{\%p}$.
+Nessa dependência recursiva, obtemos que a profundidade da recursão é $O(\log_p n)$, o comportamento assintótico total do algoritmo é, portanto, $O(p \log_p n)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Nesse caso, não precisamos de recursividade, ele pode ser implementado usando iteração.</p>
+
+<pre><code class="cpp">int factmod(int n, int p) {
+    int res = 1;
+    while (n &gt; 1) {
+        res = (res * ((n/p) % 2 ?  p-1 : 1)) % p;
+        for (int i = 2; i &lt;= n%p; ++i)
+            res = (res * i) % p;
+        n /= p;
+    }
+    return res % p;
+}
+</code></pre>
+
+<p>Essa implementação funciona em $O(p \log_p n)$.</p>		
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
