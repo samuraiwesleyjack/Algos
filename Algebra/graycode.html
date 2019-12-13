@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Código de Gray - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Gray code, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Código de Gray</h1>
+
+<p>O código de Gray é um sistema numérico binário em que dois valores sucessivos diferem em apenas um bit.</p>
+
+<p>Por exemplo, a sequência do código de Gray para números de 3 bits é:  000, 001, 011, 010, 110, 111, 101, 100, então $G(4) = 6$.</p>
+
+<p>Este código foi inventado por Frank Gray em 1953.</p>
+
+<h2>Encontrando o código de Gray</h2>
+
+<p>Vejamos os bits do número $n$ e os bits do número $G(n)$. Observe que o $i$-th bit de $G(n)$ é igual a 1 apenas quando o $i$-th bit de $n$ é igual a 1 e $i + 1$-th bit é igual a 0 ou ao contrário($i$-th bit = 0 e $i + 1$-th bit = 1). Portanto, $G(n) = n \oplus (n >> 1)$:</p>
+
+<pre><code class="cpp">int g (int n) {
+    return n ^ (n &gt;&gt; 1);   //xor(^) shift(>>)
+}
+</code></pre>
+
+<h2>Encontrado o código de Gray inverso</h2>
+
+<p>Dado um código de Gray $g$, retorne o número original $n$.</p>
+
+<p>Passaremos dos bits mais significativos para os menos significativos (o bit menos significativo possui o índice 1 e o bit mais significativo tem o índice $k$). A relação entre os bits $n_i$ do número $n$ e os bits $g_i$ do número $g$:</p>
+
+<p>$$\begin{align}
+  n_k &amp;= g_k, &#92;&#92;
+  n_{k-1} &amp;= g_{k-1} \oplus n_k = g_k \oplus g_{k-1}, &#92;&#92;
+  n_{k-2} &amp;= g_{k-2} \oplus n_{k-1} = g_k \oplus g_{k-1} \oplus g_{k-2}, &#92;&#92;
+  n_{k-3} &amp;= g_{k-3} \oplus n_{k-2} = g_k \oplus g_{k-1} \oplus g_{k-2} \oplus g_{k-3}, &#92;&#92;
+  \vdots
+\end{align}$$</p>
+
+<p>A maneira mais fácil de escrevê-lo no código é:</p>
+
+<pre><code class="cpp">int rev_g (int g) {
+  int n = 0;
+  for (; g; g &gt;&gt;= 1)
+    n ^= g;
+  return n;
+}
+</code></pre>
+
+<h2>Aplicações</h2>
+
+<p>Os códigos de Gray têm algumas aplicações úteis, às vezes bastante inesperadas:</p>
+
+<ul>
+<li><p>Código de Gray de $n$ bits forma um ciclo de hamilton em um hipercubo, em que cada bit corresponde a uma dimensão.</p></li>
+<li><p>Os códigos de Gray são usados ​​para minimizar os erros na conversão de sinais digital para analógico(por exemplo, em sensores).</p></li>
+<li><p>O código de Gray pode ser usado para resolver o problema das Torres de Hanoi.
+Deixe que $n$ denote o número de discos. Comece com o código Gray de tamanho $n$ que consiste em todos os zeros ($G(0)$) e mova-se entre os códigos Gray consecutivos(de $G(i)$ para $G(i+1)$).
+Deixe que o $i$-th bit do código de Gray atual representar o $n$-th disco 
+(o bit menos significativo corresponde ao menor disco e o bit mais significativo ao maior disco).  
+Como exatamente um bit muda em cada etapa, podemos tratar a alteração do $i$-th bit como mover o $i$-th disco.
+Observe que há exatamente uma opção de movimentação para cada disco (exceto o menor) em cada etapa (exceto as posições inicial e final).
+Sempre há duas opções de movimentação para o disco menor, mas há uma estratégia que sempre leva à resposta:
+se $n$ for ímpar a sequência de movimentos do menor disco será semelhante a $f \to t \to r \to f \to t \to r \to ...$
+onde $f$ é a barra inicial, $t$ é a barra que termina e $r$ é a barra do meio), e 
+se $n$ for par: $f \to r \to t \to f \to r \to t \to ...$.</p></li>
+<li><p>Códigos de Gray também são usados ​​na teoria dos algoritmos genéticos.</p></li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://codeforces.com/problemsets/acmsguru/problem/99999/249">SGU #249 <b>"Matrix"</b> &nbsp;&nbsp;&nbsp;&nbsp; [Difficulty: medium]</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
