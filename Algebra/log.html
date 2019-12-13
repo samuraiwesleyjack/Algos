@@ -35,7 +35,7 @@
 <p>onde $a$ e $m$ são coprimos.
 <strong>Nota</strong>, se eles não forem relativamente primos, então o algoritmo descrito abaixo está incorreto, embora possa ser modificado para funcionar.</p>
 
-<p>Neste artigo, descrevemos o algoritmo "<strong>Baby step - giant step</strong>", proposto por Shanks em 1971, que tem a complexidade de tempo $O(\sqrt{m} \log m)$. Esse algoritmo também é conhecido como "<strong>meet-in-the-middle</strong>" orque usa a técnica de separar tarefas pela metade.</p>
+<p>Neste artigo, descrevemos o algoritmo "<strong>Baby step - giant step</strong>", proposto por Shanks em 1971, que tem a complexidade de tempo $O(\sqrt{m} \log m)$. Esse algoritmo também é conhecido como "<strong>meet-in-the-middle</strong>" porque usa a técnica de separar tarefas pela metade.</p>
 
 <h2>Algoritmo</h2>
 
@@ -70,7 +70,7 @@
 
 <h2>Complexidade</h2>
 
-<p>We can calculate $f_1(p)$ em $O(\log m)$ usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>. Similar para $f_2(q)$.</p>
+<p>Podemos calcular $f_1(p)$ em $O(\log m)$ usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>. Similar para $f_2(q)$.</p>
 
 <p>Na primeira etapa do algoritmo, precisamos calcular $f_1$ para cada argumento possível $p$ e então, ordenar os valores. Portanto, essa etapa tem complexidade:</p>
 
@@ -129,7 +129,6 @@ Internamente, o <code>map</code> usa uma "red-black tree"(árvore rubro-negra) p
 Portanto, esse código é um pouco mais lento do que se tivéssemos usado uma array e uma busca binária, mas é muito mais fácil de escrever.</p>
 
 <p>Outro aspecto a ser observado é que, se houver vários argumentos $p$ que mapeiam para o mesmo valor de $f_1$, armazenamos apenas um desses argumentos.
-This works in this case because we only want to return one possible solution.
 Isso funciona neste caso, porque queremos apenas retornar uma solução possível. Se precisarmos retornar todas as soluções possíveis, precisamos alterar o  <code>map&lt;int, int&gt;</code> para, digamos <code>map&lt;int, vector&lt;int&gt;&gt;</code>.
 Também precisamos alterar o segundo passo de acordo.</p>
 
