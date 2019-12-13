@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ternário Balanceado - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, Ternário Balanceado, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Ternário Balanceado</h1>
+
+<p><img src="http://ternary.3neko.ru/photo/setun1_small.jpg" alt="&quot;Setun computer using Balanced Ternary system&quot;" /></p>
+
+<p>Este é um <strong>sistema numérico</strong> não padronizado, mas ainda assim posicional. Sua característica é que os dígitos podem ter um dos valores: <code>-1</code>, <code>0</code> e <code>1</code>.
+No entanto, sua base ainda é <code>3</code> (porque existem três valores possíveis). Como não é conveniente escrever <code>-1</code> como dígito, usaremos a letra <code>Z</code>. Se você acha que é um sistema bastante estranho - veja a foto - aqui está um dos computadores que ainda o utiliza.</p>
+
+<p>Então, aqui estão alguns primeiros números escritos em ternário balanceado:</p>
+
+<pre><code class="nohighlight">    0    0
+    1    1
+    2    1Z
+    3    10
+    4    11
+    5    1ZZ
+    6    1Z0
+    7    1Z1
+    8    10Z
+    9    100
+</code></pre>
+
+<p>Este sistema permite que você escreva valores negativos sem sinal de menos: você pode simplesmente inverter dígitos em qualquer número positivo.</p>
+
+<pre><code class="nohighlight">    -1   Z
+    -2   Z1
+    -3   Z0
+    -4   ZZ
+    -5   Z11
+</code></pre>
+
+<p>Observe que um número negativo começa com <code>Z</code> e positivo com <code>1</code>.</p>
+
+<h2>Algoritmo de Conversão</h2>
+
+<p>É fácil representar um determinado número em <strong>ternário balanceado</strong> via representação temporária no sistema de números ternários normal. Quando o valor está no ternário padrão, seus dígitos são <code>0</code> ou <code>1</code> ou <code>2</code>. Iterando do dígito mais baixo, podemos pular com segurança <code>0</code>s e<code>1</code>s,
+no entanto,<code>2</code>s devem ser transformados em <code>Z</code>s com a adição de <code>1</code> ao próximo dígito. Dígitos <code>3</code> devem ser transformados em <code>0</code> nos mesmos termos - esses dígitos não estão presentes no número inicialmente, mas podem ser encontrados após o aumento de <code>2</code>s.</p>
+
+<p><strong>Exemplo 1:</strong> Converteremos <code>64</code> em um ternário balanceado. Inicialmente, usamos o ternário normal para reescrever o número:</p>
+
+<p>$$ 64_{10} = 02101_{3} $$</p>
+
+<p>Vamos processá-lo a partir do dígito mais à direita:</p>
+
+<ul>
+<li><code>1</code>,<code>0</code> e <code>1</code> são ignorados como estão (porque <code>0</code> e <code>1</code> são permitidos no ternário balanceado )</li>
+<li><code>2</code> é trasformado em <code>Z</code> aumentando o dígito à sua esquerda, então obtemos <code>1Z101</code>.</li>
+</ul>
+
+<p>O resultado final é <code>1Z101</code>.</p>
+
+<p>Vamos convertê-lo novamente no sistema decimal, adicionando os valores posicionais ponderados:
+$$ 1Z101 = 81 \cdot 1 + 27 \cdot (-1) + 9 \cdot 1 + 3 \cdot 0 + 1 \cdot 1 = 64_{10} $$</p>
+
+<p><strong>Exemplo 2:</strong> Vamos converter <code>237</code> em ternário balanceado. Inicialmente, usamos o ternário normal para reescrever o número:</p>
+
+<p>$$ 237_{10} = 22210_{3} $$</p>
+
+<p>Vamos processá-lo a partir do dígito mais à direita:</p>
+
+<ul>
+<li><code>0</code> e <code>1</code> são ignorados.( <code>0</code> e <code>1</code> são permitidos no ternário balanceado )</li>
+<li><code>2</code> é transformado em <code>Z</code> aumentando o dígito à sua esquerda, obtendo <code>23Z10</code>.</li>
+<li><code>3</code> é transformado em <code>0</code> aumentando o dígito à sua esquerda, obtendo <code>30Z10</code>.</li>
+<li><code>3</code> é transformado em <code>0</code> aumentando o dígito à sua esquerda (que é por padrão <code>0</code> ), e então obtemos <code>100Z10</code>.</li>
+</ul>
+
+<p>O resultado final é <code>100Z10</code>.</p>
+
+<p>Vamos convertê-lo novamente no sistema decimal, adicionando os valores posicionais ponderados:
+$$ 100Z10 = 243 \cdot 1 + 81 \cdot 0 + 27 \cdot 0 + 9 \cdot (-1) + 3 \cdot 1 + 1 \cdot 0 = 237_{10} $$</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://community.topcoder.com/stat?c=problem_statement&amp;pm=12917&amp;rd=15837">Topcoder SRM 604, Div1-250</a></li>
+</ul>
+
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
