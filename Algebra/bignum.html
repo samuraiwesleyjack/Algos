@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Aritmética Bignum - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos Aritmética de precisão arbitrária, Bignum, Arbitrary-Precision Arithmetic, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Aritmética de precisão arbitrária</h1>
+
+<p>A aritmética de precisão arbitrária, também conhecida como "bignum" ou simplesmente "aritmética longa" é um conjunto de estruturas de dados e algoritmos que permite processar números muito maiores do que os que podem ser usados ​​nos tipos de dados padrão. Aqui estão vários tipos de aritmética de precisão arbitrária.</p>
+
+<h2>Aritmética clássica de inteiros longos</h2>
+
+<p>A idéia principal é que o número seja armazenado como uma array de seus "dígitos" em alguma base. As bases usadas com mais frequências são decimais, potências decimais ($10^4$ or $10^9$) e binárias.</p>
+
+<p>As operações nos números desta forma são realizadas usando algoritmos "da escola" de adição, subtração, multiplicação e divisão. Também é possível usar algoritmos de multiplicação rápida: transformada rápida de Fourier e algoritmo de Karatsuba.</p>
+
+<p>Aqui descrevemos a aritmética longa apenas para números inteiros não negativos. Para estender os algoritmos para lidar com números inteiros negativos, é necessário introduzir e manter condições extras(booleans) de "número negativo" ou usar outras modificações nos algoritmos.</p>
+
+<h3>Estrutura de dados</h3>
+
+<p>Armazenaremos números como um <code>vector&lt;int&gt;</code>, no qual cada elemento é um único "dígito" do número.</p>
+
+<pre><code class="cpp">typedef vector&lt;int&gt; lnum;
+</code></pre>
+
+<p>Para melhorar o desempenho, usaremos $10^9$ como base, para que cada "dígito" do número longo contenha 9 dígitos decimais de uma só vez.</p>
+
+<pre><code class="cpp">const int base = 1000*1000*1000;
+</code></pre>
+
+<p>Os dígitos serão armazenados na ordem do menos ao mais significativo. odas as operações serão implementadas para que, após cada uma delas, o resultado não tenha zeros à esquerda. Todas as operações que podem resultar em um número com zeros à esquerda devem ser seguidas por um código que os remova. Observe que nesta representação existem duas notações válidas para o número zero: e vetor vazio e um vetor com um único dígito zero.</p>
+
+<h3>Saída</h3>
+
+<p>Imprimir o número inteiro longo é a operação mais fácil. Primeiro, imprimimos o último elemento do vetor (ou 0, se o vetor estiver vazio), seguido pelo restante dos elementos preenchidos com zeros à esquerda, se necessário, para que tenham exatamente 9 dígitos.</p>
+
+<pre><code class="cpp">printf ("%d", a.empty() ? 0 : a.back());
+for (int i=(int)a.size()-2; i&gt;=0; --i)
+    printf ("%09d", a[i]);
+</code></pre>
+
+<p>Observe que é colocado o tipo "(int)" em <code>a.size()</code> para evitar um "unsigned integer underflow" se o vetor conter menos de 2 elementos.</p>
+
+<h3>Entrada</h3>
+
+<p>Para ler um número inteiro longo, leia sua notação em uma <code>string</code> e então em "dígitos" com <code>atoi</code>:</p>
+
+<pre><code class="cpp">for (int i=(int)s.length(); i&gt;0; i-=9)
+    if (i &lt; 9)
+        a.push_back (atoi (s.substr (0, i).c_str()));
+    else
+        a.push_back (atoi (s.substr (i-9, 9).c_str()));
+</code></pre>
+
+<p>Se usarmos uma array de <code>char</code> em vez de uma de <code>string</code>, o código será ainda mais curto:</p>
+
+<pre><code class="cpp">for (int i=(int)strlen(s); i&gt;0; i-=9) {
+    s[i] = 0;
+    a.push_back (atoi (i&gt;=9 ? s+i-9 : s));
+}
+</code></pre>
+
+<p>Se a entrada puder conter zeros à esquerda, eles poderão ser removidos da seguinte maneira:</p>
+
+<pre><code class="cpp">while (a.size() &gt; 1 &amp;&amp; a.back() == 0)
+    a.pop_back();
+</code></pre>
+
+<h3>Adição</h3>
+
+<p>Incremente o número inteiro longo $a$ por $b$ e armazene o resultado em $a$:</p>
+
+<pre><code class="cpp">int carry = 0;
+for (size_t i=0; i&lt;max(a.size(),b.size()) || carry; ++i) {
+    if (i == a.size())
+        a.push_back (0);
+    a[i] += carry + (i &lt; b.size() ? b[i] : 0);
+    carry = a[i] &gt;= base;
+    if (carry)  a[i] -= base;
+}
+</code></pre>
+
+<h3>Subtração</h3>
+
+<p>Reduza o número inteiro longo $a$ por $b$ ($a \ge b$) e armazene em $a$:</p>
+
+<pre><code class="cpp">int carry = 0;
+for (size_t i=0; i&lt;b.size() || carry; ++i) {
+    a[i] -= carry + (i &lt; b.size() ? b[i] : 0);
+    carry = a[i] &lt; 0;
+    if (carry)  a[i] += base;
+}
+while (a.size() &gt; 1 &amp;&amp; a.back() == 0)
+    a.pop_back();
+</code></pre>
+
+<p>Observe que, após executar a subtração, removemos os zeros à esquerda para manter a premissa de que nossos números inteiros longos não possuem zeros à esquerda.</p>
+
+<h3>Multiplicação por número inteiro curto</h3>
+
+<p>Multiplique o número inteiro longo $a$ pelo número inteiro curto $b$ ($b &lt; base$) e armazene em $a$:</p>
+
+<pre><code class="cpp">int carry = 0;
+for (size_t i=0; i&lt;a.size() || carry; ++i) {
+    if (i == a.size())
+        a.push_back (0);
+    long long cur = carry + a[i] * 1ll * b;
+    a[i] = int (cur % base);
+    carry = int (cur / base);
+}
+while (a.size() &gt; 1 &amp;&amp; a.back() == 0)
+    a.pop_back();
+</code></pre>
+
+<p>Otimização adicional: Se o tempo de execução for extremamente importante, você pode tentar substituir duas divisões por uma encontrando apenas o resultado inteiro da divisão (a variável <code>carry</code>) e usá-lo para encontrar o módulo usando a multiplicação. Isso geralmente torna o código mais rápido, embora não drasticamente.</p>
+
+<h3>Multiplicação por número inteiro longo</h3>
+
+<p>Multiplique números inteiros longos $a$ e $b$ armazenando em $c$:</p>
+
+<pre><code class="cpp">lnum c (a.size()+b.size());
+for (size_t i=0; i&lt;a.size(); ++i)
+    for (int j=0, carry=0; j&lt;(int)b.size() || carry; ++j) {
+        long long cur = c[i+j] + a[i] * 1ll * (j &lt; (int)b.size() ? b[j] : 0) + carry;
+        c[i+j] = int (cur % base);
+        carry = int (cur / base);
+    }
+while (c.size() &gt; 1 &amp;&amp; c.back() == 0)
+    c.pop_back();
+</code></pre>
+
+<h3>Divisão por número inteiro curto</h3>
+
+<p>Divida o inteiro longo $a$ pelo inteiro curto $b$ ($b &lt; base$), armazene o resultado inteiro em $a$ e o resto no <code>carry</code>:</p>
+
+<pre><code class="cpp">int carry = 0;
+for (int i=(int)a.size()-1; i&gt;=0; --i) {
+    long long cur = a[i] + carry * 1ll * base;
+    a[i] = int (cur / b);
+    carry = int (cur % b);
+}
+while (a.size() &gt; 1 &amp;&amp; a.back() == 0)
+    a.pop_back();
+</code></pre>
+
+<h2>Aritmética inteira longa para Fatoração</h2>
+
+<p>A idéia é armazenar o número inteiro como sua fatoração, ou seja, as potências dos primos que o dividem.</p>
+
+<p>Essa abordagem é muito fácil de implementar e permite a multiplicação e a divisão facilmente (assintoticamente mais rápidas que o método clássico), mas não a adição ou subtração. Também é muito eficiente em termos de memória em comparação com a abordagem clássica.</p>
+
+<p>Este método é frequentemente usado para cálculos módulo um número não-primo M; neste caso, um número é armazenado como potências dos divisores de M que dividem o número, mais o resto módulo M.</p>
+
+<h2>Aritmética inteira longa em módulos primos (Algoritmo de Garner)</h2>
+
+<p>A idéia é escolher um conjunto de números primos (normalmente eles são pequenos o suficiente para caber no tipo de dados padrão) e armazenar um número inteiro como um vetor de restos da divisão do número inteiro por cada um desses números primos.</p>
+
+<p>O teorema do resto chinês afirma que essa representação é suficiente para restaurar exclusivamente qualquer número de 0 ao produto desses primos. O <a href="https://cp-algorithms-brasil.com/Algebra/teoremachines.html">algoritmo de Garner</a> permite restaurar o número dessa representação para um número inteiro normal.</p>
+
+<p>Este método permite economizar memória em comparação com a abordagem clássica (embora a economia não seja tão dramática quanto na representação de fatoração). Além disso, permite realizar rápida adição, subtração e multiplicação no tempo proporcional ao número de números primos usados ​​como módulos (consulte o artigo <a href="https://cp-algorithms-brasil.com/Algebra/teoremachines.html">teorema chinês do resto</a> para implementação).</p>
+
+<p>A desvantagem é que converter o número inteiro de volta à forma normal é bastante trabalhoso e requer a implementação da aritmética clássica de precisão arbitrária com multiplicação. Além disso, este método não suporta divisão.</p>
+
+<h2>Aritmética fracionária de precisão arbitrária</h2>
+
+<p>As frações ocorrem em competições de programação com bem menos frequência do que números inteiros, e a aritmética longa é muito mais difícil de implementar para frações, portanto, as competições de programação apresentam apenas um pequeno subconjunto da aritmética longa fracionária.</p>
+
+<h3>Aritmética em frações irredutíveis</h3>
+
+<p>Um número é representado como uma fração irredutível $\frac{a}{b}$, onde $a$ e $b$ são inteiros. Todas as operações em frações podem ser representadas como operações em numeradores e denominadores inteiros dessas frações. Geralmente, isso requer o uso de aritmética clássica de precisão arbitrária para armazenar numerador e denominador, porém um tipo de dados inteiro de 64 bits é suficiente para as operações.</p>
+
+<h3>Armazenando floats como um tipo separado</h3>
+
+<p>Às vezes, um problema requer o manuseio de números muito pequenos ou muito grandes, sem permitir overflow ou underflow. O tipo de dados interno usa de 8 a 10 bytes e permite valores do expoente no intervalo $ [- 308; 308] $, que às vezes pode ser insuficiente.</p>
+
+<p>A abordagem é muito simples: uma variável inteira separada é usada para armazenar o valor do expoente e, após cada operação, o número de ponto flutuante é normalizado, ou seja, retornado ao intervalo $[0.1; 1)$ ajustando o expoente de acordo.</p>
+
+<p>Quando dois desses números são multiplicados ou divididos, seus expoentes devem ser adicionados ou subtraídos, respectivamente. Quando números são adicionados ou subtraídos, eles devem ser levados ao expoente comum primeiro multiplicando um deles por 10, elevado à potência igual à diferença dos valores do expoente. O método gira em torno do expoente e as mudanças feitas no número.</p>
+
+<p>Como nota final, a base do expoente não precisa ser igual a 10. Com base na representação interna dos números de ponto flutuante, faz mais sentido usar 2 como base do expoente.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1124">UVA - How Many Fibs?</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1047">UVA - Product</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=728">UVA - Maximum Sub-sequence Product</a></li>
+<li><a href="http://www.spoj.com/problems/MUL/en/">SPOJ - Fast Multiplication</a></li>
+<li><a href="http://www.spoj.com/problems/GCD2/">SPOJ - GCD2</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1024">UVA - Division</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=436">UVA - Fibonacci Freeze</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1866">UVA - Krakovia</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1755">UVA - Simplifying Fractions</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=564">UVA - 500!</a></li>
+<li><a href="https://www.hackerrank.com/contests/projecteuler/challenges/euler020/problem">Hackerrank - Factorial digit sum</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4803">UVA - Immortal Rabbits</a></li>
+<li><a href="http://www.spoj.com/problems/IWGBS/">SPOJ - 0110SS</a></li>
+<li><a href="http://codeforces.com/contest/17/problem/D">Codeforces - Notepad</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
