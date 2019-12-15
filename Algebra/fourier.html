@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Transformada Rápida de Fourier - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos Fourier, C++ e Algoritmos, Transformada Rápida de Fourier, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Transformada rápida de Fourier</h1>
+
+<p>Neste artigo, discutiremos um algoritmo que nos permite multiplicar dois polinômios de tamanho $n$ em tempo $O(n \log n)$, o que é melhor do que a multiplicação trivial que leva tempo $O(n^2)$.
+A multiplicação de dois números longos também pode ser reduzida a uma multiplicação de polinômios, portanto, dois números longos também podem ser multiplicados em tempo $O(n \log n)$ (onde $n$ é a quantidade de dígitos nos números).</p>
+
+<p>A descoberta da <strong>transformada rápida de Fourier (FFT)</strong> é atribuída a Cooley e Tukey, que publicaram um algoritmo em 1965.
+Mas, na verdade, a FFT foi descoberta antes, mas sua importância não foi entendida antes das invenções dos computadores modernos.
+Alguns pesquisadores atribuem a descoberta da FFT a Runge e König em 1924.
+Mas, na verdade, Gauss havia desenvolvido esse método em 1805, mas nunca o publicou.</p>
+
+<h2>Transformação discreta de Fourier</h2>
+
+<p>Seja um polinômio de grau $n - 1$:
+$$A(x) = a_0 x^0 + a_1 x^1 + \dots + a_{n-1} x^{n-1}$$
+Assumimos que $n$ - o número de coeficientes - é uma potência de $2$.
+Se $n$ não for uma potência de $2$, basta adicionar os termos ausentes $a_i x^i$ e definir os coeficientes $a_i$ para $0$.</p>
+
+<p>A teoria dos números complexos nos diz que a equação $x^n = 1$ tem $n$ soluções complexas, e as soluções são da forma $w_{n, k} = e^{\frac{2 k \pi i}{n}}$ com $k = 0 \dots n-1$.
+Além disso, esses números complexos têm propriedades interessantes: 
+por exemplo, a principal $n$-ésima raiz $w_n = w_{n, 1} = e^{\frac{2 \pi i}{n}}$ pode ser usado para descrever todas as outras $n$-ésimas raízes da forma: $w_{n, k} = (w_n)^k$.</p>
+
+<p>A <strong>transformada discreta de Fourier (DFT)</strong> do polinômio $A(x)$ (ou equivalentemente o vetor dos coeficientes $(a_0, a_1, \dots, a_{n-1})$ é definida como os valores do polinômio nos pontos $x = w_{n, k}$, ou seja, é o vetor:
+$$\begin{align}
+\text{DFT}(a_0, a_1, \dots, a_{n-1}) &amp;= (y_0, y_1, \dots, y_{n-1}) &#92;&#92;
+&amp;= (A(w_{n, 0}), A(w_{n, 1}), \dots, A(w_{n, n-1})) &#92;&#92;
+&amp;= (A(w_n^0), A(w_n^1), \dots, A(w_n^{n-1}))
+\end{align}$$</p>
+
+<p>Similarmente a <strong>transformada discreta inversa de Fourier</strong> é definada como:
+A DFT inversa dos valores do polinômio $(y_0, y_1, \dots, y_{n-1})$ são os coeficientes do polinômio $(a_0, a_1, \dots, a_{n-1})$.
+$$\text{InverseDFT}(y_0, y_1, \dots, y_{n-1}) = (a_0, a_1, \dots, a_{n-1})$$</p>
+
+<p>Assim, se uma DFT calcula os valores do polinômio nos pontos da $n$-ésimas raízes, a DFT inversa pode restaurar os coeficientes do polinômio usando esses valores.</p>
+
+<h3>Aplicação da DFT: multiplicação rápida de polinômios</h3>
+
+<p>Sejam dois polinômios $A$ e $B$.
+Calculamos a DFT para cada um: $\text{DFT}(A)$ e $\text{DFT}(B)$.</p>
+
+<p>O que acontece se multiplicarmos esses polinômios?
+em cada ponto, os valores são simplesmente multiplicados, isto é
+$$(A \cdot B)(x) = A(x) \cdot B(x).$$</p>
+
+<p>Isso significa que, se multiplicarmos os vetores $\text{DFT}(A)$ e $\text{DFT}(B)$ - multiplicando cada elemento de um vetor pelo elemento correspondente do outro vetor - não obtemos nada diferente da DFT do polinômio $\text{DFT}(A \cdot B)$:
+$$\text{DFT}(A \cdot B) = \text{DFT}(A) \cdot \text{DFT}(B)$$</p>
+
+<p>Finalmente, aplicando a DFT inversa, obtemos:
+$$A \cdot B = \text{InverseDFT}(\text{DFT}(A) \cdot \text{DFT}(B))$$</p>
+
+<p>À direita, o produto das duas DFTs significa o produto em pares dos elementos dos vetores.
+Isso pode ser calculado em tempo $O(n)$.
+Se pudermos calcular a DFT e a DFT inversa em $O(n \log n)$, poderemos calcular o produto dos dois polinômios (e consequentemente também dois números longos) com a mesma complexidade de tempo.</p>
+
+<p>Deve-se notar que os dois polinômios devem ter o mesmo grau.
+Caso contrário, os doivetores resultantes da DFT irão ter tamanhos diferentes.
+Podemos fazer isso adicionando coeficientes com o valor $0$.</p>
+
+<p>E também, como o resultado do produto de dois polinômios é um polinômio de grau $2 (n - 1)$, temos que dobrar os graus de cada polinômio (novamente preenchendo com $0$s).
+A partir de um vetor com $n$ valores não podemos reconstruir o polinômio desejado com $2n - 1$ coeficientes.</p>
+
+<h3>Transformada rápida de Fourier</h3>
+
+<p>A <strong>transformada rápida de Fourier</strong> é um método que permite calcular a DFT em tempo $O(n \log n)$.
+A idéia básica da FFT é aplicar dividir e conquistar.
+Dividimos o vetor coeficiente do polinômio em dois vetores, recursivamente calculamos a DFT para cada um deles, e combinamos os resultados para calcular a DFT do polinômio completo.</p>
+
+<p>Assim, exista um polinômio $A(x)$ com grau $n - 1$, onde $n$ é uma potência de $2$, e $n > 1$:
+$$A(x) = a_0 x^0 + a_1 x^1 + \dots + a_{n-1} x^{n-1}$$</p>
+
+<p>Dividimos em dois polinômios menores, o que contém apenas os coeficientes das posições pares e o que contém os coeficientes das posições ímpares:
+$$\begin{align}
+A_0(x) &amp;= a_0 x^0 + a_2 x^1 + \dots + a_{n-2} x^{\frac{n}{2}-1} &#92;&#92;
+A_1(x) &amp;= a_1 x^0 + a_3 x^1 + \dots + a_{n-1} x^{\frac{n}{2}-1}
+\end{align}$$</p>
+
+<p>Vejamos que
+$$A(x) = A_0(x^2) + x A_1(x^2).$$</p>
+
+<p>Os polinômios $A_0$ e $A_1$ são apenas metade dos coeficientes que o polinômio $A$ é.
+Se pudermos calcular a $\text{DFT}(A)$ em tempo linear usando a $\text{DFT}(A_0)$ e $\text{DFT}(A_1)$, obteremos a recorrência $T_{\text{DFT}}(n) = 2 T_{\text{DFT}}\left(\frac{n}{2}\right) + O(n)$ para a complexidade de tempo, o que resulta em $T_{\text{DFT}}(n) = O(n \log n)$.</p>
+
+<p>Como podemos conseguir isso.</p>
+
+<p>Suponha que tenhamos calculado os vetores $\left(y_k^0\right)&#95;{k=0}^{n/2-1} = \text{DFT}(A_0)$ and $\left(y_k^1\right)&#95;{k=0}^{n/2-1} = \text{DFT}(A_1)$.
+Vamos encontrar uma expressão para $\left(y_k\right)_{k=0}^{n-1} = \text{DFT}(A)$.</p>
+
+<p>Para os primeiros valores de $\frac{n}{2}$ podemos apenas usar a equação anterior $A(x) = A_0(x^2) + x A_1(x^2)$:
+$$y_k = y_k^0 + w_n^k y_k^1, \quad k = 0 \dots \frac{n}{2} - 1.$$</p>
+
+<p>No entanto, para os segundos valores de $\frac{n}{2}$ precisamos encontrar uma expressão diferente:
+$$\begin{align}
+y_{k+n/2} &amp;= A\left(w_n^{k+n/2}\right) &#92;&#92;
+&amp;= A_0\left(w_n^{2k+n}\right) + w_n^{k + n/2} A_1\left(w_n^{2k+n}\right) &#92;&#92;
+&amp;= A_0\left(w_n^{2k} w_n^n\right) + w_n^k w_n^{n/2} A_1\left(w_n^{2k} w_n^n\right) &#92;&#92;
+&amp;= A_0\left(w_n^{2k}\right) - w_n^k A_1\left(w_n^{2k}\right) &#92;&#92;
+&amp;= y_k^0 - w_n^k y_k^1
+\end{align}$$
+Aqui nós usado novamente $A(x) = A_0(x^2) + x A_1(x^2)$ e as duas identidades $w_n^n = 1$ e $w_n^{n/2} = -1$.</p>
+
+<p>Portanto, obtemos as fórmulas desejadas para calcular todo o vetor $(y_k)$:
+$$\begin{align}
+y_k &amp;= y_k^0 + w_n^k y_k^1, &amp;\quad k = 0 \dots \frac{n}{2} - 1, &#92;&#92;
+y_{k+n/2} &amp;= y_k^0 - w_n^k y_k^1, &amp;\quad k = 0 \dots \frac{n}{2} - 1.
+\end{align}$$
+(Esse padrão $a + b$ e $a - b$ é as vezes chamado de <strong>borboleta</strong>.)</p>
+
+<p>Assim, aprendemos como calcular a DFT em tempo $O(n \log n)$.</p>
+
+<h3>FFT Inversa</h3>
+
+<p>Seja o vetor $(y_0, y_1, \dots y_{n-1})$ - os valores do polinômio $A$ de grau $n - 1$ nos pontos $x = w_n^k$.
+Queremos restaurar os coeficientes $(a_0, a_1, \dots, a_{n-1})$ do polinômio.
+Esse problema é chamado de <strong>interpolação</strong>, e existem algoritmos gerais para resolvê-lo.
+Mas nesse caso (já que conhecemos os valores dos pontos nas raízes), podemos obter um algoritmo mais simples (que é praticamente o mesmo que o FFT).</p>
+
+<p>Podemos escrever a DFT, de acordo com sua definição, na forma de matriz:
+$$
+\begin{pmatrix}
+w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; \cdots &amp; w_n^0 &#92;&#92;
+w_n^0 &amp; w_n^1 &amp; w_n^2 &amp; w_n^3 &amp; \cdots &amp; w_n^{n-1} &#92;&#92;
+w_n^0 &amp; w_n^2 &amp; w_n^4 &amp; w_n^6 &amp; \cdots &amp; w_n^{2(n-1)} &#92;&#92;
+w_n^0 &amp; w_n^3 &amp; w_n^6 &amp; w_n^9 &amp; \cdots &amp; w_n^{3(n-1)} &#92;&#92;
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &#92;&#92;
+w_n^0 &amp; w_n^{n-1} &amp; w_n^{2(n-1)} &amp; w_n^{3(n-1)} &amp; \cdots &amp; w_n^{(n-1)(n-1)}
+\end{pmatrix} \begin{pmatrix}
+a_0 &#92;&#92; a_1 &#92;&#92; a_2 &#92;&#92; a_3 &#92;&#92; \vdots &#92;&#92; a_{n-1}
+\end{pmatrix} = \begin{pmatrix}
+y_0 &#92;&#92; y_1 &#92;&#92; y_2 &#92;&#92; y_3 &#92;&#92; \vdots &#92;&#92; y_{n-1}
+\end{pmatrix}
+$$
+Essa matriz é chamada de <strong>matriz de Vandermonde</strong>.</p>
+
+<p>Assim, podemos calcular o vetor $(a_0, a_1, \dots, a_{n-1})$ multiplicando o vetor $(y_0, y_1, \dots y_{n-1})$ da esquerda com o inverso da matriz:
+$$
+\begin{pmatrix}
+a_0 &#92;&#92; a_1 &#92;&#92; a_2 &#92;&#92; a_3 &#92;&#92; \vdots &#92;&#92; a_{n-1}
+\end{pmatrix} = \begin{pmatrix}
+w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; \cdots &amp; w_n^0 &#92;&#92;
+w_n^0 &amp; w_n^1 &amp; w_n^2 &amp; w_n^3 &amp; \cdots &amp; w_n^{n-1} &#92;&#92;
+w_n^0 &amp; w_n^2 &amp; w_n^4 &amp; w_n^6 &amp; \cdots &amp; w_n^{2(n-1)} &#92;&#92;
+w_n^0 &amp; w_n^3 &amp; w_n^6 &amp; w_n^9 &amp; \cdots &amp; w_n^{3(n-1)} &#92;&#92;
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &#92;&#92;
+w_n^0 &amp; w_n^{n-1} &amp; w_n^{2(n-1)} &amp; w_n^{3(n-1)} &amp; \cdots &amp; w_n^{(n-1)(n-1)}
+\end{pmatrix}^{-1} \begin{pmatrix}
+y_0 &#92;&#92; y_1 &#92;&#92; y_2 &#92;&#92; y_3 &#92;&#92; \vdots &#92;&#92; y_{n-1}
+\end{pmatrix}
+$$</p>
+
+<p>A matriz inversa tem a seguinte forma:
+$$
+\frac{1}{n}
+\begin{pmatrix}
+w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; w_n^0 &amp; \cdots &amp; w_n^0 &#92;&#92;
+w_n^0 &amp; w_n^{-1} &amp; w_n^{-2} &amp; w_n^{-3} &amp; \cdots &amp; w_n^{-(n-1)} &#92;&#92;
+w_n^0 &amp; w_n^{-2} &amp; w_n^{-4} &amp; w_n^{-6} &amp; \cdots &amp; w_n^{-2(n-1)} &#92;&#92;
+w_n^0 &amp; w_n^{-3} &amp; w_n^{-6} &amp; w_n^{-9} &amp; \cdots &amp; w_n^{-3(n-1)} &#92;&#92;
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots &#92;&#92;
+w_n^0 &amp; w_n^{-(n-1)} &amp; w_n^{-2(n-1)} &amp; w_n^{-3(n-1)} &amp; \cdots &amp; w_n^{-(n-1)(n-1)}
+\end{pmatrix}
+$$
+Assim, obtemos a fórmula:
+$$a_k = \frac{1}{n} \sum_{j=0}^{n-1} y_j w_n^{-k j}$$
+Comparando isso com a fórmula para $y_k$
+$$y_k = \sum_{j=0}^{n-1} a_j w_n^{k j},$$
+observamos que esses problemas são quase os mesmos, portanto os coeficientes $a_k$ podem ser encontrados pelo mesmo algoritmo de divisão e conquista, bem como pela FFT direta, apenas em vez de $w_n^k$ precisamos usar $w_n^{-k}$, e no final precisamos dividir os coeficientes resultantes por $n$.</p>
+
+<p>Assim, o cálculo da DFT inversa é quase o mesmo que o cálculo da DFT direta, e também pode ser realizado em tempo $O(n \log n)$.</p>
+
+<h3>Implementação</h3>
+
+<p>Aqui, apresentamos uma <strong>implementação recursiva da FFT</strong> direta e inversa, ambas em uma função, uma vez que a diferença entre a FFT direta e a inversa é tão mínima. Para armazenar os números complexos, usamos o tipo complexo da STL do C++.</p>
+
+<pre><code class="cpp">using cd = complex&lt;double&gt;;
+const double PI = acos(-1);
+
+void fft(vector&lt;cd&gt; &amp; a, bool invert) {
+    int n = a.size();
+    if (n == 1)
+        return;
+
+    vector&lt;cd&gt; a0(n / 2), a1(n / 2);
+    for (int i = 0; 2 * i &lt; n; i++) {
+        a0[i] = a[2*i];
+        a1[i] = a[2*i+1];
+    }
+    fft(a0, invert);
+    fft(a1, invert);
+
+    double ang = 2 * PI / n * (invert ? -1 : 1);
+    cd w(1), wn(cos(ang), sin(ang));
+    for (int i = 0; 2 * i &lt; n; i++) {
+        a[i] = a0[i] + w * a1[i];
+        a[i + n/2] = a0[i] - w * a1[i];
+        if (invert) {
+            a[i] /= 2;
+            a[i + n/2] /= 2;
+        }
+        w *= wn;
+    }
+}
+</code></pre>
+
+<p>A função recebe um vetor de coeficientes e calcula a DFT ou a DFT inversa e armazena o resultado novamente nesse vetor.
+O argumento $\text{invert}$ mostra qual DFT(direta ou a inversa) deve ser calculada.
+Dentro da função, primeiro verificamos se o comprimento do vetor é igual a um; se esse for o caso, não precisamos fazer nada.
+Caso contrário, dividimos o vetor $a$ em dois vetores $a0$ e $a1$ e calculamos a DFT recursivamente para ambos.
+Em seguida, inicializamos o valor $wn$ e uma variável $w$, que conterá a potência atual de $wn$.
+Em seguida, os valores da DFT resultante são calculados usando as fórmulas.</p>
+
+<p>Se o sinalizador $\text{invert}$ estiver definido, substituímos $wn$ por $wn^{-1}$, e cada um dos valores do resultado será dividido por $2$ (como isso será feito em cada nível da recursão, então acabará dividindo os valores finais por $n$).</p>
+
+<p>Usando esta função, podemos criar uma função para <strong>multiplicar dois polinômios</strong>:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; multiply(vector&lt;int&gt; const&amp; a, vector&lt;int&gt; const&amp; b) {
+    vector&lt;cd&gt; fa(a.begin(), a.end()), fb(b.begin(), b.end());
+    int n = 1;
+    while (n &lt; a.size() + b.size()) 
+        n &lt;&lt;= 1;
+    fa.resize(n);
+    fb.resize(n);
+
+    fft(fa, false);
+    fft(fb, false);
+    for (int i = 0; i &lt; n; i++)
+        fa[i] *= fb[i];
+    fft(fa, true);
+
+    vector&lt;int&gt; result(n);
+    for (int i = 0; i &lt; n; i++)
+        result[i] = round(fa[i].real());
+    return result;
+}
+</code></pre>
+
+<p>Essa função trabalha com polinômios com coeficientes inteiros, no entanto, você também pode ajustá-la para trabalhar com outros tipos.
+Como existe algum erro ao trabalhar com números complexos, precisamos arredondar os coeficientes resultantes no final.</p>
+
+<p>Finalmente, a função de <strong>multiplicar dois números longos</strong> praticamente não difere da função de multiplicar polinômios.
+A única coisa que precisamos fazer depois é "normalizar" o número:</p>
+
+<pre><code class="cpp">    int carry = 0;
+    for (int i = 0; i &lt; n; i++)
+        result[i] += carry;
+        carry = result[i] / 10;
+        result[i] %= 10;
+    }
+</code></pre>
+
+<p>Como o comprimento do produto de dois números nunca excede o comprimento total de ambos os números, o tamanho do vetor é suficiente para executar todas as operações.</p>
+
+<h3>Implementação aprimorada</h3>
+
+<p>Para aumentar a eficiência, passaremos da implementação recursiva para a iterativa. Na implementação recursiva acima, separamos explicitamente o vetor $a$ em dois vetores - os elementos nas posi;'oes pares foram colocados em um vetor temporário assim como os elementos nas posições impares.
+No entanto, se reordenarmos os elementos de uma certa maneira, não precisamos criar esses vetores temporários (ou seja, todos os cálculos podem ser feitos no próprio vetor $A$).</p>
+
+<p>Observe que, no primeiro nível de recursão, os elementos cujo bit mais baixo da posição era zero foram atribuídos ao vetor $a_0$, e os que tinham um como o bit na posição mais baixa foram colocados no vetor $a_1$.
+No segundo nível de recursão, acontece o mesmo, mas com o segundo bit mais baixo, etc.
+Portanto, se invertermos os bits da posição de cada coeficiente e os ordenarmos por esses valores invertidos, obteremos a ordem desejada ( chamada de permutação de reversão de bits).</p>
+
+<p>Por exemplo, a ordem desejada para $n = 8$ tem a forma:
+$$a = \left&#92;{ \left[ (a_0, a_4), (a_2, a_6) \right], \left[ (a_1, a_5), (a_3, a_7) \right] \right&#92;}$$
+No primeiro nível de recursão (cercado por chaves), o vetor é dividido em duas partes $[a_0, a_2, a_4, a_6]$ e $[a_1, a_3, a_5, a_7]$.
+Na permutação de inversão de bits, isso corresponde simplesmente à divisão do vetor em duas metades: os primeiros $\frac{n}{2}$ elementos e os últimos $\frac{n}{2}$ elementos.
+Depois, há uma chamada recursiva para cada metade.
+Deixe a DFT resultante para cada um deles retornar no lugar dos próprios elementos (ou seja, a primeira metade e a segunda metade do vetor $a$ respectivamente.
+$$a = \left&#92;{[y_0^0, y_1^0, y_2^0, y_3^0], [y_0^1, y_1^1, y_2^1, y_3^1]\right&#92;}$$</p>
+
+<p>Agora, queremos combinar as duas DFTs em uma para o vetor completo.
+A ordem dos elementos é ideal, mas também podemos realizar a união diretamente nesse vetor.
+Podemos pegar os elementos $y_0^0$ e $y_0^1$  executar a transformação de borboleta.
+O local dos dois valores resultantes é igual ao local dos dois valores iniciais, portanto, obtemos:
+$$a = \left&#92;{[y_0^0 + w_n^0 y_0^1, y_1^0, y_2^0, y_3^0], [y_0^0 - w_n^0 y_0^1, y_1^1, y_2^1, y_3^1]\right&#92;}$$
+Da mesma forma, podemos calcular a transformação de borboleta de $y_1^0$ e $y_1^1$ e colocar os resultados no lugar deles, e assim por diante.
+Como resultado, obtemos:
+$$a = \left&#92;{[y_0^0 + w_n^0 y_0^1, y_1^0 + w_n^1 y_1^1, y_2^0 + w_n^2 y_2^1, y_3^0 + w_n^3 y_3^1], [y_0^0 - w_n^0 y_0^1, y_1^0 - w_n^1 y_1^1, y_2^0 - w_n^2 y_2^1, y_3^0 - w_n^3 y_3^1]\right&#92;}$$
+Assim, calculamos a DFT necessária a partir do vetor $a$.</p>
+
+<p>Aqui, descrevemos o processo de computação da DFT apenas no primeiro nível de recursão, mas o mesmo funciona obviamente também para todos os outros níveis. Assim, após aplicar a <a href="https://en.wikipedia.org/wiki/Bit-reversal_permutation">permutação de reversão de bits</a>, podemos calcular a DFT no mesmo vetor, sem nenhuma memória adicional.</p>
+
+<p>Além disso, isso permite nos livrar da recursão. Apenas começamos no nível mais baixo, ou seja, dividimos o vetor em pares e aplicamos a transformação de borboleta neles.
+Isso resulta com o vetor $a$ com o trabalho do último nível aplicado.
+Na próxima etapa, dividimos o vetor em vetores de tamanho $4$, e novamente aplicamos a transformação de borboleta, que nos fornece a DFT para cada bloco de tamanho $4$.
+E assim por diante.
+Finalmente, na última etapa, obtemos o resultado das DFTs de ambas as metades de $a$, e, aplicando a transformação de borboleta, obtemos o DFT para o vetor completo $a$.</p>
+
+<pre><code class="cpp">using cd = complex&lt;double&gt;;
+const double PI = acos(-1);
+
+int reverse(int num, int lg_n) {
+    int res = 0;
+    for (int i = 0; i &lt; lg_n; i++) {
+        if (num &amp; (1 &lt;&lt; i))
+            res |= 1 &lt;&lt; (lg_n - 1 - i);
+    }
+    return res;
+}
+
+void fft(vector&lt;cd&gt; &amp; a, bool invert) {
+    int n = a.size();
+    int lg_n = 0;
+    while ((1 &lt;&lt; lg_n) &lt; n)
+        lg_n++;
+
+    for (int i = 0; i &lt; n; i++) {
+        if (i &lt; reverse(i, lg_n))
+            swap(a[i], a[reverse(i, lg_n)]);
+    }
+
+    for (int len = 2; len &lt;= n; len &lt;&lt;= 1) {
+        double ang = 2 * PI / len * (invert ? -1 : 1);
+        cd wlen(cos(ang), sin(ang));
+        for (int i = 0; i &lt; n; i += len) {
+            cd w(1);
+            for (int j = 0; j &lt; len / 2; j++) {
+                cd u = a[i+j], v = a[i+j+len/2] * w;
+                a[i+j] = u + v;
+                a[i+j+len/2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    if (invert) {
+        for (cd &amp; x : a)
+            x /= n;
+    }
+}
+</code></pre>
+
+<p>Inicialmente, aplicamos a permutação de reversão de bits(bit-reversal permutation) trocando cada elemento pelo elemento da posição reversa. 
+Então na $\log n - 1$ fase do algoritmo calculamos a DFT para cada bloco de tamanho correspondente $\text{len}$.
+Para todos esses blocos, temos a mesma raiz de unidade $\text{wlen}$.
+Nós iteramos todos os blocos e executamos a transformação de borboleta em cada um deles.</p>
+
+<p>Podemos otimizar ainda mais a reversão dos bits. Na implementação anterior, iteramos todos os bits do índice e criamos o índice reverso bit a bit. No entanto, podemos inverter os bits de uma maneira diferente.</p>
+
+<p>Suponha que $j$ já contenha o reverso de $i$.
+Então, para ir para $i + 1$, temos que incrementar $i$, e também precisamos incrementar $j$, mas em um sistema numérico "invertido".
+Adicionar um no sistema binário convencional é equivalente a inverter todos os ums juntos em zeros e inverter o zero antes deles em um.
+Equivalentemente, no sistema numérico "invertido", invertemos todos os principais ums, e também o próximo zero.</p>
+
+<p>Implementação:</p>
+
+<pre><code class="cpp">using cd = complex&lt;double&gt;;
+const double PI = acos(-1);
+
+void fft(vector&lt;cd&gt; &amp; a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i &lt; n; i++) {
+        int bit = n &gt;&gt; 1;
+        for (; j &amp; bit; bit &gt;&gt;= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i &lt; j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len &lt;= n; len &lt;&lt;= 1) {
+        double ang = 2 * PI / len * (invert ? -1 : 1);
+        cd wlen(cos(ang), sin(ang));
+        for (int i = 0; i &lt; n; i += len) {
+            cd w(1);
+            for (int j = 0; j &lt; len / 2; j++) {
+                cd u = a[i+j], v = a[i+j+len/2] * w;
+                a[i+j] = u + v;
+                a[i+j+len/2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    if (invert) {
+        for (cd &amp; x : a)
+            x /= n;
+    }
+}
+</code></pre>
+
+<p>Além disso, podemos pré-calcular previamente a permutação de reversão de bits.
+Isso é especialmente útil quando o tamanho $n$ é o mesmo para todas as chamadas.
+Mas mesmo quando temos apenas três chamadas (necessárias para multiplicar dois polinômios), o efeito é perceptível.
+Também podemos pré-calcular todas as raízes da unidade e suas potências.</p>
+
+<h2>Transformação teórica dos números(number theoretic transform NTT)</h2>
+
+<p>Agora vamos mudar um pouco o objetivo. Ainda queremos multiplicar dois polinômios em tempo $O(n \log n)$, mas desta vez queremos calcular os coeficientes módulo algum número primo $p$.
+Obviamente, para esta tarefa, podemos usar a DFT normal e aplicar o operador de módulo ao resultado.
+No entanto, isso pode levar a erros, especialmente quando se lida com números grandes.
+A <strong>transformação teórica dos números (NTT)</strong> funciona apenas com números inteiros e, portanto, é garantido que o resultado seja correto.</p>
+
+<p>A transformada discreta de Fourier é baseada em números complexos e nas raizes $n$-ésima de unidade.
+Para calculá-la eficientemente, usamos extensivamente as propriedades das raízes (por exemplo: que existe uma raiz que gera todas as outras raízes por exponenciação).</p>
+
+<p>Mas as mesmas propriedades são válidas para as raízes $n$-ésimas de unidade na arithmética modular.
+Uma $n$-ésima raiz de unidade é um número $w_n$ que satisfaz:
+$$\begin{align}
+(w_n)^n &amp;= 1 \pmod{p}, &#92;&#92;
+(w_n)^k &amp;\ne 1 \pmod{p}, \quad 1 \le k &lt; n.
+\end{align}$$
+As outras $n-1$ raízes podem ser obtidas como potências da raiz $w_n$.</p>
+
+<p>Para aplicar no algoritmo de transformação rápida de Fourier, precisamos que uma raiz exista para algum $n$, na qual seja uma potência de $2$, e também para todas as potências menores.
+Podemos notar uma seguinte propriedade interessante:
+$$\begin{align}
+(w_n^2)^m = w_n^n &amp;= 1 \pmod{p}, \quad \text{with } m = \frac{n}{2}&#92;&#92;
+(w_n^2)^k = w_n^{2k} &amp;\ne 1 \pmod{p}, \quad 1 \le k &lt; m.
+\end{align}$$
+Então, se $w_n$ for uma $n$-ésima raiz da unidade, então $w_n^2$ é uma $\frac{n}{2}$-ésima raiz.
+E, conseqüentemente, para todas as potências menores que dois, existem raízes do grau exigido e elas podem ser calculadas usando $w_n$.</p>
+
+<p>Para calcular a DFT inversa, precisamos do $w_n^{-1}$ inverso de $w_n$.
+Mas, para um módulo primo, o inverso sempre existe.</p>
+
+<p>Assim, todas as propriedades que precisamos das raízes complexas também estão disponíveis na aritmética modular, desde que tenhamos um módulo grande o suficiente $p$ no qual uma $n$-ésima raiz da unidade exista.</p>
+
+<p>Por exemplo, podemos usar os seguintes valores: módulo $p = 7340033$, $w_{2^{20}} = 5$.
+Se este módulo não for suficiente, precisamos encontrar um par diferente.
+Podemos usar esse fato de que, para os módulos da forma $p = c 2^k + 1$ ($p$ é primo), sempre existe $2^k$-ésima raiz da unidade.
+Pode-se mostrar que $g^c$ é uma $2^k$-ésima raiz, onde $g$ é uma <a href="https://cp-algorithms-brasil.com/Algebra/raizprimitiva.html">raiz primitiva</a> de $p$.</p>
+
+<pre><code class="cpp">const int mod = 7340033;
+const int root = 5;
+const int root_1 = 4404020;
+const int root_pw = 1 &lt;&lt; 20;
+
+void fft(vector&lt;int&gt; &amp; a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i &lt; n; i++) {
+        int bit = n &gt;&gt; 1;
+        for (; j &amp; bit; bit &gt;&gt;= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i &lt; j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len &lt;= n; len &lt;&lt;= 1) {
+        int wlen = invert ? root_1 : root;
+        for (int i = len; i &lt; root_pw; i &lt;&lt;= 1)
+            wlen = (int)(1LL * wlen * wlen % mod);
+
+        for (int i = 0; i &lt; n; i += len) {
+            int w = 1;
+            for (int j = 0; j &lt; len / 2; j++) {
+                int u = a[i+j], v = (int)(1LL * a[i+j+len/2] * w % mod);
+                a[i+j] = u + v &lt; mod ? u + v : u + v - mod;
+                a[i+j+len/2] = u - v &gt;= 0 ? u - v : u - v + mod;
+                w = (int)(1LL * w * wlen % mod);
+            }
+        }
+    }
+
+    if (invert) {
+        int n_1 = inverse(n, mod);
+        for (int &amp; x : a)
+            x = (int)(1LL * x * n_1 % mod);
+    }
+}
+</code></pre>
+
+<p>A função <code>inverse</code> calcula o (see <a href="https://en.wikipedia.org/wiki/Modular_multiplicative_inverse">Inverso Modular</a>).
+As constantes <code>mod</code>, <code>root</code>, <code>root_pw</code> determinam o módulo e a raiz, e <code>root_1</code> é o inverso de <code>root</code> módulo <code>mod</code>.</p>
+
+<p>Na prática, essa implementação é mais lenta que a implementação usando números complexos (devido ao grande número de operações com módulo), mas possui algumas vantagens, como menos uso de memória e nenhum erro de arredondamento.</p>
+
+<h2>Multiplicação com módulo arbitrário</h2>
+
+<p>Aqui queremos alcançar o mesmo objetivo da seção anterior. Multiplicando dois polinômios $A(x)$ e $B(x)$, e calcular os coeficientes módulo algum número $M$.
+A transformação teórica dos números funciona apenas para determinados números primos, ela não funciona quando o módulo não possui a forma desejada.</p>
+
+<p>Uma opção seria realizar transformações teóricas de múltiplos números com diferentes números primos da forma $c 2^k + 1$, e, em seguida, aplicar o <a href="https://cp-algorithms-brasil.com/Algebra/teoremachines.html">teorema chinês do resto</a> para calcular os coeficientes finais.</p>
+
+<p>Outra opção é distribuir os polinômios $A(x)$ e $B(x)$ em dois polinômios menores
+$$\begin{align}
+A(x) &amp;= A_1(x) + A_2(x) \cdot C &#92;&#92;
+B(x) &amp;= B_1(x) + B_2(x) \cdot C
+\end{align}$$
+with $C \approx \sqrt{M}$.</p>
+
+<p>Em seguida, o produto de $A(x)$ e $B(x)$ pode ser representado como:
+$$A(x) \cdot B(x) = A_1(x) \cdot B_1(x) + \left(A_1(x) \cdot B_2(x) + A_2(x) \cdot B_1(x)\right)\cdot C + \left(A_2(x) \cdot B_2(x)\right)\cdot C^2$$</p>
+
+<p>Os polinômios $A_1(x)$, $A_2(x)$, $B_1(x)$ e $B_2(x)$ contêm apenas coeficientes menores que $\sqrt{M}$, portanto, os coeficientes de todos os produtos exibidos são menores que $M \cdot n$, que geralmente é pequeno o suficiente para lidar com tipos float.</p>
+
+<p>Essa abordagem, portanto, exige calcular os produtos de polinômios com coeficientes menores (usando a FFT normal e a FFT inversa) e, em seguida, o produto original pode ser restaurado usando adição e multiplicação modular em tempo $O(n)$.</p>
+
+<h2>Aplicações</h2>
+
+<p>A DFT pode ser usada em uma enorme variedade de outros problemas, que de primeira não têm nada a ver com a multiplicação de polinômios.</p>
+
+<h3>Todas as somas possíveis</h3>
+
+<p>São dadas duas arrays $a[]$ e $b[]$.
+Temos que encontrar todas as somas possíveis $a[i] + b[j]$, e, para cada soma, conte com que frequência ela aparece.</p>
+
+<p>Por exemplo, para $a = [1,~ 2,~ 3]$ e $b = [2,~ 4]$, teremos:
+a soma $3$ pode ser obtida em $1$ maneira, a soma $4$ também em $1$ maneira, $5$ em $2$, $6$ em $1$, $7$ em $1$.</p>
+
+<p>Construímos para as arrays $a$ e $b$ dois polinômios $A$ e $B$.
+Os números da array atuarão como expoentes no polinômio ($a[i] \Rightarrow x^{a[i]}$); e os coeficientes desse termo serão com que frequência o número aparece na array.</p>
+
+<p>Então, multiplicando esses dois polinômios em tempo $O(n \log n)$, conseguimos o polinômio $C$, onde os expoentes nos dizem quais somas podem ser obtidas e os coeficientes nos dizem com que frequência elas acontecem.
+Para demonstrar:
+$$(1 x^1 + 1 x^2 + 1 x^3) (1 x^2 + 1 x^4) = 1 x^3 + 1 x^4 + 2 x^5 + 1 x^6 + 1 x^7$$</p>
+
+<h3>Todos os possíveis produtos escalares</h3>
+
+<p>São dadas duas arrays $a[]$ e $b[]$ de tamanho $n$.
+Precisamos calcular os produtos de $a$ a cada mudança(shift) cíclico de $b$.</p>
+
+<p>Geramos duas novas arrays de tamanho $2n$:
+Revertemos $a$ e adicionamos $n$ zeros.
+E apenas adicionamos $b$ a ele mesmo.
+Quando multiplicamos essas duas arrays como polinômios, e observamos os coeficientes $c[n-1],~ c[n],~ c[2n-2]$ do produto $c$, obtemos:
+$$c[k] = \sum_{i+j=k} a[i] b[j]$$
+Como $a[i] = 0$ para $i \ge n$:
+$$c[k] = \sum_{i=0}^{n-1} a[i] b[k-i]$$
+Essa soma é o produto escalar do vetor $a$ com o $(k - (n - 1))$-ésimo ciclo de $b$.
+Portanto, esses coeficientes são a resposta para o problema.
+Nota: o $c[2n-1]$ nos dá o $n$-ésimo ciclo mas esse é o mesmo que o ciclo $0$, portanto, não precisamos considerar isso separadamente em nossa resposta.</p>
+
+<h3>Duas faixas(two stripes)</h3>
+
+<p>São dados duas faixas de booleanos (arrays cíclicas de valores $0$ e $1$) $a$ e $b$.
+Queremos encontrar todas as maneiras de anexar a primeira faixa à segunda, de modo que em nenhuma posição tenha $1$ da primeira faixa ao lado de $1$ da segunda faixa.</p>
+
+<p>O problema não difere muito do problema anterior. Anexar duas faixas significa apenas que realizamos uma mudança cíclica na segunda array e podemos anexar as duas faixas, se o produto escalar das duas arrays for $0$.</p>
+
+<h3>Coincidência de strings</h3>
+
+<p>Nos são dadas duas strings, um texto $T$ e um padrão $P$, consistindo em letras minúsculas. Temos que calcular todas as ocorrências do padrão p no texto t.</p>
+
+<p>Criamos um polinômio para cada string ($T[i]$ e $P[I]$ são número entre $0$ e $25$ correspondentes às $26$ letras do alfabeto):
+$$A(x) = a_0 x^0 + a_1 x^1 + \dots + a_{n-1} x^{n-1}, \quad n = |T|$$
+com
+$$a_i = \cos(\alpha_i) + i \sin(\alpha_i), \quad \alpha_i = \frac{2 \pi T[i]}{26}.$$</p>
+
+<p>e
+$$B(x) = b_0 x^0 + b_1 x^1 + \dots + b_{m-1} x^{m-1}, \quad m = |P|$$
+com
+$$b_i = \cos(\beta_i) - i \sin(\beta_i), \quad \beta_i = \frac{2 \pi P[m-i-1]}{26}.$$</p>
+
+<p>Observe que com a expressão $P[m-i-1]$ inverte explicitamente o padrão.</p>
+
+<p>O $(m-1+i)$ésimo coeficiente do produto de dois polinômios $C(x) = A(x) \cdot B(x)$ nos dirá se o padrão aparece no texto na posição $i$.</p>
+
+<p>$$c_{m-1+i} = \sum_{j = 0}^{m-1} a_{i+j} \cdot b_{m-1-j} = \sum_{j=0}^{m-1} \left(\cos(\alpha_{i+j}) + i \sin(\alpha_{i+j})\right) \cdot \left(\cos(\beta_j) - i \sin(\beta_j)\right)
+$$
+com $\alpha_{i+j} = \frac{2 \pi T[i+j]}{26}$ and $\beta_j = \frac{2 \pi P[j]}{26}$</p>
+
+<p>Se eles corresponderem, então $T[i+j] = P[j]$, e, portanto, $\alpha_{i+j} = \beta_j$.
+Isso nos dá (usando a identidade trigonométrica pitagórica):
+$$\begin{align}
+c_{m-1+i} &amp;= \sum_{j = 0}^{m-1}  \left(\cos(\alpha_{i+j}) + i \sin(\alpha_{i+j})\right) \cdot \left(\cos(\alpha_{i+j}) - i \sin(\alpha_{i+j})\right) &#92;&#92;
+&amp;= \sum_{j = 0}^{m-1} \cos(\alpha_{i+j})^2 + \sin(\alpha_{i+j})^2 = \sum_{j = 0}^{m-1} 1 = m
+\end{align}$$</p>
+
+<p>Se não houver uma correspondência, pelo menos um caractere é diferente, o que significa que um dos produtos $a_{i+1} \cdot b_{m-1-j}$ não é igual a $1$, nos levando ao coeficiente $c_{m-1+i} \ne m$.</p>
+
+<h3>Coincidência de strings com curingas</h3>
+
+<p>Esta é uma extensão do problema anterior. Desta vez, permitimos que o padrão contenha o caractere curinga $&#42;$, que pode corresponder a todas as letras possíveis. Por exemplo, o padrão $a*c$ aparece no texto como $abccaacc$ em exatamente três posições, no índice $0$, índice $4$ e índice $5$.</p>
+
+<p>Criamos exatamente os mesmos polinômios, exceto que definimos $b_i = 0$ se $P[m-i-1] = *$.
+Se $x$ é o número de curingas em $P$, então teremos uma correspondência de $P$ em $T$ no índice $i$ se $c_{m-1+i} = m - x$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/POLYMUL/">SPOJ - POLYMUL</a></li>
+<li><a href="http://www.spoj.com/problems/MAXMATCH/">SPOJ - MAXMATCH</a></li>
+<li><a href="http://www.spoj.com/problems/ADAMATCH/">SPOJ - ADAMATCH</a></li>
+<li><a href="http://codeforces.com/problemset/problem/954/I">Codeforces - Yet Another String Matching Problem</a></li>
+<li><a href="http://codeforces.com/problemset/problem/958/F3">Codeforces - Lightsabers (hard)</a></li>
+<li><a href="https://open.kattis.com/problems/kinversions">Kattis - K-Inversions</a></li>
+<li><a href="http://codeforces.com/contest/754/problem/E">Codeforces - Dasha and cyclic table</a></li>
+</ul>
+
+<h2>Referências</h2>
+<ul>
+	<li><a href="https://en.wikipedia.org/wiki/Discrete_Fourier_transform_(general)#Number-theoretic_transform">transformada teórica dos números</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
