@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Operações em polinômios e séries - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos Polinômios, C++ e Algoritmos, C++, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Operações em polinômios e séries</h1>
+
+<p>Neste artigo, abordaremos operações comuns que você provavelmente terá que fazer se lidar com polinômios.</p>
+
+<h2>Notações básicas e fatos</h2>
+
+<p>Considere um polinômio $A(x) = a_0 + a_1 x + \dots + a_n x^n$ tal que $a_n \neq 0$.</p>
+
+<ul>
+<li>Para simplificar, escreveremos $A$ em vez de $A(x)$ sempre que possível, o que será compreensível a partir do contexto.</li>
+<li>Definiremos o grau do polinômio $A$ como $\deg A = n$. É conveniente dizer que $\deg A = -\infty$ para $A(x) = 0$.</li>
+<li>Para polinômios arbitrários $A$ e $B$ é válido que $\deg AB = \deg A + \deg B$.</li>
+<li>Os polinômios formam um anel euclidiano, o que significa que, para qualquer polinômio $A$ e $B \neq 0$ podemos representar $A$ exclusivamente como: $$A = D \cdot B + R,~ \deg R &lt; \deg B.$$ Aqui $R$ é chamado de resto de $A$ módulo(%) $B$ e $D$ é chamado quociente.</li>
+<li>Se $A$ e $B$ tiverem o mesmo resto módulo $C$, eles são chamados de "equivalentes ao módulo $C$", que é indicado como: $$A \equiv B \pmod{C}$$</li>
+<li>Para qualquer polinômio linear $x-r$ é válido que: $$A(x) \equiv A(r) \pmod{x-r}$$</li>
+<li>Em particular: $$A(r) = 0 \iff A(x) \equiv 0 \pmod {x-r}$$ O que significa que $A$ é divisível por $x-r$ $\iff$ $A(r)=0$.</li>
+<li>Se $A \equiv B \pmod{C \cdot D}$ então $A \equiv B \pmod{C}$</li>
+<li>$A \equiv a_0 + a_1 x + \dots + a_{k-1} x^{k-1} \pmod{x^k}$</li>
+</ul>
+
+<h2>Implementação básica</h2>
+
+<p><a href="https://github.com/e-maxx-eng/e-maxx-eng-aux/blob/master/src/polynomial.cpp">Aqui</a> você pode encontrar a implementação básica da álgebra polinomial.</p>
+
+<p>Ele suporta todas as operações triviais e alguns outros métodos úteis. A classe principal é <code>poly&lt;T&gt;</code> para polinômios com coeficientes da classe <code>T</code>.</p>
+
+<p>Todas as operações aritméticas <code>+</code>, <code>-</code>, <code>*</code>, <code>%</code> e <code>/</code> são suportadas, <code>%</code> e <code>/</code> representam o resto e o quociente na divisão inteira.</p>
+
+<p>Existe também a classe <code>modular&lt;m&gt;</code> para executar operações aritméticas nos restos módulo um número primo <code>m</code>.</p>
+
+<p>Outras funções úteis:</p>
+
+<ul>
+<li><code>deriv()</code>: calcula a derivada $P'(x)$ de $P(x)$.</li>
+<li><code>integr()</code>: calcula a integral indefinida $Q(x) = \int P(x)$ de $P(x)$ tal que $Q(0)=0$.</li>
+<li><code>inv(size_t n)</code>: calcula os primeiros $n$ coeficientes de $P^{-1}(x)$ em $O(n \log n)$.</li>
+<li><code>log(size_t n)</code>: calcula os primeiros $n$ coeficientes de $\ln P(x)$ em $O(n \log n)$.</li>
+<li><code>exp(size_t n)</code>: calcula os primeiros $n$ coeficientes de $\exp P(x)$ em $O(n \log n)$.</li>
+<li><code>pow(size_t k, size_t n)</code>: calcula os primeiros $n$ coeficientes de $P^{k}(x)$ em $O(n \log nk)$.</li>
+<li><code>deg()</code>: retorna o grau de $P(x)$.</li>
+<li><code>lead()</code>: retorna o coeficiente de $x^{\deg P(x)}$.</li>
+<li><code>resultant(poly&lt;T&gt; a, poly&lt;T&gt; b)</code>: calcula o resultado de $a$ e $b$ em $O(|a| \cdot |b|)$.</li>
+<li><code>bpow(T x, size_t n)</code>: calcula $x^n$.</li>
+<li><code>bpow(T x, size_t n, T m)</code>: calcula $x^n \pmod{m}$.</li>
+<li><code>chirpz(T z, size_t n)</code>: calcula $P(1), P(z), P(z^2), \dots, P(z^{n-1})$ em $O(n \log n)$.</li>
+<li><code>vector&lt;T&gt; eval(vector&lt;T&gt; x)</code>: avalia $P(x_1), \dots, P(x_n)$ em $O(n \log^2 n)$.</li>
+<li><code>poly&lt;T&gt; inter(vector&lt;T&gt; x, vector&lt;T&gt; y)</code>: insere um conjunto de pares em um polinômio $P(x_i) = y_i$ em $O(n \log^2 n)$.</li>
+<li>E um pouco mais, fique à vontade para explorar o código! -créditos link do github</li>
+</ul>
+
+<h2>Aritmética</h2>
+
+<h3>Multiplicação</h3>
+
+<p>A operação principal é a multiplicação de dois polinômios, ou seja, dado os polinômios $A$ e $B$:
+$$A = a_0 + a_1 x + \dots + a_n x^n$$
+$$B = b_0 + b_1 x + \dots + b_m x^m$$
+Você precisa calcular o polinômio $C = A \cdot B$: $$\boxed{C = \sum\limits_{i=0}^n \sum\limits_{j=0}^m a_i b_j x^{i+j}}  = c_0 + c_1 x + \dots + c_{n+m} x^{n+m}$$
+Pode ser calculado em $O(n \log n)$ através da <a href="https://cp-algorithms-brasil.com/Algebra/fourier.html">transformada rápida de Fourier</a> e quase todos os métodos aqui o usarão como sub-rotina.</p>
+
+<h3>Série inversa</h3>
+
+<p>Se $A(0) \neq 0$ sempre irá existir uma série infinita $A^{-1}(x) = \sum\limits_{i=0}^\infty a_i'x^i$ tal que $A^{-1} A = 1$.</p>
+
+<p>Pode ser razoável calcularmos os primeiros $k$ coeficientes de $A^{-1}$:</p>
+
+<ol>
+<li>Digamos que $A^{-1} \equiv B_k \pmod{x^{a}}$. Isso significa que $A B_k \equiv 1 \pmod {x^{a}}$.</li>
+<li>Queremos encontrar $B_{k+1} \equiv B_k + x^{a}C \pmod{x^{2a}}$ tal que $A B_{k+1} \equiv 1 \pmod{x^{2a}}$: $$A(B_k + x^{a}C) \equiv 1 \pmod{x^{2a}}$$</li>
+<li>Observe que, como $A B_k \equiv 1 \pmod{x^{a}}$ irá ser válido que $A B_k \equiv 1 + x^a D \pmod{x^{2a}}$. Portanto: $$x^a(D+AC) \equiv 0 \pmod{x^{2a}} \implies D \equiv -AC \pmod{x^a} \implies C \equiv -B_k D \pmod{x^a}$$</li>
+<li>A partir disso, obtemos que:
+$$x^a C \equiv -B_k x^a D  \equiv B_k(1-AB_k) \pmod{x^{2a}} \implies \boxed{B_{k+1} \equiv B_k(2-AB_k) \pmod{x^{2a}}}$$</li>
+</ol>
+
+<p>Assim, começando com $B_0 \equiv a_0^{-1} \pmod x$ we will calcularemos a sequência $B_k$ de modo que $AB_k \equiv 1 \pmod{x^{2^k}}$ com a complexidade: $$T(n) = T(n/2) + O(n \log n) = O(n \log n)$$</p>
+
+<h3>Divisão com resto</h3>
+
+<p>Considere dois polinômios $A(x)$ e $B(x)$ de graus $n$ e $m$. Como foi dito anteriormente, você pode reescrever $A(x)$ como:</p>
+
+<p>$$A(x) = B(x) D(x) + R(x), \deg R &lt; \deg B$$</p>
+
+<p>Seja $n \geq m$, você poderá descobrir imediatamente que $\deg D = n - m$ e que os principais $n-m+1$ coeficientes de $A$ não influenciam $R$.</p>
+
+<p>Isso significa que você pode recuperar $D(x)$ dos maiores $n-m+1$ coeficientes de $A(x)$ e $B(x)$, se considerá-lo como um sistema de equações.</p>
+
+<p>A maneira formal de fazer isso é considerar os polinômios reversos:
+$$A^R(x) = x^nA(x^{-1})= a_n + a_{n-1} x + \dots + a_0 x^n$$
+$$B^R(x) = x^m B(x^{-1}) = b_m + b_{m-1} x + \dots + b_0 x^m$$
+$$D^R(x) = x^{n-m}D(x^{-1}) = d_{n-m} + d_{n-m-1} x + \dots + d_0 x^{n-m}$$</p>
+
+<p>Usando esses termos, você pode reescrever essa declaração sobre os maiores $n-m+1$ coeficientes como:</p>
+
+<p>$$A^R(x) \equiv B^R(x) D^R(x) \pmod{x^{n-m+1}}$$</p>
+
+<p>A partir do qual você pode recuperar todos os coeficientes de $D(x)$:</p>
+
+<p>$$\boxed{D^R(x) \equiv A^R(x) (B^R(x))^{-1} \pmod{x^{n-m+1}}}$$</p>
+
+<p>E a partir disso, você pode facilmente recuperar $R(x)$ como $R(x) = A(x) - B(x)D(x)$.</p>
+
+<h2>Cálculo de funções do polinômio</h2>
+
+<h3>Método de Newton</h3>
+
+<p>Vamos generalizar a abordagem de séries inversas.
+Você deseja encontrar um polinômio $P(x)$ satisfazendo $F(P) = 0$ onde $F(x)$ é alguma função representada como:
+$$F(x) = \sum\limits_{i=0}^\infty \alpha_i (x-\beta)^k$$</p>
+
+<p>Onde $\beta$ é uma constante. Pode-se provar que, se introduzirmos uma nova variável $y$, podemos expressar $F(x)$ como:
+$$F(x) = F(y) + (x-y)F'(y) + (x-y)^2 G(x,y)$$</p>
+
+<p>Onde $F'(x)$ é a derivada da potência da série definida como $F'(x) = \sum\limits_{i=0}^\infty (k+1)\alpha_{i+1}(x-\beta)^k$ e $G(x, y)$ é uma potência da série de $x$ e $y$.</p>
+
+<p>Diante disso, podemos encontrar os coeficientes da solução de forma iterativa:</p>
+
+<ol>
+<li>Assumindo que $F(Q_k) \equiv 0 \pmod{x^{a}}$, queremos encontrar $Q_{k+1} \equiv Q_k + x^a C \pmod{x^{2a}}$ de forma que $F(Q_{k+1}) \equiv 0 \pmod{x^{2a}}$.</li>
+<li>Ao substituir $x = Q_{k+1}$ e $y=Q_k$ na fórmula acima, obtemos: $$F(Q_{k+1}) \equiv F(Q_k) + (Q_{k+1} - Q_k) F'(Q_k) + (Q_{k+1} - Q_k)^2 G(x, y) \pmod x^{2a}$$</li>
+<li>Como $Q_{k+1} - Q_k \equiv 0 \pmod{x^a}$ podemos dizer que $(Q_{k+1} - Q_k)^2 \equiv 0 \pmod{x^{2a}}$, então: $$0 \equiv F(Q_{k+1}) \equiv F(Q_k) + (Q_{k+1} - Q_k) F'(Q_k) \pmod{x^{2a}}$$</li>
+<li>A partir da última fórmula, derivamos o valor de $Q_{k+1}$: $$\boxed{Q_{k+1} = Q_k - \dfrac{F(Q_k)}{F'(Q_k)} \pmod{x^{2a}}}$$</li>
+</ol>
+
+<p>Assim, sabendo como inverter o polinômio arbitrário e calcular $F(Q_k)$ rapidamente, podemos encontrar $n$ coeficientes de $P$ com a complexidade: $$T(n) = T(n/2) + f(n)$$, onde $f(n)$ é o máximo do $O(n \log n)$ necessário para inverter a série e o tempo necessário para calcular $F(Q_k)$ no qual é também $O(n \log n)$.</p>
+
+<h3>Logaritmo</h3>
+
+<p>Para a função $\ln P(x)$ é conhecido que: $$\boxed{(\ln P(x))' = \dfrac{P'(x)}{P(x)}}$$
+Podemos calcular $n$ coeficientes de $\ln P(x)$ em $O(n \log n)$.</p>
+
+<h3>Série inversa</h3>
+
+<p>Acontece que podemos obter a fórmula para $A^{-1}$ usando o método de Newton.
+Para isso, usamos a equação $A=Q^{-1}$, e então:
+$$F(Q) = Q^{-1} - A$$
+$$F'(Q) = -Q^{-2}$$
+$$\boxed{Q_{k+1} \equiv Q_k(2-AQ_k) \pmod{x^{2^{k+1}}}}$$</p>
+
+<h3>Expoente</h3>
+
+<p>Vamos aprender a calcular $e^{P(x)}=Q(x)$. Deve ser considerado que $\ln Q = P$, então: $$F(Q) = \ln Q - P$$ $$F'(Q) = Q^{-1}$$ $$\boxed{Q_{k+1} \equiv Q_k(1 + P - \ln Q_k) \pmod{x^{2^{k+1}}}}$$</p>
+
+<h3>$k$-ésima potência</h3>
+
+<p>Precisamos calcular $P^k(x)=Q$. Isso pode ser feito através da seguinte fórmula:
+$$Q = \exp\left[k \ln P(x)\right]$$
+Observe, porém, que você pode calcular os logaritmos e os expoentes corretamente apenas se encontrar algum $Q_0$ inicial.</p>
+
+<p>Para encontrá-lo, você deve calcular o logaritmo ou o expoente do coeficiente constante do polinômio.</p>
+
+<p>Mas a única maneira razoável de fazer isso é se $P(0)=1$ para $Q = \ln P$ então $Q(0)=0$ e se $P(0)=0$ para $Q = e^P$ então $Q(0)=1$.</p>
+
+<p>Assim, você pode usar a fórmula acima apenas se $P(0) = 1$. Caso contrário, se $P(x) = \alpha x^t T(x)$ onde $T(0)=1$ podemos escrever que:
+$$\boxed{P^k(x) = \alpha^kx^{kt} \exp[k \ln T(x)]}$$
+Observe que você também pode calcular alguma $k$-ésima raiz do polinômio se você puder calcular $\sqrt[k]{\alpha}$, por exemplo, para $\alpha=1$.</p>
+
+<h2>Avaliação e Interpolação</h2>
+
+<h3><a href="https://en.wikipedia.org/wiki/Chirp_Z-transform">transformada Chirp-z</a></h3>
+
+<p>Para o caso específico em que você precisa avaliar um polinômio nos pontos $x_r = z^{2r}$ você pode fazer o seguinte:</p>
+
+<p>$$A(z^{2r}) = \sum\limits_{k=0}^n a_k z^{2kr}$$</p>
+
+<p>Vamos substituir $2kr = r^2+k^2-(r-k)^2$. Então essa soma é reescrita como:</p>
+
+<p>$$\boxed{A(z^{2r}) = z^{r^2}\sum\limits_{k=0}^n (a_k z^{k^2}) z^{-(r-k)^2}}$$</p>
+
+<p>Que vai até o fator $z^{r^2}$ igual à convolução das sequências $u_k = a_k z^{k^2}$ e $v_k = z^{-k^2}$.</p>
+
+<p>Observe que $u_k$ tem índices de $0$ até $n$ aqui e $v_k$ tem índices de $-n$ até $m$ onde $m$ é a máxima potência de $z$ na qual você precisa.</p>
+
+<p>Agora, se você precisar avaliar um polinômio nos pontos $x_r = z^{2r+1}$ poderá reduzi-lo à tarefa anterior pela transformação $a_k \to a_k z^k$.</p>
+
+<p>Ele nos fornece um algoritmo $O(n \log n)$ quando você precisa calcular valores em potências de $z$, então, você pode calcular a DFT para potências que não são de 2.</p>
+
+<h3>Avaliação em múltiplos pontos</h3>
+
+<p>Suponha que você precise calcular $A(x_1), \dots, A(x_n)$. Como mencionado antes, $A(x) \equiv A(x_i) \pmod{x-x_i}$. Assim, você pode fazer o seguinte:</p>
+
+<ol>
+<li>Calcule uma árvore de segmentos que, no segmento $[l;r)$ represente o produto $P_{l, r}(x) = (x-x_l)(x-x_{l+1})\dots(x-x_{r-1})$.</li>
+<li>Começando com $l=1$ e $r=n$ no nó raiz. Seja $m=\lfloor(l+r)/2\rfloor$. Vamos mover abaixo até $[l;m)$ com o polinômio $A(x) \pmod{P_{l,m}(x)}$.</li>
+<li>Isso irá calcular recursivamente $A(x_l), \dots, A(x_{m-1})$, agora faça o mesmo para $[m;r)$ com $A(x) \pmod{P_{m,r}(x)}$.</li>
+<li>Concatene os resultados da primeira e da segunda chamada recursiva e retorne-os.</li>
+</ol>
+
+<p>Todo o procedimento será executado em $O(n \log^2 n)$.</p>
+
+<h3>Interpolação</h3>
+
+<p>Existe uma fórmula direta de Lagrange para interpolar um polinômio, dado um conjunto de pares $(x_i, y_i)$:</p>
+
+<p>$$\boxed{A(x) = \sum\limits_{i=1}^n y_i \prod\limits_{j \neq i}\dfrac{x-x_j}{x_i - x_j}}$$</p>
+
+<p>Computá-lo diretamente é uma coisa difícil, mas acontece que podemos calculá-lo em $O(n \log^2 n)$ com uma abordagem de dividir e conquistar:</p>
+
+<p>Considere $P(x) = (x-x_1)\dots(x-x_n)$. Para conhecer os coeficientes dos denominadores em $A(x)$ devemos calcular os produtos como: $$P_i = \prod\limits_{j \neq i} (x_i-x_j)$$</p>
+
+<p>Mas se você considerar a derivada $P'(x)$ descobrirá que $P'(x_i) = P_i$. Assim, você pode calcular $P_i$'s através da avaliação em $O(n \log^2 n)$.</p>
+
+<p>Agora considere o algoritmo recursivo feito na mesma árvore de segmentos que na avaliação de múltiplos pontos. Começa nas folhas com o valor $\dfrac{y_i}{P_i}$ em cada folha.</p>
+
+<p>Quando retornamos da recursão, devemos mesclar os resultados dos vértices esquerdo e direito como $A_{l,r} = A_{l,m}P_{m,r} + P_{l,m} A_{m,r}$.</p>
+
+<p>Dessa forma, quando você retornar à raiz, terá exatamente $A(x)$ nela.
+O procedimento total também funciona em $O(n \log^2 n)$.</p>
+
+<h2>GCD e resultantes</h2>
+
+<p>Suponha que você receba polinômios $A(x) = a_0 + a_1 x + \dots + a_n x^n$ and $B(x) = b_0 + b_1 x + \dots + b_m x^m$.</p>
+
+<p>Seja $\lambda_0, \dots, \lambda_n$ as raízes de $A(x)$ e $\mu_0, \dots, \mu_m$ ser as raízes de $B(x)$ contadas com suas multiplicidades.</p>
+
+<p>Você quer saber se $A(x)$ e $B(x)$ têm raízes em comum. Existem duas maneiras interconectadas de fazer isso.</p>
+
+<h3>Algoritmo de Euclides</h3>
+
+<p>Bem, já temos um <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">artigo</a> sobre isso. Você pode escrever o algoritmo euclidiano tão fácil quanto:</p>
+
+<pre><code class="cpp">template&lt;typename T&gt;
+T gcd(const T &amp;a, const T &amp;b) {
+    return b == T(0) ? a : gcd(b, a % b);
+}
+</code></pre>
+
+<p>Pode-se provar que, para os polinômios $A(x)$ e $B(x)$, ele funcionará em $O(nm)$.</p>
+
+<h3>Resultante</h3>
+
+<p>Vamos calcular o produto $A(\mu_0)\cdots A(\mu_m)$. Será igual a zero se, e somente se, $\mu_i$ for a raiz de $A(x)$.</p>
+
+<p>Para simetria, também podemos multiplicá-lo com $b_m^n$ e reescrever todo o produto da seguinte forma:
+$$\boxed{\mathcal{R}(A, B) = b_m^n\prod\limits_{j=0}^m A(\mu_j) = b_m^n a_m^n \prod\limits_{i=0}^n \prod\limits_{j=0}^m (\mu_j - \lambda_i)= (-1)^{mn}a_n^m \prod\limits_{i=0}^n B(\lambda_i)}$$</p>
+
+<p>O valor definido acima é chamado de resultante dos polinômios $A(x)$ e $B(x)$. Na definição, você pode encontrar as seguintes propriedades:</p>
+
+<ol>
+<li>$\mathcal R(A, B) = (-1)^{nm} \mathcal R(B, A)$.</li>
+<li>$\mathcal R(A, B)= a_n^m b_m^n$ when $n=0$ or $m=0$.</li>
+<li>Se $b_m=1$ então $\mathcal R(A - CB, B) = \mathcal R(A, B)$ para um polinômio arbitrário $C(x)$ e $n,m \geq 1$.</li>
+<li>A partir disso, segue-se que $\mathcal R(A, B) = b_m^{\deg(A) - \deg(A-CB)}\mathcal R(A - CB, B)$ para um arbitrário $A(x)$, $B(x)$, $C(x)$.</li>
+</ol>
+
+<p>Miraculosamente, significa que o resultado de dois polinômios é sempre sempre do mesmo anel que seus coeficientes!</p>
+
+<p>Além disso, essas propriedades permitem calcular o resultado juntamente com o algoritmo euclidiano, que funciona em $O(nm)$.</p>
+
+<pre><code class="cpp">template&lt;typename T&gt;
+T resultant(poly&lt;T&gt; a, poly&lt;T&gt; b) {
+    if(b.is_zero()) {
+        return 0;
+    } else if(b.deg() == 0) {
+        return bpow(b.lead(), a.deg());
+    } else {
+        int pw = a.deg();
+        a %= b;
+        pw -= a.deg();
+        base mul = bpow(b.lead(), pw) * base((b.deg() &amp; a.deg() &amp; 1) ? -1 : 1);
+        base ans = resultant(b, a);
+        return ans * mul;
+    }
+}
+</code></pre>
+
+<h3>Algoritmo Half-GCD</h3>
+
+<p>Existe uma maneira de calcular o MDC e os resultantes em $O(n \log^2 n)$. Para fazer isso, observe que, se for considerado: $a(x) = a_0 + x^k a_1$ e $b(x) = b_0 + x^k b_1$ onde $k=\min(\deg a, \deg b)/2$ então basicamente as primeiras operações do algoritmo euclidiano em $a(x)$ e $b(x)$ são definidas pelo algoritmo euclidiano em $a_1(x)$ e $b_1(x)$ para o qual você também pode calcular o MDC recursivamente e, de alguma forma, memorizar as transformações lineares feitas com elas e aplicá-las a $a(x)$ e $b(x)$ para diminuir os graus dos polinômios. A implementação desse algoritmo parece bastante tediosa(imagino..) e técnica, portanto, ainda não foi considerada neste artigo.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/RNG">CodeChef - RNG</a></li>
+<li><a href="https://codeforces.com/gym/102129/problem/D">CodeForces - Basis Change</a></li>
+<li><a href="https://codeforces.com/gym/102129/problem/G">CodeForces - Permutant</a></li>
+<li><a href="https://codeforces.com/gym/102129/problem/C">CodeForces - Medium Hadron Collider</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
