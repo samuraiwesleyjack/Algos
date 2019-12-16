@@ -50,7 +50,7 @@ E também aqui a união consiste em no máximo $\lceil \log_2(\text{length of in
 <p>A idéia principal por trás das Sparse Tables é pré-calcular todas as respostas para consultas de intervalos, sendo os intervalos com tamanho de potências de $2$.
 Posteriormente, uma consulta de intervalo diferente pode ser respondida dividindo o intervalo em intervalos com tamanho de potência de dois, procurando as respostas pré-calculadas e combinando-as para receber uma resposta completa.</p>
 
-<h2>Precomputação</h2>
+<h2>Pré-computação</h2>
 
 <p>Usaremos uma array 2d para armazenar as respostas para as consultas pré-calculadas.
 $\text{st}[i][j]$ armazenará a resposta para o intervalo $[i, i + 2^j - 1]$ de tamanho $2^j$.
