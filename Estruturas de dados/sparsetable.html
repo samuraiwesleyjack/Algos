@@ -71,7 +71,7 @@ for (int j = 1; j &lt;= K; j++)
         st[i][j] = f(st[i][j-1], st[i + (1 &lt;&lt; (j - 1))][j - 1]);
 </code></pre>
 
-<p>A função $f$ will dependerá do tipo da query/consulta.
+<p>A função $f$ dependerá do tipo da query/consulta.
 Para consultas de soma de intervalo, ele calculará a soma; para consultas de intervalo mínimo, calculará o mínimo.</p>
 
 <p>A complexidade de tempo é $O(\text{N} \log \text{N})$.</p>
@@ -115,7 +115,7 @@ Por exemplo: podemos dividir o intervalo $[1, 6]$ nos intervalos $[1, 4]$ e $[3,
 O mínimo do intervalo $[1, 6]$ é claramente o mesmo mínimo do intervalo $[1, 4]$ e o mesmo mínimo do intervalo $[3, 6]$.
 Portanto, podemos calcular o mínimo do intervalo $[L, R]$ com:</p>
 
-<p>$$\min(\text{st}[L][j], \text{st}[R - 2^j + 1][j]) \quad \text{ where } j = \log_2(R - L + 1)$$</p>
+<p>$$\min(\text{st}[L][j], \text{st}[R - 2^j + 1][j]) \quad \text{ onde } j = \log_2(R - L + 1)$$</p>
 
 <p>Isso requer que possamos calcular $\log_2(R - L + 1)$ rápido.
 Você pode fazer isso pré-computando todos os <strong>logaritmos</strong>:</p>
