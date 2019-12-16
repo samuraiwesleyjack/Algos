@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sparse Table - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos, Sparse Table, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Sparse Table</h1>
+
+<p>Sparse Table é uma estrutura de dados que permite responder a consultas/testes de intervalo(range queries).
+Ela pode responder à maioria das queries de range em $O(\log n)$, mas seu verdadeiro poder é responder consultasdo mínimo no intervalo(range minimum query (RMQ) - encontrar o valor mínimo em uma sub-array de uma array) ou, equivalentemente, consultas de máximo.
+Para essas consultas, ele pode calcular a resposta em tempo $O(1)$.</p>
+
+<p>A única desvantagem dessa estrutura de dados é que ela só pode ser usada em arrays <em>imutáveis</em>.
+Isso significa que a array não pode ser alterada entre duas consultas.
+Se algum elemento da array for alterado, a estrutura de dados completa deverá ser recalculada.</p>
+
+<h2>Intuição</h2>
+
+<p>Qualquer número não negativo pode ser representado exclusivamente como uma soma de potências decrescentes de $2$.
+Esta é apenas uma variante da representação binária de um número.
+Por exemplo: $13 = (1101)_2 = 8 + 4 + 1$.
+Para um número $x$ pode haver no máximo $\lceil \log_2 x \rceil$ números somando.</p>
+
+<p>Pelo mesmo raciocínio, qualquer intervalo pode ser representado exclusivamente como uma união de intervalos com comprimentos que são potências decrescentes de dois.
+Por exemplo: $[2, 14] = [2, 9] \cup [10, 13] \cup [14, 14]$, em que o intervalo completo tem <strong>tamanho</strong> 13, e os intervalos individuais têm os tamanhos 8, 4 and 1 respectivamente.
+E também aqui a união consiste em no máximo $\lceil \log_2(\text{length of interval}) \rceil$ em muitos intervalos.</p>
+
+<p>A idéia principal por trás das Sparse Tables é pré-calcular todas as respostas para consultas de intervalos, sendo os intervalos com tamanho de potências de $2$.
+Posteriormente, uma consulta de intervalo diferente pode ser respondida dividindo o intervalo em intervalos com tamanho de potência de dois, procurando as respostas pré-calculadas e combinando-as para receber uma resposta completa.</p>
+
+<h2>Precomputação</h2>
+
+<p>Usaremos uma array 2d para armazenar as respostas para as consultas pré-calculadas.
+$\text{st}[i][j]$ armazenará a resposta para o intervalo $[i, i + 2^j - 1]$ de tamanho $2^j$.
+O tamanho da array 2d será $\text{MAXN} \times (K + 1)$, onde $\text{MAXN}$ é maior tamanho possível para a array.
+$\text{K}$ precisa satisfazer $\text{K} \ge \lfloor \log_2 \text{MAXN} \rfloor + 1$, pois $2^{\lfloor \log_2 \text{MAXN} \rfloor}$ é o maior tamanho de potência de $2$ que precisamos suportar.
+Para arrays de tamanho razoável ($\le 10^7$ elements), $K = 25$ é um bom valor.</p>
+
+<pre><code class="cpp">int st[MAXN][K + 1];
+</code></pre>
+
+<p>Como o intervalo $[i, i + 2^j - 1]$ de tamanho $2^j$ se divide nos intervalos $[i, i + 2^{j - 1} - 1]$ e $[i + 2^{j - 1}, i + 2^j - 1]$, ambos com tamanho $2^{j - 1}$, podemos gerar a tabela eficientemente usando programação dinâmica:</p>
+
+<pre><code class="cpp">for (int i = 0; i &lt; N; i++)
+    st[i][0] = f(array[i]);
+
+for (int j = 1; j &lt;= K; j++)
+    for (int i = 0; i + (1 &lt;&lt; j) &lt;= N; i++)
+        st[i][j] = f(st[i][j-1], st[i + (1 &lt;&lt; (j - 1))][j - 1]);
+</code></pre>
+
+<p>A função $f$ will dependerá do tipo da query/consulta.
+Para consultas de soma de intervalo, ele calculará a soma; para consultas de intervalo mínimo, calculará o mínimo.</p>
+
+<p>A complexidade de tempo é $O(\text{N} \log \text{N})$.</p>
+
+<h2>Consultas de soma</h2>
+
+<p>Para esse tipo de consulta, queremos encontrar a soma de todos os valores em um intervalo. 
+Portanto, a definição natural da função $f$ é $f(x, y) = x + y$.
+Podemos construir a estrutura de dados com:</p>
+
+<pre><code class="cpp">long long st[MAXN][K];
+
+for (int i = 0; i &lt; N; i++)
+    st[i][0] = array[i];
+
+for (int j = 1; j &lt;= K; j++)
+    for (int i = 0; i + (1 &lt;&lt; j) &lt;= N; i++)
+        st[i][j] = st[i][j-1] + st[i + (1 &lt;&lt; (j - 1))][j - 1];
+</code></pre>
+
+<p>Para responder à consulta de soma do intervalo $[L, R]$, iteramos sobre todas as potências de dois, começando pela maior.
+Assim que uma potência de dois $2^j$ for menor ou igual ao comprimento do intervalo ($= R - L + 1$), processamos a primeira parte do intervalo $[L, L + 2^j - 1]$, e continuamos com o intervalo restante $[L + 2^j, R]$.</p>
+
+<pre><code class="cpp">long long sum = 0;
+for (int j = K; j &gt;= 0; j--) {
+    if ((1 &lt;&lt; j) &lt;= R - L + 1) {
+        sum += st[L][j];
+        L += 1 &lt;&lt; j;
+    }
+}
+</code></pre>
+
+<p>A complexidade de tempo para uma consulta de soma de intervalo é $O(K) = O(\log \text{MAXN})$.</p>
+
+<h2>Consultas mínimas de intervalo (Range Minimum Queries (RMQ))</h2>
+
+<p>Essas são as consultas em que a Sparse Table brilha.
+Ao calcular o mínimo de um intervalo, não importa se processamos um valor no intervalo uma ou duas vezes.
+Portanto, em vez de dividir um intervalo em vários intervalos, podemos dividir o intervalo em apenas dois intervalos sobrepostos com comprimentos de potências de $2$.
+Por exemplo: podemos dividir o intervalo $[1, 6]$ nos intervalos $[1, 4]$ e $[3, 6]$.
+O mínimo do intervalo $[1, 6]$ é claramente o mesmo mínimo do intervalo $[1, 4]$ e o mesmo mínimo do intervalo $[3, 6]$.
+Portanto, podemos calcular o mínimo do intervalo $[L, R]$ com:</p>
+
+<p>$$\min(\text{st}[L][j], \text{st}[R - 2^j + 1][j]) \quad \text{ where } j = \log_2(R - L + 1)$$</p>
+
+<p>Isso requer que possamos calcular $\log_2(R - L + 1)$ rápido.
+Você pode fazer isso pré-computando todos os <strong>logaritmos</strong>:</p>
+
+<pre><code class="cpp">int log[MAXN+1];
+log[1] = 0;
+for (int i = 2; i &lt;= MAXN; i++)
+    log[i] = log[i/2] + 1;
+</code></pre>
+
+<p>Depois disso precisamos pré-computar a estrutura da <strong>Sparse Table</strong>. Dessa vez definimos $f$ como $f(x, y) = \min(x, y)$.</p>
+
+<pre><code class="cpp">int st[MAXN][K];
+
+for (int i = 0; i &lt; N; i++)
+    st[i][0] = array[i];
+
+for (int j = 1; j &lt;= K; j++)
+    for (int i = 0; i + (1 &lt;&lt; j) &lt;= N; i++)
+        st[i][j] = min(st[i][j-1], st[i + (1 &lt;&lt; (j - 1))][j - 1]);
+</code></pre>
+
+<p>E o <strong>mínimo de um intervalo</strong> $[L, R]$ pode ser calculado da seguinte maneira:</p>
+
+<pre><code class="cpp">int j = log[R - L + 1];
+int minimum = min(st[L][j], st[R - (1 &lt;&lt; j) + 1][j]);
+</code></pre>
+
+<p>A complexidade do tempo para uma consulta de intervalo mínimo é $O(1)$.</p>
+
+<h2>Estruturas de dados similares que suportam mais tipos de consultas</h2>
+
+<p>Uma das principais fraquezas da abordagem com tempo $O(1)$ discutida na seção anterior é que essa abordagem suporta apenas consultas de <a href="https://en.wikipedia.org/wiki/Idempotence">funções idempotentes</a>.
+Ou seja, funciona muito bem para consultas mínimas de intervalo, mas não é possível responder a consultas de soma de intervalo usando essa abordagem.</p>
+
+<p>Existem estruturas de dados semelhantes que podem lidar com qualquer tipo de função associativa e responder a consultas de intervalo em $O(1)$.
+Uma delas é chamada <a href="https://discuss.codechef.com/questions/117696/tutorial-disjoint-sparse-table">Disjoint Sparse Table</a>.
+A outra é a <a href="./data_structures/sqrt-tree.html">Sqrt Tree</a>.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/RMQSQ/">SPOJ - RMQSQ</a></li>
+<li><a href="http://www.spoj.com/problems/THRBL/">SPOJ - THRBL</a></li>
+<li><a href="https://www.codechef.com/problems/MSTICK">Codechef - MSTICK</a></li>
+<li><a href="https://www.codechef.com/problems/SEAD">Codechef - SEAD</a></li>
+<li><a href="http://codeforces.com/contest/475/problem/D">Codeforces - CGCDSSQ</a></li>
+<li><a href="http://codeforces.com/problemset/problem/514/D">Codeforces - R2D2 and Droid Army</a></li>
+<li><a href="http://codeforces.com/problemset/problem/872/B">Codeforces - Maximum of Maximums of Minimums</a></li>
+<li><a href="http://www.spoj.com/problems/TNVFC1M/">SPOJ - Miraculous</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/19">DevSkills - Multiplication Interval</a></li>
+<li><a href="http://codeforces.com/contest/713/problem/D">Codeforces - Animals and Puzzles</a></li>
+<li><a href="http://codeforces.com/contest/675/problem/E">Codeforces - Trains and Statistics</a></li>
+<li><a href="http://www.spoj.com/problems/POSTERIN/">SPOJ - Postering</a></li>
+<li><a href="http://www.spoj.com/problems/RPLN/">SPOJ - Negative Score</a></li>
+<li><a href="http://www.spoj.com/problems/CITY2/">SPOJ - A Famous City</a></li>
+<li><a href="http://www.spoj.com/problems/DIFERENC/">SPOJ - Diferencija</a></li>
+<li><a href="http://codeforces.com/contest/863/problem/E">Codeforces - Turn off the TV</a></li>
+<li><a href="http://codeforces.com/contest/15/problem/D">Codeforces - Map</a></li>
+<li><a href="http://codeforces.com/contest/873/problem/E">Codeforces - Awards for Contestants</a></li>
+<li><a href="http://codeforces.com/contest/5/problem/C">Codeforces - Longest Regular Bracket Sequence</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
