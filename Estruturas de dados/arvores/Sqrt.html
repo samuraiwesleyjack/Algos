@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sqrt Decomposition - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos, Sqrt Decomposition, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Sqrt Decomposition</h1>
+
+<p>Sqrt Decomposition é um método (ou uma estrutura de dados) que permite executar algumas operações comuns (encontrar a soma dos elementos da sub-array, encontrar o elemento mínimo/máximo etc.) com $O(\sqrt n)$ operações, que é bem mais rápido que $O(n)$ para o algoritmo trivial.</p>
+
+<p>Primeiro, descrevemos a estrutura de dados para uma das aplicações mais simples dessa idéia, depois mostramos como generalizá-la para resolver alguns outros problemas e, finalmente, analisamos um uso ligeiramente diferente dessa idéia: decompor as solicitações de entrada em blocos.</p>
+
+<h2>Estrutura de dados baseada em uma Sqrt-decomposition</h2>
+
+<p>Seja uma array $a[0 \dots n-1]$, implemente uma estrutura de dados que permita encontrar a soma dos elementos $a[l \dots r]$ para um arbitrário $l$ e $r$ em $O(\sqrt n)$.</p>
+
+<h3>Descrição</h3>
+
+<p>A idéia básica da sqrt decomposition é o pré-processamento. Dividiremos a array $a$ em blocos de tamanho aproximadamente $\sqrt n$, e, para cada bloco $i$ pré-calcularemos a soma dos elementos nele $b[i]$.</p>
+
+<p>Podemos assumir que o tamanho do bloco e o número de blocos sejam iguais a $\sqrt n$(arredondado):</p>
+
+<p>$$ s = \lceil \sqrt n \rceil $$</p>
+
+<p>Em seguida, a array $a$ é dividida em blocos da seguinte maneira:</p>
+
+<p>$$ \underbrace{a[0], a[1], \dots, a[s-1]}&#95;{\text{b[0]}}, \underbrace{a[s], \dots, a[2s-1]}&#95;{\text{b[1]}}, \dots, \underbrace{a[(s-1) \cdot s], \dots, a[n]}&#95;{\text{b[s-1]}} $$</p>
+
+<p>O último bloco pode ter menos elementos que os outros (se $n$ não for um múltiplo de $s$), não é importante para a discussão (pois pode ser tratado com facilidade).
+Assim, para cada bloco $k$, sabemos a soma dos elementos nele: $b[k]$:</p>
+
+<p>$$ b[k] = \sum\limits_{i=k\cdot s}^{\min {(n-1,(k+1)\cdot s - 1})} a[i] $$</p>
+
+<p>Portanto, calculamos os valores de $b[k]$ (isso exige $O(n)$ operações). Como eles podem nos ajudar a responder as consultas $[l; r]$ ?
+Observe que se o intervalo $[l; r]$ for longo o bastante, conterá vários blocos inteiros e, para esses blocos, podemos encontrar a soma dos elementos neles em uma única operação. Como resultado, o intervalo $[l; r]$ conterá partes de apenas dois blocos, e teremos que calcular a soma dos elementos nessas partes trivialmente.</p>
+
+<p>Assim, para calcular a soma dos elementos no intervalo $[l; r]$ precisamos somar os elementos das duas "caudas":
+$[l\dots (k + 1)\cdot s-1]$ e $[p\cdot s\dots r]$ , e somar os valores $b[i]$ em todos os blocos de $k + 1$ até $p-1$:</p>
+
+<p>$$ \sum\limits&#95;{i=l}^r a[i] = \sum\limits&#95;{i=l}^{(k+1) \cdot s-1} a[i] + \sum\limits&#95;{i=k+1}^{p-1} b[i] + \sum\limits&#95;{i=p\cdot s}^r a[i] $$</p>
+
+<p><em>Nota: quando $k = p$, ou seja, $l$ e $r$ pertencem ao mesmo bloco, a fórmula não pode ser aplicada e a soma deve ser calculada trivialmente.</em></p>
+
+<p>Essa abordagem nos permite reduzir significativamente o número de operações. De fato, o tamanho de cada "cauda" não excede o comprimento $s$ do bloco, e o número de blocos na soma não excede $s$. Como escolhemos $s \approx \sqrt n$, o número total de operações necessárias para encontrar a soma dos elementos no intervalo $[l; r]$ é $O(\sqrt n)$.</p>
+
+<h3>Implementação</h3>
+
+<p>Implementação mais simples:</p>
+
+<pre><code class="cpp">// input
+int n;
+vector&lt;int&gt; a (n);
+
+// pré-processamento
+int len = (int) sqrt (n + .0) + 1; // tamanho do bloco e número de blocos
+vector&lt;int&gt; b (len);
+for (int i=0; i&lt;n; ++i)
+    b[i / len] += a[i];
+
+// consultas/queries
+for (;;) {
+    int l, r;
+  // ler input para a próxima consulta
+    int sum = 0;
+    for (int i=l; i&lt;=r; )
+        if (i % len == 0 &amp;&amp; i + len - 1 &lt;= r) {
+            // if the whole block starting at i belongs to [l; r]
+            sum += b[i / len];
+            i += len;
+        }
+        else {
+            sum += a[i];
+            ++i;
+        }
+}
+</code></pre>
+
+<p>Essa implementação possui muitas operações de divisão (que são muito mais lentas que outras operações aritméticas). Em vez disso, podemos calcular os índices dos blocos $c_l$ e $c_r$ que possuem índices $l$ e $r$, e percorrer sobre os blocos $c_l+1 \dots c_r-1$ com um processamento separado das "caudas" nos blocos $c_l$ e $c_r$. Essa abordagem corresponde à última fórmula na descrição e torna o caso $c_l = c_r$ um caso especial.</p>
+
+<pre><code class="cpp">int sum = 0;
+int c_l = l / len,   c_r = r / len;
+if (c_l == c_r)
+    for (int i=l; i&lt;=r; ++i)
+        sum += a[i];
+else {
+    for (int i=l, end=(c_l+1)*len-1; i&lt;=end; ++i)
+        sum += a[i];
+    for (int i=c_l+1; i&lt;=c_r-1; ++i)
+        sum += b[i];
+    for (int i=c_r*len; i&lt;=r; ++i)
+        sum += a[i];
+}
+</code></pre>
+
+<h2>Outros problemas</h2>
+
+<p>Até agora estávamos discutindo o problema de encontrar a soma dos elementos de uma subarray contínua. Esse problema pode ser estendido para permitir a <strong>atualização individual dos elementos na array</strong>. Se um elemento $a[i]$ for alterado, o valor de $b[k]$ precisa ser atualizado para o bloco no qual o elemento pertence ($k = i / s$) em uma operação:</p>
+
+<p>$$ b[k] += a_{novo}[i] - a_{antigo}[i] $$</p>
+
+<p>Por outro lado, a tarefa de encontrar a soma dos elementos pode ser substituída pela tarefa de encontrar o elemento mínimo / máximo de uma subarray. Se esse problema também precisar abordar as atualizações de elementos individuais, também é possível atualizar o valor de $b[k]$, mas será necessário iterar por todos os valores do bloco $k$ em $O(s) = O(\sqrt{n})$ operações.</p>
+
+<p>Sqrt decomposition pode ser aplicada de maneira semelhante em outros problemas: fencontrar o número de elementos zero, encontrar o primeiro elemento diferente de zero, contar elementos que satisfazem uma determinada propriedade, etc.</p>
+
+<p>Outra classe de problemas aparece quando precisamos <strong>atualizar os elementos da array em intervalos</strong>: incrementar elementos existentes ou substituí-los por um determinado valor.</p>
+
+<p>Por exemplo, podemos realizar dois tipos de operações em uma array: adicionar um determinado valor $\delta$ para todos os elementos da array no intervalo $[l; r]$ ou consultar o valor do elemento $a[i]$. Vamos armazenar o valor que deve ser adicionado a todos os elementos do bloco $k$ em $b[k]$ (inicialmente todos os $b[k] = 0$). Durante cada operação "add", precisamos adicionar $\delta$ em $b[k]$ para todos os blocos que pertencem ao intervalo $[l; r]$ e adicionar $\delta$ em $a[i]$ para todos os elementos que pertencem às "caudas" do intervalo. A resposta de uma consulta $i$ é simplesmente $a[i] + b[i/s]$. Dessa forma, a operação "add" possui complexidade $O(\sqrt{n})$, e responder a uma consulta tem complexidade $O(1)$.</p>
+
+<p>Finalmente, essas duas classes de problemas podem ser combinadas se a tarefa exigir que <strong>ambas</strong> altualizações de elementos e consultas/queries sejam em um intervalo. Ambas as operações podem ser feitas com complexidade $O(\sqrt{n})$. Isso exigirá dois blocos de array $b$ e $c$: uma para acompanhar as atualizações dos elementos e outra para acompanhar as respostas da consulta/query.</p>
+
+<p>Existem outros problemas que podem ser resolvidos usando sqrt decomposition, por exemplo, um problema sobre manter um conjunto de números que permitiria adicionar / excluir números, verificar se um número pertence ao conjunto e encontrar o $k$-ésimo maior número. Para resolvê-lo, é necessário armazenar números em ordem crescente, dividir em vários blocos com $\sqrt{n}$ números em cada bloco. Toda vez que um número é adicionado / excluído, os blocos precisam ser reequilibrados movendo-se os números entre o início e o fim dos blocos adjacentes.</p>
+
+<h2>Algoritmo de Mo</h2>
+
+<p>Uma idéia similar, baseada na sqrt decomposition, pode ser usada para responder a consultas de intervalo(range queries) ($Q$) offline em $O((N+Q)\sqrt{N})$.
+Isso pode parecer pior do que os métodos da seção anterior, pois essa é uma complexidade um pouco pior do que tínhamos anteriormente e o fato de não podermos atualizar valores entre duas consultas.
+Mas em muitas situações esse método tem vantagens.
+Durante uma sqrt decomposition, temos que pré-calcular as respostas para cada bloco e mesclá-las para obter as respostas da consulta/query.
+Em alguns problemas, essa etapa de mesclagem pode ser bastante problemática.
+Por exemplo, quando cada consulta pergunta qual a <strong>moda</strong> do intervalo (o número que aparece com maior frequência).
+Para isso, cada bloco teria que armazenar a contagem de cada número nele em algum tipo de estrutura de dados, e não podemos mais executar a etapa de mesclagem com rapidez suficiente.
+O <strong>algoritmo de Mo</strong> usa uma abordagem completamente diferente, que pode responder a esse tipo de consulta rapidamente, porque mantém o controle de apenas uma estrutura de dados e as únicas operações com ela são fáceis e rápidas.</p>
+
+<p>A idéia é responder às consultas em uma ordem especial com base nos índices.
+Primeiro, responderemos a todas as consultas que tem o índice esquerdo no bloco 0, depois responderemos a todas as consultas que tem o índice esquerdo no bloco 1 e assim por diante.
+E também teremos que responder às consultas de um bloco em uma ordem especial, ordenado pelo índice/index direito das consultas.</p>
+
+<p>Usaremos uma única estrutura de dados.
+Essa estrutura de dados armazenará informações sobre o intervalo.
+No início, esse intervalo estará vazio.
+Quando queremos responder à próxima consulta (na ordem especial), simplesmente aumentamos ou reduzimos o intervalo adicionando ou removendo elementos nos dois lados do intervalo atual, até transformá-lo no intervalo de consulta.
+Dessa maneira, precisamos apenas adicionar ou remover um único elemento por vez, o que deve ser uma operação simples na estrutura de dados.</p>
+
+<p>Como alteramos a ordem de responder as consultas/queries, isso só é possível quando é permitido responder às consultas no modo offline.</p>
+
+<h3>Implementação</h3>
+
+<p>No algoritmo de Mo, usamos duas funções para adicionar um índice e remover um índice do intervalo que estamos mantendo no momento.</p>
+
+<pre><code class="cpp">void remove(idx);  // remover valor no indice(idx) da estrutura de dados
+void add(idx);     // adicionar valor no indice(idx) da estrutura de dados
+int get_answer();  // extrair a resposta atual da estrutura de dados
+
+int block_size;
+
+struct Query {
+    int l, r, idx;
+    bool operator&lt;(Query other) const
+    {
+        return make_pair(l / block_size, r) &lt;
+               make_pair(other.l / block_size, other.r);
+    }
+};
+
+vector&lt;int&gt; mo_s_algorithm(vector&lt;Query&gt; queries) {
+    vector&lt;int&gt; answers(queries.size());
+    sort(queries.begin(), queries.end());
+
+    // inicializar a estrutura de dados
+
+    int cur_l = 0;
+    int cur_r = -1;
+    // intervalo [cur_l, cur_r]
+    for (Query q : queries) {
+        while (cur_l &gt; q.l) {
+            cur_l--;
+            add(cur_l);
+        }
+        while (cur_r &lt; q.r) {
+            cur_r++;
+            add(cur_r);
+        }
+        while (cur_l &lt; q.l) {
+            remove(cur_l);
+            cur_l++;
+        }
+        while (cur_r &gt; q.r) {
+            remove(cur_r);
+            cur_r--;
+        }
+        answers[q.idx] = get_answer();
+    }
+    return answers;
+}
+</code></pre>
+
+<p>Com base no problema, podemos usar uma estrutura de dados diferente e modificar as funções <code>add</code>/<code>remove</code>/<code>get_answer</code>.
+Por exemplo, se for pedido para encontrar consultas de soma de intervalo(range sum queries), usamos um número inteiro simples na estrutura de dados, que é $0$ no começo.
+A função <code>add</code> simplesmente adiciona o valor da posição e, posteriormente, atualiza a variável de resposta.
+A função <code>remove</code> irá subtrair o valor e, da mesma maneira, atualiza a variável da resposta.
+E <code>get_answer</code> apenas retorna o inteiro.</p>
+
+<p>Para responder a consultas/queries de moda, podemos usar uma árvore de pesquisa binária(binary search tree) (por exemplo: <code>map&lt;int, int&gt;</code>) para armazenar com que frequência cada número aparece no intervalo atual e uma segunda árvore de pesquisa binária (por exemplo: <code>set&lt;pair&lt;int, int&gt;&gt;</code>) para manter as contagens dos números (pares contagem-número) em ordem.
+O método <code>add</code> remove o número atual da segunda BST, incrementa a contagem na primeira, e insere o número de volta na segunda BST.
+<code>remove</code> faz a mesma coisa, apenas decrementa a contagem.
+E <code>get_answer</code> apenas verifica a segunda árvore e retorna o melhor valor em $O(1)$.</p>
+
+<h3>Complexidade</h3>
+
+<p>Ordenar todas as queries/consultas levará $O(Q \log Q)$.</p>
+
+<p>E as outras operações?
+Quantas vezes <code>add</code> e <code>remove</code> serão chamadas?</p>
+
+<p>Assumindo que o tamanho do bloco seja $S$.</p>
+
+<p>Chamaremos <code>add(cur_r)</code> e <code>remove(cur_r)</code> apenas $O(N)$ vezes para todas essas consultas combinadas.
+Isso nos dará $O(\frac{N}{S} N)$ chamadas para todos os blocos.</p>
+
+<p>O valor de <code>cur_l</code> pode mudar no máximo $O(S)$ vezes entre duas consultas.
+Portanto, temos um adicional de $O(S Q)$ chamadas para <code>add(cur_l)</code> e <code>remove(cur_l)</code>.</p>
+
+<p>Para $S \approx \sqrt{N}$ isso nos dá $O((N + Q) \sqrt{N})$ operações no total.
+Portanto, a complexidade é $O((N+Q)F\sqrt{N})$ onde $O(F)$  é a complexidade das funções <code>add</code> e <code>remove</code>.</p>
+
+<h3>Dicas para melhorar o tempo de execução</h3>
+
+<ul>
+<li>O tamanho do bloco precisamente ser $\sqrt{N}$ em sempre oferece o melhor tempo de execução. Por exemplo, se $\sqrt{N}=750$ pode acontecer que o tamanhos do bloco de $700$ ou $800$ sejam executados de uma melhor forma.
+Importante: não calcule o tamanho do bloco no tempo de execução - faça uma constante <code>const</code>. A divisão por constantes é bem otimizada pelos compiladores.</li>
+<li>Em blocos ímpares ordene o indice direito em ordem crescente e em blocos pares ordene em ordem decrescente. Isso minimizará o movimento do pointer direito, pois a ordenação normal moverá o pointer direito do final para o início no começo de cada bloco. Com a versão aprimorada, esse reset não é mais necessário.</li>
+</ul>
+
+<pre><code class="cpp">bool cmp(pair&lt;int, int&gt; p, pair&lt;int, int&gt; q) {
+    if (p.first / BLOCK_SIZE != q.first / BLOCK_SIZE)
+        return p &lt; q;
+    return (p.first / BLOCK_SIZE &amp; 1) ? (p.second &lt; q.second) : (p.second &gt; q.second);
+}
+</code></pre>
+
+<p>Você pode ler sobre uma abordagem mais rápida de ordenação <a href="https://codeforces.com/blog/entry/61203">aqui</a>.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3154">UVA - 12003 - Array Transformer</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3141">UVA - 11990 Dynamic Inversion</a></li>
+<li><a href="http://www.spoj.com/problems/GIVEAWAY/">SPOJ - Give Away</a></li>
+<li><a href="http://codeforces.com/contest/786/problem/C">Codeforces - Till I Collapse</a></li>
+<li><a href="http://codeforces.com/contest/840/problem/D">Codeforces - Destiny</a></li>
+<li><a href="http://codeforces.com/contest/13/problem/E">Codeforces - Holes</a></li>
+<li><a href="https://codeforces.com/problemset/problem/617/E">Codeforces - XOR and Favorite Number</a></li>
+<li><a href="http://codeforces.com/problemset/problem/86/D">Codeforces - Powerful array</a></li>
+<li><a href="https://www.spoj.com/problems/DQUERY">SPOJ - DQUERY</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
