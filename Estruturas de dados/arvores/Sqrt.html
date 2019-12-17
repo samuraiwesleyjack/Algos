@@ -86,7 +86,7 @@ for (;;) {
     int sum = 0;
     for (int i=l; i&lt;=r; )
         if (i % len == 0 &amp;&amp; i + len - 1 &lt;= r) {
-            // if the whole block starting at i belongs to [l; r]
+            // se o bloco inteiro começando de i pertencer ao intervalo [l; r]
             sum += b[i / len];
             i += len;
         }
