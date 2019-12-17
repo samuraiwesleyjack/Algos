@@ -212,7 +212,7 @@ A função <code>add</code> simplesmente adiciona o valor da posição e, poster
 A função <code>remove</code> irá subtrair o valor e, da mesma maneira, atualiza a variável da resposta.
 E <code>get_answer</code> apenas retorna o inteiro.</p>
 
-<p>Para responder a consultas/queries de moda, podemos usar uma árvore de pesquisa binária(binary search tree) (por exemplo: <code>map&lt;int, int&gt;</code>) para armazenar com que frequência cada número aparece no intervalo atual e uma segunda árvore de pesquisa binária (por exemplo: <code>set&lt;pair&lt;int, int&gt;&gt;</code>) para manter as contagens dos números (pares contagem-número) em ordem.
+<p>Para responder as consultas/queries de moda, podemos usar uma árvore de pesquisa binária(binary search tree) (por exemplo: <code>map&lt;int, int&gt;</code>) para armazenar com que frequência cada número aparece no intervalo atual e uma segunda árvore de pesquisa binária (por exemplo: <code>set&lt;pair&lt;int, int&gt;&gt;</code>) para manter as contagens dos números (pares contagem-número) em ordem.
 O método <code>add</code> remove o número atual da segunda BST, incrementa a contagem na primeira, e insere o número de volta na segunda BST.
 <code>remove</code> faz a mesma coisa, apenas decrementa a contagem.
 E <code>get_answer</code> apenas verifica a segunda árvore e retorna o melhor valor em $O(1)$.</p>
