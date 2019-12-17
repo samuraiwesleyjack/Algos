@@ -229,7 +229,7 @@ Quantas vezes <code>add</code> e <code>remove</code> serão chamadas?</p>
 <p>Chamaremos <code>add(cur_r)</code> e <code>remove(cur_r)</code> apenas $O(N)$ vezes para todas essas consultas combinadas.
 Isso nos dará $O(\frac{N}{S} N)$ chamadas para todos os blocos.</p>
 
-<p>O valor de <code>cur_l</code> pode mudar no máximo $O(S)$ vezes entre duas consultas.
+<p>O valor de <code>cur_l</code> pode mudar no máximo $O(S)$ vezes entre duas consultas durante a execução.
 Portanto, temos um adicional de $O(S Q)$ chamadas para <code>add(cur_l)</code> e <code>remove(cur_l)</code>.</p>
 
 <p>Para $S \approx \sqrt{N}$ isso nos dá $O((N + Q) \sqrt{N})$ operações no total.
