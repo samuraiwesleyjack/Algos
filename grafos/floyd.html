@@ -127,7 +127,7 @@ Isso leva a um algoritmo de reconstrução recursiva simples do caminho mais cur
 <p>Se os pesos das arestas não forem inteiros, mas reais, é necessário levar em consideração os erros que ocorrem ao trabalhar com o tipo <strong>float</strong>.</p>
 
 <p>O algoritmo de Floyd-Warshall tem o efeito desagradável de acumular os erros rapidamente.
-De fato, se houver um erro na primeira fase do $\delta$, esse erro pode se propagar para a segunda iteração como $2 \delta$, para a terceira iteração como $3 \delta$, e assim por diante.</p>
+De fato, se houver um erro $\delta$ na primeira fase, esse erro pode se propagar para a segunda iteração como $2 \delta$, para a terceira iteração como $3 \delta$, e assim por diante.</p>
 
 <p>Para evitar isso, o algoritmo pode ser modificado para corrigir o erro (E = $\delta$) em consideração usando a seguinte comparação:</p>
 
