@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Treap - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, CP Algoritmos, Treap, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Treap</h1>
+
+<p>Treap é uma estrutura de dados que combina uma <a href="https://en.wikipedia.org/wiki/Binary_tree">árvore binária</a>(binary tree) e uma <a href="https://en.wikipedia.org/wiki/Binary_heap">binary heap</a> (tree + heap $\Rightarrow$ Treap).</p>
+
+<p>Mais especificamente, treap é uma estrutura de dados que armazena pares (X, Y) em uma binary tree de forma que seja uma binary search tree por X e uma binary heap por Y.
+Assumindo que todos os X e Y sejam diferentes, podemos ver que, se algum nó da árvore contém valores ($X_0$, $Y_0$), todos os nós na subárvore esquerda terão $X &lt; X_0$, todos os nós na subárvore direita terão $X > X_0$, e todos nós nas subárvores esquerda e direita têm $Y &lt; Y_0$.</p>
+
+<p>Treaps foram propostas por Siedel e Aragon em 1989.</p>
+
+<h2>Vantagens dessa organização de dados</h2>
+
+<p>Nessa implementação os valores X são as chaves (e ao mesmo tempo os valores armazenados na treap), e os valores Y são chamados de <strong>prioridades</strong>. Sem as prioridades, a treap seria uma binary search tree normal por X, e um conjunto de valores X poderia corresponder a muitas árvores diferentes, algumas delas degeneradas (por exemplo, na forma de uma linked list), e, portanto, seria extremamente lento (as operações principais teriam complexidade $O(N)$).</p>
+
+<p>Ao mesmo tempo, as <strong>prioridades</strong> permitem especificar exclusivamente a árvore que será construída (isso não depende da ordem em que os valores são adicionados), o que pode ser comprovado usando um teorema correspondente. Se você <strong>escolher as prioridades de maneira aleatória</strong>, você obterá árvores não degeneradas em média, o que garantirá a complexidade $O(\log N)$ para as operações principais. Daí surge outro nome para essa estrutura de dados - <strong>randomized binary search tree</strong>.</p>
+
+<h2>Operações</h2>
+
+<p>Uma treap fornece as seguintes operações:</p>
+
+<ul>
+<li><strong>Insert(X,Y)</strong> em $O(\log N)$.<br />
+Adiciona um novo nó à árvore. Uma variante possível é passar apenas X e gerar Y aleatoriamente dentro da operação (garantindo que seja diferente de todas as outras prioridades na árvore).</li>
+<li><strong>Search (X)</strong> em $O(\log N)$.<br />
+Procura um nó com o valor da chave específico X. A implementação é a mesma que para uma binary search tree normal.</li>
+<li><strong>Erase (X)</strong> em $O(\log N)$.<br />
+Procura um nó com o valor da chave específico X e o remove da árvore.</li>
+<li><strong>Build ($X_1$, ..., $X_N$)</strong> em $O(N)$.<br />
+Constrói uma árvore a partir de uma lista de valores. Isso pode ser feito em tempo linear (assumindo que $X_1, ..., X_N$ são ordenados), mas não discutiremos essa implementação aqui. Usaremos apenas $N$ chamadas com a operação <strong>Insert</strong>, o que terá complexidade $O(N \log N)$.</li>
+<li><strong>Union ($T_1$, $T_2$)</strong> em $O(M \log (N/M))$.<br />
+Mescla duas árvores, assumindo que todos os elementos são diferentes. É possível obter a mesma complexidade se os elementos duplicados forem removidos durante a mesclagem.</li>
+<li><strong>Intersect ($T_1$, $T_2$)</strong> em $O(M \log (N/M))$.<br />
+Encontra a interseção de duas árvores (ou seja, seus elementos comuns). Não consideraremos a implementação desta operação aqui.</li>
+</ul>
+
+<p>Além disso, devido ao fato de uma treap ser uma binary search tree, é possível implementar outras operações, como encontrar o K-ésimo maior elemento ou localizar o índice de um elemento.</p>
+
+<h2>Descrição</h2>
+
+<p>Em termos de implementação, cada nó contém X, Y e ponteiros para os nós filhos da esquerda (L) e direita (R).</p>
+
+<p>Implementaremos todas as operações necessárias usando apenas duas operações auxiliares: Split e Merge.</p>
+
+<p><strong>Split (T, X)</strong> separa a árvore T em 2 subárvores L e R (no qual são os valores de retorno de split) assim, L contém todos os elementos com chave $X_L &lt; X$, e R contém todos os elementos com chave $X_R > X$. Essa operação tem complexidade $O (\log N)$ e é implementada usando uma recursão.</p>
+
+<p><strong>Merge ($T_1$, $T_2$)</strong> combina duas subárvores $T_1$ e $T_2$ e retorna a nova árvore. Essa operação também possui complexidade $O (\log N)$. Ela funciona sob a suposição de que $T_1$ e $T_2$ estão ordenadas (todas as chaves X em $T_1$ são menores que as chaves em $T_2$). Portanto, precisamos combinar essas árvores sem violar a ordem das prioridades Y. Para fazer isso, escolhemos como raiz a árvore que tem maior prioridade Y no nó raiz, e recursivamente chamamos Merge para a outra árvore e a subtree correspondente do nó raiz selecionado.</p>
+
+<p>Implementação de <strong>Insert (X, Y)</strong>. Primeiro descemos na árvore (como em uma binary search tree regular por X), e paramos no primeiro nó em que o valor da prioridade é menor que Y. Encontramos o local onde iremos inserir o novo elemento. Em seguida, chamamos <strong>Split (T, X)</strong> na subtree começando do nó encontrado,  usamos as subtrees retornadas L e R como filhos esquerdo e direito do novo nó.</p>
+
+<p>Implementação de <strong>Erase (X)</strong>. Primeiro descemos na árvore (como em uma binary search tree regular por X), procurando o elemento que queremos excluir. Depois que o nó é encontrado, chamamos <strong>Merge</strong> em seus filhos e colocamos o valor de retorno da operação no local do elemento que estamos deletando.</p>
+
+<p>Nós implementamos a operação <strong>Build</strong> com complexidade $O (N \log N)$ usando $N$ chamadas com <strong>Insert</strong>.</p>
+
+<p><strong>Union ($T_1$, $T_2$)</strong> tem complexidade teórica de $O (M \log (N / M))$, mas na prática funciona muito bem, provavelmente com uma constante oculta muito pequena. Vamos assumir, sem perda de generalidade, que $T_1 \rightarrow Y > T_2 \rightarrow Y$, ou seja, a raiz de $T_1$ será a raiz do resultado. Para obter o resultado, precisamos mesclar as árvores $T_1 \rightarrow L$, $T_1 \rightarrow R$ e $T_2$ em duas árvores que podem ser filhas da raiz de $T_1$. Para fazer isso, chamamos Split ($T_2$, $T_1\rightarrow X$), dividindo assim $T_2$ em duas partes L e R, que depois combinamos recursivamente com os filhos de $T_1$: Union ($T_1 \rightarrow L$, $L$) e Union ($T_1 \rightarrow R$, $R$), obtendo assim as subárvores esquerda e direita do resultado.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct item {
+    int key, prior;
+    item * l, * r;
+    item() { }
+    item (int key, int prior) : key(key), prior(prior), l(NULL), r(NULL) { }
+};
+typedef item * pitem;
+
+void split (pitem t, int key, pitem &amp; l, pitem &amp; r) {
+    if (!t)
+        l = r = NULL;
+    else if (key &lt; t-&gt;key)
+        split (t-&gt;l, key, l, t-&gt;l),  r = t;
+    else
+        split (t-&gt;r, key, t-&gt;r, r),  l = t;
+}
+
+void insert (pitem &amp; t, pitem it) {
+    if (!t)
+        t = it;
+    else if (it-&gt;prior &gt; t-&gt;prior)
+        split (t, it-&gt;key, it-&gt;l, it-&gt;r),  t = it;
+    else
+        insert (it-&gt;key &lt; t-&gt;key ? t-&gt;l : t-&gt;r, it);
+}
+
+void merge (pitem &amp; t, pitem l, pitem r) {
+    if (!l || !r)
+        t = l ? l : r;
+    else if (l-&gt;prior &gt; r-&gt;prior)
+        merge (l-&gt;r, l-&gt;r, r),  t = l;
+    else
+        merge (r-&gt;l, l, r-&gt;l),  t = r;
+}
+
+void erase (pitem &amp; t, int key) {
+    if (t-&gt;key == key)
+        merge (t, t-&gt;l, t-&gt;r);
+    else
+        erase (key &lt; t-&gt;key ? t-&gt;l : t-&gt;r, key);
+}
+
+pitem unite (pitem l, pitem r) {
+    if (!l || !r)  return l ? l : r;
+    if (l-&gt;prior &lt; r-&gt;prior)  swap (l, r);
+    pitem lt, rt;
+    split (r, l-&gt;key, lt, rt);
+    l-&gt;l = unite (l-&gt;l, lt);
+    l-&gt;r = unite (l-&gt;r, rt);
+    return l;
+}
+</code></pre>
+
+<h2>Mantendo os tamanhos das subtrees</h2>
+
+<p>Para estender a funcionalidade do treap, geralmente é necessário armazenar o número de nós na subárvore de cada nó - (contador)<code>int cnt</code> na estrutura <code>item</code>. Por exemplo, ele pode ser usado para encontrar o K-ésimo maior elemento da árvore em $O (\log N)$, ou para encontrar o índice do elemento na lista ordenada com a mesma complexidade. A implementação dessas operações será a mesma para uma binary search tree normal.</p>
+
+<p>Quando uma árvore muda (nós são adicionados ou removidos etc.), o <code>cnt</code> de alguns nós deve ser atualizado de acordo. Criaremos duas funções: <code>cnt()</code> retornará o valor atual de <code>cnt</code> ou 0 se o nó não existir, e <code>upd_cnt()</code> irá atualizar o valor de <code>cnt</code> para esse nó, assumindo que, para seus filhos L e R seus valores de <code>cnt</code> já foram atualizados. Evidentemente, é suficiente adicionar chamadas de <code>upd_cnt()</code> ao final de <code>insert</code>, <code>erase</code>, <code>split</code> e <code>merge</code> para manter os valores de <code>cnt</code> atualizados.</p>
+
+<pre><code class="cpp">int cnt (pitem t) {
+    return t ? t-&gt;cnt : 0;
+}
+
+void upd_cnt (pitem t) {
+    if (t)
+        t-&gt;cnt = 1 + cnt(t-&gt;l) + cnt (t-&gt;r);
+}
+</code></pre>
+
+<h2>Construindo uma Treap em $O (N)$ (modo offline)</h2>
+
+<p>Dada uma lista ordenada de chaves, é possível construir uma treap mais rápido do que inserindo as chaves uma por vez, o que leva $O(N \log N)$. Como as chaves estão ordenadas, uma binary search tree balanceada pode ser construída em tempo linear. Os valores <a href="https://pt.wikipedia.org/wiki/Heap">heap</a> $Y$ são inicializados aleatoriamente e, em seguida, podem ser "ordenados"(heapified - heap sort) independentemente das chaves $X$ para <a href="https://en.wikipedia.org/wiki/Binary_heap#Building_a_heap">construir o heap</a> em $O(N)$.</p>
+
+<pre><code class="cpp">void heapify (pitem t) {
+    if (!t) return;
+    pitem max = t;
+    if (t-&gt;l != NULL &amp;&amp; t-&gt;l-&gt;prior &gt; max-&gt;prior)
+        max = t-&gt;l;
+    if (t-&gt;r != NULL &amp;&amp; t-&gt;r-&gt;prior &gt; max-&gt;prior)
+        max = t-&gt;r;
+    if (max != t) {
+        swap (t-&gt;prior, max-&gt;prior);
+        heapify (max);
+    }
+}
+
+pitem build (int * a, int n) {
+    // Construct a treap on values {a[0], a[1], ..., a[n - 1]}
+    if (n == 0) return NULL;
+    int mid = n / 2;
+    pitem t = new item (a[mid], rand ());
+    t-&gt;l = build (a, mid);
+    t-&gt;r = build (a + mid + 1, n - mid - 1);
+    heapify (t);
+    return t;
+}
+</code></pre>
+
+<p>Também é possível calcular os tamanhos das subárvores com essa abordagem. Basta chamar <code>upd_cnt(t)</code> antes de retornar da função <code>build</code>.</p>
+
+<h2>Treaps Implícitas</h2>
+
+<p>Treap implícita é uma modificação simples do treap regular, que é uma estrutura de dados muito poderosa. De fato, a treap implícita pode ser considerada como uma array com os seguintes procedimentos implementados (todos em $O (\log N)$ - <a href="https://stackoverflow.com/questions/11496013/what-is-the-difference-between-an-on-line-and-off-line-algorithm">modo online</a>):</p>
+
+<ul>
+<li>Inserir um elemento na array em qualquer local</li>
+<li>Remoção de um elemento</li>
+<li>Encontrar soma, elemento mínimo / máximo etc. em um intervalo</li>
+<li>Adição, pintando um intervalo arbitrário</li>
+<li>Reversão de elementos em um intervalo</li>
+</ul>
+
+<p>A idéia é que as chaves sejam <strong>índices</strong> dos elementos na array. Mas não armazenaremos esses valores explicitamente (caso contrário, por exemplo, a inserção de um elemento causaria alterações nas chaves dos $O (N)$ nós da árvore).</p>
+
+<p>Observe que a chave de um nó é o número de nós menor que ele (esses nós podem estar presentes não apenas na subárvore esquerda, mas também nas subárvores esquerdas de seus ancestrais). 
+Mais especificamente, a <strong>chave implícita</strong> para algum nó T é o número de vértices $cnt (T \rightarrow L)$ na subárvore esquerda desse nó, mais os valores semelhantes $cnt (P \rightarrow L) + 1$ para cada ancestral P do nó T, se T estiver na subárvore direita de P.</p>
+
+<p>Como em todas as operações chegamos a qualquer nó descendo na árvore, podemos apenas acumular essa soma e passá-la para a função. Se formos para a subárvore esquerda, a soma acumulada não será alterada; se formos para a subárvore direita, ela aumentará em $cnt (T \rightarrow L) +1$.</p>
+
+<p>Aqui estão as novas implementações de <strong>Split</strong> e <strong>Merge</strong>:</p>
+
+<pre><code class="cpp">void merge (pitem &amp; t, pitem l, pitem r) {
+    if (!l || !r)
+        t = l ? l : r;
+    else if (l-&gt;prior &gt; r-&gt;prior)
+        merge (l-&gt;r, l-&gt;r, r),  t = l;
+    else
+        merge (r-&gt;l, l, r-&gt;l),  t = r;
+    upd_cnt (t);
+}
+
+void split (pitem t, pitem &amp; l, pitem &amp; r, int key, int add = 0) {
+    if (!t)
+        return void( l = r = 0 );
+    int cur_key = add + cnt(t-&gt;l); //implicit key
+    if (key &lt;= cur_key)
+        split (t-&gt;l, l, t-&gt;l, key, add),  r = t;
+    else
+        split (t-&gt;r, t-&gt;r, r, key, add + 1 + cnt(t-&gt;l)),  l = t;
+    upd_cnt (t);
+}
+</code></pre>
+
+<p>Agora, vamos considerar a implementação de várias operações em treaps implícitas:</p>
+
+<ul>
+<li><strong>Inserir elemento</strong>.<br />
+Suponha que precisamos inserir um elemento na posição <code>pos</code>. Dividimos a treap em duas partes, que correspondem às arrays <code>[0..pos-1]</code> e <code>[pos..sz]</code>; para fazer isso, chamamos <code>split</code> (T, $T_1$, $T_2$, pos). Em seguida, podemos combinar a árvore $T_1$ com o novo vértice chamando <code>merge</code> ($T_1$, $T_1$, new_item) (todas as pré-condições são atendidas). Finalmente, combinamos as árvores $T_1$ e $T_2$ de volta em T chamando <code>merge</code> (T, $T_1$, $T_2$).</li>
+<li><strong>Deletar elemento</strong>.<br />
+Esta operação é ainda mais fácil: encontre o elemento a ser excluído T, performe o "merge" de seus filhos L e R, e substitua o elemento T pelo resultado da mesclagem. De fato, a exclusão do elemento na treap implícita é exatamente a mesma que na treap regular.</li>
+<li>Encontrar <strong>soma / mínimo</strong>, etc. em um intervalo.<br />
+Primeiro, crie um campo adicional F na estrutura do <code>item</code> para armazenar o valor dessa função de destino para a subárvore desse nó. É fácil manter esse campo da mesma forma que manter os tamanhos das subárvores: crie uma função que calcule esse valor para um nó com base nos valores de seus filhos e adicione chamadas dessa função no final de todas as funções que modificam a árvore.<br />
+Segundo, precisamos saber como processar uma consulta/query por um intervalo arbitrário [A; B].<br />
+Para obter uma parte da árvore que corresponde ao intervalo [A; B], precisamos chamar <code>split</code> (T, $T_1$, $T_2$, A), e então <code>split</code> ($T_2$, $T_2$, $T_3$, B - A + 1): depois disso $T_2$ consistirá em todos os elementos no intervalo [A; B]. Portanto, a resposta à consulta será armazenada no campo F da raiz de $T_2$. Depois que a consulta é respondida, a árvore deve ser restaurada chamando <code>merge</code> (T, $T_1$, $T_2$) e <code>merge</code> ($T$, $T$, $T_3$).</li>
+<li><strong>Adição / "pintura"</strong> em um intervalo.<br />
+Agimos de maneira semelhante ao parágrafo anterior, mas, em vez do campo F armazenaremos um campo <code>add</code> que conterá o valor adicionado da subárvore (ou o valor no qual a subárvore é pintada). Antes de executar qualquer operação, precisamos "puxar" esse valor corretamente - ou seja, mudar $T \rightarrow L \rightarrow add$ e $T \rightarrow R \rightarrow add$, e limpar o campo <code>add</code> no nó parente. Dessa forma, após qualquer alteração na árvore, as informações não serão perdidas.</li>
+<li><strong>Reverter</strong> em um intervalo.<br />
+Isso é novamente semelhante à operação anterior: precisamos adicionar o sinalizador booleano "rev" e configurá-lo como true quando a subárvore do nó atual precisar ser revertida. "Puxar" esse valor é um pouco complicado - trocamos os filhos desse nó e configuramos esse sinalizador como true para eles.</li>
+</ul>
+
+<p>Aqui está um exemplo de implementação da treap implícita com reversão no intervalo. Para cada nó, armazenamos o campo chamado <code>value</code> que é o valor real do elemento da array na posição atual. Também fornecemos a implementação da função <code>output()</code>, que gera uma array que corresponde ao estado atual da treap implícita.</p>
+
+<pre><code class="cpp">typedef struct item * pitem;
+struct item {
+    int prior, value, cnt;
+    bool rev;
+    pitem l, r;
+};
+
+int cnt (pitem it) {
+    return it ? it-&gt;cnt : 0;
+}
+
+void upd_cnt (pitem it) {
+    if (it)
+        it-&gt;cnt = cnt(it-&gt;l) + cnt(it-&gt;r) + 1;
+}
+
+void push (pitem it) {
+    if (it &amp;&amp; it-&gt;rev) {
+        it-&gt;rev = false;
+        swap (it-&gt;l, it-&gt;r);
+        if (it-&gt;l)  it-&gt;l-&gt;rev ^= true;
+        if (it-&gt;r)  it-&gt;r-&gt;rev ^= true;
+    }
+}
+
+void merge (pitem &amp; t, pitem l, pitem r) {
+    push (l);
+    push (r);
+    if (!l || !r)
+        t = l ? l : r;
+    else if (l-&gt;prior &gt; r-&gt;prior)
+        merge (l-&gt;r, l-&gt;r, r),  t = l;
+    else
+        merge (r-&gt;l, l, r-&gt;l),  t = r;
+    upd_cnt (t);
+}
+
+void split (pitem t, pitem &amp; l, pitem &amp; r, int key, int add = 0) {
+    if (!t)
+        return void( l = r = 0 );
+    push (t);
+    int cur_key = add + cnt(t-&gt;l);
+    if (key &lt;= cur_key)
+        split (t-&gt;l, l, t-&gt;l, key, add),  r = t;
+    else
+        split (t-&gt;r, t-&gt;r, r, key, add + 1 + cnt(t-&gt;l)),  l = t;
+    upd_cnt (t);
+}
+
+void reverse (pitem t, int l, int r) {
+    pitem t1, t2, t3;
+    split (t, t1, t2, l);
+    split (t2, t2, t3, r-l+1);
+    t2-&gt;rev ^= true;
+    merge (t, t1, t2);
+    merge (t, t, t3);
+}
+
+void output (pitem t) {
+    if (!t)  return;
+    push (t);
+    output (t-&gt;l);
+    printf ("%d ", t-&gt;value);
+    output (t-&gt;r);
+}
+</code></pre>
+
+<h2>Referências</h2>
+
+<ul>
+<li><a href="https://www.cs.cmu.edu/~scandal/papers/treaps-spaa98.pdf">Blelloch, Reid-Miller "Fast Set Operations Using Treaps"</a></li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/ADAAPHID/">SPOJ - Ada and Aphids</a></li>
+<li><a href="http://www.spoj.com/problems/ADACROP/">SPOJ - Ada and Harvest</a></li>
+<li><a href="http://codeforces.com/contest/762/problem/E">Codeforces - Radio Stations</a></li>
+<li><a href="http://www.spoj.com/problems/COUNT1IT/">SPOJ - Ghost Town</a></li>
+<li><a href="http://www.spoj.com/problems/IITWPC4D/">SPOJ - Arrangement Validity</a></li>
+<li><a href="http://www.spoj.com/problems/ALLIN1/">SPOJ - All in One</a></li>
+<li><a href="http://codeforces.com/contest/847/problem/D">Codeforces - Dog Show</a></li>
+<li><a href="http://codeforces.com/contest/863/problem/D">Codeforces - Yet Another Array Queries Problem</a></li>
+<li><a href="http://www.spoj.com/problems/MEANARR/">SPOJ - Mean of Array</a></li>
+<li><a href="http://www.spoj.com/problems/TWIST/">SPOJ - TWIST</a></li>
+<li><a href="http://www.spoj.com/problems/KOILINE/">SPOJ - KOILINE</a></li>
+<li><a href="https://www.codechef.com/problems/PRESTIGE">CodeChef - The Prestige</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
