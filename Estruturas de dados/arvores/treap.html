@@ -169,7 +169,7 @@ void upd_cnt (pitem t) {
 }
 
 pitem build (int * a, int n) {
-    // Construct a treap on values {a[0], a[1], ..., a[n - 1]}
+    // Construir uma treap com os valores {a[0], a[1], ..., a[n - 1]}
     if (n == 0) return NULL;
     int mid = n / 2;
     pitem t = new item (a[mid], rand ());
@@ -216,7 +216,7 @@ Mais especificamente, a <strong>chave implícita</strong> para algum nó T é o 
 void split (pitem t, pitem &amp; l, pitem &amp; r, int key, int add = 0) {
     if (!t)
         return void( l = r = 0 );
-    int cur_key = add + cnt(t-&gt;l); //implicit key
+    int cur_key = add + cnt(t-&gt;l); //chave implícita
     if (key &lt;= cur_key)
         split (t-&gt;l, l, t-&gt;l, key, add),  r = t;
     else
