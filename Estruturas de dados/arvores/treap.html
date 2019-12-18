@@ -49,9 +49,9 @@ Assumindo que todos os X e Y sejam diferentes, podemos ver que, se algum nó da 
 <li><strong>Insert(X,Y)</strong> em $O(\log N)$.<br />
 Adiciona um novo nó à árvore. Uma variante possível é passar apenas X e gerar Y aleatoriamente dentro da operação (garantindo que seja diferente de todas as outras prioridades na árvore).</li>
 <li><strong>Search (X)</strong> em $O(\log N)$.<br />
-Procura um nó com o valor da chave específico X. A implementação é a mesma que para uma binary search tree normal.</li>
+Procura um nó com o valor de chave específico X. A implementação é a mesma que para uma binary search tree normal.</li>
 <li><strong>Erase (X)</strong> em $O(\log N)$.<br />
-Procura um nó com o valor da chave específico X e o remove da árvore.</li>
+Procura um nó com o valor de chave específico X e o remove da árvore.</li>
 <li><strong>Build ($X_1$, ..., $X_N$)</strong> em $O(N)$.<br />
 Constrói uma árvore a partir de uma lista de valores. Isso pode ser feito em tempo linear (assumindo que $X_1, ..., X_N$ são ordenados), mas não discutiremos essa implementação aqui. Usaremos apenas $N$ chamadas com a operação <strong>Insert</strong>, o que terá complexidade $O(N \log N)$.</li>
 <li><strong>Union ($T_1$, $T_2$)</strong> em $O(M \log (N/M))$.<br />
