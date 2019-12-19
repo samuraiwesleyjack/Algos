@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sqrt Tree - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Sqrt Tree, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+			<h1>Sqrt Tree</h1>
+
+<p>Seja uma array $a$ contendo $n$ elementos e a operação "$\circ$" que satisfaz a propriedade associativa: $(x \circ y) \circ z = x \circ (y \circ z)$ é verdadeiro para qualquer $x$, $y$, $z$.</p>
+
+<p>Portanto, operações como $\ gcd/mdc$, $\min$, $\max$, $+$, $\text{and}$, $\text{or}$, $\text{xor}$, etc. satisfazem essas condições.</p>
+
+<p>Também temos algumas consultas $q(l, r)$. Para cada consulta, precisamos calcular $a_l \circ a_{l+1} \circ \dots \circ a_r$.</p>
+
+<p>A Sqrt Tree pode processar essas consultas em tempo $O(1)$ com tempo $O(n \cdot \log \log n)$ de pré-processamento e memória $O(n \cdot \log \log n)$.</p>
+
+<h2>Descrição</h2>
+
+<h3>Construção da sqrt decomposition</h3>
+
+<p>Vamos fazer uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/Sqrt.html">sqrt decomposition</a>. Dividimos nossa array em $\sqrt{n}$ blocos, cada bloco tem tamanho $\sqrt{n}$. Para cada bloco, calculamos:</p>
+
+<ol>
+<li>Respostas às consultas que estão no bloco e começam no início do bloco ($\text{prefixOp}$)</li>
+<li>Respostas às consultas que estão no bloco e terminam no final do bloco ($\text{suffixOp}$)</li>
+</ol>
+
+<p>E calcularemos uma array adicional:</p>
+
+<ol>
+<li>$\text{between}_{i, j}$ (para $i \le j$) - responde a consulta que começa no início do bloco $i$ e termina no final do bloco $j$. Observe que temos $\sqrt{n}$ blocos, portanto o tamanho dessa array será $O(\sqrt{n}^2) = O(n)$.</li>
+</ol>
+
+<p>Vamos ver o exemplo.</p>
+
+<p>Deixe que "$\circ$" seja $+$ (calculamos a soma em um segmento) e temos a seguinte array $a$:</p>
+
+<p><code>{1, 2, 3, 4, 5, 6, 7, 8, 9}</code></p>
+
+<p>Ele será dividido em três blocos: <code>{1, 2, 3}</code>, <code>{4, 5, 6}</code> e <code>{7, 8, 9}</code>.</p>
+
+<p>Para o primeiro bloco, $\text{prefixOp}$ é <code>{1, 3, 6}</code> e $\text{suffixOp}$ será <code>{6, 5, 3}</code>.(6, 6-1, 6-(1+2))</p>
+
+<p>Para o segundo bloco, $\text{prefixOp}$ é <code>{4, 9, 15}</code> e $\text{suffixOp}$ será <code>{15, 11, 6}</code>.</p>
+
+<p>Para o terceiro bloco, $\text{prefixOp}$ é <code>{7, 15, 24}</code> e $\text{suffixOp}$ será <code>{24, 17, 9}</code>.</p>
+
+<p>a array $\text{between}$ será:</p>
+
+<pre><code>{
+    {6, 21, 45},
+    {0, 15, 39},
+    {0, 0,  24}
+}
+</code></pre>
+
+<p>(assumimos que elementos inválidos em que $i > j$ sejam preenchidos com zeros)</p>
+
+<p>É óbvio ver que essas arrays podem ser facilmente calculadas em tempo e memória linear $O(n)$.</p>
+
+<p>Já podemos responder a algumas consultas usando essas arrays. Se a consulta não couber em um bloco, podemos dividi-la em três partes: sufixo de um bloco, algum segmento de blocos contínuos e o prefixo de algum bloco. Podemos responder a uma consulta dividindo-a em três partes e obtendo nossa operação de algum valor de $\text{suffixOp}$, depois, de algum valor de $\text{b}$, e assim algum valor de $\text{prefixOp}$.</p>
+
+<p>Mas se tivermos consultas que se encaixam totalmente em um bloco, não podemos processá-las usando essas três arrays.</p>
+
+<h3>Construindo uma árvore</h3>
+
+<p>Não podemos responder apenas às consultas que se encaixam inteiramente em um bloco. Entretanto, podemos <strong>construir a mesma estrutura descrita acima para cada bloco</strong>. E fazemos isso recursivamente, até atingirmos o tamanho do bloco de $1$ ou $2$. As respostas para esses blocos podem ser calculadas facilmente em $O(1)$.</p>
+
+<p>Então, nós temos uma árvore. Cada nó da árvore representa algum segmento da array. O nó que representa o segmento da array com tamanho $k$ tem $\sqrt{k}$ filhos -- para cada bloco. Além disso, cada nó contém as três arrays descritas acima para o segmento contido. A raiz da árvore representa toda a array. Nós com comprimentos de segmento $1$ ou $2$ são folhas.</p>
+
+<p>A altura dessa árvore é $O(\log \log n)$, porque se algum vértice da árvore representar uma array com comprimento $k$, seus filhos terão comprimento $\sqrt{k}$. $\log(\sqrt{k}) = \frac{\log{k}}{2}$, então $\log k$ diminui duas vezes a cada camada da árvore e, portanto, sua altura é $O(\log \log n)$. O tempo para construção e uso da memória será $O(n \cdot \log \log n)$, porque todos os elementos da array aparecem exatamente uma vez em cada camada da árvore.</p>
+
+<p>Agora podemos responder às consultas em $O(\log \log n)$. Podemos descer na árvore até encontrarmos um segmento com comprimento $1$ ou $2$ (a resposta pode ser calculada em tempo $O(1)$) ou encontrar o primeiro segmento no qual nossa consulta não se encaixa totalmente.</p>
+
+<p>Agora conseguimos $O(\log \log n)$ por consulta.</p>
+
+<h3>Otimizando a complexidade da consulta/query</h3>
+
+<p>Uma das otimizações mais óbvias é fazer uma <strong>busca binária</strong> no nó da árvore que precisamos. Usando binary search podemos alcançar a complexidade $O(\log \log \log n)$ por query. Podemos fazer isso ainda mais rápido.</p>
+
+<p>Vamos assumir que:</p>
+
+<ol>
+<li>Cada tamanho de bloco é uma potência de dois.</li>
+<li>Todos os blocos são iguais em cada camada.</li>
+</ol>
+
+<p>Para alcançar isso, podemos adicionar alguns elementos zero à nossa array para que seu tamanho se torne uma potência de dois.</p>
+
+<p>Quando usamos isso, alguns tamanhos de bloco podem se tornar duas vezes maiores para ter uma potência de dois, mas ainda tem $O(\sqrt{k})$ em tamanho e mantemos a complexidade linear para criar as arrays em um segmento.</p>
+
+<p>Agora, podemos verificar facilmente se a consulta se encaixa inteiramente em um bloco com tamanho $2^k$. Vamos escrever os intervalos da consulta, $l$ e $r$ em formato binário. Por exemplo, vamos supor que $k=4, l=39, r=46$. A representação binária de $l$ e $r$ é:</p>
+
+<p>$l = 39_{10} = 100111_2$</p>
+
+<p>$r = 46_{10} = 101110_2$</p>
+
+<p>Lembre-se de que uma camada contém segmentos do mesmo tamanho e o bloco de uma camada também tem o mesmo tamanho (no nosso caso, o tamanho é de $2^k = 2^4 = 16$. Os blocos cobrem a array inteira, então o primeiro bloco cobre os elementos $(0 - 15)$ ($(000000_2 - 001111_2)$ em binário), o segundo cobre os elementos $(16 - 31)$ ($(010000_2 - 011111_2)$ em binário) e assim por diante. Podemos ver que os índices das posições cobertas por um bloco podem diferir apenas em $k$ (no nosso caso: $4$) últimos bits. No nosso caso $l$ e $r$ tem bits iguais exceto os 4 finais, então eles pertencem em um bloco.</p>
+
+<p>Portanto, precisamos verificar se nada mais que $k$ bits diferem (ou $l\ \text{xor}\ r$ não exceda $2^k-1$).</p>
+
+<p>Usando esta observação, podemos encontrar uma camada que é adequada para responder à consulta rapidamente.</p>
+
+<ol>
+<li><p>Para cada $i$ que não exceda o tamanho da array, encontramos o maior bit igual a $1$. Para fazer isso rapidamente, usamos DP e uma array pré-calculada.</p></li>
+<li><p>Agora, para cada $q(l, r)$ encontramos o maior bit de $l\ \text{xor}\ r$ e, usando essas informações, é fácil escolher a camada na qual podemos processar a consulta facilmente. Também podemos usar uma array pré-calculada aqui.</p></li>
+</ol>
+
+<p>Para mais detalhes, consulte o código abaixo.</p>
+
+<p>Portanto, usando isso, podemos responder às consultas em $O(1)$ cada. Viva! :)</p>
+
+<h2>Atualizando elementos</h2>
+
+<p>Também podemos atualizar elementos na Sqrt Tree. Ambas as atualizações (de elemento único e as de segmento) são suportadas.</p>
+
+<h3>Atualizando um único elemento</h3>
+
+<p>Considere uma query $\text{update}(x, val)$ que faça a atribuição $a_x = val$. Precisamos executar essa query com rapidez suficiente.</p>
+
+<h4>Abordagem trivial</h4>
+
+<p>Primeiro, vamos dar uma olhada no que é alterado na árvore quando um único elemento é alterado. Considere um nó de árvore com comprimento $l$ e suas arrays: $\text{prefixOp}$, $\text{suffixOp}$ e $\text{between}$. Apenas $O(\sqrt{l})$ elementos de $\text{prefixOp}$ e $\text{suffixOp}$ mudam (apenas dentro do bloco com o elemento alterado). $O(l)$ elementos são alterados em $\text{between}$. Portanto, $O(l)$ elementos no nó da árvore são atualizados.</p>
+
+<p>Lembrando que qualquer elemento $x$ é presente exatamente em um nó da árvore em cada camada. O nó raiz (camada $0$) tem comprimento $O(n)$, os nós da camada $1$ têm comprimento $O(\sqrt{n})$, nós da camada $2$ têm comprimento $O(\sqrt{\sqrt{n}})$, etc. Então a complexidade de tempo por atualização é $O(n + \sqrt{n} + \sqrt{\sqrt{n}} + \dots) = O(n)$.</p>
+
+<p>Mas ainda é muito lento. Isso pode ser feito mais rápido.</p>
+
+<h4>Uma sqrt-tree dentro da sqrt-tree</h4>
+
+<p>Para otimizar a árvore, vamos nos livrar da array <em>between</em>. Em vez da array $\text{between}$, armazenamos outra sqrt-tree para o nó raiz. Vamos chamá-la de $\text{index}$. Ele desempenha o mesmo papel que $\text{between}$&mdash; responde às consultas nos segmentos de blocos. Observe que o restante dos nós da árvore não possuem $\text{index}$, eles mantém a array $\text{between}$.</p>
+
+<p>Uma sqrt-tree é <em>indexada</em>, se o seu nó raiz tiver um $\text{index}$. Uma sqrt-tree com uma array $\text{between}$ em seu nó raiz é <em>unindexada</em>. Observe que $\text{index}$ <strong>é <em>unindexado</em></strong>.</p>
+
+<p>Portanto, temos o seguinte algoritmo para atualizar uma árvore <em>indexada</em> :</p>
+
+<ul>
+<li><p>Atualizar $\text{prefixOp}$ e $\text{suffixOp}$ em $O(\sqrt{n})$.</p></li>
+<li><p>Atualizar $\text{index}$. Tem tamanho $O(\sqrt{n})$ e precisamos atualizar apenas um item nele (isso representa o bloco alterado). Então, a complexidade do tempo para essa etapa é $O(\sqrt{n})$. Podemos usar o algoritmo descrito no início desta seção para fazer isso.</p></li>
+<li><p>Va direto no nó filho no qual representa o bloco alterado e atualize-o em $O(\sqrt{n})$ com o algoritmo descrito.</p></li>
+</ul>
+
+<p>Observe que a complexidade da query ainda é $O(1)$: precisamos usar $\text{index}$ na query não mais que uma vez, e isso levará tempo $O(1)$.</p>
+
+<p>Portanto, a complexidade do tempo total para atualizar um único elemento é $O(\sqrt{n})$. Hooray! :)</p>
+
+<h3>Atualizando um segmento</h3>
+
+<p>Sqrt-tree também pode atribuir um valor em um segmento inteiro. $\text{massUpdate}(x, l, r)$ significa: $a_i = x$ em todo $l \le i \le r$.</p>
+
+<p>Existem duas abordagens para fazer isso: uma delas executa o $\text{massUpdate}$ em $O(\sqrt{n}\cdot \log \log n)$, mantendo $O(1)$ por query/consulta. O segundo executa o $\text{massUpdate}$ in $O(\sqrt{n})$, mas a complexidade da consulta se torna $O(\log \log n)$.</p>
+
+<p>Faremos uma "lazy propagation" da mesma maneira que é feita na árvore segmentária: marcamos alguns nós como <em>lazy</em>, o que significa que iremos "puxá-los" quando necessário. Mas uma coisa é diferente das árvores de segmentos: puxar um nó é caro, portanto, isso não pode ser feito em consultas. Na camada $0$, puxar um nó leva tempo $O(\sqrt{n})$. Portanto, não puxamos nós em consultas, apenas examinamos se o nó atual ou se seu parente são "<em>lazy</em>", e apenas o levamos em consideração durante a execução de consultas.</p>
+
+<h4>Primeira abordagem</h4>
+
+<p>Na primeira abordagem, dizemos que apenas os nós da camada $1$ (com tamanho $O(\sqrt{n}$) podem ser <em>lazy</em>. Ao puxar esse nó, ele atualiza toda a sua subárvore(incluindo ele mesmo) em $O(\sqrt{n}\cdot \log \log n)$. O processo de $\text{massUpdate}$ é feito da seguinte forma:</p>
+
+<ul>
+<li><p>Considere os nós na camada $1$ e os blocos correspondentes a eles.</p></li>
+<li><p>Alguns blocos são totalmente cobertos por $\text{massUpdate}$. Marque-os como "<em>lazy</em>" em $O(\sqrt{n})$.</p></li>
+<li><p>Alguns blocos são parcialmente cobertos. Observe que não há mais de dois blocos desse tipo. Reconstrua eles em $O(\sqrt{n}\cdot \log \log n)$. Se eles eram "<em>lazy</em>", leve em consideração.</p></li>
+<li><p>Atualize $\text{prefixOp}$ e $\text{suffixOp}$ para blocos parcialmente cobertos em $O(\sqrt{n})$ (porque existem apenas dois desses blocos).</p></li>
+<li><p>Reconstrua o $\text{index}$ em $O(\sqrt{n}\cdot \log \log n)$.</p></li>
+</ul>
+
+<p>Então, podemos executar o $\text{massUpdate}$ rápido. Mas como lazy propagation afeta as consultas? Elas terão as seguintes modificações:</p>
+
+<ul>
+<li><p>Se a nossa consulta estiver inteiramente em um bloco <em>lazy</em>, calcule-o e leve em consideração o <em>lazy</em>. $O(1)$.</p></li>
+<li><p>Se nossa consulta consistir em muitos blocos e alguns deles são <em>lazy</em>, precisamos cuidar do <em>lazy</em> apenas nos blocos mais à esquerda e mais à direita(ou seja, os blocos extremos). O restante dos blocos é calculado usando o $\text{index}$, que já sabe a resposta no bloco marcado com <em>lazy</em> (por causa de sua reconstrução depois de cada modificação). $O(1)$.</p></li>
+</ul>
+
+<p>A complexidade da consulta ainda permanece $O(1)$.</p>
+
+<h4>Segunda abordagem</h4>
+
+<p>Nesta abordagem, cada nó pode ser <em>lazy</em> (exceto a raiz). Até os nós em $\text{index}$ podem ser <em>lazy</em>. Portanto, durante o processamento de uma consulta, precisamos procurar pelas tags com <em>lazy</em> em todos os nós parentes, ou seja, a complexidade da consulta será $O(\log \log n)$.</p>
+
+<p>Porém, $\text{massUpdate}$ se torna rápido. Parece da seguinte maneira:</p>
+
+<ul>
+<li><p>Alguns blocos são totalmente cobertos com $\text{massUpdate}$. Portanto, as tags <em>lazy</em> são adicionadas neles. $O(\sqrt{n})$.</p></li>
+<li><p>Atualizar $\text{prefixOp}$ e $\text{suffixOp}$ para blocos parcialmente cobertos em $O(\sqrt{n})$ (porque existem apenas dois desses blocos).</p></li>
+<li><p>Não se esqueça de atualizar o "index". $O(\sqrt{n})$ (usamos o mesmo algoritmo $\text{massUpdate}$).</p></li>
+<li><p>Atualizar a array $\text{between}$ para subárvores <em>unindexadas</em>.</p></li>
+<li><p>Va nos nós que representam os blocos parcialmente cobertos e chame $\text{massUpdate}$ recursivamente.</p></li>
+</ul>
+
+<p>Observe que, quando fazemos a chamada recursiva, fazemos o prefixo ou o sufixo $\text{massUpdate}$. Porém, para atualizações de prefixo e sufixo, não podemos ter mais do que um filho parcialmente coberto. Então, visitamos um nó na camada $1$, dois nós na camada $2$ e dois nós em qualquer camada mais profunda. Portanto, a complexidade do tempo é $O(\sqrt{n} + \sqrt{\sqrt{n}} + \dots) = O(\sqrt{n})$. A abordagem aqui é semelhante à atualização em massa da árvore segmentária.</p>
+
+<h2>Implementação</h2>
+
+<p>A seguinte implementação da Sqrt Tree pode executar as seguintes operações: construir em $O(n \cdot \log \log n)$, responder consultas em $O(1)$ e atualizar um elemento em $O(\sqrt{n})$.</p>
+
+<pre><code class="cpp">SqrtTreeItem op(const SqrtTreeItem &amp;a, const SqrtTreeItem &amp;b);
+
+inline int log2Up(int n) {
+    int res = 0;
+    while ((1 &lt;&lt; res) &lt; n) {
+        res++;
+    }
+    return res;
+}
+
+class SqrtTree {
+private:
+    int n, lg, indexSz;
+    vector&lt;SqrtTreeItem&gt; v;
+    vector&lt;int&gt; clz, layers, onLayer;
+    vector&lt; vector&lt;SqrtTreeItem&gt; &gt; pref, suf, between;
+
+    inline void buildBlock(int layer, int l, int r) {
+        pref[layer][l] = v[l];
+        for (int i = l+1; i &lt; r; i++) {
+            pref[layer][i] = op(pref[layer][i-1], v[i]);
+        }
+        suf[layer][r-1] = v[r-1];
+        for (int i = r-2; i &gt;= l; i--) {
+            suf[layer][i] = op(v[i], suf[layer][i+1]);
+        }
+    }
+
+    inline void buildBetween(int layer, int lBound, int rBound, int betweenOffs) {
+        int bSzLog = (layers[layer]+1) &gt;&gt; 1;
+        int bCntLog = layers[layer] &gt;&gt; 1;
+        int bSz = 1 &lt;&lt; bSzLog;
+        int bCnt = (rBound - lBound + bSz - 1) &gt;&gt; bSzLog;
+        for (int i = 0; i &lt; bCnt; i++) {
+            SqrtTreeItem ans;
+            for (int j = i; j &lt; bCnt; j++) {
+                SqrtTreeItem add = suf[layer][lBound + (j &lt;&lt; bSzLog)];
+                ans = (i == j) ? add : op(ans, add);
+                between[layer-1][betweenOffs + lBound + (i &lt;&lt; bCntLog) + j] = ans;
+            }
+        }
+    }
+
+    inline void buildBetweenZero() {
+        int bSzLog = (lg+1) &gt;&gt; 1;
+        for (int i = 0; i &lt; indexSz; i++) {
+            v[n+i] = suf[0][i &lt;&lt; bSzLog];
+        }
+        build(1, n, n + indexSz, (1 &lt;&lt; lg) - n);
+    }
+
+    inline void updateBetweenZero(int bid) {
+        int bSzLog = (lg+1) &gt;&gt; 1;
+        v[n+bid] = suf[0][bid &lt;&lt; bSzLog];
+        update(1, n, n + indexSz, (1 &lt;&lt; lg) - n, n+bid);
+    }
+
+    void build(int layer, int lBound, int rBound, int betweenOffs) {
+        if (layer &gt;= (int)layers.size()) {
+            return;
+        }
+        int bSz = 1 &lt;&lt; ((layers[layer]+1) &gt;&gt; 1);
+        for (int l = lBound; l &lt; rBound; l += bSz) {
+            int r = min(l + bSz, rBound);
+            buildBlock(layer, l, r);
+            build(layer+1, l, r, betweenOffs);
+        }
+        if (layer == 0) {
+            buildBetweenZero();
+        } else {
+            buildBetween(layer, lBound, rBound, betweenOffs);
+        }
+    }
+
+    void update(int layer, int lBound, int rBound, int betweenOffs, int x) {
+        if (layer &gt;= (int)layers.size()) {
+            return;
+        }
+        int bSzLog = (layers[layer]+1) &gt;&gt; 1;
+        int bSz = 1 &lt;&lt; bSzLog;
+        int blockIdx = (x - lBound) &gt;&gt; bSzLog;
+        int l = lBound + (blockIdx &lt;&lt; bSzLog);
+        int r = min(l + bSz, rBound);
+        buildBlock(layer, l, r);
+        if (layer == 0) {
+            updateBetweenZero(blockIdx);
+        } else {
+            buildBetween(layer, lBound, rBound, betweenOffs);
+        }
+        update(layer+1, l, r, betweenOffs, x);
+    }
+
+    inline SqrtTreeItem query(int l, int r, int betweenOffs, int base) {
+        if (l == r) {
+            return v[l];
+        }
+        if (l + 1 == r) {
+            return op(v[l], v[r]);
+        }
+        int layer = onLayer[clz[(l - base) ^ (r - base)]];
+        int bSzLog = (layers[layer]+1) &gt;&gt; 1;
+        int bCntLog = layers[layer] &gt;&gt; 1;
+        int lBound = (((l - base) &gt;&gt; layers[layer]) &lt;&lt; layers[layer]) + base;
+        int lBlock = ((l - lBound) &gt;&gt; bSzLog) + 1;
+        int rBlock = ((r - lBound) &gt;&gt; bSzLog) - 1;
+        SqrtTreeItem ans = suf[layer][l];
+        if (lBlock &lt;= rBlock) {
+            SqrtTreeItem add = (layer == 0) ? (
+                query(n + lBlock, n + rBlock, (1 &lt;&lt; lg) - n, n)
+            ) : (
+                between[layer-1][betweenOffs + lBound + (lBlock &lt;&lt; bCntLog) + rBlock]
+            );
+            ans = op(ans, add);
+        }
+        ans = op(ans, pref[layer][r]);
+        return ans;
+    }
+public:
+    inline SqrtTreeItem query(int l, int r) {
+        return query(l, r, 0, 0);
+    }
+
+    inline void update(int x, const SqrtTreeItem &amp;item) {
+        v[x] = item;
+        update(0, 0, n, 0, x);
+    }
+
+    SqrtTree(const vector&lt;SqrtTreeItem&gt;&amp; a)
+        : n((int)a.size()), lg(log2Up(n)), v(a), clz(1 &lt;&lt; lg), onLayer(lg+1) {
+        clz[0] = 0;
+        for (int i = 1; i &lt; (int)clz.size(); i++) {
+            clz[i] = clz[i &gt;&gt; 1] + 1;
+        }
+        int tlg = lg;
+        while (tlg &gt; 1) {
+            onLayer[tlg] = (int)layers.size();
+            layers.push_back(tlg);
+            tlg = (tlg+1) &gt;&gt; 1;
+        }
+        for (int i = lg-1; i &gt;= 0; i--) {
+            onLayer[i] = max(onLayer[i], onLayer[i+1]);
+        }
+        int betweenLayers = max(0, (int)layers.size() - 1);
+        int bSzLog = (lg+1) &gt;&gt; 1;
+        int bSz = 1 &lt;&lt; bSzLog;
+        indexSz = (n + bSz - 1) &gt;&gt; bSzLog;
+        v.resize(n + indexSz);
+        pref.assign(layers.size(), vector&lt;SqrtTreeItem&gt;(n + indexSz));
+        suf.assign(layers.size(), vector&lt;SqrtTreeItem&gt;(n + indexSz));
+        between.assign(betweenLayers, vector&lt;SqrtTreeItem&gt;((1 &lt;&lt; lg) + bSz));
+        build(0, 0, n, 0);
+    }
+};
+
+</code></pre>
+
+<h2>Problemas</h2>
+
+<p><a href="https://www.codechef.com/NOV17/problems/SEGPROD">CodeChef - SEGPROD</a></p>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
