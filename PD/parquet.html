@@ -45,7 +45,7 @@
 
 <p>Deixe que o estado da DP seja: <code>D[i][mask]</code>, onde <code>i = 1 ... N</code>, e <code>mask = 0 ... 2^M-1</code>. <code>i</code> representa o número de linhas no grid atual e <code>mask</code> é o estado da última linha do grid atual. Se o <code>j</code>-ésimo bit de <code>mask</code> for 0 a célula correspondente será preenchida, caso contrário, não será preenchida. Claramente, a resposta para o problema será <code>D[N][0]</code>.</p>
 
-<p>Nós estaremos construindo o estado da DP iterando sobre cada <code>i = 1 ... N</code> e cada <code>mask = 0 ... 2^M-1</code>, e para cada <code>mask</code> estaremos apenas fazendo a transição adiante, ou seja, estaremos <em>adicionando</em> figuras para a grid atual.</p>
+<p>Nós estaremos construindo o estado da DP iterando sobre cada <code>i = 1 ... N</code> e cada <code>mask = 0 ... 2^M-1</code>, e para cada <code>mask</code> estaremos apenas fazendo a transição adiante, ou seja, estaremos <em>adicionando</em> figuras para o grid atual.</p>
 
 <h3>Implementação</h3>
 
