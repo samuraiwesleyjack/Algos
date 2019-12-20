@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Randomized Heap - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Heap Aleatório</h1>
+
+<p>Um heap aleatório é um <a href="http://www.cplusplus.com/reference/algorithm/make_heap/">heap</a> no qual, através do uso da randomização, permite executar todas as operações em tempo logarítmico.</p>
+
+<p>Um <strong>heap mínimo</strong> é uma árvore binária na qual o valor de cada vértice é menor ou igual aos valores de seus filhos.
+Assim, o mínimo da árvore está sempre no vértice raiz.</p>
+
+<p>Um heap máximo pode ser definido de maneira semelhante: substituindo mínimo por máximo.</p>
+
+<p>As operações padrão de um heap são:</p>
+
+<ul>
+<li>Adicionar um valor</li>
+<li>Extrair o mínimo</li>
+<li>Remover o mínimo</li>
+<li>Mesclar dois heaps (sem excluir elementos duplicados)</li>
+<li>Remover um elemento arbitrário (se sua posição na árvore for conhecida)</li>
+</ul>
+
+<p>Um heap aleatório pode executar todas essas operações no tempo esperado de $O(\log n)$ com uma implementação muito simples.</p>
+
+<h2>Estrutura de dados</h2>
+
+<p>Podemos descrever imediatamente a estrutura do heap binário:</p>
+
+<pre><code class="cpp">struct Tree {
+    int value;
+    Tree * l = nullptr;
+    Tree * r = nullptr;
+};
+</code></pre>
+
+<p>No vértice, armazenamos um valor <code>value</code>.
+Além disso, temos ponteiros para os filhos esquerdo e direito, que são <code>nullptr</code> se o filho correspondente não existir.</p>
+
+<h2>Operações</h2>
+
+<p>Não é difícil perceber que todas as operações podem ser reduzidas a uma única: <strong>mesclar</strong> dois heaps em um.
+De fato, adicionar um novo valor ao heap é equivalente a mesclar o heap com um heap que consiste em um único vértice com esse valor. 
+Encontrar um mínimo não requer nenhuma operação - o mínimo é simplesmente o valor na raiz.
+Remover o mínimo é equivalente ao resultado da mesclagem dos filhos esquerdo e direito do vértice raiz.
+E remover um elemento arbitrário é semelhante. Mesclamos os filhos do vértice e substituímos o vértice pelo resultado da mesclagem.</p>
+
+<p>Então, na verdade, precisamos apenas implementar a operação de mesclar dois heaps. Todas as outras operações são reduzidas a esta operação.</p>
+
+<p>Sejam dois heaps $T_1$ e $T_2$.
+É claro que a raiz de cada um desses heaps contém o mínimo.
+Portanto, a raiz do heap resultante será o mínimo desses dois valores.
+Então, comparamos os dois valores e usamos o menor como a nova raiz.
+Agora temos que combinar os filhos do vértice selecionado com o heap que sobrou.
+Para isso, selecionamos um dos filhos e o mesclamos com o heap.
+Assim, temos novamente a operação de mesclar dois heaps.
+Mais cedo ou mais tarde, esse processo terminará (o número de etapas desse processo é limitado pela soma das alturas dos dois heaps).</p>
+
+<p>Para alcançar a complexidade logarítmica, em média, precisamos especificar um método para escolher um dos dois filhos, para que o comprimento médio do caminho seja logarítmico.
+Tomaremos essa decisão <strong>aleatoriamente</strong> :).
+Portanto, a implementação da operação de mesclagem é a seguinte:</p>
+
+<pre><code class="cpp">Tree* merge(Tree* t1, Tree* t2) {
+    if (!t1 || !t2)
+        return t1 ? t1 : t2;
+    if (t2-&gt;value &lt; t1-&gt;value)
+        swap(t1, t2);
+    if (rand() &amp; 1)
+        swap(t1-&gt;l, t1-&gt;r);
+    t1-&gt;l = merge(t1-&gt;l, t2);
+    return t1;
+}
+</code></pre>
+
+<p>Aqui, primeiro verificamos se um dos heaps está vazio e não precisamos executar nenhuma ação de mesclagem.
+Caso contrário, criamos o heap <code>t1</code> o que tem o menor valor (trocando <code>t1</code> e <code>t2</code> se necessário).
+Queremos mesclar o filho esquerdo de <code>t1</code> com <code>t2</code>, portanto, trocamos aleatoriamente os filhos de <code>t1</code>, e executamos a mesclagem.</p>
+
+<h2>Complexidade</h2>
+
+<p>Introduzimos a variável aleatória $h(T)$ que indicará o <strong>comprimento do caminho aleatório</strong> da raiz até a folha (o comprimento no número de arestas).
+O algoritmo <code>merge</code> performa $O(h(T_1) + h(T_2))$ etapas.
+Portanto, para entender a complexidade das operações, devemos olhar para a variável aleatória $h(T)$.</p>
+
+<h3>Valor esperado</h3>
+
+<p>Assumimos que a 'expectativa' $h(T)$ ossa ser estimada acima pelo logaritmo do número de vértices no heap:
+$$\mathbf{E} h(T) \le \log(n+1)$$</p>
+
+<p>Isso pode ser comprovado por indução.
+Seja $L$ e $R$ as subárvores esquerda e direita da raiz $T$, e $n_L$ e $n_R$ o número de vértices nelas ($n = n_L + n_R + 1$).</p>
+
+<p>A seguir, é mostrada a indução:</p>
+
+<p>$$\begin{align}
+\mathbf{E} h(T) &amp;= 1 + \frac{\mathbf{E} h(L) + \mathbf{E} h(R)}{2} 
+\le 1 + \frac{\log(n_L + 1) \log(n_R + 1)}{2} &#92;&#92;
+&amp;= 1 + \log\sqrt{(n_L + 1)(n_R + 1)} = \log 2\sqrt{(n_L + 1)(n_R + 1)} &#92;&#92;
+&amp;\le \log \frac{2\left((n_L + 1) + (n_R + 1)\right)}{2} = \log(n_L + n_R + 2) = \log(n+1)
+\end{align}$$</p>
+
+<h3>Excedendo o valor esperado</h3>
+
+<p>Of course we are still not happy.
+O valor esperado de $h(T)$ não diz nada sobre o pior caso.
+Ainda é possível que os caminhos da raiz aos vértices sejam, em média, muito maiores que $\log(n + 1)$ para uma árvore específica.</p>
+
+<p>Vamos provar que o valor excedido é realmente muito pequeno:
+$$P&#92;{h(T > (c+1) \log n&#92;} &lt; \frac{1}{n^c}$$
+para qualquer constante positiva $c$.</p>
+
+<p>Aqui, denotamos por $P$ o conjunto de caminhos da raiz do heap até as folhas em que o comprimento excede $(c+1) \log n$.
+Observe que, para qualquer caminho $p$ de comprimento $|p|$ a probabilidade de ser escolhido como caminho aleatório é $2^{-|p|}$.
+Portanto, obtemos:
+$$P&#92;{h(T > (c+1) \log n&#92;} = \sum_{p \in P} 2^{-|p|} &lt; \sum_{p \in P} 2^{-(c+1) \log n} = |P| n^{-(c+1)} \le n^{-c}$$</p>
+
+<h3>Complexidade do algoritmo</h3>
+
+<p>Assim, o algoritmo <code>merge</code>, e, portanto, todas as outras operações expressas com ele, podem ser executadas em $O(\log n)$ em média.</p>
+
+<p>Além disso, para qualquer constante positiva $\epsilon$ existe uma constante positiva $c$, de tal forma que a probabilidade de a operação exigir mais que $c \log n$ etapas é menor que $n^{-\epsilon}$ (em em certo sentido, isso descreve o comportamento do algoritmo no pior caso).</p>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
