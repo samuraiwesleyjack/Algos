@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Problema "Parquet" - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Programação dinâmica - Problema "Parquet"</h1>
+
+<p>Problemas comuns resolvidos usando DP incluem:</p>
+
+<ul>
+<li>encontrar várias maneiras de preencher completamente uma área (por exemplo, tabuleiro de xadrez / grid) com algumas figuras(por exemplo, dominós)</li>
+<li>encontrar uma maneira de preencher uma área com um número mínimo de figuras</li>
+<li>localizando um preenchimento parcial com número mínimo de espaço não preenchido (ou células, no caso de grids)</li>
+<li>encontrar um preenchimento parcial com um número mínimo de figuras, de modo que não seja possível adicionar mais figuras</li>
+</ul>
+
+<h2>Problema "Parquet"</h2>
+
+<h3>Descrição</h3>
+
+<p>Dado um grid de tamanho $N \times M$. Encontre o número de maneiras para preencher o grid com "figuras" de tamanho $2 \times 1$ (nenhuma célula deve ser deixada vazia e as figuras não devem se sobrepor).</p>
+
+<p>Deixe que o estado da DP seja: <code>D[i][mask]</code>, onde <code>i = 1 ... N</code>, e <code>mask = 0 ... 2^M-1</code>. <code>i</code> representa o número de linhas no grid atual e <code>mask</code> é o estado da última linha do grid atual. Se o <code>j</code>-ésimo bit de <code>mask</code> for 0 a célula correspondente será preenchida, caso contrário, não será preenchida. Claramente, a resposta para o problema será <code>D[N][0]</code>.</p>
+
+<p>Nós estaremos construindo o estado da DP iterando sobre cada <code>i = 1 ... N</code> e cada <code>mask = 0 ... 2^M-1</code>, e para cada <code>mask</code> estaremos apenas fazendo a transição adiante, ou seja, estaremos <em>adicionando</em> figuras para a grid atual.</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp">int n, m;
+vector &lt; vector&lt;long long&gt; &gt; d;
+
+
+void calc (int x = 0, int y = 0, int mask = 0, int next_mask = 0)
+{
+    if (x == n)
+        return;
+    if (y &gt;= m)
+        d[x+1][next_mask] += d[x][mask];
+    else
+    {
+        int my_mask = 1 &lt;&lt; y;
+        if (mask &amp; my_mask)
+            calc (x, y+1, mask, next_mask);
+        else
+        {
+            calc (x, y+1, mask, next_mask | my_mask);
+            if (y+1 &lt; m &amp;&amp; ! (mask &amp; my_mask) &amp;&amp; ! (mask &amp; (my_mask &lt;&lt; 1)))
+                calc (x, y+2, mask, next_mask);
+        }
+    }
+}
+
+
+int main()
+{
+    cin &gt;&gt; n &gt;&gt; m;
+
+    d.resize (n+1, vector&lt;long long&gt; (1&lt;&lt;m));
+    d[0][0] = 1;
+    for (int x=0; x&lt;n; ++x)
+        for (int mask=0; mask&lt;(1&lt;&lt;m); ++mask)
+            calc (x, 0, mask, 0);
+
+    cout &lt;&lt; d[n][0];
+
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
