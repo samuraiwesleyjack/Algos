@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Deletando de uma estrutura de dados - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Deletando de uma estrutura de dados em $O(T(n)\log n)$</h1>
+
+<p>Suponha que você tenha uma estrutura de dados que permita adicionar elementos em $O(T(n))$.
+Este artigo descreve uma técnica que permite a exclusão em $O(T(n)\log n)$ (modo offline).</p>
+
+<h2>Algoritmo</h2>
+
+<p>Cada elemento vive na estrutura de dados por alguns segmentos de tempo entre adições e exclusões.
+Vamos construir uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore de segmentos</a> sobre as consultas.
+Cada segmento quando algum elemento está ativo é dividido em $O(\log n)$ nós da árvore.
+Vamos colocar cada consulta(query), quando quisermos saber algo sobre a estrutura, na folha correspondente.
+Agora, para processar todas as consultas, executaremos uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> na árvore de segmentos.
+Ao entrar no nó, adicionaremos todos os elementos que estão dentro desse nó.
+Em seguida, iremos além nos filhos desse nó ou responderemos às consultas (se o nó for uma folha).
+Ao sair do nó, devemos desfazer as adições. Observe que, se alterarmos a estrutura em $O(T(n))$ podemos reverter as alterações em $O(T(n))$ mantendo um stack de alterações. Observe que as reversões quebram a complexidade amortizada.</p>
+
+<h2>Notas</h2>
+
+<p>A idéia de criar uma árvore de segmentos sobre segmentos pode ser usada não apenas para problemas de estrutura de dados. Veja alguns problemas abaixo.</p>
+
+<h2>Implementação</h2>
+
+<p>Esta implementação é para o problema <a href="https://en.wikipedia.org/wiki/Dynamic_connectivity">conectividade dinâmica</a>.
+Ele pode adicionar arestas, remover arestas e contar o número de componentes conectados.</p>
+
+<pre><code class="cpp">struct dsu_save {
+    int v, rnkv, u, rnku;
+
+    dsu_save() {}
+
+    dsu_save(int _v, int _rnkv, int _u, int _rnku)
+        : v(_v), rnkv(_rnkv), u(_u), rnku(_rnku) {}
+};
+
+struct dsu_with_rollbacks {
+    vector&lt;int&gt; p, rnk;
+    int comps;
+    stack&lt;dsu_save&gt; op;
+
+    dsu_with_rollbacks() {}
+
+    dsu_with_rollbacks(int n) {
+        p.resize(n);
+        rnk.resize(n);
+        for (int i = 0; i &lt; n; i++) {
+            p[i] = i;
+            rnk[i] = 0;
+        }
+        comps = n;
+    }
+
+    int find_set(int v) {
+        return (v == p[v]) ? v : find_set(p[v]);
+    }
+
+    bool unite(int v, int u) {
+        v = find_set(v);
+        u = find_set(u);
+        if (v == u)
+            return false;
+        comps--;
+        if (rnk[v] &gt; rnk[u])
+            swap(v, u);
+        op.push(dsu_save(v, rnk[v], u, rnk[u]));
+        p[v] = u;
+        if (rnk[u] == rnk[v])
+            rnk[u]++;
+        return true;
+    }
+
+    void rollback() {
+        if (op.empty())
+            return;
+        dsu_save x = op.top();
+        op.pop();
+        comps++;
+        p[x.v] = x.v;
+        rnk[x.v] = x.rnkv;
+        p[x.u] = x.u;
+        rnk[x.u] = x.rnku;
+    }
+};
+
+struct query {
+    int v, u;
+    bool united;
+    query(int _v, int _u) : v(_v), u(_u) {
+    }
+};
+
+struct QueryTree {
+    vector&lt;vector&lt;query&gt;&gt; t;
+    dsu_with_rollbacks dsu;
+    int T;
+
+    QueryTree() {}
+
+    QueryTree(int _T, int n) : T(_T) {
+        dsu = dsu_with_rollbacks(n);
+        t.resize(4 * T + 4);
+    }
+
+    void add_to_tree(int v, int l, int r, int ul, int ur, query&amp; q) {
+        if (ul &gt; ur)
+            return;
+        if (l == ul &amp;&amp; r == ur) {
+            t[v].push_back(q);
+            return;
+        }
+        int mid = (l + r) / 2;
+        add_to_tree(2 * v, l, mid, ul, min(ur, mid), q);
+        add_to_tree(2 * v + 1, mid + 1, r, max(ul, mid + 1), ur, q);
+    }
+
+    void add_query(query q, int l, int r) {
+        add_to_tree(1, 0, T - 1, l, r, q);
+    }
+
+    void dfs(int v, int l, int r, vector&lt;int&gt;&amp; ans) {
+        for (query&amp; q : t[v]) {
+            q.united = dsu.unite(q.v, q.u);
+        }
+        if (l == r)
+            ans[l] = dsu.comps;
+        else {
+            int mid = (l + r) / 2;
+            dfs(2 * v, l, mid, ans);
+            dfs(2 * v + 1, mid + 1, r, ans);
+        }
+        for (query q : t[v]) {
+            if (q.united)
+                dsu.rollback();
+        }
+    }
+
+    vector&lt;int&gt; solve() {
+        vector&lt;int&gt; ans(T);
+        dfs(1, 0, T - 1, ans);
+        return ans;
+    }
+};
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://codeforces.com/gym/100551/problem/A">Codeforces - Connect and Disconnect</a></li>
+<li><a href="https://codeforces.com/contest/981/problem/E">Codeforces - Addition on Segments</a></li>
+<li><a href="https://codeforces.com/contest/1140/problem/F">Codeforces - Extending Set of Points</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
