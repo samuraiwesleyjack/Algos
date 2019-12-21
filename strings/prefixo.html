@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Função de prefixo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Função de prefixo - Algoritmo de Knuth – Morris – Pratt</h1>
+
+<h2>Definição</h2>
+
+<p>Você recebe uma string $s$ de tamanho $n$.
+A <strong>função prefixo</strong> para essa string é definida como uma array $\pi$ de tamanho $n$, onde $\pi[i]$ é o comprimento do prefixo apropriado mais longo da substring $s[0 \dots i]$ que também é um sufixo dessa substring.
+Um prefixo adequado de uma string é um prefixo que não é igual à própria string.
+Por definição, $\pi[0] = 0$.</p>
+
+<p>Matematicamente, a definição da função de prefixo pode ser escrita da seguinte maneira:</p>
+
+<p>$$\pi[i] = \max_ {k = 0 \dots i} &#92;{k : s[0 \dots k-1] = s[i-(k-1) \dots i] &#92;}$$</p>
+
+<p>Por exemplo, a função de prefixo da string "abcabcd" será $[0, 0, 0, 1, 2, 3, 0]$, e o prefixo da string "aabaaab" é $[0, 1, 0, 1, 2, 2, 3]$.</p>
+
+<h2>Algoritmo Trivial</h2>
+
+<p>Um algoritmo que segue exatamente a definição da função de prefixo é o seguinte:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; prefix_function(string s) {
+    int n = (int)s.length();
+    vector&lt;int&gt; pi(n);
+    for (int i = 0; i &lt; n; i++)
+        for (int k = 0; k &lt;= i; k++)
+            if (s.substr(0, k) == s.substr(i-k+1, k))
+                pi[i] = k;
+    return pi;
+}
+</code></pre>
+
+<p>É fácil ver que sua complexidade é $O(n^3)$, que tem espaço para melhorias.</p>
+
+<h2>Algoritmo eficiente</h2>
+
+<p>Esse algoritmo foi proposto por Knuth e Pratt e, independentemente deles, por Morris em 1977. 
+Foi usado como a principal função de um algoritmo de busca de substring.</p>
+
+<h3>Primeira otimização</h3>
+
+<p>A primeira observação importante é que os valores da função prefixo só podem aumentar em no máximo um.</p>
+
+<p>De fato, caso contrário, se $\pi[i + 1] \gt \pi[i] + 1$, podemos pegar esse sufixo terminando na posição $i + 1$ com o comprimento $\pi[i + 1]$ e remova o último caractere dele. 
+Terminamos com um sufixo que termina na posição $i$ com o comprimento $\pi[i + 1] - 1$, que é melhor que $\pi[i]$, ou seja, temos uma contradição.</p>
+
+<p>A ilustração a seguir mostra essa contradição.
+O sufixo apropriado mais longo na posição $i$ que também é um prefixo de tamanho $2$, e na posição $i+1$ é de tamanho $4$.
+Portanto, a string $s_0 ~ s_1 ~ s_2 ~ s_3$ é igual à string $s_{i-2} ~ s_{i-1} ~ s_i ~ s_{i+1}$, o que significa que também as strings $s_0 ~ s_1 ~ s_2$ e $s_{i-2} ~ s_{i-1} ~ s_i$ são iguais, portanto, $\pi[i]$ deve ser $3$.
+$$\underbrace{\overbrace{s_0 ~ s_1}^{\pi[i] = 2} ~ s_2 ~ s_3}&#95;{\pi[i+1] = 4} ~ \dots ~ \underbrace{s_{i-2} ~ \overbrace{s_{i-1} ~ s_{i}}^{\pi[i] = 2} ~ s_{i+1}}&#95;{\pi[i+1] = 4}$$</p>
+
+<p>Assim, ao passar para a próxima posição, o valor da função prefixo pode aumentar em um, permanecer o mesmo ou diminuir em alguma quantidade.
+Esse fato já nos permite reduzir a complexidade do algoritmo para $O(n^2)$, porque em uma etapa a função prefixo pode crescer no máximo em um.
+No total, a função pode crescer no máximo $n$ etapas e, portanto, também pode apenas diminuir um total de $n$ etapas.
+Isso significa que precisamos executar $O(n)$ comparações de string, e alcançar a complexidade de $O(n^2)$.</p>
+
+<h3>Segunda otimização</h3>
+
+<p>Vamos além: queremos nos livrar das comparações de strings. Para conseguir isso, precisamos usar todas as informações calculadas nas etapas anteriores.</p>
+
+<p>Então, vamos calcular o valor da função de prefixo $\pi$ para $i + 1$.
+Se $s[i+1] = s[\pi[i]]$, então podemos dizer com certeza que $\pi[i+1] = \pi[i] + 1$, pois já sabemos que o sufixo na posição $i$ de tamanho $\pi[i]$ é igual ao prefixo de tamanho $\pi[i]$.
+Isso é ilustrado novamente com um exemplo.
+$$\underbrace{\overbrace{s_0 ~ s_1 ~ s_2}^{\pi[i]} ~ \overbrace{s_3}^{s_3 = s_{i+1}}}&#95;{\pi[i+1] = \pi[i] + 1} ~ \dots ~ \underbrace{\overbrace{s_{i-2} ~ s_{i-1} ~ s_{i}}^{\pi[i]} ~ \overbrace{s_{i+1}}^{s_3 = s_i + 1}}&#95;{\pi[i+1] = \pi[i] + 1}$$</p>
+
+<p>Se isso não for o caso, $s[i+1] \neq s[\pi[i]]$, então precisamos tentar uma string mais curta.
+Para acelerar as coisas, gostaríamos de passar imediatamente para o maior comprimento $j \lt \pi[i]$, de modo que a propriedade do prefixo na posição $i$ seja mantida, ou seja, $s[0 \dots j-1] = s[i-j+1 \dots i]$:
+$$\overbrace{\underbrace{s_0 ~ s_1}&#95;j ~ s_2 ~ s_3}^{\pi[i]} ~ \dots ~ \overbrace{s_{i-3} ~ s_{i-2} ~ \underbrace{s_{i-1} ~ s_{i}}&#95;j}^{\pi[i]} ~ s_{i+1}$$</p>
+
+<p>De fato, se encontrarmos esse tamanho $j$, então, novamente, precisamos apenas comparar os caracteres $s[i+1]$ e $s[j]$.
+Se forem iguais, podemos atribuir $\pi[i+1] = j + 1$.
+Caso contrário, precisaremos encontrar o maior valor menor que $j$, para o qual a propriedade do prefixo é válida, e assim por diante.
+Pode acontecer que isso vá até $j = 0$.
+Se $s[i+1] = s[0]$, definimos $\pi[i+1] = 1$, e $\pi[i+1] = 0$ caso contrário.</p>
+
+<p>Portanto, já temos um esquema geral do algoritmo. 
+A única questão que resta é como podemos encontrar efetivamente os comprimentos de $j$.
+Vamos recapitular: para o comprimento atual $j$ na posição $i$ na qual a propriedade do prefixo é válida, ou seja, $s[0 \dots j-1] = s[i-j+1 \dots i]$, queremos encontrar o maior $k \lt j$, para o qual a propriedade do prefixo é válida.
+$$\overbrace{\underbrace{s_0 ~ s_1}&#95;k ~ s_2 ~ s_3}^j ~ \dots ~ \overbrace{s_{i-3} ~ s_{i-2} ~ \underbrace{s_{i-1} ~ s_{i}}&#95;k}^j ~s_{i+1}$$</p>
+
+<p>A ilustração mostra que esse deve ser o valor de $\pi[j-1]$, que já calculamos anteriormente.</p>
+
+<h3>Algoritmo final</h3>
+
+<p>Finalmente, podemos construir um algoritmo que não realiza comparações de strings e apenas executa $O(n)$ ações.</p>
+
+<p>Aqui está o procedimento final:</p>
+
+<ul>
+<li>Calculamos os valores do prefixo $\pi[i]$ em um loop iterando de $i = 1$ até $i = n-1$ ($\pi[0]$ é atribuído como $0$).</li>
+<li>Para calcular o valor atual $\pi[i]$ definimos a variável $j$ indicando o tamanho do melhor sufixo para $i-1$. Inicialmente $j = \pi[i-1]$.</li>
+<li>Teste se o sufixo de tamanho $j+1$ é também um prefixo, comparando $s[j]$ e $s[i]$.
+Se eles são iguais, atribuímos $\pi[i] = j + 1$, caso contrário, atribuímos $j$ para $\pi[j-1]$ e repetimos essa etapa.</li>
+<li>Se atingirmos o comprimento $j = 0$ e ainda não temos uma correspondência, então, atribuímos $\pi[i] = 0$ e vamos para o próximo índice $i + 1$.</li>
+</ul>
+
+<h3>Implementação</h3>
+
+<p>A implementação acaba sendo surpreendentemente curta e expressiva.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; prefix_function(string s) {
+    int n = (int)s.length();
+    vector&lt;int&gt; pi(n);
+    for (int i = 1; i &lt; n; i++) {
+        int j = pi[i-1];
+        while (j &gt; 0 &amp;&amp; s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+</code></pre>
+
+<p>Este é um algoritmo <strong>online</strong>, ou seja, ele processa os dados à medida que chegam - por exemplo, você pode ler os caracteres da string um por um e processá-los imediatamente, localizando o valor da função de prefixo para cada próximo caractere.
+O algoritmo ainda exige o armazenamento da própria string e dos valores calculados anteriormente da função de prefixo, mas se soubermos previamente o valor máximo $M$ ue a função de prefixo pode assumir na string, podemos armazenar apenas $M+1$ primeiros caracteres da string e o mesmo número de valores da função prefixo.</p>
+
+<h2>Aplicações</h2>
+
+<h3>Procure uma substring em uma string - Algoritmo de Knuth-Morris-Pratt</h3>
+
+<p>A tarefa é a aplicação clássica da função prefixo.</p>
+
+<p>Dado um texto $t$ e uma string $s$, queremos encontrar e exibir as posições de todas as ocorrências da string $s$ no texto $t$.</p>
+
+<p>Por conveniência, denotamos como $n$ o comprimento da string s e como $m$ o tamanho do texto $t$.</p>
+
+<p>Geramos a string $s + &#92;# + t$, onde $&#92;#$ é um separador que não aparece em $s$ e $t$.
+Vamos calcular a função de prefixo para essa string.
+Agora pense no significado dos valores da função prefixo, exceto pelas primeiras $n + 1$ entradas (nas quais pertencem a string $s$ e o separador).
+Por definição, o valor $\pi[i]$ mostra o maior comprimento de uma substring que termina na posição $i$ que coincide com o prefixo.
+Mas, no nosso caso, isso nada mais é do que o maior bloco que coincide com $s$ e termina na posição $i$.
+Esse comprimento não pode ser maior que $n$ devido ao separador. Mas se a igualdade $\pi[i] = n$ for alcançada, isso significa que a string $s$ aparece completamente nessa posição, ou seja, termina na posição $i$.
+Apenas não esqueça que as posições são indexadas na string $s + &#92;# + t$.</p>
+
+<p>Portanto, se em alguma posição $i$ tivermos $\pi[i] = n$, então, na posição $i - (n + 1) - n + 1 = i - 2n$ na string $t$, a string $s$ aparece.</p>
+
+<p>Como já mencionado na descrição da computação da função de prefixo, se sabemos que os valores do prefixo nunca excedem um determinado valor, não precisamos armazenar a string inteira e a função inteira, mas apenas o seu início.
+No nosso caso, isso significa que precisamos armazenar apenas a string $s + &#92;#$ e os valores do prefixo para ela.
+Podemos ler um caractere de cada vez da string $t$ e calcular o valor atual da função de prefixo.</p>
+
+<p>Assim, o algoritmo Knuth-Morris-Pratt resolve o problema em tempo $O(n + m)$ com $O(n)$ de memória.</p>
+
+<h3>Contando o número de ocorrências de cada prefixo</h3>
+
+<p>Aqui discutimos dois problemas ao mesmo tempo.
+Dada uma string $s$ de tamanho $n$.
+Na primeira variação do problema, queremos contar o número de ocorrências de cada prefixo $s[0 \dots i]$ na mesma string.
+Na segunda variação do problema, outra string $t$ é fornecida e queremos contar o número de ocorrências de cada prefixo $s[0 \dots i]$ em $t$.</p>
+
+<p>Primeiro resolvemos o primeiro problema.
+Considere o valor da função de prefixo $\pi[i]$ em uma posição $i$.
+Por definição, significa que na posição $i$ o prefixo de tamanho $\pi[i]$ da string $s$ aparece e termina na posição $i$, e não existe um prefixo mais longo que siga essa definição.
+Ao mesmo tempo, prefixos mais curtos podem terminar nesta posição.
+Não é difícil ver que temos a mesma pergunta que já respondemos quando calculamos a própria função de prefixo:
+Dado um prefixo de comprimento $j$ que é um sufixo que termina na posição $i$, qual é o próximo prefixo menor $\lt j$ que também é um sufixo que termina na posição $i$.
+Assim, na posição $i$ termina o prefixo de comprimento $\pi[i]$, o prefixo de comprimento $\pi[\pi[i] - 1]$, o prefixo $\pi[\pi[\pi[i] - 1] - 1]$, e assim por diante, até o índice se tornar zero. Assim, podemos calcular a resposta da seguinte maneira.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; ans(n + 1);
+for (int i = 0; i &lt; n; i++)
+    ans[pi[i]]++;
+for (int i = n-1; i &gt; 0; i--)
+    ans[pi[i-1]] += ans[i];
+for (int i = 0; i &lt;= n; i++)
+    ans[i]++;
+</code></pre>
+
+<p>Aqui, para cada valor da função de prefixo, contamos primeiro quantas vezes ocorre na array $\pi$, e depois calculamos as respostas finais:
+se sabemos que o prefixo de comprimento $i$ aparece exatamente $\text{ans}[i]$ vezes, então, esse número deve ser adicionado ao número de ocorrências de seu sufixo mais longo, que também é um prefixo.
+No final, precisamos adicionar $1$ a cada resultado, pois também precisamos contar os prefixos originais.</p>
+
+<p>Agora vamos considerar o segundo problema.
+Aplicamos o truque de Knuth-Morris-Pratt:
+criamos a string $s + &#92;# + t$ e calculamos sua função de prefixo.
+As únicas diferenças para a primeira tarefa é que estamos interessados ​​apenas nos valores do prefixo relacionados à string $t$, ou seja, $\pi[i]$ para $i \ge n + 1$.
+Com esses valores, podemos realizar exatamente os mesmos cálculos que na primeira tarefa.</p>
+
+<h3>O número de diferentes substrings em uma string</h3>
+
+<p>Dada uma string $s$ de tamanho $n$.
+Queremos calcular o número de diferentes substrings que aparecem nele.</p>
+
+<p>Vamos resolver esse problema iterativamente.
+Iremos ver, sabendo o número atual de diferentes substrings, como recalcular essa contagem adicionando um caractere ao final.</p>
+
+<p>Portanto, seja $k$ o número atual de diferentes substrings em $s$, e adicionamos o caractere $c$ ao final de $s$.
+Obviamente, algumas novas substrings terminadas em $c$ irão aparecer.
+Queremos contar essas novas substrings que não apareceram antes.</p>
+
+<p>Pegamos a string $t = s + c$ e a invertemos.
+Agora, a tarefa é transformada em calcular quantos prefixos existem que não aparecem em nenhum outro lugar.
+Se calcularmos o valor máximo da função de prefixo $\pi_{\text{max}}$ da string revertida $t$, então, o prefixo mais longo que aparece em $s$ é $\pi_{\text{max}}$.
+Claramente também todos os prefixos de tamanho menor aparecem nele.</p>
+
+<p>Portanto, o número de novas substrings que aparecem quando adicionamos um novo caractere $c$ é $|s| + 1 - \pi_{\text{max}}$.</p>
+
+<p>Portanto, para cada caractere acrescentado, podemos calcular o número de novas substrings em $O(n)$ vezes, o que fornece uma complexidade de tempo de $O(n^2)$ no total.</p>
+
+<p>É importante notar que também podemos calcular o número de diferentes substrings anexando os caracteres no início ou excluindo os caracteres do início ou do fim.</p>
+
+<h3>Comprimindo uma string</h3>
+
+<p>Dada uma string $s$ de tamanho $n$.
+Queremos encontrar a menor representação "comprimida" da string, ou seja, queremos encontrar uma string $t$ de menor tamanho, de modo que $s$ possa ser representado como uma concatenação de uma ou mais cópias de $t$.</p>
+
+<p>É claro que precisamos apenas encontrar o comprimento de $t$. Sabendo o comprimento, a resposta para o problema será o prefixo de $s$ com esse comprimento.</p>
+
+<p>Vamos calcular a função de prefixo para $s$.
+Usando o último valor dele, definimos o valor $k = n - \pi[n - 1]$.
+Mostraremos que se $k$ divide $n$, então $k$ será a resposta; caso contrário, não haverá uma compactação efetiva e a resposta será $n$.</p>
+
+<p>Deixe que $n$ seja divisível por $k$.
+Em seguida, a string pode ser particionada em blocos com o comprimento $k$.
+Por definição da função prefixo, o prefixo de comprimento $n - k$ será igual ao seu sufixo. 
+Mas isso significa que o último bloco é igual ao bloco anterior. E o bloco anterior deve ser igual ao bloco anterior. E assim por diante. 
+Como resultado, verifica-se que todos os blocos são iguais; portanto, podemos compactar a string $s$ no comprimento $k$.</p>
+
+<p>É claro que ainda precisamos mostrar que esse valor é realmente otimizado. 
+De fato, se houvesse uma compactação menor que $k$, a função de prefixo no final seria maior que $n - k$.
+Portanto, $k$ é realmente a resposta.</p>
+
+<p>Agora vamos supor que $n$ não seja divisível por $k$.
+Mostramos que isso implica que o comprimento da resposta é $n$.
+Provamos isso por contradição.
+Supondo que exista uma resposta, e a compactação tenha comprimento $p$ ($p$ divide $n$).
+Então o último valor da função prefixo deve ser maior que $n - p$, ou seja, o sufixo cobrirá parcialmente o primeiro bloco.
+Agora considere o segundo bloco da string.
+Como o prefixo é igual ao sufixo, e o prefixo e o sufixo cobrem esse bloco e seu deslocamento um em relação ao outro $k$ não divide o comprimento do bloco $p$ (caso contrário, $k$ divide $n$), então todos os caracteres do bloco devem ser idênticos.
+Mas então, a string consistiria em apenas um caractere repetido várias vezes, portanto, podemos compactá-la para uma string de tamanho $1$, o que nos dá $k = 1$, e $k$ divide $n$.
+Contradição</p>
+
+<p>$$\overbrace{s_0 ~ s_1 ~ s_2 ~ s_3}^p ~ \overbrace{s_4 ~ s_5 ~ s_6 ~ s_7}^p$$
+$$s_0 ~ s_1 ~ s_2 ~ \underbrace{\overbrace{s_3 ~ s_4 ~ s_5 ~ s_6}^p ~ s_7}_{\pi[7] = 5}$$
+$$s_4 = s_3, ~ s_5 = s_4, ~ s_6 = s_5, ~ s_7 = s_6 ~ \Rightarrow ~ s_0 = s_1 = s_2 = s_3$$</p>
+
+<h3>Construindo um autômato de acordo com a função de prefixo</h3>
+
+<p>Vamos retornar à concatenação para as duas strings através de um separador, ou seja, para as strings $s$ e $t$ calculamos a função de prefixo para a string $s + &#92;# + t$.
+Obviamente, como $&#92;#$ é um separador, o valor da função de prefixo nunca excederá $|s|$.
+Segue-se que é suficiente armazenar a string $s + &#92;#$ e os valores da função de prefixo para ela, e podemos calcular a função de prefixo para todos os caracteres subsequentes rapidamente:
+$$\underbrace{s_0 ~ s_1 ~ \dots ~ s_{n-1} ~ &#92;#}&#95;{\text{precisa armazenar}} ~ \underbrace{t_0 ~ t_1 ~ \dots ~ t_{m-1}}&#95;{\text{nao precisa}}$$</p>
+
+<p>De fato, nessa situação, conhecer o próximo caractere $c \in t$ e o valor da função de prefixo da posição anterior é informação suficiente para calcular o próximo valor da função de prefixo, sem usar caracteres anteriores da string $t$ e o valor do prefixo neles.</p>
+
+<p>Em outras palavras, podemos construir um "<strong>automaton</strong>" (uma máquina de estados finitos): o estado nele é o valor atual da função de prefixo e a transição de um estado para outro será realizada através do próximo caractere.</p>
+
+<p>Portanto, mesmo sem a string $t$, podemos construir uma tabela de transição $(\text{old}&#92;_\pi, c) \rightarrow \text{new}&#92;_\pi$ usando o mesmo algoritmo para calcular a tabela de transição:</p>
+
+<pre><code class="cpp">void compute_automaton(string s, vector&lt;vector&lt;int&gt;&gt;&amp; aut) {
+    s += '#';
+    int n = s.size();
+    vector&lt;int&gt; pi = prefix_function(s);
+    aut.assign(n, vector&lt;int&gt;(26));
+    for (int i = 0; i &lt; n; i++) {
+        for (int c = 0; c &lt; 26; c++) {
+            int j = i;
+            while (j &gt; 0 &amp;&amp; 'a' + c != s[j])
+                j = pi[j-1];
+            if ('a' + c == s[j])
+                j++;
+            aut[i][c] = j;
+        }
+    }
+}
+</code></pre>
+
+<p>No entanto, nesta forma, o algoritmo é executado em tempo $O(n^2 26)$ para as letras minúsculas do alfabeto.
+Observe que podemos aplicar programação dinâmica e usar as partes já calculadas da tabela.
+Sempre que vamos do valor $j$ para o valor $\pi[j-1]$, na verdade queremos dizer que a transição $(j, c)$ leva ao mesmo estado que a transição que $(\pi[j-1], c)$, e esta resposta já é calculada com precisão.</p>
+
+<pre><code class="cpp">void compute_automaton(string s, vector&lt;vector&lt;int&gt;&gt;&amp; aut) {
+    s += '#';
+    int n = s.size();
+    vector&lt;int&gt; pi = prefix_function(s);
+    aut.assign(n, vector&lt;int&gt;(26));
+    for (int i = 0; i &lt; n; i++) {
+        for (int c = 0; c &lt; 26; c++) {
+            if (i &gt; 0 &amp;&amp; 'a' + c != s[i])
+                aut[i][c] = aut[pi[i-1]][c];
+            else
+                aut[i][c] = i + ('a' + c == s[i]);
+        }
+    }
+}
+</code></pre>
+
+<p>Como resultado, construímos o autômato em tempo $O(n 26)$.</p>
+
+<p>Quando esse autômato é útil? Para começar, lembre-se de que usamos a função prefixo da string $s + &#92;# + t$ e seus valores principalmente para uma única finalidade: encontrar todas as ocorrências da string $s$ na string $t$.</p>
+
+<p>Portanto, o benefício mais óbvio desse autômato é a <strong>aceleração do cálculo da função de prefixo</strong> para a string $s + &#92;# + t$.
+Ao criar o autômato para $s + &#92;#$, não precisamos mais armazenar a string $s$ ou os valores do prefixo nela.
+Todas as transições já são computadas na tabela.</p>
+
+<p>Mas há uma segunda aplicação, menos óbvia.
+Podemos usar o autômato quando a string $t$ é uma string enorme construída com algumas regras.
+Ela pode ser, por instância, uma das strings de Gray, ou uma string formada por uma combinação recursiva de várias strings curtas da entrada.</p>
+
+<p>Para completar, resolveremos esse problema: dado um número $k \le 10^5$ e uma string $s$ de tamanho $\le 10^5$.
+Temos que calcular o número de ocorrências de $s$ na $k$-ésima string de Gray.
+Lembre-se de que as strings de Gray são definidas da seguinte maneira:
+$$\begin{align}
+g_1 &amp;= "a"&#92;&#92;
+g_2 &amp;= "aba"&#92;&#92;
+g_3 &amp;= "abacaba"&#92;&#92;
+g_4 &amp;= "abacabadabacaba"
+\end{align}$$</p>
+
+<p>Nesses casos, até construir a string $t$ será impossível, devido ao seu comprimento.
+A $k$-ésima string de Gray tem $2^k-1$ caracteres.
+No entanto, podemos calcular o valor da função de prefixo no final da string efetivamente, apenas conhecendo o valor da função de prefixo no início.</p>
+
+<p>Além do próprio autômato, também calculamos os valores $G[i][j]$ - o valor do autômato após o processamento da string $g_i$ começando com o estado $j$.
+Além disso, calculamos os valores $K[i][j]$ - o número de ocorrências de $s$ em $g_i$, antes do processamento de $g_i$ começando com o estado $j$.
+$K[i][j]$ é o número de vezes que a função de prefixo assumiu o valor $|s|$ durante a execução das operações.
+A resposta para o problema será então $K[k][0]$.</p>
+
+<p>Como podemos calcular esses valores? Primeiro, os valores básicos são $G[0][j] = j$ e $K[0][j] = 0$.
+E todos os valores subsequentes podem ser calculados a partir dos valores anteriores e usando o autômato.
+Para calcular o valor para alguns $i$ lembramos que a string $g_i$ consiste de $g_{i-1}$, o caractere $i$ do alfabeto, e $g_{i-1}$.
+Assim, o autômato entrará no estado:
+$$\text{mid} = \text{aut}[G[i-1][j]][i]$$
+$$G[i][j] = G[i-1][\text{mid}]$$
+Os valores para $K[i][j]$ também podem ser facilmente contados.
+$$K[i][j] = K[i-1][j] + (\text{mid} == |s|) + K[i-1][\text{mid}]$$</p>
+
+<p>Assim, podemos resolver o problema das strings de Gray e, da mesma forma, também um grande número de outros problemas semelhantes.
+Por exemplo, o mesmo método também resolve o seguinte problema: recebemos uma string $s$ e alguns padrões $t_i$, cada um deles é especificado da seguinte maneira:
+é uma string de caracteres comuns e pode haver algumas inserções recursivas de strings anteriores da forma $t_k^{\text{cnt}}$, o que significa que neste local temos que inserir a string $t_k$ $\text{cnt}$ vezes.
+Um exemplo desses padrões:
+$$\begin{align}
+t_1 &amp;= "abdeca"&#92;&#92;
+t_2 &amp;= "abc" + t_1^{30} + "abd"&#92;&#92;
+t_3 &amp;= t_2^{50} + t_1^{100}&#92;&#92;
+t_4 &amp;= t_2^{10} + t_3^{100}
+\end{align}$$</p>
+
+<p>As substituições recursivas fazem com que os comprimentos das strings possam atingir a ordem de $100^{100}$.</p>
+
+<p>Temos que encontrar o número de vezes que a string $s$ aparece em cada uma das strings.</p>
+
+<p>O problema pode ser resolvido da mesma maneira, construindo o autômato da função de prefixo e, então, calculamos as transições para cada padrão usando os resultados anteriores.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=396">UVA # 455 "Periodic Strings"</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1963">UVA # 11022 "String Factoring"</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=2447">UVA # 11452 "Dancing the Cheeky-Cheeky"</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4282">UVA 12604 - Caesar Cipher</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3911">UVA 12467 - Secret Word</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1960">UVA 11019 - Matrix Matcher</a></li>
+<li><a href="http://www.spoj.com/problems/NAJPF/">SPOJ - Pattern Find</a></li>
+<li><a href="http://codeforces.com/contest/808/problem/G">Codeforces - Anthem of Berland</a></li>
+<li><a href="http://codeforces.com/problemset/problem/471/D">Codeforces - MUH and Cube Walls</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
