@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Função Z - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Função Z</h1>
+
+<p>Suponha que recebamos uma string $s$ de tamanho $n$. A <strong>função Z</strong> para essa string é uma array de tamanho $n$ onde o $i$-ésimo elemento é igual ao maior número de caracteres começando na posição $i$ que coincide com os primeiros caracteres de $s$.</p>
+
+<p>Em outras palavras, $z[i]$ é o comprimento do prefixo comum mais longo entre $s$ e o sufixo de $s$ começando em $i$.</p>
+
+<p><strong>Nota:</strong> Neste artigo, o primeiro caractere de $s$ tem índice $0$ e o último índice $n-1$.</p>
+
+<p>O primeiro elemento da função Z, $z[0]$, geralmente não é bem definido. Neste artigo, assumiremos que é zero (embora não mude nada na implementação do algoritmo).</p>
+
+<p>Este artigo apresenta um algoritmo para calcular a função Z em tempo $O(n)$, bem como várias de suas aplicações.</p>
+
+<h2>Exemplos</h2>
+
+<p>Por exemplo, aqui estão os valores da função Z calculados para diferentes strings:</p>
+
+<ul>
+<li>"aaaaa" - $[0, 4, 3, 2, 1]$</li>
+<li>"aaabaab" - $[0, 2, 1, 0, 2, 1, 0]$</li>
+<li>"abacaba" - $[0, 0, 1, 0, 3, 0, 1]$</li>
+</ul>
+
+<h2>Algoritmo trivial</h2>
+
+<p>A definição formal pode ser representada na seguinte implementação elementar em $O(n^2)$.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; z_function_trivial(string s) {
+    int n = (int) s.length();
+    vector&lt;int&gt; z(n);
+    for (int i = 1; i &lt; n; ++i)
+        while (i + z[i] &lt; n &amp;&amp; s[z[i]] == s[i + z[i]])
+            ++z[i];
+    return z;
+}
+</code></pre>
+
+<p>Nós apenas iteramos sobre todas as posições $i$ e atualizamos $z[i]$ para cada uma delas, começando em $z[i] = 0$ e incrementando-a desde que não encontremos uma 'incompatibilidade' (e enquanto não chegamos ao fim da linha).</p>
+
+<h2>Algoritmo eficiente</h2>
+
+<p>Para obter um algoritmo eficiente, calcularemos os valores de $z[i]$ com $i = 1$ até $n - 1$ mas, ao mesmo tempo, ao calcular um novo valor, tentaremos fazer o melhor uso possível dos valores calculados anteriormente.</p>
+
+<p>Por uma questão de sermos breves, vamos chamar <strong>correspondências de segmento</strong> àquelas substrings que coincidem com um prefixo de $s$. Por exemplo, o valor da função Z desejada $z[i]$ é o comprimento do segmento correspondendo ao começo da posição $i$ (e isso termina na posição $i + z[i] - 1$).</p>
+
+<p>Para fazer isso, manteremos <strong>os índices $[l; r]$ do segmento mais à direita correspondem</strong>. Ou seja, entre todos os segmentos detectados, manteremos o que terminar mais à direita. De certa forma, o índice $r$ pode ser visto como o "limite" para o qual nossa string $s$ foi varrida pelo algoritmo; tudo além desse ponto ainda não é conhecido.</p>
+
+<p>Então, se o índice atual (para o qual temos que calcular o próximo valor da função Z) for $i$, teremos uma das duas opções:
+
+</p>
+
+<ul>
+<li><p>$i > r$ -- a posição atual está <strong>fora</strong> do que já processamos.</p>
+
+<p>Em seguida, calcularemos $z[i]$ com o <strong>algoritmo trivial</strong> (ou seja, apenas comparando valores um por um). Observe que, no final, se $z[i] > 0$, precisaremos atualizar os índices do segmento mais à direita, porque é garantido que o novo $r = i + z[i] - 1$ seja melhor que os $r$'s anteriores.</p></li>
+<li><p>$i \le r$ -- a posição atual está dentro do segmento atual correspondente a $[l; r]$.</p>
+
+<p>Então, podemos usar os valores Z já calculados para "inicializar" o valor de $z[i]$ (com certeza é melhor que "começar do zero"), talvez até um número grande.</p>
+
+<p>Para isso, observamos que as substrings $s[l \dots r]$ e $s[0 \dots r-l]$ <strong>correspondem</strong>. Isso significa que, como uma aproximação inicial para $z[i]$ podemos pegar o valor já calculado para o segmento correspondente $s[0 \dots r-l]$, ($z[i-l]$).</p>
+
+<p>No entanto, o valor $z[i-l]$ pode ser muito grande: quando aplicado à posição $i$ pode exceder o índice $r$. Isso não é permitido, porque não sabemos nada sobre os caracteres à direita de $r$: eles podem diferir daqueles necessários.</p>
+
+<p>Aqui está <strong>um exemplo</strong> de um cenário similar:</p>
+
+<p>$$ s = "aaaabaa" $$</p>
+
+<p>Quando chegarmos à última posição ($i = 6$), o segmento de correspondência atual será $[5; 6]$. A posição $6$ então, corresponderá à posição $6 - 5 = 1$, para a qual o valor da função Z é $z[1] = 3$. Obviamente, não podemos inicializar $z[6]$ para $3$, isso seria completamente incorreto. O valor máximo em que poderíamos inicializá-lo é de $1$ - porque é o maior valor que não nos leva além do índice $r$ do segmento de correspondência $[l; r]$.</p>
+
+<p>Assim, como uma <strong>aproximação inicial</strong> para $z[i]$ podemos tomar com segurança:</p>
+
+<p>$$ z_0[i] = \min(r - i + 1,\; z[i-l]) $$</p>
+
+<p>Depois de inicializar $z[i]$ como $z_0[i]$, tentamos incrementar $z[i]$ executando <strong>algoritmo trivial</strong> - porque, em geral, após a borda $r$, não podemos saber se o segmento continuará a corresponder ou não.</p></li>
+</ul>
+
+<p>Assim, todo o algoritmo é dividido em dois casos, que diferem apenas no <strong>valor inicial</strong> de $z[i]$: no primeiro caso, assume-se zero, no segundo caso, é determinado pelos valores computados anteriormente (usando a fórmula acima). Depois disso, ambas as ramificações desse algoritmo podem ser reduzidas à implementação do <strong>algoritmo trivial</strong>, que inicia imediatamente após a especificação do valor inicial.</p>
+
+<p>O algoritmo acaba sendo muito simples. Apesar do fato de que em cada iteração o algoritmo trivial é executado, fizemos um progresso significativo, tendo um algoritmo que é executado em tempo linear. Depois provaremos que o tempo de execução é linear.</p>
+
+<h2>Implementação</h2>
+
+<p>A implementação acaba sendo bastante curta:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; z_function(string s) {
+    int n = (int) s.length();
+    vector&lt;int&gt; z(n);
+    for (int i = 1, l = 0, r = 0; i &lt; n; ++i) {
+        if (i &lt;= r)
+            z[i] = min (r - i + 1, z[i - l]);
+        while (i + z[i] &lt; n &amp;&amp; s[z[i]] == s[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 &gt; r)
+            l = i, r = i + z[i] - 1;
+    }
+    return z;
+}
+</code></pre>
+
+<h3>Comentários sobre esta implementação</h3>
+
+<p>oda a solução é dada como uma função que retorna uma array de comprimento $n$ -- a função Z de $s$.</p>
+
+<p>Array $z$ é inicialmente preenchida com zeros. O segmento de correspondência mais à direita atual é assumido como $[0; 0]$ (um segmento pequeno que não contém nenhum $i$).</p>
+
+<p>Dentro do loop for $i = 1 \dots n - 1$ primeiro determinamos o valor inicial $z[i]$ -- ele permanecerá zero ou será computado usando a fórmula acima.</p>
+
+<p>Posteriormente, o algoritmo trivial tenta aumentar o valor de $z[i]$ o máximo possível.</p>
+
+<p>No final, se for necessário (ou seja, se $i + z[i] - 1 > r$), atualizamos o segmento de correspondência mais à direita $[l; r]$.</p>
+
+<h2>Comportamento assintótico do algoritmo</h2>
+
+<p>Vamos provar que o algoritmo acima tem um tempo de execução linear no comprimento da string - portanto, é $O(n)$.</p>
+
+<p>Estamos interessados ​​no loop <code>while</code>, já que todo o resto é apenas um monte de operações constantes que somam $O(n)$.</p>
+
+<p>Mostraremos que <strong>cada iteração</strong> do loop <code>while</code> aumentará a borda direita $r$ do segmento de correspondência.</p>
+
+<p>Para fazer isso, consideraremos os dois ramos do algoritmo:</p>
+
+<ul>
+<li><p>$i > r$</p>
+
+<p>Nesse caso, o loop <code>while</code> não fará nenhuma iteração (se $s[0] \ne s[i]$), ou levará algumas iterações, começando na posição $i$, sempre que um caractere é movido para a direita. Depois disso, a borda direita $r$ será necessariamente atualizada.</p>
+
+<p>Portanto, descobrimos que, quando $i > r$, cada iteração do loop <code>while</code> aumenta o valor do novo índice de $r$.</p></li>
+<li><p>$i \le r$</p>
+
+<p>Nesse caso, inicializamos $z[i]$ para um determinado valor $z_0$ fornecido pela fórmula acima. Vamos comparar esse valor inicial $z_0$ com o valor $r - i + 1$. Teremos três casos:</p>
+
+<ul>
+<li><p>$z_0 &lt; r - i + 1$</p>
+
+<p>Provamos que, neste caso, nenhuma iteração do loop <code>while</code> ocorrerá.</p>
+
+<p>É fácil provar, por exemplo, por contradição: se o loop <code>while</code> fez pelo menos uma iteração, isso significaria que a aproximação inicial $z[i] = z_0$ foi imprecisa (menor que o comprimento real da correspondência). Mas como $s[l \dots r]$ e $s[0 \dots r-l]$ são os mesmos, isso implica que $z[i-l]$ possui o valor errado (menor do que deveria ser).</p>
+
+<p>Portanto, como $z[i-l]$ está correto e é menor que $r - i + 1$, segue-se que esse valor coincide com o valor requerido $z[i]$.</p></li>
+<li><p>$z_0 = r - i + 1$</p>
+
+<p>Nesse caso, o loop <code>while</code> pode fazer algumas iterações, mas cada uma delas levará a um aumento no valor do índice $r$ porque começaremos a comparar de $s[r+1]$, que ultrapassará além do intervalo $[l; r]$.</p></li>
+<li><p>$z_0 > r - i + 1$</p>
+
+<p>Esta opção é impossível, por definição de $z_0$.</p></li>
+</ul></li>
+</ul>
+
+<p>Portanto, provamos que cada iteração do loop interno faz o ponteiro $r$ avançar para a direita. Como $r$ não pode ser superior a $n-1$, isso significa que o loop interno não fará mais do que $n-1$ iterações.</p>
+
+<p>Como o restante do algoritmo obviamente funciona em $O(n)$, provamos que todo o algoritmo para calcular funções Z é executado em tempo linear.</p>
+
+<h2>Aplicações</h2>
+
+<p>amos agora considerar alguns usos das funções Z para tarefas específicas.</p>
+
+<p>Esses aplicações serão amplamente similares aos da <a href="https://cp-algorithms-brasil.com/strings/prefixo.html">função de prefixos</a>.</p>
+
+<h3>Procure a substring</h3>
+
+<p>Para simplificar, chamamos $t$ a string de texto, e $p$ o padrão. O problema é: encontre todas as ocorrências do padrão $p$ dentro do texto $t$.</p>
+
+<p>TPara resolver esse problema, criamos uma nova string $s = p + \diamond + t$, ou seja, aplicamos a concatenação das string $p$ e $t$ mas também colocamos um caractere separador $\diamond$ no meio (escolhemos $\diamond$ para que ele certamente não esteja presente em nenhum lugar nas strings $p$ ou $t$).</p>
+
+<p>Calcule a função-z para $s$. Então, para qualquer $i$ no intervalo $[0; \; \operatorname{length}(t) - 1]$, iremos considerar o valor correspondente $k = z[i + \operatorname{length}(p) + 1]$. Se $k$ for igual $\operatorname{length}(p)$ sabemos que há uma ocorrência de $p$ na $i$-ésima posição de $t$, caso contrário, não há ocorrência.</p>
+
+<p>O tempo de execução (e consumo de memória) é $O(\operatorname{length}(t) + \operatorname{length}(p))$.</p>
+
+<h3>Número de substrings distintas em uma string</h3>
+
+<p>Dada uma string $s$ de tamanho $n$, conte o número de substrings distintas de $s$.</p>
+
+<p>Vamos resolver esse problema iterativamente. Ou seja: conhecendo o número atual de diferentes substrings, recalcule esse valor após adicionar um caractere ao final de $s$.</p>
+
+<p>Portanto, seja $k$ o número atual de substrings distintas de $s$. Anexamos um novo caractere $c$ a $s$. Obviamente, pode haver algumas novas substrings terminando neste novo caractere $c$ (ou seja, todas as strings que terminam com esse símbolo e que ainda não encontramos).</p>
+
+<p>Pegue uma string $t = s + c$ e inverta-a (escreva seus caracteres na ordem inversa). Nossa tarefa agora é contar quantos prefixos de $t$ não são encontrados em nenhum outro lugar em $t$. Vamos calcular a função-Z de $t$ e encontrar seu valor máximo $z_{max}$. Obviamente, o prefixo de $t$ de tamanho $z_{max}$ ocorre também em algum lugar no meio de $t$. Claramente, prefixos mais curtos também ocorrem.</p>
+
+<p>Portanto, descobrimos que o número de novas substrings que aparecem quando o símbolo $c$ é anexado a $s$ é igual a $\operatorname{length}(t) - z_{max}$.</p>
+
+<p>Consequentemente, o tempo de execução desta solução é $O(n^2)$ para uma string de tamanho $n$.</p>
+
+<p>Vale ressaltar que, exatamente da mesma maneira, podemos recalcular(ainda em tempo $O(n)$), o número de substrings distintas ao anexar um caractere no início da string, bem como ao removê-lo (do final ou o início).</p>
+
+<h3>Comprimindo uma string</h3>
+
+<p>Dada uma string $s$ de tamanho $n$. Encontre sua representação "compactada" mais curta, ou seja: encontre uma string $t$ de menor tamanho, de modo que $s$ possa ser representado como uma concatenação de uma ou mais cópias de $t$.</p>
+
+<p>Uma solução é: calcular a função Z de $s$, percorrer todos os $i$'s de modo que $i$ divida $n$. Pare no primeiro $i$ em que $i + z[i] = n$. Então, a string $s$ pode ser comprimida no tamanho $i$.</p>
+
+<p>A prova desse fato é a mesma da solução que usa a <a href="https://cp-algorithms-brasil.com/strings/prefixo.html">função de prefixos</a>.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://codeforces.com/problemset/problem/126/B">Codeforces - Password [Difficulty: Easy]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=396">UVA # 455 "Periodic Strings" [Difficulty: Medium]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1963">UVA # 11022 "String Factoring" [Difficulty: Medium]</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=2470">UVa 11475 - Extend to Palindrome</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=588&amp;page=show_problem&amp;problem=4450">LA 6439 - Pasti Pas!</a></li>
+<li><a href="https://www.codechef.com/problems/CHSTR">Codechef - Chef and Strings</a></li>
+<li><a href="http://codeforces.com/problemset/problem/432/D">Codeforces - Prefixes and Suffixes</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
