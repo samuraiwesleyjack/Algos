@@ -59,7 +59,7 @@ for (int i = 0; i &lt; n; ++i) {
 
 <p>Simetricamente, você pode definir um índice <code>k2</code> para a borda direita: este é o índice mais próximo à direita de <code>j</code> de modo que <code>d[i][k2] &gt; d[i][j]</code> (ou <code>m</code>, se não houver esse índice).</p>
 
-<p>Portanto, os índices <code>k1</code> e <code>k2</code>, se aprendermos a procurá-los efetivamente, fornecerão todas as informações necessárias sobre a submatriz zero atual. Em particular, sua área será igual a <code>(i - d[i][j]) * (k2 - k1 - 1)</code>.</p>
+<p>Portanto, os índices <code>k1</code> e <code>k2</code>, se aprendermos a procurá-los efetivamente, fornecerão todas as informações necessárias sobre a submatriz de zeros atual. Em particular, sua área será igual a <code>(i - d[i][j]) * (k2 - k1 - 1)</code>.</p>
 
 <p>Como procurar esses índices <code>k1</code> e <code>k2</code> efetivamente com fixos <code>i</code> e <code>j</code>? Podemos fazer isso em $O(1)$ em média.</p>
 
