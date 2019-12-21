@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Encontrando a maior submatriz de 0's - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Encontrando a maior submatriz de 0's</h1>
+
+<p>Seja uma matriz com <code>n</code> linhas e <code>m</code> colunas. Encontre a maior submatriz(área retangular dentro da matriz) que consiste em apenas zeros.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Os elementos da matriz serão <code>a[i][j]</code>, onde <code>i = 0...n - 1</code>, <code>j = 0... m - 1</code>. Para simplificar, consideraremos todos os elementos diferentes de zero iguais a 1.</p>
+
+<h3>Etapa 1: dinâmica auxiliar</h3>
+
+<p>Primeiro, calculamos a seguinte matriz auxiliar: <code>d[i][j]</code>, , linha mais próxima que tem 1 acima de <code>a[i][j]</code>. Formalmente, <code>d[i][j]</code> é o maior número de linha (de <code>0</code> a <code>i - 1</code>), no qual existe um elemento igual a <code>1</code> na <code>j</code>-ésima coluna. 
+Ao iterar da parte superior esquerda para a parte inferior direita, quando estamos na linha <code>i</code>, conhecemos os valores da linha anterior; portanto, basta atualizar os elementos com o valor <code>1</code>. Podemos salvar os valores em uma array simples <code>d[i]</code>, <code>i = 1...m - 1</code>, porque no algoritmo adicional processaremos a matriz uma linha por vez e precisaremos apenas dos valores da linha atual.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; d(m, -1);
+for (int i = 0; i &lt; n; ++i) {
+    for (int j = 0; j &lt; m; ++j) {
+        if (a[i][j] == 1) {
+            d[j] = i;
+        }
+    }
+}
+</code></pre>
+
+<h3>Etapa 2: Solução de problemas</h3>
+
+<p>Podemos resolver o problema em $O(n m^2)$ iterando pelas linhas, considerando todas as colunas esquerda e direita possíveis para uma submatriz. A parte inferior do retângulo será a linha atual e, usando <code>d[i][j]</code> podemos encontrar a linha superior. No entanto, é possível ir além e melhorar significativamente a complexidade da solução.</p>
+
+<p>É claro que a submatriz de zeros desejada é delimitada em todos os quatro lados por alguns <code>1</code>'s, o que impede que ele aumente de tamanho e melhore a resposta. Portanto, não perderemos a resposta se agirmos da seguinte maneira: para cada célula <code>j</code> na linha <code>i</code> (a linha inferior de uma potencial submatriz zero) teremos <code>d[i][j]</code> como a linha superior da atual submatriz zero. Resta agora determinar os limites ideais esquerdo e direito da submatriz zero, ou seja, empurre ao máximo essa submatriz para a esquerda e direita da <code>j</code>-ésima coluna.</p>
+
+<p>O que significa empurrar o máximo para a esquerda? Significa encontrar um índice <code>k1</code> para o qual <code>d[i][k1] &gt; d[i][j]</code>, e, ao mesmo tempo, <code>k1</code> - o mais próximo à esquerda do índice <code>j</code>. É claro que então <code>k1 + 1</code> fornece o número da coluna esquerda da submatriz zero necessária. Se não houver esse índice, coloque <code>k1</code> = <code>-1</code>(isso significa que conseguimos estender a submatriz zero atual para a esquerda até a borda da matriz <code>a</code>).</p>
+
+<p>Simetricamente, você pode definir um índice <code>k2</code> para a borda direita: este é o índice mais próximo à direita de <code>j</code> de modo que <code>d[i][k2] &gt; d[i][j]</code> (ou <code>m</code>, se não houver esse índice).</p>
+
+<p>Portanto, os índices <code>k1</code> e <code>k2</code>, se aprendermos a procurá-los efetivamente, fornecerão todas as informações necessárias sobre a submatriz zero atual. Em particular, sua área será igual a <code>(i - d[i][j]) * (k2 - k1 - 1)</code>.</p>
+
+<p>Como procurar esses índices <code>k1</code> e <code>k2</code> efetivamente com fixos <code>i</code> e <code>j</code>? Podemos fazer isso em $O(1)$ em média.</p>
+
+<p>Para atingir essa complexidade, você pode usar o <code>stack</code> da seguinte maneira. Vamos primeiro aprender a procurar um índice <code>k1</code>, e salvar seu valor para cada índice <code>j</code> na linha atual <code>i</code> na matriz <code>d1[i][j]</code>. Para fazer isso, examinaremos todas as colunas <code>j</code> da esquerda para a direita e armazenaremos no stack apenas as colunas que possuem <code>d[][]</code> estritamente maior que <code>d[i][j]</code>. É claro que, ao passar de uma coluna <code>j</code> para a próxima coluna, é necessário atualizar o conteúdo do stack. Quando houver um elemento inadequado no topo do stack (por exemplo, <code>d[][] &lt;= d[i][j]</code>), remova-o. É fácil entender que basta remover do stack apenas do topo e de nenhum dos outros lugares (porque o stack conterá uma sequência crescente <code>d</code> de colunas).</p>
+
+<p>O valor <code>d1[i][j]</code> para cada <code>j</code> será igual ao valor que está, naquele momento, no topo do stack.</p>
+
+<p>A matriz dinâmica <code>d2[i][j]</code> para encontrar os índices <code>k2</code> é considerada semelhante, apenas é necessário visualizar as colunas da direita para a esquerda.</p>
+
+<p>Como existem exatamente <code>m</code> peças adicionadas ao stack em cada linha, também não poderia haver mais exclusões(deletar elementos), a soma das complexidades será linear, portanto a complexidade final do algoritmo é $O(nm)$.</p>
+
+<p>Também deve ser observado que esse algoritmo consome $O(m)$ de memória (sem contar os dados de entrada - a matriz <code>a[][]</code>).</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp">int zero_matrix(vector&lt;vector&lt;int&gt;&gt; a) {
+    int n = a.size();
+    int m = a[0].size();
+
+    int ans = 0;
+    vector&lt;int&gt; d(m, -1), d1(m), d2(m);
+    stack&lt;int&gt; st;
+    for (int i = 0; i &lt; n; ++i) {
+        for (int j = 0; j &lt; m; ++j) {
+            if (a[i][j] == 1)
+                d[j] = i;
+        }
+
+        for (int j = 0; j &lt; m; ++j) {
+            while (!st.empty() &amp;&amp; d[st.top()] &lt;= d[j])
+                st.pop();
+            d1[j] = st.empty() ? -1 : st.top();
+            st.push(j);
+        }
+        while (!st.empty())
+            st.pop();
+
+        for (int j = m - 1; j &gt;= 0; --j) {
+            while (!st.empty() &amp;&amp; d[st.top()] &lt;= d[j])
+                st.pop();
+            d2[j] = st.empty() ? m : st.top();
+            st.push(j);
+        }
+        while (!st.empty())
+            st.pop();
+
+        for (int j = 0; j &lt; m; ++j)
+            ans = max(ans, (i - d[j]) * (d2[j] - d1[j] - 1));
+    }
+    return ans;
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
