@@ -1,1 +1,243 @@
-dsgfydsugfsdfsdf
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>String Hashing - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>String Hashing</h1>
+
+<p>Os algoritmos de hash são úteis na solução de muitos problemas.</p>
+
+<p>O problema que queremos resolver é que queremos comparar seqüências de caracteres com eficiência.
+O método de força bruta de fazer isso é apenas comparar as letras de ambas as strings, esse método tem uma complexidade de tempo de $O(\min(n_1, n_2))$, se $n_1$ e $n_2$ forem o tamanho das duas strings.
+Queremos fazer melhor. A idéia por trás é a seguinte: convertemos cada string em um número inteiro e os comparamos em vez das strings.
+Comparar duas strings é então uma operação $O(1)$.</p>
+
+<p>Para a conversão, precisamos da chamada "<strong>função hash</strong>".
+O objetivo é converter uma string em um número inteiro, o chamado <strong>hash</strong> da string.
+A seguinte condição deve ser mantida: se duas strings $s$ e $t$ forem iguais ($s = t$), também seus hashes deverão ser iguais ($\text{hash}(s) = \text{hash}(t)$).
+Caso contrário, não poderemos comparar strings.</p>
+
+<p>Observe que o oposto não precisa se manter. 
+Se os hashes forem iguais ($\text{hash}(s) = \text{hash}(t)$), as strings não precisam necessariamente ser iguais. 
+Por exemplo, uma função hash válida seria simplesmente $\text{hash}(s) = 0$ para cada $s$.
+Agora, este é apenas um exemplo, porque essa função será inútil, mas é uma função hash válida.
+A razão no qual o oposto não precisa ser válido é porque existem exponencialmente muitas strings.
+Se queremos apenas que essa função hash faça a distinção entre todas as strings que consistem em caracteres minúsculos de comprimento menor que 15, então o hash não caberia mais em um número inteiro de 64 bits (exemplo: unsigned long long), pois existem muitas delas.
+E é claro que não queremos comparar números inteiros longos arbitrários, porque isso também terá a complexidade $O(n)$.</p>
+
+<p>Portanto, geralmente queremos que a função hash mapeie strings em números de um intervalo fixo $[0, m)$, então comparar strings será apenas uma comparação de dois inteiros com tamanho fixo.
+E queremos que seja muito provável que $\text{hash}(s) \neq \text{hash}(t)$, se $s \neq t$.</p>
+
+<p>Essa é a parte importante que você deve ter em mente. O uso de hash não será 100% deterministicamente correto, porque duas strings diferentes podem ter o mesmo hash (os hashes colidem).
+No entanto, na grande maioria das tarefas, isso pode ser ignorado com segurança, pois a probabilidade de os hashes de duas strings diferentes colidirem ainda é muito pequena. Discutiremos algumas técnicas neste artigo sobre como manter a probabilidade de colisões muito baixa.</p>
+
+<h2>Cálculo do hash de uma string</h2>
+
+<p>Uma e amplamente usada maneira de definir o hash de uma string $s$ de tamanho $n$ é
+$$\begin{align}
+\text{hash}(s) &amp;= s[0] + s[1] \cdot p + s[2] \cdot p^2 + ... + s[n-1] \cdot p^{n-1} \mod m &#92;&#92;
+&amp;= \sum_{i=0}^{n-1} s[i] \cdot p^i \mod m,
+\end{align}$$
+onde $p$ e $m$ são número positivos dados.
+É chamada de <strong>função polinomial de hashing</strong>.</p>
+
+<p>É razoável $p$ ser um número primo aproximadamente igual ao número de caracteres no alfabeto de entrada.
+Por exemplo, se a entrada for composta apenas por letras minúsculas do alfabeto inglês, $p = 31$ é uma boa escolha.
+Se a entrada puder conter letras maiúsculas e minúsculas, então $p = 53$ é uma possível escolha.
+O código neste artigo usará $p = 31$.</p>
+
+<p>Obviamente, $m$ deve ser um número grande, pois a probabilidade de duas strings aleatórias colidirem é de cerca de $\approx \frac{1}{m}$.
+Às vezes, é escolhido $m = 2^{64}$, ja que o overflow de inteiros de 64 bits funciona exatamente com o módulo da operação.
+No entanto, existe um método que gera strings em colisão (que funcionam independentemente da opção de $p$).
+Portanto, na prática, $m = 2^{64}$ não é recomendado.
+Uma boa opção para $m$ é um grande número primo. 
+O código neste artigo usará apenas $m = 10^9+9$.
+Esse é um número grande, mas ainda é pequeno o suficiente para que possamos executar a multiplicação de dois valores usando números inteiros de 64 bits.</p>
+
+<p>Aqui está um exemplo do cálculo do hash de uma string $s$, que contém apenas letras minúsculas.
+Convertemos cada caractere de $s$ em um número inteiro.
+Aqui usamos a conversão $a \rightarrow 1$, $b \rightarrow 2$, $\dots$, $z \rightarrow 26$.
+Converter $a \rightarrow 0$ não é uma boa ideia, pois os hashes das strings $a$, $aa$, $aaa$, $\dots$ são todos avaliados como $0$.</p>
+
+<pre><code class="cpp">long long compute_hash(string const&amp; s) {
+    const int p = 31;
+    const int m = 1e9 + 9;
+    long long hash_value = 0;
+    long long p_pow = 1;
+    for (char c : s) {
+        hash_value = (hash_value + (c - 'a' + 1) * p_pow) % m;
+        p_pow = (p_pow * p) % m;
+    }
+    return hash_value;
+}
+</code></pre>
+
+<p>A pré-computação das potências de $p$ pode aumentar o desempenho.</p>
+
+<h2>Exemplos</h2>
+
+<h3>Procure por strings duplicadas em uma array de strings</h3>
+
+<p>Problema: dada uma lista de $n$ strings $s_i$, cada uma com no máximo $m$ caracteres, localize todas as strings duplicadas e divida-as em grupos.</p>
+
+<p>De um algoritmo trivial que envolve ordenar as strings, obteríamos uma complexidade de tempo de $O(n m \log n)$ onde a ordenação requer $O(n \log n)$ comparações e cada comparação leva tempo $O(m)$.
+No entanto, usando hashes, reduzimos o tempo de comparação para $O(1)$, fornecendo um algoritmo que é executado em tempo $O(n m + n \log n)$.</p>
+
+<p>Calculamos o hash para cada string, ordenamos os hashes junto com os índices e, em seguida, agrupamos os índices por hashes idênticos.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; group_identical_strings(vector&lt;string&gt; const&amp; s) {
+    int n = s.size();
+    vector&lt;pair&lt;long long, int&gt;&gt; hashes(n);
+    for (int i = 0; i &lt; n; i++)
+        hashes[i] = {compute_hash(s[i]), i};
+
+    sort(hashes.begin(), hashes.end());
+
+    vector&lt;vector&lt;int&gt;&gt; groups;
+    for (int i = 0; i &lt; n; i++) {
+        if (i == 0 || hashes[i].first != hashes[i-1].first)
+            groups.emplace_back();
+        groups.back().push_back(hashes[i].second);
+    }
+    return groups;
+}
+</code></pre>
+
+<h3>Cálculo rápido do hash de substrings de uma determinada string</h3>
+
+<p>Problema: Dada uma string $s$ e índices $i$ e $j$, encontre o hash da substring $s [i \dots j]$.</p>
+
+<p>Por definição, temos:
+$$\text{hash}(s[i \dots j]) = \sum_{k = i}^j s[k] \cdot p^{k-i} \mod m$$
+Multiplicando por $p^i$, temos:
+$$\begin{align}
+\text{hash}(s[i \dots j]) \cdot p^i &amp;= \sum_{k = i}^j s[k] \cdot p^k \mod m &#92;&#92;
+&amp;= \text{hash}(s[0 \dots j]) - \text{hash}(s[0 \dots i-1]) \mod m
+\end{align}$$</p>
+
+<p>Portanto, sabendo o valor do hash de cada prefixo da string $s$, podemos calcular o hash de qualquer substring diretamente usando essa fórmula.
+O único problema que enfrentamos no cálculo é que devemos ser capazes de dividir $\text{hash}(s[0 \dots j]) - \text{hash}(s[0 \dots i-1])$ por $p^i$.
+Portanto, precisamos encontrar o <a href="https://cp-algorithms-brasil.com/Algebra/inversomod.html">inverso multiplicativo modular</a> de $p^i$ e executar a multiplicação com esse inverso. Podemos pré-calcular o inverso de cada $p^i$, o que permite calcular o hash de qualquer substring de $s$ em tempo $O(1)$.</p>
+
+<p>No entanto, existe uma maneira mais fácil.
+Na maioria dos casos, em vez de calcular exatamente os hashes das substrings, basta calcular o hash multiplicado por alguma potência de $p$.
+Suponha que temos dois hashes de duas substrings, uma multiplicada por $p^i$ e a outra por $p^j$.
+Se $i &lt; j$ então multiplicamos o primeiro hash por $p^{j-i}$, caso contrário, multiplicamos o segundo hash por $p^{i-j}$.
+Ao fazer isso, obtemos os dois hashes multiplicados pela mesma potência de $p$ (que é o máximo de $i$ e $j$) e agora esses hashes podem ser comparados facilmente, sem a necessidade de qualquer divisão.</p>
+
+<h2>Aplicações de Hashing</h2>
+
+<p>Aqui estão algumas aplicações típicas de Hashing:</p>
+
+<ul>
+<li><a href="https://cp-algorithms.com/string/rabin-karp.html">algoritmo de Rabin-Karp</a> para correspondência de padrões em uma string em tempo $O(n)$</li>
+<li>Calculando o número de diferentes substrings de uma string em $O(n^2 \log n)$ (veja abaixo)</li>
+<li>Calculando o número de substrings palindrômicos em uma string</li>
+</ul>
+
+<h3>Determine o número de substrings em uma string</h3>
+
+<p>Problema: Dada uma string $s$ de tamanho $n$, consistindo apenas em letras minúsculas em inglês, encontre o número de diferentes substrings nessa string.</p>
+
+<p>Para resolver esse problema, iteramos sobre todos os comprimentos da substring $l = 1 \dots n$.
+Para cada substring de tamanho $l$ construimos uma array dos hashes de todas as substrings de tamanho $l$ multiplicado pela mesma pot"encia de $p$.
+O número de elementos diferentes na array é igual ao número de substrings diferentes de tamanho $l$ na string.
+Este número é adicionado à resposta final.</p>
+
+<p>Por conveniência, usaremos $h[i]$ como o hash do prefixo com $i$ caracteres, e definimos $h[0] = 0$.</p>
+
+<pre><code class="cpp">int count_unique_substrings(string const&amp; s) {
+    int n = s.size();
+
+    const int p = 31;
+    const int m = 1e9 + 9;
+    vector&lt;long long&gt; p_pow(n);
+    p_pow[0] = 1;
+    for (int i = 1; i &lt; n; i++)
+        p_pow[i] = (p_pow[i-1] * p) % m;
+
+    vector&lt;long long&gt; h(n + 1, 0);
+    for (int i = 0; i &lt; n; i++)
+        h[i+1] = (h[i] + (s[i] - 'a' + 1) * p_pow[i]) % m;
+
+    int cnt = 0;
+    for (int l = 1; l &lt;= n; l++) {
+        set&lt;long long&gt; hs;
+        for (int i = 0; i &lt;= n - l; i++) {
+            long long cur_h = (h[i + l] + m - h[i]) % m;
+            cur_h = (cur_h * p_pow[n-i-1]) % m;
+            hs.insert(cur_h);
+        }
+        cnt += hs.size();
+    }
+    return cnt;
+}
+</code></pre>
+
+<h2>Melhorar a probabilidade de não colisão</h2>
+
+<p>Muitas vezes, o hash mencionado acima é bom o suficiente e nenhuma colisão ocorrerá durante os testes.
+Lembre-se, a probabilidade de colisão acontecer é de apenas $\approx \frac{1}{m}$.
+Para $m = 10^9 + 9$ a probabilidade é de $\approx 10^{-9}$ no qual é bem pequena.
+Mas observe que fizemos apenas uma comparação.
+E se comparássemos uma string $s$ com $10^6$ strings diferentes.
+A probabilidade de ocorrer pelo menos uma colisão é agora $\approx 10^{-3}$.
+E se quisermos comparar $10^6$ strings diferentes (por exemplo, contando quantas strings únicas existem), a probabilidade de que pelo menos uma colisão aconteça já é $\approx 1$.
+É praticamente garantido que esta tarefa termine com uma colisão e retorne o resultado errado.</p>
+
+<p>Existe um truque para obter melhores probabilidades.
+Podemos apenas calcular dois hashes diferentes para cada string (usando dois $p$, e/ou um $m$ diferente, e comparar esses pares.
+Se $m$ for cerca de $10^9$  para cada uma das duas funções de hash, isso será mais ou menos equivalente a ter uma função de hash com $m \approx 10^{18}$.
+Ao comparar $10^6$ strings entre si, a probabilidade de ocorrer pelo menos uma colisão agora é reduzida para $\approx 10^{-6}$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/NHAY/">A Needle in the Haystack - SPOJ</a></li>
+<li><a href="http://codeforces.com/problemset/problem/154/C">Double Profiles - Codeforces</a></li>
+<li><a href="http://codeforces.com/problemset/problem/126/B">Password - Codeforces</a></li>
+<li><a href="http://www.spoj.com/problems/SUB_PROB/">SUB_PROB - SPOJ</a></li>
+<li><a href="https://www.codechef.com/problems/INSQ15_A">INSQ15_A</a></li>
+<li><a href="http://www.spoj.com/problems/ADACLEAN/">SPOJ - Ada and Spring Cleaning</a></li>
+<li><a href="http://codeforces.com/gym/101466/problem/E">GYM - Text Editor</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3163">12012 - Detection of Extraterrestrial</a></li>
+<li><a href="http://codeforces.com/contest/727/problem/E">Codeforces - Games on a CD</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2955">UVA 11855 - Buzzwords</a></li>
+<li><a href="http://codeforces.com/contest/752/problem/D">Codeforces - Santa Claus and a Palindrome</a></li>
+<li><a href="http://codeforces.com/contest/825/problem/F">Codeforces - String Compression</a></li>
+<li><a href="http://codeforces.com/contest/835/problem/D">Codeforces - Palindromic Characteristics</a></li>
+<li><a href="http://www.spoj.com/problems/CF25E/">SPOJ - Test</a></li>
+<li><a href="http://codeforces.com/contest/7/problem/D">Codeforces - Palindrome Degree</a></li>
+<li><a href="http://codeforces.com/contest/19/problem/C">Codeforces - Deletion of Repeats</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
