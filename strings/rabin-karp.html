@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Algoritmo de Rabin-Karp - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Algoritmo de Rabin-Karp</h1>
+
+<p>Esse algoritmo é baseado no conceito de hashing; portanto, se você não estiver familiarizado com hashing de strings, consulte o artigo <a href="https://cp-algorithms-brasil.com/strings/striing.html">string hashing</a>.</p>
+
+<p>Esse algoritmo foi criado por Rabin e Karp em 1987.</p>
+
+<p>Problema: Dadas duas strings - um padrão $s$ e um texto $t$, determine se o padrão aparece no texto e, se aparecer, enumere todas as ocorrências em $O(|s| + |t|)$.</p>
+
+<p>Algoritmo: Calcule o hash para o padrão $s$.
+Calcule valores de hash para todos os prefixos do texto $t$.
+Agora, podemos comparar uma substring de comprimento $|s|$ com $s$ em tempo constante usando os hashes calculados.
+Portanto, compare cada substring de comprimento $|s|$ com o padrão. Isso levará um total de $O(|t|)$.
+Portanto, a complexidade final do algoritmo é $O(|t| + |s|)$: $O(|s|)$ é necessário para calcular o hash do padrão e $O(|t|)$ para comparar cada substring de comprimento $|s|$ com o padrão.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">vector&lt;int&gt; rabin_karp(string const&amp; s, string const&amp; t) {
+    const int p = 31; 
+    const int m = 1e9 + 9;
+    int S = s.size(), T = t.size();
+
+    vector&lt;long long&gt; p_pow(max(S, T)); 
+    p_pow[0] = 1; 
+    for (int i = 1; i &lt; (int)p_pow.size(); i++) 
+        p_pow[i] = (p_pow[i-1] * p) % m;
+
+    vector&lt;long long&gt; h(T + 1, 0); 
+    for (int i = 0; i &lt; T; i++)
+        h[i+1] = (h[i] + (t[i] - 'a' + 1) * p_pow[i]) % m; 
+    long long h_s = 0; 
+    for (int i = 0; i &lt; S; i++) 
+        h_s = (h_s + (s[i] - 'a' + 1) * p_pow[i]) % m; 
+
+    vector&lt;int&gt; occurences;
+    for (int i = 0; i + S - 1 &lt; T; i++) { 
+        long long cur_h = (h[i+S] + m - h[i]) % m; 
+        if (cur_h == h_s * p_pow[i] % m)
+            occurences.push_back(i);
+    }
+    return occurences;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/NAJPF/">SPOJ - Pattern Find</a></li>
+<li><a href="http://codeforces.com/problemset/problem/271/D">Codeforces - Good Substrings</a></li>
+<li><a href="https://codeforces.com/problemset/problem/835/D">Codeforces - Palindromic characteristics</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
