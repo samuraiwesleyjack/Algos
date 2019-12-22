@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Algoritmo de Aho-Corasick - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Algoritmo de Aho-Corasick</h1>
+
+<p>Seja um conjunto de strings com o comprimento total $m$ (soma de todos os comprimentos).
+O algoritmo Aho-Corasick constrói uma estrutura de dados semelhante a uma trie com alguns links adicionais e, em seguida, constrói uma máquina de estado finito (autômato) em tempo  $O(m k)$, onde $k$ é o tamanho do alfabeto usado.</p>
+
+<p>O algoritmo foi proposto por Alfred Aho e Margaret Corasick em 1975.</p>
+
+<h2>Construção da trie</h2>
+
+<p>Formalmente, uma trie é uma árvore enraizada, em que cada aresta da árvore é rotulada por alguma letra.
+Todas as arestas que saem de um vértice devem ter rótulos diferentes.</p>
+
+<p>Considere qualquer caminho na trie da raiz para qualquer vértice.
+Se escrevermos os rótulos de todas as arestas do caminho, obteremos uma string que corresponde a esse caminho.
+Para qualquer vértice na trie associaremos a string da raiz ao vértice.</p>
+
+<p>Cada vértice também terá uma 'flag' $\text{leaf}$ que será verdadeiro(true), se qualquer string do conjunto especificado corresponder a esse vértice.</p>
+
+<p>Assim, construir uma trie para um conjunto de strings significa construir uma trie de modo que cada $\text{leaf}$ do vértice corresponda a uma string do conjunto e, inversamente, que cada string do conjunto corresponda a uma $\text{leaf}$ do vértice.</p>
+
+<p>Agora, descrevemos como construir uma trie para um determinado conjunto de strings em tempo linear em relação ao seu comprimento total.</p>
+
+<p>Introduzimos uma estrutura para os vértices da árvore.</p>
+
+<pre><code class="cpp">const int K = 26;
+
+struct Vertex {
+    int next[K];
+    bool leaf = false;
+
+    Vertex() {
+        fill(begin(next), end(next), -1);
+    }
+};
+
+vector&lt;Vertex&gt; trie(1);
+</code></pre>
+
+<p>Aqui armazenamos a trie como uma array com o $\text{Vertex}$.
+Cada $\text{Vertex}$ contém a flag(sinalizador booleano) $\text{leaf}$, e as arestas na forma de uma array $\text{next}[]$, onde $\text{next}[i]$ é o índice para o vértice que alcançamos seguindo o caracter $i$, ou $-1$, se essa aresta não existir.
+Inicialmente, a trie consiste apenas de um vértice - a raiz - com índice $0$.</p>
+
+<p>Agora, implementamos uma função que adicionará uma string $s$ a trie.
+Começamos no nó raiz e, desde que haja arestas correspondentes aos caracteres de $s$, nós seguimos elas.
+Se não houver aresta para um caractere, simplesmente geramos um novo vértice e o conectamos através de uma aresta.
+No final do processo, marcamos o último vértice com a flag $\text{leaf}$.</p>
+
+<pre><code class="cpp">void add_string(string const&amp; s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (trie[v].next[c] == -1) {
+            trie[v].next[c] = trie.size();
+            trie.emplace_back();
+        }
+        v = trie[v].next[c];
+    }
+    trie[v].leaf = true;
+}
+</code></pre>
+
+<p>A implementação é executada em tempo linear. 
+E como todo vértice armazena $k$ links, ele usará $O(m k)$ de memória.</p>
+
+<p>É possível diminuir o consumo de memória para $O(m)$ usando um 'map' em vez de uma array em cada vértice.
+No entanto, isso aumentará a complexidade para $O(n \log k)$.</p>
+
+<h2>Construção de um autômato</h2>
+
+<p>Suponha que tenhamos construído uma trie para o conjunto de strings fornecido.
+Agora vamos olhar com uma maneira diferente.
+Se olharmos para qualquer vértice, a string que corresponde a ele é um prefixo de uma ou mais strings no conjunto, portanto, cada vértice da trie pode ser interpretado como uma posição em uma ou mais strings do conjunto.</p>
+
+<p>De fato, os vértices da trie podem ser interpretados como estados em um <strong>autômato finito e deterministico</strong>.
+De qualquer estado podemos fazer uma transição - usando alguma letra como input - para outros estados, ou seja, para outra posição no conjunto de strings.
+Por exemplo, se tiver apenas uma string na trie $abc$, e estamos no vértice $2$ (que corresponde à string $ab$), usando a letra $c$ podemos fazer a transição para o estado $3$.</p>
+
+<p>Assim, podemos entender as arestas da árvore como transições em um autômato de acordo com a letra correspondente.
+No entanto, para um autômato, não podemos restringir as transições possíveis para cada estado.
+Se tentarmos realizar uma transição usando uma letra, e não houver arestas correspondentes na trie, então, devemos entrar em algum estado.</p>
+
+<p>Mais estritamente, vamos estar em um estado $p$ correspondente à string $t$, e queremos fazer a transição para um estado diferente com o caractere $c$.
+Se existir uma aresta rotulada com essa letra $c$, podemos simplesmente passar por essa aresta e obter o vértice correspondente a $t + c$.
+Se essa aresta não existir, então, devemos procurar o estado correspondente ao sufixo mais longo da string $t$ (o mais longo disponível na trie), e tentar executar uma transição com $c$.</p>
+
+<p>Por exemplo, deixe a trie ser construída pelas strings $ab$ e $bc$, e atualmente estamos no vértice correspondente a $ab$, que é uma $\text{leaf}$.
+Para uma transição com a letra $c$, somos forçados a ir para o estado correspondente à string $b$, e a partir daí seguir a aresta com a letra $c$.</p>
+
+<p>Um <strong>link de sufixo(<a href="https://en.wikipedia.org/wiki/Suffix_tree">suffix link</a>)</strong> para um vértice $p$ é uma aresta que aponta para o sufixo adequado mais longo da string correspondente ao vértice $p$.
+O único caso especial é a raiz da trie, o link do sufixo apontará para ele mesmo.
+Agora podemos reformular a declaração sobre as transições no autômato assim:
+enquanto no vértice atual da trie não há transição usando a letra atual (ou até alcançarmos a raiz), seguimos o link do sufixo.</p>
+
+<p>Assim, reduzimos o problema de construir um autômato ao problema de encontrar links de sufixo para todos os vértices da trie.
+No entanto, construiremos esses links de sufixo, por estranho que pareça, usando as transições construídas no autômato.</p>
+
+<p>Observe que, se quisermos encontrar um link de sufixo para algum vértice $v$, então, podemos ir para o ancestral $p$ do vértice atual (seja $c$ a letra da aresta de $p$ para $v$), siga o link do sufixo e faça a transição a partir daí com a letra $c$.</p>
+
+<p>Assim, o problema de encontrar as transições foi reduzido ao problema de encontrar links de sufixos, e o problema de encontrar links de sufixos foi reduzido ao problema de encontrar um link de sufixo e uma transição, mas apenas para vértices mais próximos da raiz. 
+Portanto, temos uma dependência recursiva que podemos resolver em tempo linear.</p>
+
+<p>Vamos para a implementação. Observe que agora armazenaremos o ancestral $p$ e o caractere $pch$ da aresta de $p$ para $v$ para cada vértice $v$.
+Além disso, em cada vértice, armazenaremos o link do sufixo $\text{link}$ (ou $-1$ se não estiver calculado ainda), e na array $\text{go}[k]$ as transições para cada símbolo (novamente $-1$ se ainda não tiver sido calculado).</p>
+
+<pre><code class="cpp">const int K = 26;
+
+struct Vertex {
+    int next[K];
+    bool leaf = false;
+    int p = -1;
+    char pch;
+    int link = -1;
+    int go[K];
+
+    Vertex(int p=-1, char ch='$') : p(p), pch(ch) {
+        fill(begin(next), end(next), -1);
+        fill(begin(go), end(go), -1);
+    }
+};
+
+vector&lt;Vertex&gt; t(1);
+
+void add_string(string const&amp; s) {
+    int v = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        if (t[v].next[c] == -1) {
+            t[v].next[c] = t.size();
+            t.emplace_back(v, ch);
+        }
+        v = t[v].next[c];
+    }
+    t[v].leaf = true;
+}
+
+int go(int v, char ch);
+
+int get_link(int v) {
+    if (t[v].link == -1) {
+        if (v == 0 || t[v].p == 0)
+            t[v].link = 0;
+        else
+            t[v].link = go(get_link(t[v].p), t[v].pch);
+    }
+    return t[v].link;
+}
+
+int go(int v, char ch) {
+    int c = ch - 'a';
+    if (t[v].go[c] == -1) {
+        if (t[v].next[c] != -1)
+            t[v].go[c] = t[v].next[c];
+        else
+            t[v].go[c] = v == 0 ? 0 : go(get_link(v), ch);
+    }
+    return t[v].go[c];
+} 
+</code></pre>
+
+<p>Devido à memorização dos links de sufixos e transições encontrados, o tempo total para encontrar todos os links e transições será linear.</p>
+
+<h2>Aplicações</h2>
+
+<h3>Encontre todas as strings de um determinado conjunto em um texto</h3>
+
+<p>Dado um conjunto de strings e um texto.
+Temos que imprimir todas as ocorrências de todas as strings de um conjunto no texto fornecido em $O(\text{len} + \text{ans})$, onde $\text{len}$ é o tamanho do texto e $\text{ans}$ é o tamanho da resposta.</p>
+
+<p>Construímos um autômato para esse conjunto de strings.
+Agora, processaremos o texto letra por letra, fazendo a transição durante os diferentes estados.
+Inicialmente estaremos na raiz da trie.
+Se estivermos a qualquer momento no estado $v$, e a próxima letra for $c$, então, passamos para o próximo estado com $\text{go}(v, c)$, aumentando assim o comprimento da substring correspondente em $1$, ou decrementando-a seguindo um link de sufixo.</p>
+
+<p>Como podemos descobrir, para um estado $v$, se houver alguma correspondência com as strings do conjunto?
+Primeiro, é claro que, se permanecermos em uma $\text{leaf}$ do vértice, a string correspondente ao vértice termina nesta posição no texto.
+No entanto, esse não é o único caso possível de obter uma correspondência:
+se pudermos alcançar um ou mais  $\text{leaf}$ vértices movendo-se pelos links de sufixo, haverá também uma correspondência correspondente a cada $\text{leaf}$ vértice encontrado.
+Um exemplo simples que demonstra essa situação pode ser criado usando o conjunto de strings $&#92;{dabce, abc, bc&#92;}$ e o texto $dabc$.</p>
+
+<p>Portanto, se armazenarmos em cada vértice $\text{leaf}$ o índice da string correspondente a ela (ou a lista de índices se strings duplicadas aparecerem no conjunto), poderemos encontrar em $O(n)$ os índices de todas as strings que correspondem ao estado atual, simplesmente seguindo os links de sufixo do vértice atual para a raiz. 
+No entanto, essa não é a solução mais eficiente, pois isso nos dá complexidade total $O(n ~ \text{len})$.
+No entanto, isso pode ser otimizado calculando e armazenando o vértice $\text{leaf}$ mais próximo que é acessível usando links de sufixo (isso às vezes é chamado de  <strong>link de saída</strong>).
+Podemos calcular esse valor com lazy propagation em tempo linear.
+Assim, para cada vértice, podemos avançar em tempo $O(1)$ para o próximo vértice marcado no caminho do link do sufixo, ou seja, para a próxima correspondência.
+Assim, para cada correspondência, levamos tempo $O(1)$, e portanto, alcançamos a complexidade $O(\text{len} + \text{ans})$.</p>
+
+<p>Se você quiser apenas contar as ocorrências e não encontrar os índices, poderá calcular o número de vértices marcados no caminho do link do sufixo para cada vértice $v$.
+Isso pode ser calculado em tempo $O(n)$ no total.
+Portanto podemos somar todas as correspondências em $O(\text{len})$.</p>
+
+<h3>Localizando a menor string lexicográfica de um determinado comprimento que não corresponde a nenhuma string</h3>
+
+<p>Um conjunto de strings e um comprimento $L$ são fornecidos.
+Temos que encontrar uma string de comprimento $L$, que não contenha nenhuma das outras strings, e derivar a menor lexicográfica dessas strings.</p>
+
+<p>Podemos construir o autômato para o conjunto de strings. Lembremos que os vértices dos quais podemos alcançar um $\text{leaf}$ vértice são os estados nos quais temos uma correspondência com uma string do conjunto. Como nesta tarefa temos que evitar correspondências, não podemos entrar nesses estados. Por outro lado, podemos inserir todos os outros vértices. Assim, excluímos todos os vértices "ruins" da máquina e, no grafo restante do autômato, encontramos o menor caminho lexicográfico de comprimento $L$.
+Esta tarefa pode ser resolvida em $O(L)$ por exemplo com uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>.</p>
+
+<h3>Localizando a string mais curta que contém todas as strings fornecidas</h3>
+
+<p>Here we use the same ideas.
+Aqui usamos as mesmas idéias. Para cada vértice, armazenamos uma máscara que indica as seqüências que correspondem a esse estado. Em seguida, o problema pode ser reformulado da seguinte forma: estando inicialmente no estado $(v = \text{root},~ \text{mask} = 0)$, queremos atingir o estado $(v,~ \text{mask} = 2^n - 1)$, onde $n$ é o número de cadeias de caracteres no conjunto. Quando fazemos a transição de um estado para outro usando uma letra, atualizamos a máscara de acordo. Executando uma <a href="https://cp-algorithms-brasil.com/grafos/BFS.html">BFS</a> podemos encontrar um caminho para o estado $(v,~ \text{mask} = 2^n - 1)$ com o menor comprimento.</p>
+
+<h3>Localizando a menor string lexicográfica de comprimento $L$ contendo $k$ strings</h3>
+
+<p>Como no problema anterior, calculamos para cada vértice o número de correspondências que correspondem a ele (ou seja, o número de vértices marcados alcançáveis ​​usando links de sufixo). Nós reformulamos o problema: o estado atual é determinado por um triplo de números $(v,~ \text{len},~ \text{cnt})$, e precisamos alcançar do estado $(\text{root},~ 0,~ 0)$, o estado $(v,~ L,~ k)$, onde $v$ pode ser qualquer vértice.
+Assim, podemos encontrar esse caminho usando uma DFS (e se a pesquisa observar as arestas em sua ordem natural, o caminho encontrado será automaticamente o menor lexicográfico).</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2637">UVA #11590 - Prefix Lookup</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2112">UVA #11171 - SMS</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1620">UVA #10679 - I Love Strings!!</a></li>
+<li><a href="http://codeforces.com/problemset/problem/963/D">Codeforces - Frequency of String</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
