@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Array de Sufixos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Array de Sufixos</h1>
+
+<h2>Definição</h2>
+
+<p>Seja $s$ uma string de tamanho $n$. O $i$-ésimo sufixo de $s$ é a substring $s[i \ldots n - 1]$.</p>
+
+<p>Uma <strong>array de sufixos</strong> conterá números inteiros que representam os <strong>índices iniciais</strong> de todos os sufixos de uma determinada string, após a ordenação desses sufixos.</p>
+
+<p>Como exemplo, veja a string $s = abaab$.
+Todos os sufixos:
+$$\begin{array}{ll}
+0. &amp; abaab &#92;&#92;
+1. &amp; baab &#92;&#92;
+2. &amp; aab &#92;&#92;
+3. &amp; ab &#92;&#92;
+4. &amp; b
+\end{array}$$</p>
+
+<p>Após ordenar essas strings:
+$$\begin{array}{ll}
+2. &amp; aab &#92;&#92;
+3. &amp; ab &#92;&#92;
+0. &amp; abaab &#92;&#92;
+4. &amp; b &#92;&#92;
+1. &amp; baab
+\end{array}$$</p>
+
+<p>Portanto, a array de sufixos para $s$ será $(2,~ 3,~ 0,~ 4,~ 1)$.</p>
+
+<p>Como estrutura de dados, é amplamente utilizada em áreas como compressão de dados, bioinformática e, no geral, em qualquer área que lide com strings e problemas de correspondência de strings.</p>
+
+<h2>Construção</h2>
+
+<h3>abordagem $O(n^2 \log n)$</h3>
+
+<p>Essa é uma abordagem mais trivial.
+Consiga todos os sufixos e ordene-os usando quicksort ou mergesort e, simultaneamente, mantenha seus índices originais.
+Ordenar custa $O(n \log n)$ comparações, e, como comparar duas strings também levará tempo $O(n)$, obtemos a complexidade final de $O(n^2 \log n)$.</p>
+
+<h3>abordagem $O(n \log n)$</h3>
+
+<p>A rigor, o algoritmo a seguir não ordena os sufixos, mas as mudanças cíclicas de uma string.
+No entanto, podemos derivar dele um algoritmo para ordenar sufixos:
+basta anexar um caractere arbitrário ao final da string, que é menor que qualquer caractere da string.
+É comum usar o símbolo $&#92;$$.
+Então, a ordem das mudanças cíclicos ordenadas é equivalente à ordem dos sufixos ordenados, conforme demonstrado aqui com a string $dabbb$.</p>
+
+<p>$$\begin{array}{lll}
+1. &amp; abbb&#92;$d &amp; abbb &#92;&#92;
+4. &amp; b&#92;$dabb &amp; b &#92;&#92;
+3. &amp; bb&#92;$dab &amp; bb &#92;&#92;
+2. &amp; bbb&#92;$da &amp; bbb &#92;&#92;
+0. &amp; dabbb&#92;$ &amp; dabbb
+\end{array}$$</p>
+
+<p>Como vamos ordenar as mudanças cíclicas, consideraremos <strong>substrings cíclicas</strong>.
+Usaremos a notação $s[i \dots j]$ para a substring $s$ mesmo que $i > j$.
+Nesse caso, na verdade queremos dizer a string $s[i \dots n-1] + s[0 \dots j]$.
+Além disso, pegaremos todos os índices módulo o comprimento de $s$, e omitiremos a operação do módulo por simplicidade.</p>
+
+<p>O algoritmo que discutimos executará $\lceil \log n \rceil + 1$ iterações.
+Na $k$-ésima iteração ($k = 0 \dots \lceil \log n \rceil$) ordenamos $n$ substrings cíclicas de $s$ de tamanho $2^k$.
+Depois da $\lceil \log n \rceil$-ésima iteração as substrings de tamanho $2^{\lceil \log n \rceil} \ge n$ portanto isso equivale a ordenar as mudanças cíclicas completamente.</p>
+
+<p>Em cada iteração do algoritmo, além da permutação $p[0 \dots n-1]$, onde $p[i]$ é o índice da $i$-ésima substring (começando de $i$ e com tamanho $2^k$) na ordem ordenada, também manteremos uma array $c[0 \dots n-1]$, onde $c[i]$ corresponde a <strong>classe equivalente</strong> na qual a substring pertence.
+Como algumas substrings serão idênticas, o algoritmo precisa tratá-las igualmente.
+Por conveniência as classes serão números começando de zero.
+Além disso, os números $c[i]$ erão atribuídos de forma a preservar as informações sobre a ordem:
+se uma substring for menor que a outra, também deverá ter um rótulo de classe menor.
+O número de classes equivalentes será armazenado em uma variável $\text{classes}$.</p>
+
+<p>Considere a string $s = aaba$.
+As substrings cíclicas e as arrays correspondentes $p[]$ e $c[]$ são dadas para cada iteração:
+$$\begin{array}{cccc}
+0: &amp; (a,~ a,~ b,~ a) &amp; p = (0,~ 1,~ 3,~ 2) &amp; c = (0,~ 0,~ 1,~ 0)&#92;&#92;
+1: &amp; (aa,~ ab,~ ba,~ aa) &amp; p = (0,~ 3,~ 1,~ 2) &amp; c = (0,~ 1,~ 2,~ 0)&#92;&#92;
+2: &amp; (aaba,~ abaa,~ baaa,~ aaab) &amp; p = (3,~ 0,~ 1,~ 2) &amp; c = (1,~ 2,~ 3,~ 0)&#92;&#92;
+\end{array}$$
+Vale a pena notar que os valores de $p[]$ podem ser diferentes.
+Por exemplo, na $0$ iteração a array também poderia ser $p = (3,~ 1,~ 0,~ 2)$ ou $p = (3,~ 0,~ 1,~ 2)$.
+Todas essas opções permutam as substrings em uma ordem ordenada.
+Então elas são todas válidas.
+Ao mesmo tempo a array $c[]$ é corrigida, não podem haver ambiguidades.</p>
+
+<p>Vamos agora focar na implementação do algoritmo.
+Escreveremos uma função que pega uma string $s$ e retorna as permutações das mudanças cíclicas ordenadas.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; sort_cyclic_shifts(string const&amp; s) {
+    int n = s.size();
+    const int alphabet = 256;
+</code></pre>
+
+<p>No começo (na <strong>"$0$-ésima" iteração</strong>) devemos ordenar as substrings cíclicas de comprimento $1$, isto é, devemos ordenar todos os caracteres da string e dividi-los em classes equivalentes (símbolos iguais são atribuídos na mesma classe).
+Isso pode ser feito trivialmente, por exemplo, usando <strong>counting sort</strong>.
+Para cada caractere, contamos quantas vezes ele aparece na string e, em seguida, usamos essas informações para criar a array $p[]$.
+Depois disso, iremos pela array $p[]$ e construímos $c[]$ comparando caracteres adjacentes.</p>
+
+<pre><code class="cpp">    vector&lt;int&gt; p(n), c(n), cnt(max(alphabet, n), 0);
+    for (int i = 0; i &lt; n; i++)
+        cnt[s[i]]++;
+    for (int i = 1; i &lt; alphabet; i++)
+        cnt[i] += cnt[i-1];
+    for (int i = 0; i &lt; n; i++)
+        p[--cnt[s[i]]] = i;
+    c[p[0]] = 0;
+    int classes = 1;
+    for (int i = 1; i &lt; n; i++) {
+        if (s[p[i]] != s[p[i-1]])
+            classes++;
+        c[p[i]] = classes - 1;
+    }
+</code></pre>
+
+<p>Agora temos que falar sobre a etapa da iteração.
+Vamos supor que já executamos a $k-1$-ésima etapa e calculamos os valores das arrays $p[]$ e $c[]$ para ela.
+Queremos calcular os valores para a $k$-ésima etapa em tempo $O(n)$.
+Como executamos esta etapa $O(\log n)$ vezes, o algoritmo completo terá uma complexidade de tempo de $O(n \log n)$.</p>
+
+<p>Para fazer isso, observe que as substrings cíclicas de tamanho $2^k$ consistem de duas substrings de tamanho $2^{k-1}$ que podemos comparar entre si em $O(1)$ usando as informações da fase anterior - os valores da classe equivalente $c[]$.
+Assim, para duas substrings de comprimento $2^k$ começando da posição $i$ e $j$, todas as informações necessárias para compará-las estão contidas nos pares $(c[i],~ c[i + 2^{k-1}])$ e $(c[j],~ c[j + 2^{k-1}])$.
+$$\dots
+\overbrace{
+\underbrace{s_i \dots s_{i+2^{k-1}-1}}&#95;{\text{length} = 2^{k-1},~ \text{class} = c[i]}
+\quad
+\underbrace{s_{i+2^{k-1}} \dots s_{i+2^k-1}}&#95;{\text{length} = 2^{k-1},~ \text{class} = c[i + 2^{k-1}]}
+}^{\text{length} = 2^k}
+\dots
+\overbrace{
+\underbrace{s_j \dots s_{j+2^{k-1}-1}}&#95;{\text{length} = 2^{k-1},~ \text{class} = c[j]}
+\quad
+\underbrace{s_{j+2^{k-1}} \dots s_{j+2^k-1}}&#95;{\text{length} = 2^{k-1},~ \text{class} = c[j + 2^{k-1}]}
+}^{\text{length} = 2^k}
+\dots
+$$</p>
+
+<p>Isso nos dá uma solução bem simples:
+<strong>ordene</strong> as substrings de tamanho $2^k$ <strong>por esses pares de números</strong>.
+Isso nos dará a ordem requerida $p[]$.
+No entanto, uma ordenação normal é executada em tempo $O(n \log n)$.
+Isso nos fornecerá apenas um algoritmo para a construção de uma array de sufixos em $O(n \log^2 n)$.</p>
+
+<p>Como realizamos uma ordenação mais rápida dos pares?
+Como os elementos dos pares não excedem $n$, podemos usar <strong>counting sort</strong> de novo.
+Entretanto, ordenar pares com counting sort não é muito eficiente.
+Para obter uma constante oculta melhor na complexidade, usaremos outro truque.</p>
+
+<p>Usamos aqui uma técnica na qual o <strong>radix sort</strong> é baseado: para ordenar os pares, primeiro os ordenamos pelo segundo elemento e depois pelo primeiro elemento (com um <strong>stable sort</strong>, ou seja, <strong>ordenando sem quebrar a ordem relativa dos elementos iguais</strong>).
+No entanto, os segundos elementos já foram ordenados na iteração anterior.
+Portanto, para ordenar os pares pelos segundos elementos, basta subtrair $2^{k-1}$ do índices em $p[]$ (por exemplo, se a menor substring de comprimento $2^{k-1}$ começa na posição $i$, então a substring de comprimento $2^k$ com a menor segunda metade começa em $i - 2^{k-1}$).</p>
+
+<p>Portanto, apenas por subtrações simples, podemos ordenar os segundos elementos dos pares em $p[]$.
+Agora precisamos performar um stable sort pelos primeiros elementos.
+Como já mencionado, isso pode ser alcançado com um 'counting sort'.</p>
+
+<p>A única coisa que resta é calcular as classes de equivalência $c[]$, mas, como antes, isso pode ser feito simplesmente iterando sobre a permutação ordenada $p[]$ e comparando pares vizinhos.</p>
+
+<p>Aqui está a implementação restante.
+Usamos arrays temporárias $pn[]$ e $cn[]$ para armazenar a permutação pelos segundos elementos e pelos novas classes equivalentes de índices.</p>
+
+<pre><code class="cpp">    vector&lt;int&gt; pn(n), cn(n);
+    for (int h = 0; (1 &lt;&lt; h) &lt; n; ++h) {
+        for (int i = 0; i &lt; n; i++) {
+            pn[i] = p[i] - (1 &lt;&lt; h);
+            if (pn[i] &lt; 0)
+                pn[i] += n;
+        }
+        fill(cnt.begin(), cnt.begin() + classes, 0);
+        for (int i = 0; i &lt; n; i++)
+            cnt[c[pn[i]]]++;
+        for (int i = 1; i &lt; classes; i++)
+            cnt[i] += cnt[i-1];
+        for (int i = n-1; i &gt;= 0; i--)
+            p[--cnt[c[pn[i]]]] = pn[i];
+        cn[p[0]] = 0;
+        classes = 1;
+        for (int i = 1; i &lt; n; i++) {
+            pair&lt;int, int&gt; cur = {c[p[i]], c[(p[i] + (1 &lt;&lt; h)) % n]};
+            pair&lt;int, int&gt; prev = {c[p[i-1]], c[(p[i-1] + (1 &lt;&lt; h)) % n]};
+            if (cur != prev)
+                ++classes;
+            cn[p[i]] = classes - 1;
+        }
+        c.swap(cn);
+    }
+    return p;
+}
+</code></pre>
+
+<p>O algoritmo requer tempo $O(n \log n)$ e memória $O(n)$.
+No entanto, se considerarmos o tamanho do alfabeto $k$, ele usará tempo $O((n + k) \log n)$ e memória $O(n + k)$.</p>
+
+<p>Para simplificar, usamos o intervalo ASCII do alfabeto.
+Se sabemos que a string contém apenas um subconjunto de caracteres, por exemplo, apenas letras minúsculas, essa implementação pode ser otimizada.
+No entanto, não muito, já que o tamanho do alfabeto aparece apenas com um fator de $O(\log n)$ na complexidade.</p>
+
+<p>Observe também que esse algoritmo ordena apenas as mudanças cíclicas.
+Conforme mencionado no início desta seção, podemos gerar a ordem ordenada dos sufixos anexando um caractere menor que todos os outros caracteres da string e ordenando essa string resultante por mudanças cíclicas (por exemplo, ordenando as mudanças cíclicas $s + &#92;$$).
+Isso nos dará a array de sufixos $s$, no entanto precedida por $|s|$.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; suffix_array_construction(string s) {
+    s += "$";
+    vector&lt;int&gt; sorted_shifts = sort_cyclic_shifts(s);
+    sorted_shifts.erase(sorted_shifts.begin());
+    return sorted_shifts;
+}
+</code></pre>
+
+<h2>Aplicações</h2>
+
+<h3>Encontrar a menor mudança cíclica</h3>
+
+<p>O algoritmo acima ordenada todas as mudanças cíclicas (sem anexar um caractere à string) e, portanto $p[0]$ fornece a posição da menor mudança cíclica.</p>
+
+<h3>Localizando uma substring em uma string</h3>
+
+<p>TA tarefa é encontrar uma string $s$ dentro de um texto $t$, em modo online - conhecemos o texto $t$ antecipadamente, mas não a string $s$.
+Podemos criar a array de sufixos para o texto $t$ em tempo $O(|t| \log |t|)$.
+Agora podemos procurar a substring $s$ da seguinte maneira.
+A ocorrência de $s$ deve ser um prefixo de algum sufixo de $t$.
+Como ordenamos todos os sufixos, podemos realizar uma pesquisa binária por $s$ em $p$.
+A comparação do sufixo atual e da substring $s$ na pesquisa binária pode ser feita em tempo $O(|s|)$, portanto, a complexidade para localizar a substring é $O(|s| \log |t|)$.
+Observe também que, se a substring ocorrer várias vezes em $t$, todas as ocorrências serão próximas umas das outras em $p$.
+Portanto, o número de ocorrências pode ser encontrado com uma segunda pesquisa binária e todas as ocorrências podem ser impressas.</p>
+
+<h3>Comparando duas substrings de uma string</h3>
+
+<p>Queremos poder comparar duas substrings de mesmo comprimento de uma determinada string $s$ em tempo $O(1)$, i.e. verificar se a primeira substring é menor que a segunda.</p>
+
+<p>Para isso construímos a array de sufixos em tempo $O(|s| \log |s|)$ e armazenamos todos os resultados intermediários das classes de equivalência $c[]$.</p>
+
+<p>Usando essas informações, podemos comparar quaisquer duas substrings cujo comprimento seja igual a uma potência de dois em O(1):
+para isso, é suficiente comparar as classes de equivalência de ambas as substrings.
+Agora queremos generalizar esse método para substrings de comprimento arbitrário.</p>
+
+<p>Vamos comparar duas substrings de comprimento $l$ com os índices iniciais $i$ e $j$.
+Encontramos o maior comprimento de um bloco que é colocado dentro de uma substring desse comprimento: o maior $k$ de modo que $2^k \le l$.
+A comparação das duas substrings pode ser substituída pela comparação de dois blocos sobrepostos de comprimento $2^k$:
+primeiro você precisa comparar os dois blocos começando em $i$ e $j$, e, se forem iguais, compare os dois blocos que terminam em posições $i + l - 1$ e $j + l - 1$:
+$$\dots
+\overbrace{\underbrace{s_i \dots s_{i+l-2^k} \dots s_{i+2^k-1}}&#95;{2^k} \dots s_{i+l-1}}^{\text{first}}
+\dots
+\overbrace{\underbrace{s_j \dots s_{j+l-2^k} \dots s_{j+2^k-1}}&#95;{2^k} \dots s_{j+l-1}}^{\text{second}}
+\dots$$
+$$\dots
+\overbrace{s_i \dots \underbrace{s_{i+l-2^k} \dots s_{i+2^k-1} \dots s_{i+l-1}}&#95;{2^k}}^{\text{first}}
+\dots
+\overbrace{s_j \dots \underbrace{s_{j+l-2^k} \dots s_{j+2^k-1} \dots s_{j+l-1}}&#95;{2^k}}^{\text{second}}
+\dots$$</p>
+
+<p>Aqui está a implementação da comparação.
+Note que é assumido que a função seja chamada com o já calculado $k$.
+$k$ pode ser calculado com $\lfloor \log l \rfloor$, mas é mais eficiente pré-calcular todos os valores de $k$ para todo $l$.
+Veja, por exemplo, o artigo sobre a <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/sparsetable.html">Sparse Table</a>, que usa uma idéia similar e calcula todos os valores de $\log$.</p>
+
+<pre><code class="cpp">int compare(int i, int j, int l, int k) {
+    pair&lt;int, int&gt; a = {c[k][i], c[k][(i+l-(1 &lt;&lt; k))%n]};
+    pair&lt;int, int&gt; b = {c[k][j], c[k][(j+l-(1 &lt;&lt; k))%n]};
+    return a == b ? 0 : a &lt; b ? -1 : 1;
+}
+</code></pre>
+
+<h3>Maior prefixo comum de duas substrings com memória adicional</h3>
+
+<p>Para uma determinada string $s$ queremos calcular o prefixo comum mais longo (<strong>LCP</strong>) de dois sufixos arbitrários com posição $i$ e $j$.</p>
+
+<p>O método descrito aqui usa $O(|s| \log |s|)$ de memória adicional.
+Uma abordagem completamente diferente que usará apenas uma quantidade linear de memória é descrita na próxima seção.</p>
+
+<p>Construímos uma array de sufixos em tempo $O(|s| \log |s|)$, e lembramos os resultados intermediários das arrays $c[]$ de cada iteração.</p>
+
+<p>Vamos calcular o LCP para dois sufixos começando em $i$ e $j$.
+Podemos comparar quaisquer duas substrings com um comprimento igual a uma potência de 2 em $O(1)$.
+Para fazer isso, comparamos as strings por potência de dois (da maior para a menor) e, se as substrings desse comprimento forem iguais, adicionamos o mesmo comprimento à resposta e continuamos verificando o LCP à direita da parte igual, ou seja, $i$ e $j$ são adicionados pela potência de dois atual.</p>
+
+<pre><code class="cpp">int lcp(int i, int j) {
+    int ans = 0;
+    for (int k = log_n; k &gt;= 0; k--) {
+        if (c[k][i] == c[k][j]) {
+            ans += 1 &lt;&lt; k;
+            i += 1 &lt;&lt; k;
+            j += 1 &lt;&lt; k;
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p>Aqui <code>log_n</code> indica uma constante igual ao logaritmo de $n$ na base $2$ arredondado.</p>
+
+<h3>Maior prefixo comum de duas substrings sem memória adicional</h3>
+
+<p>Temos a mesma tarefa que na seção anterior.
+Calculamos o (<strong>LCP</strong>) para dois sufixos de uma string $s$.</p>
+
+<p>Diferente do método anterior, este usará apenas $O(|s|)$ de memória.
+O resultado do pré-processamento será uma array (que por si só é uma fonte importante de informações sobre a string e, portanto, também é usada para resolver outras tarefas).
+As consultas/queries de LCP podem ser respondidas executando consultas de RMQ (consultas de intervalo mínimo/range minimum queries) nessa array, portanto, para diferentes implementações, é possível obter tempo de consulta logarítmico e até constante.</p>
+
+<p>A base desse algoritmo é a seguinte ideia: calcularemos o prefixo comum mais longo para cada <strong>par de sufixos adjacentes ordenados</strong>.
+Em outras palavras, construímos uma array $\text{lcp}[0 \dots n-2]$, onde $\text{lcp}[i]$ é igual ao tamanho do prefixo comum mais longo dos sufixos começando em $p[i]$ e $p[i+1]$.
+Essa array nos dará uma resposta para quaisquer dois sufixos adjacentes da string.
+Então a resposta para dois sufixos arbitrários, não necessariamente vizinhos, pode ser obtida dessa array.
+De fato, permita que a solicitação seja calcular o LCP dos sufixos $p[i]$ e $p[j]$.
+Então, a resposta para esta consulta será $\min(lcp[i],~ lcp[i+1],~ \dots,~ lcp[j-1])$.</p>
+
+<p>Portanto, se tivermos uma array $\text{lcp}$, o problema será reduzido para o <a href="https://cp-algorithms.com/sequences/rmq.html">RMQ</a>, que possui um grande número de soluções diferentes com diferentes complexidades.</p>
+
+<p>Portanto, a principal tarefa é <strong>criar</strong> essa array $\text{lcp}$.
+Usaremos o <strong>algoritmo de Kasai</strong>, que pode calcular essa array em tempo $O(n)$.</p>
+
+<p>Vejamos dois sufixos adjacentes na ordenados (ordem da array de sufixos).
+Deixe suas posições iniciais serem $i$ e $j$ e sua $\text{lcp}$ igual a $k > 0$.
+Se removermos a primeira letra de ambos sufixos - ou seja, pegamos os sufixos $i+1$ e $j+1$ - então o $\text{lcp}$ desses dois será $k - 1$.
+No entanto, não podemos usar esse valor e escrevê-lo na array $\text{lcp}$, porque esses dois sufixos podem não estar próximos um do outro na ordenação.
+O sufixo $i+1$ será menor que o sufixo $j+1$, mas pode haver alguns sufixos entre eles.
+No entanto, como o LCP entre dois sufixos é o valor mínimo de todas as transições, então o LCP entre dois pares nesse intervalo deve ser pelo menos $k-1$, e especialmente também entre $i+1$ e o próximo sufixo.
+E possivelmente pode ser maior.</p>
+
+<p>Agora já podemos implementar o algoritmo.
+Iremos iterar sobre os sufixos na ordem de seus comprimentos. Dessa forma, podemos reutilizar o último valor $k$, já que passar do sufixo $i$ para o sufixo $i+1$ é exatamente o mesmo que remover a primeira letra.
+Será necessário uma array adicional $\text{rank}$, que nos dará a posição de um sufixo na lista ordenada de sufixos.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; lcp_construction(string const&amp; s, vector&lt;int&gt; const&amp; p) {
+    int n = s.size();
+    vector&lt;int&gt; rank(n, 0);
+    for (int i = 0; i &lt; n; i++)
+        rank[p[i]] = i;
+
+    int k = 0;
+    vector&lt;int&gt; lcp(n-1, 0);
+    for (int i = 0; i &lt; n; i++) {
+        if (rank[i] == n - 1) {
+            k = 0;
+            continue;
+        }
+        int j = p[rank[i] + 1];
+        while (i + k &lt; n &amp;&amp; j + k &lt; n &amp;&amp; s[i+k] == s[j+k])
+            k++;
+        lcp[rank[i]] = k;
+        if (k)
+            k--;
+    }
+    return lcp;
+}
+</code></pre>
+
+<p>Diminuimos $k$ no máximo $O(n)$ vezes (cada iteração no máximo uma vez, exceto para $\text{rank}[i] == n-1$, onde redefinimos diretamente para $0$), e o LCP entre duas strings é no máximo $n-1$, também aumentaremos $k$ apenas $O(n)$ vezes.
+Portanto, o algoritmo é executado em tempo $O(n)$.</p>
+
+<h3>Número de substrings diferentes</h3>
+
+<p>Nós pré-processamos a string $s$ calculando a array de sufixos e a array LCP.
+Usando essas informações, podemos calcular o número de diferentes substrings na string.</p>
+
+<p>Para fazer isso, vamos pensar sobre quais <strong>novas</strong> substrings começam na posição $p[0]$, e então em $p[1]$, etc.
+De fato, conseguimos os sufixos ordenados e vemos quais prefixos fornecem novas substrings.
+Assim, não vamos esquecer não olhar um por acidente.</p>
+
+<p>Como os sufixos são ordenados, fica claro que o sufixo atual $p[i]$ fornecerá novas substrings para todos os seus prefixos, exceto para os prefixos que coincidam com o sufixo $p[i-1]$.
+(Assim, todos os prefixos, exceto o primeiro $\text{lcp}[i-1]$).
+Como o tamanho do sufixo atual é $n - p[i]$, $n - p[i] - \text{lcp}[i-1]$ novos sufixos começam em $p[i]$.
+Somando todos os sufixos, obtemos a resposta final:
+$$\sum_{i=0}^{n-1} (n - p[i]) - \sum_{i=0}^{n-2} \text{lcp}[i] = \frac{n^2 + n}{2} - \sum_{i=0}^{n-2} \text{lcp}[i]$$</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=701">Uva 760 - DNA Sequencing</a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=3664">Uva 1223 - Editor</a></li>
+<li><a href="https://www.codechef.com/problems/TANDEM">Codechef - Tandem</a></li>
+<li><a href="https://www.codechef.com/problems/ANUSAR">Codechef - Substrings and Repetitions</a></li>
+<li><a href="https://www.codechef.com/problems/TANGLED">Codechef - Entangled Strings</a></li>
+<li><a href="http://codeforces.com/problemset/problem/149/E">Codeforces - Martian Strings</a></li>
+<li><a href="http://codeforces.com/problemset/problem/204/E">Codeforces - Little Elephant and Strings</a></li>
+<li><a href="http://www.spoj.com/problems/ADAPHOTO/">SPOJ - Ada and Terramorphing</a></li>
+<li><a href="http://www.spoj.com/problems/ADASTRNG/">SPOJ - Ada and Substring</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3668">UVA - 1227 - The longest constant gene</a></li>
+<li><a href="http://www.spoj.com/problems/LCS/en/">SPOJ - Longest Common Substring</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2507">UVA 11512 - GATTACA</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=720&amp;page=show_problem&amp;problem=5524">LA 7502 - Suffixes and Palindromes</a></li>
+<li><a href="http://codeforces.com/gym/100923/problem/D">GYM - Por Costel and the Censorship Committee</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3695">UVA 1254 - Top 10</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3343">UVA 12191 - File Recover</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3358">UVA 12206 - Stammering Aliens</a></li>
+<li><a href="https://www.codechef.com/problems/INSQ16F">Codechef - Jarvis and LCP</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1944">LA 3943 - Liking's Letter</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2048">UVA 11107 - Life Forms</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=862&amp;page=show_problem&amp;problem=4853">UVA 12974 - Exquisite Strings</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1467">UVA 10526 - Intellectual Property</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3760">UVA 12338 - Anti-Rhyme Pairs</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/328">DevSkills Reconstructing Blue Print of Life</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3343">UVA 12191 - File Recover</a></li>
+<li><a href="http://www.spoj.com/problems/SARRAY/">SPOJ - Suffix Array</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2514">LA 4513 - Stammering Aliens</a></li>
+<li><a href="http://www.spoj.com/problems/LCS2/">SPOJ - LCS2</a></li>
+<li><a href="http://codeforces.com/contest/802/problem/I">Codeforces - Fake News (hard)</a></li>
+<li><a href="http://www.spoj.com/problems/LONGCS/">SPOJ - Longest Commong Substring</a></li>
+<li><a href="http://www.spoj.com/problems/SUBLEX/">SPOJ - Lexicographical Substring Search</a></li>
+<li><a href="http://codeforces.com/contest/873/problem/F">Codeforces - Forbidden Indices</a></li>
+<li><a href="http://codeforces.com/contest/30/problem/E">Codeforces - Tricky and Clever Password</a></li>
+<li><a href="https://icpcarchive.ecs.baylor.edu/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=4868">LA 6856 - Circle of digits</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
