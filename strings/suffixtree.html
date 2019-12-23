@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore de Sufixos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, Suffix Tree, Árvore de Sufixos, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		    <h1>Árvore de Sufixos(Suffix Tree) - Algoritmo de Ukkonen</h1>
+
+<p><em>Este artigo é um esboço e não contém nenhuma descrição. Para obter uma descrição do algoritmo, consulte outras fontes, como <a href="http://web.stanford.edu/~mjkay/gusfield.pdf">Algoritmos em Strings, Árvores e Sequências</a> por Dan Gusfield.</em></p>
+
+<p>Esse algoritmo cria uma árvore de sufixos para uma determinada string $s$ de tamanho $n$ em tempo $O(n\log(k))$), onde $k$ é o tamanho do alfabeto (se $k$ for considerado uma constante, o comportamento assintótico é linear).</p>
+
+<p>O input para o algoritmo é a string $s$ e o seu tamanho $n$, que são passados ​​como variáveis ​​globais.</p>
+
+<p>A função principal <code>build_tree</code> cria uma árvore de sufixos. É armazenada como uma array de estruturas <code>node</code>, onde <code>node[0]</code> é a raiz da árvore.</p>
+
+<p>Para simplificar o código, as arestas são armazenadas nas mesmas estruturas: para cada vértice sua estrutura <code>node</code> armazena as informações sobre a aresta entre ele e seu ancestral. No geral, cada <code>node</code> armazena as seguintes informações:</p>
+
+<ul>
+<li><code>(l, r)</code> - limites esquerdo e direito da substring <code>s[l..r-1]</code> que correspondem à aresta deste nó</li>
+<li><code>par</code> - o nó pai(ancestral,parente)</li>
+<li><code>link</code> - o link de sufixo</li>
+<li><code>next</code> - a lista de arestas saindo deste nó</li>
+</ul>
+
+<pre><code class="cpp">string s;
+int n;
+
+struct node {
+    int l, r, par, link;
+    map&lt;char,int&gt; next;
+
+    node (int l=0, int r=0, int par=-1)
+        : l(l), r(r), par(par), link(-1) {}
+    int len()  {  return r - l;  }
+    int &amp;get (char c) {
+        if (!next.count(c))  next[c] = -1;
+        return next[c];
+    }
+};
+node t[MAXN];
+int sz;
+
+struct state {
+    int v, pos;
+    state (int v, int pos) : v(v), pos(pos)  {}
+};
+state ptr (0, 0);
+
+state go (state st, int l, int r) {
+    while (l &lt; r)
+        if (st.pos == t[st.v].len()) {
+            st = state (t[st.v].get( s[l] ), 0);
+            if (st.v == -1)  return st;
+        }
+        else {
+            if (s[ t[st.v].l + st.pos ] != s[l])
+                return state (-1, -1);
+            if (r-l &lt; t[st.v].len() - st.pos)
+                return state (st.v, st.pos + r-l);
+            l += t[st.v].len() - st.pos;
+            st.pos = t[st.v].len();
+        }
+    return st;
+}
+
+int split (state st) {
+    if (st.pos == t[st.v].len())
+        return st.v;
+    if (st.pos == 0)
+        return t[st.v].par;
+    node v = t[st.v];
+    int id = sz++;
+    t[id] = node (v.l, v.l+st.pos, v.par);
+    t[v.par].get( s[v.l] ) = id;
+    t[id].get( s[v.l+st.pos] ) = st.v;
+    t[st.v].par = id;
+    t[st.v].l += st.pos;
+    return id;
+}
+
+int get_link (int v) {
+    if (t[v].link != -1)  return t[v].link;
+    if (t[v].par == -1)  return 0;
+    int to = get_link (t[v].par);
+    return t[v].link = split (go (state(to,t[to].len()), t[v].l + (t[v].par==0), t[v].r));
+}
+
+void tree_extend (int pos) {
+    for(;;) {
+        state nptr = go (ptr, pos, pos+1);
+        if (nptr.v != -1) {
+            ptr = nptr;
+            return;
+        }
+
+        int mid = split (ptr);
+        int leaf = sz++;
+        t[leaf] = node (pos, n, mid);
+        t[mid].get( s[pos] ) = leaf;
+
+        ptr.v = get_link (mid);
+        ptr.pos = t[ptr.v].len();
+        if (!mid)  break;
+    }
+}
+
+void build_tree() {
+    sz = 1;
+    for (int i=0; i&lt;n; ++i)
+        tree_extend (i);
+}
+</code></pre>
+
+<h2>Implementação compactada</h2>
+
+<p>Essa implementação foi proposta por <a href="http://codeforces.com/profile/freopen">freopen</a>.</p>
+
+<pre><code class="cpp">const int N=1000000,INF=1000000000;
+string a;
+int t[N][26],l[N],r[N],p[N],s[N],tv,tp,ts,la;
+
+void ukkadd (int c) {
+    suff:;
+    if (r[tv]&lt;tp) {
+        if (t[tv][c]==-1) { t[tv][c]=ts;  l[ts]=la;
+            p[ts++]=tv;  tv=s[tv];  tp=r[tv]+1;  goto suff; }
+        tv=t[tv][c]; tp=l[tv];
+    }
+    if (tp==-1 || c==a[tp]-'a') tp++; else {
+        l[ts+1]=la;  p[ts+1]=ts;
+        l[ts]=l[tv];  r[ts]=tp-1;  p[ts]=p[tv];  t[ts][c]=ts+1;  t[ts][a[tp]-'a']=tv;
+        l[tv]=tp;  p[tv]=ts;  t[p[ts]][a[l[ts]]-'a']=ts;  ts+=2;
+        tv=s[p[ts-2]];  tp=l[ts-2];
+        while (tp&lt;=r[ts-2]) {  tv=t[tv][a[tp]-'a'];  tp+=r[tv]-l[tv]+1;}
+        if (tp==r[ts-2]+1)  s[ts-2]=tv;  else s[ts-2]=ts; 
+        tp=r[tv]-(tp-r[ts-2])+2;  goto suff;
+    }
+}
+
+void build() {
+    ts=2;
+    tv=0;
+    tp=0;
+    fill(r,r+N,(int)a.size()-1);
+    s[0]=1;
+    l[0]=-1;
+    r[0]=-1;
+    l[1]=-1;
+    r[1]=-1;
+    memset (t, -1, sizeof t);
+    fill(t[1],t[1]+26,0);
+    for (la=0; la&lt;(int)a.size(); ++la)
+        ukkadd (a[la]-'a');
+}
+</code></pre>
+
+<p>Mesmo código com comentários:</p>
+
+<pre><code class="cpp">const int N=1000000,    // máximo possível número de nós na árvore de sufixos
+    INF=1000000000; // constante denotando infinito
+string a;       // input string na qual a árvore de sufixos será criada
+int t[N][26],   // array de transições (estado, letra)
+    l[N],   // esquerda...
+    r[N],   // ...e direita (limites) da substring na qual corresponde a entrada de uma aresta
+    p[N],   // parente do nó
+    s[N],   // link de sufixo
+    tv,     // nó do sufixo atual
+    tp,     // posição na string que corresponde a posição na aresta (entre l[tv] e r[tv] )
+    ts,     // número de nós
+    la;     // caractere atual na string
+
+void ukkadd(int c) { // adiciona caractere s à árvore
+    suff:;      // retornaremos aqui após cada transição para o sufixo (e adicionaremos um caractere de novo)
+    if (r[tv]&lt;tp) { // verifique se ainda estamos dentro dos limites da aresta atual
+        // se não, encontre a próxima aresta. se não existir, crie uma folha e adicione na árvore
+        if (t[tv][c]==-1) {t[tv][c]=ts;l[ts]=la;p[ts++]=tv;tv=s[tv];tp=r[tv]+1;goto suff;}
+        tv=t[tv][c];tp=l[tv];
+    } // caso contrário, basta avançar para a próxima aresta
+    if (tp==-1 || c==a[tp]-'a')
+        tp++; // se a letra na aresta for igual a 'c', prossiga por esta aresta
+    else { 
+        // caso contrário, divida a aresta em duas no meio no nó ts
+        l[ts]=l[tv];r[ts]=tp-1;p[ts]=p[tv];t[ts][a[tp]-'a']=tv;
+        // adiciona folha ts+1. corresponde a transição por c.
+        t[ts][c]=ts+1;l[ts+1]=la;p[ts+1]=ts;
+        // atualiza informações para o nó atual - lembrar de marcar ts como parente de tv
+        l[tv]=tp;p[tv]=ts;t[p[ts]][a[l[ts]]-'a']=ts;ts+=2;
+        // preparar para descer na árvore(iterar sobre)
+        // tp marcará onde estamos no sufixo atual
+        tv=s[p[ts-2]];tp=l[ts-2];
+        // enquanto o sufixo atual ainda não acabou, desça
+        while (tp&lt;=r[ts-2]) {tv=t[tv][a[tp]-'a'];tp+=r[tv]-l[tv]+1;}
+        // se estivermos em um nó, adicione um link de sufixo a ele, caso contrário adicione o link para ts
+        // (criaremos ts na próxima iteração).
+        if (tp==r[ts-2]+1) s[ts-2]=tv; else s[ts-2]=ts; 
+        // adicionar tp para a nova aresta e retornar para adicionar a letra ao sufixo
+        tp=r[tv]-(tp-r[ts-2])+2;goto suff;
+    }
+}
+
+void build() {
+    ts=2;
+    tv=0;
+    tp=0;
+    fill(r,r+N,(int)a.size()-1);
+    // inicializar dados para a raiz da árvore
+    s[0]=1;
+    l[0]=-1;
+    r[0]=-1;
+    l[1]=-1;
+    r[1]=-1;
+    memset (t, -1, sizeof t);
+    fill(t[1],t[1]+26,0);
+    // adicionar texto para a árvore, letra por letra
+    for (la=0; la&lt;(int)a.size(); ++la)
+        ukkadd (a[la]-'a');
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1620">UVA 10679 - I Love Strings!!!</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
