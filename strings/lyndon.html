@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fatoração de Lyndon - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Fatoração de Lyndon</h1>
+
+<p>Primeiro, vamos definir a noção de fatoração de Lyndon.</p>
+
+<p>Uma string é chamada <strong>simples</strong> (ou uma palavra de Lyndon), se for estritamente <strong>menor que</strong> qualquer um de seus próprios <strong>sufixos</strong>.
+Exemplos: $a$, $b$, $ab$, $aab$, $abb$, $ababb$, $abcd$.
+Pode-se mostrar que uma string é simples, se e somente se for estritamente <strong>menor que</strong> todas as suas <strong>mudanças cíclicas</strong>.</p>
+
+<p>A seguir, seja uma string $s$.
+A <strong>fatoração Lyndon</strong> da string $s$ é uma fatoração $s = w_1 w_2 \dots w_k$, onde todas strings $w_i$ são simples, e estão em ordem não crescente $w_1 \ge w_2 \ge \dots \ge w_k$.</p>
+
+<p>Pode ser mostrado que, para qualquer string, existe uma fatoração e ela será única.</p>
+
+<h2>Algoritmo de Duval</h2>
+
+<p>O algoritmo Duval constrói a fatoração de Lyndon em tempo $O(n)$ usando $O(1)$ de memória adicional.</p>
+
+<p>Primeiro, vamos introduzir outra noção: uma string $t$ é definida como <strong>pré-simples</strong>, se tiver a forma $t = w w \dots w \overline{w}$, onde $w$ é uma string simples e $\overline{w}$ é um prefixo de $w$ (possivelmente vazio).
+Uma string simples também é pré-simples.</p>
+
+<p>O algoritmo de Duval é guloso(greedy).
+A qualquer momento durante sua execução, a string $s$ será dividida em três strings $s = s_1 s_2 s_3$, onde a fatoração de Lyndon para $s_1$ já foi encontrada e finalizada, a string $s_2$ é pré-simples (e sabemos o comprimento da string simples) e $s_3$ ainda está praticamente intocada.
+Em cada iteração, o algoritmo Duval pega o primeiro caractere da string $s_3$ e tenta anexá-lo à string $s_2$.
+Como $s_2$ não é mais pré-simples, a fatoração de Lyndon para uma parte de $s_2$ se torna conhecida e essa parte vai para $s_1$.</p>
+
+<p>Vamos descrever o algoritmo em mais detalhes. O ponteiro $i$ sempre apontará para o início da string $s_2$.
+O loop externo será executado contanto que $i &lt; n$.
+Dentro do loop, usamos dois ponteiros adicionais, $j$ que aponta para o início de $s_3$, e $k$ que aponta para o caractere atual com o qual estamos comparando atualmente. Queremos adicionar o caractere $s[j]$ na string $s_2$, o que requer uma comparação com o caractere $s[k]$.
+Pode haver três casos diferentes:</p>
+
+<ul>
+<li>$s[j] = s[k]$: se este for o caso, adicionar o símbolo $s[j]$ a $s_2$ não anula a pré-simplicidade.
+Então, simplesmente incrementamos os ponteiros $j$ e $k$.</li>
+<li>$s[j] > s[k]$: aqui, a string $s_2 + s[j]$ se torna simples.
+Podemos incrementar $j$ e resetar $k$ de volta ao início $s_2$, para que o próximo caractere possa ser comparado com o início da palavra simples.</li>
+<li>$s[j] &lt; s[k]$: a string $s_2 + s[j]$ não é mais pré-simples.
+Portanto, dividiremos a string pré-simples $s_2$ em suas strings simples e o resto possivelmente vazio. A string simples terá comprimento $j - k$.
+Na próxima iteração, começamos novamente com o resto de $s_2$.</li>
+</ul>
+
+<h3>Implementação</h3>
+
+<p>Aqui apresentamos a implementação do algoritmo de Duval, que retornará a fatoração de Lyndon desejada de uma determinada string $s$.</p>
+
+<pre><code class="cpp">vector&lt;string&gt; duval(string const&amp; s) {
+    int n = s.size();
+    int i = 0;
+    vector&lt;string&gt; factorization;
+    while (i &lt; n) {
+        int j = i + 1, k = i;
+        while (j &lt; n &amp;&amp; s[k] &lt;= s[j]) {
+            if (s[k] &lt; s[j])
+                k = i;
+            else
+                k++;
+            j++;
+        }
+        while (i &lt;= k) {
+            factorization.push_back(s.substr(i, j - k));
+            i += j - k;
+        }
+    }
+    return factorization;
+}
+</code></pre>
+
+<h3>Complexidade</h3>
+
+<p>Vamos estimar o tempo de execução desse algoritmo.</p>
+
+<p>O <strong>loop while externo</strong> não excede $n$ iterações, pois no final de cada iteração $i$ aumenta.
+Além disso, o segundo loop while interno é executado em $O(n)$, uma vez que ele apenas gera a fatoração final.</p>
+
+<p>Então, estamos interessados ​​apenas no primeiro while interno.
+Quantas iterações são executadas no pior caso? É fácil ver que as palavras simples que identificamos em cada iteração do loop externo são mais longas que o restante que comparamos adicionalmente. Portanto, também a soma dos restantes será menor que $n$, o que significa que apenas realizamos no máximo $O(n)$ iterações do primeiro loop while interno. De fato, o número total de comparações de caracteres não excederá $4n - 3$.</p>
+
+<h2>Encontrar a menor mudança cíclica</h2>
+
+<p>Seja uma string $s$.
+Construímos a fatoração de Lyndon para a string $s + s$ (em tempo $O(n)$).
+Procuraremos uma string simples na fatoração, que começa em uma posição menor que $n$ (ou seja, começa na primeira instância de $s$), e termina em uma posição maior ou igual a $n$ (ou seja, na segunda instância de $s$).
+É afirmado que a posição do início desta string simples será o início da menor mudança cíclico desejada. Isso pode ser facilmente verificado usando a definição da decomposição de Lyndon.</p>
+
+<p>O início do bloco simples pode ser encontrado facilmente - lembre do ponteiro $i$ no início de cada iteração do loop externo, que indicava o início da atual string pré-simples.</p>
+
+<p>Portanto, obtemos a seguinte implementação:</p>
+
+<pre><code class="cpp">string min_cyclic_string(string s) {
+    s += s;
+    int n = s.size();
+    int i = 0, ans = 0;
+    while (i &lt; n / 2) {
+        ans = i;
+        int j = i + 1, k = i;
+        while (j &lt; n &amp;&amp; s[k] &lt;= s[j]) {
+            if (s[k] &lt; s[j])
+                k = i;
+            else
+                k++;
+            j++;
+        }
+        while (i &lt;= k)
+            i += j - k;
+    }
+    return s.substr(ans, n / 2);
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=660">UVA #719 - Glass Beads</a></li>
+</ul>
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
