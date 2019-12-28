@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Algoritmo de Manacher - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Algoritmo de Manacher - Encontrando todos os sub-palíndromos em $O(N)$</h1>
+
+<p>Dada uma string $s$ de comprimento $n$. Encontre todos os pares $(i, j)$ de modo que a substring  $s[i\dots j]$ seja um palíndromo. A string $t$ é um palíndromo quando $t = t_{rev}$ ($t_{rev}$ é uma string invertida para $t$).</p>
+
+<h2>Descrição</h2>
+
+<p>É claro que, no pior dos casos, podemos ter $O(n^2)$ strings palíndromos, e, à primeira vista, parece que não há algoritmo linear para esse problema.</p>
+
+<p>Mas as informações sobre os palíndromos podem ser mantidas <strong>em uma forma mais comprimida</strong>: para cada posição $i = 0\dots n-1$ encontraremos os valores $d_1[i]$ e $d_2[i]$, indicando o número de palíndromos de acordo com comprimentos ímpares e pares com centros na posição $i$.</p>
+
+<p>Por exemplo, a string $s = abababc$ tem três palíndromos com comprimento ímpar, com centros na posição $s[3] = b$, i. e. $d_1[3] = 3$:</p>
+
+<p>$a\ \overbrace{b\ a\ \underbrace{b}_{s_3}\ a\ b}^{d_1[3]=3} c$</p>
+
+<p>E a string $s = cbaabd$ tem dois palíndromos de comprimento par com centros na posição $s[3] = a$, ou seja, $d_2[3] = 2$:</p>
+
+<p>$c\ \overbrace{b\ a\ \underbrace{a}_{s_3}\ b}^{d_2[3]=2} d$</p>
+
+<p>Portanto, a ideia é que, se tivermos um sub-palíndromo com comprimento $l$ com centro em alguma posição $i$, ambém teremos sub-palíndromos com comprimentos $l-2$, $l-4$ etc. com centros em $i$. Então, essas duas arrays $d_1[i]$ e $d_2[i]$ são suficientes para manter as informações sobre todos os sub-palíndromos da string.</p>
+
+<p>É um fato surpreendente que exista um algoritmo, bastante simples, que calcule essas "arrays de palíndromes" $d_1[]$ e $d_2[]$ em tempo linear. O algoritmo é descrito neste artigo.</p>
+
+<h2>Solução</h2>
+
+<p>Em geral, esse problema tem muitas soluções: com <a href="https://cp-algorithms-brasil.com/strings/striing.html">String Hashing</a> ele pode ser resolvido em $O(n\cdot \log n)$, e com <a href="https://cp-algorithms-brasil.com/strings/suffixtree.html">Árvore de Sufixos</a> e <a href="https://en.wikipedia.org/wiki/Lowest_common_ancestor">LCA</a> rápido, esse problema pode ser resolvido em $O(n)$.</p>
+
+<p>Mas o método descrito aqui é <strong>suficientemente</strong> simples e tem uma menor constante oculta na complexidade do tempo e da memória. Este algoritmo foi descoberto por <strong>Glenn K. Manacher</strong> em 1975.</p>
+
+<h2>Algoritmo trivial</h2>
+
+<p>Para evitar ambiguidades na descrição adicional, denotamos o que é o "algoritmo trivial".</p>
+
+<p>É o algoritmo que faz o seguinte. Para cada posição central $i$ ele tenta aumentar a resposta em um até que seja possível, comparando um par de caracteres correspondentes a cada vez.</p>
+
+<p>Esse algoritmo é lento, só pode calcular a resposta em $O(n^2)$.</p>
+
+<p>A implementação do algoritmo trivial é:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; d1(n),  d2(n);
+for (int i = 0; i &lt; n; i++) {
+    d1[i] = 1;
+    while (0 &lt;= i - d1[i] &amp;&amp; i + d1[i] &lt; n &amp;&amp; s[i - d1[i]] == s[i + d1[i]]) {
+        d1[i]++;
+    }
+
+    d2[i] = 0;
+    while (0 &lt;= i - d2[i] - 1 &amp;&amp; i + d2[i] &lt; n &amp;&amp; s[i - d2[i] - 1] == s[i + d2[i]]) {
+        d2[i]++;
+    }
+}
+</code></pre>
+
+<h2>Algoritmo de Manacher</h2>
+
+<p>Nós descrevemos o algoritmo para encontrar todos os sub-palíndromos com comprimento ímpar, ou seja, para calcular $d_1[]$; a solução para todos os sub-palíndromos com comprimento par (isto é, calcular a array $d_2[]$) será uma pequena modificação para este aqui.</p>
+
+<p>Para um cálculo rápido, manteremos as extremidades $(l, r)$ do sub-palíndromo encontrado mais à direita (ou seja, o palíndromo com o máximo $r$). Inicialmente assumimos $l = 0, r = -1$.</p>
+
+<p>Portanto, queremos calcular $d_1[i]$ para os próximos $i$, e todos os valores anteriores em $d_1[]$ já foram calculados. Faremos o seguinte:</p>
+
+<ul>
+<li><p>Se $i$ estiver fora do sub-palíndromo atual, ou seja, $i > r$, iniciaremos o algoritmo trivial.</p>
+
+<p>Portanto, aumentaremos $d_1[i]$ consecutivamente e verificaremos cada vez se a substring atual $[i - d_1[i]\dots i + d_1[i]]$ é um palíndromo. Quando encontrarmos a primeira divergência ou atingir os limites de $s$, pararemos. Nesse caso, finalmente calculamos $d_1[i]$. Depois disso, não devemos esquecer de atualizar $(l, r)$.</p></li>
+<li><p>Agora considere o caso quando $i \le r$. Vamos tentar extrair algumas informações dos valores já calculados em $d_1[]$. Então, vamos inverter a posição $i$ dentro do sub-palíndromo $(l, r)$, ou seja, obteremos a posição $j = l + (r - i)$, e veremos o valor $d_1[j]$. Como $j$ é a posição simétrica a $i$, <strong>quase sempre</strong> podemos definir $d_1[i] = d_1[j]$. Ilustração disso (o palíndromo em torno de $j$ é realmente "copiado" no palíndromo em torno de $i$):</p>
+
+<p>$$
+\ldots\ 
+\overbrace{
+    s&#95;l\ \ldots\ 
+    \underbrace{
+        s&#95;{j-d_1[j]+1}\ \ldots\ s_j\ \ldots\ s&#95;{j+d_1[j]-1}\ 
+    }&#95;\text{palindrome}\ 
+    \ldots\ 
+    \underbrace{
+        s&#95;{i-d_1[j]+1}\ \ldots\ s_i\ \ldots\ s&#95;{i+d_1[j]-1}\ 
+    }&#95;\text{palindrome}\ 
+    \ldots\ s_r\ 
+}^\text{palindrome}\ 
+\ldots
+$$</p>
+
+<p>Mas há um caso complicado a ser tratado corretamente: quando o palíndromo "interno" atinge as bordas do "externo", ou seja, $j - d_1[j] + 1 \le l$ (ou  $i + d_1[j] - 1 \ge r$). Como a simetria fora do palíndromo "externo" não é garantida, apenas atribuir $d_1[i] = d_1[j]$ estará incorreto: não temos dados suficientes para afirmar que o palíndromo na posição $i$ tem o mesmo comprimento.</p>
+
+<p>Na verdade, devemos "cortar" o comprimento do nosso palíndromo, ou seja, atribuir $d_1[i] = r - i + 1$, para lidar com essas situações corretamente. Depois disso, executaremos o algoritmo trivial que tentará aumentar $d_1[i]$ enquanto for possível.</p>
+
+<p>Ilustração deste caso (o palíndromo com o centro $j$ já está "cortado" para se ajustar ao palíndromo "externo"):</p>
+
+<p>$$
+\ldots\ 
+\overbrace{
+    \underbrace{
+        s_l\ \ldots\ s_j\ \ldots\ s_{j+(j-l)}\ 
+    }&#95;\text{palindrome}\ 
+    \ldots\ 
+    \underbrace{
+        s_{i-(r-i)}\ \ldots\ s_i\ \ldots\ s_r
+    }&#95;\text{palindrome}\ 
+}^\text{palindrome}\ 
+\underbrace{
+    \ldots \ldots \ldots \ldots \ldots
+}&#95;\text{try moving here}
+$$</p>
+
+<p>É mostrado na ilustração que, embora o palíndromo com centro $j$ possa ser maior e sair do palíndromo "externo", na posição $i$ podemos usar apenas a parte que se encaixa totalmente no palíndromo "externo". Mas a resposta para a posição $i$ pode ser muito mais longa que essa parte; portanto, a seguir, executaremos nosso algoritmo trivial que tentará expandi-lo fora do nosso palíndromo "externo", ou seja, para a região "try moving here".</p></li>
+</ul>
+
+<p>No final, é necessário lembrar que não devemos esquecer de atualizar os valores $(l, r)$ após calcular cada $d_1[i]$.</p>
+
+<p>Também repetiremos que o algoritmo foi descrito para calcular o array para palíndromos ímpares $d_1[]$, o algoritmo é semelhante para o de array de palíndromos pares $d_2[]$.</p>
+
+<h2>Complexidade</h2>
+
+<p>À primeira vista, não é óbvio que esse algoritmo tenha complexidade de tempo linear, porque geralmente executamos o algoritmo trivial enquanto procuramos a resposta para uma posição específica.</p>
+
+<p>Porém, análises mais cuidadosas mostram que o algoritmo é linear no entanto. Precisamos mencionar a <a href="https://cp-algorithms-brasil.com/strings/funcz.html">construção do algoritmo da função-Z</a> que se parece com esse algoritmo e também funciona em tempo linear.</p>
+
+<p>Na verdade, podemos notar que cada iteração de algoritmo trivial aumenta $r$ em um. Além disso, $r$ ão pode ser diminuído durante o algoritmo. Portanto, o algoritmo trivial fará $O(n)$ iterações no total.</p>
+
+<p>Além disso, outras partes do algoritmo de Manacher funcionam em tempo linear. Assim, obtemos uma complexidade de tempo de $O(n)$.</p>
+
+<h2>Implementação do algoritmo de Manacher</h2>
+
+<p>Para calcular $d_1[]$, obtemos o seguinte código:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; d1(n);
+for (int i = 0, l = 0, r = -1; i &lt; n; i++) {
+    int k = (i &gt; r) ? 1 : min(d1[l + r - i], r - i + 1);
+    while (0 &lt;= i - k &amp;&amp; i + k &lt; n &amp;&amp; s[i - k] == s[i + k]) {
+        k++;
+    }
+    d1[i] = k--;
+    if (i + k &gt; r) {
+        l = i - k;
+        r = i + k;
+    }
+}
+</code></pre>
+
+<p>Para calcular $d_2[]$, o código parece semelhante, mas com pequenas alterações nas expressões aritméticas:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; d2(n);
+for (int i = 0, l = 0, r = -1; i &lt; n; i++) {
+    int k = (i &gt; r) ? 0 : min(d2[l + r - i + 1], r - i + 1);
+    while (0 &lt;= i - k - 1 &amp;&amp; i + k &lt; n &amp;&amp; s[i - k - 1] == s[i + k]) {
+        k++;
+    }
+    d2[i] = k--;
+    if (i + k &gt; r) {
+        l = i - k - 1;
+        r = i + k ;
+    }
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<p><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2470">UVA #11475 "Extend to Palindrome"</a></p>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
