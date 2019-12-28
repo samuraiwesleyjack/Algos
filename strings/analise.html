@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Expression Parsing - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Análise sintática</h1>
+
+<p>Uma string contendo uma expressão matemática contendo números e vários operadores é fornecida. Temos que calcular o valor dela em $O(n)$, onde $n$ é o comprimento da string.</p>
+
+<p>O algoritmo discutido aqui traduz uma expressão na chamada <strong>notação polonesa reversa</strong> (explícita ou implicitamente) e avalia essa expressão.</p>
+
+<h2>Notação polonesa reversa</h2>
+
+<p>A notação polonesa reversa é uma forma de escrever expressões matemáticas, na qual os operadores estão localizados após seus operandos. Por exemplo, a seguinte expressão
+$$a + b * c * d + (e - f) * (g * h + i)$$
+pode ser escrita em notação polonesa reversa da seguinte maneira:
+$$a b c * d * + e f - g h * i + * +$$</p>
+
+<p>A notação polonesa reversa foi desenvolvida pelo filósofo e especialista em ciência da computação australiano Charles Hamblin em meados da década de 1950, com base na notação polonesa, proposta em 1920 pelo matemático polonês Jan Łukasiewicz.</p>
+
+<p>A conveniência da notação polonesa reversa é que as expressões nesta forma são mais <strong>fáceis de avaliar</strong> em tempo linear. Usamos uma pilha, que está inicialmente vazia. Iremos iterar sobre os operandos e operadores da expressão em notação polonesa reversa. Se o elemento atual é um número, colocamos o valor no topo da pilha, se o elemento atual é um operador, obtemos os dois elementos principais da pilha, executamos a operação e colocamos o resultado novamente no topo da pilha. a pilha. No final, haverá exatamente um elemento restante na pilha, que será o valor da expressão.</p>
+
+<p>Obviamente, essa avaliação simples é executada em $O(n)$.</p>
+
+<h2><a href="https://en.wikipedia.org/wiki/Parsing">Parsing</a> de expressões simples</h2>
+
+<p>Por enquanto, consideramos apenas um problema simplificado: assumimos que todos os operadores são <strong>binários</strong> (ou seja, recebem dois argumentos) e todos são <strong>associativos à esquerda</strong> (se as prioridades são iguais, são executadas da esquerda para a direita). Parênteses são permitidos.</p>
+
+<p>Vamos configurar duas pilhas: uma para números e outra para operadores e parênteses. Inicialmente, ambas as pilhas estão vazias. Para a segunda pilha, manteremos a condição de que todas as operações sejam ordenadas estritamente por ordem descendente. Se houver parênteses na pilha, cada bloco de operadores (correspondente a um par de parênteses) será ordenado e a pilha inteira não será necessariamente ordenada.</p>
+
+<p>Iremos iterar os caracteres da expressão da esquerda para a direita. Se o caractere atual for um dígito, colocaremos o valor desse número na pilha. Se o caractere atual é um parêntese de abertura, colocamos na pilha. Se o caractere atual é um parêntese de fechamento, executamos todos os operadores na pilha até atingirmos o colchete de abertura (em outras palavras, executamos todas as operações dentro do parêntese). Finalmente, se o caractere atual for um operador, enquanto o topo da pilha tiver um operador com a mesma ou maior prioridade, executaremos esta operação e colocaremos a nova operação na pilha.</p>
+
+<p>Depois que processamos a string inteira, alguns operadores ainda podem estar na pilha, então nós os executamos.</p>
+
+<p>Aqui está a implementação deste método para os quatro operadores $+$ $-$ $*$ $/$:</p>
+
+<pre><code class="cpp">bool delim(char c) {
+    return c == ' ';
+}
+
+bool is_op(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+
+int priority (char op) {
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return -1;
+}
+
+void process_op(stack&lt;int&gt;&amp; st, char op) {
+    int r = st.top(); st.pop();
+    int l = st.top(); st.pop();
+    switch (op) {
+        case '+': st.push(l + r); break;
+        case '-': st.push(l - r); break;
+        case '*': st.push(l * r); break;
+        case '/': st.push(l / r); break;
+    }
+}
+
+int evaluate(string&amp; s) {
+    stack&lt;int&gt; st;
+    stack&lt;char&gt; op;
+    for (int i = 0; i &lt; (int)s.size(); i++) {
+        if (delim(s[i]))
+            continue;
+
+        if (s[i] == '(') {
+            op.push('(');
+        } else if (s[i] == ')') {
+            while (op.top() != '(') {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.pop();
+        } else if (is_op(s[i])) {
+            char cur_op = s[i];
+            while (!op.empty() &amp;&amp; priority(op.top()) &gt;= priority(cur_op)) {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.push(cur_op);
+        } else {
+            int number = 0;
+            while (i &lt; (int)s.size() &amp;&amp; isalnum(s[i]))
+                number = number * 10 + s[i++] - '0';
+            --i;
+            st.push(number);
+        }
+    }
+
+    while (!op.empty()) {
+        process_op(st, op.top());
+        op.pop();
+    }
+    return st.top();
+}
+</code></pre>
+
+<p>Assim, aprendemos como calcular o valor de uma expressão em $O(n)$, ao mesmo tempo em que usamos implicitamente a notação polonesa reversa. Modificando ligeiramente a implementação acima, também é possível obter a expressão na notação polonesa reversa de forma explícita.</p>
+
+<h2>Operadores unários</h2>
+
+<p>Agora, suponha que a expressão também contenha operadores <strong>unários</strong> (operadores que usam um argumento). O mais unário e o menos unário são exemplos comuns de tais operadores.</p>
+
+<p>Uma das diferenças nesse caso é que precisamos determinar se o operador atual é unário ou binário.</p>
+
+<p>Você pode notar que, antes de um operador unário, sempre existe outro operador ou um parêntese de abertura, ou nada (se estiver no início da expressão). Pelo contrário, antes de um operador binário, sempre haverá um operando (número) ou um parêntese de fechamento. Portanto, é fácil sinalizar se o próximo operador pode ser unário ou não.</p>
+
+<p>Além disso, precisamos executar um operador unário e um binário de maneira diferente. E precisamos escolher a prioridade de um operador binário mais alto que todas as operações binárias.</p>
+
+<p>Além disso, deve-se notar que alguns operadores unários (por exemplo, unário mais e unário menos) são na verdade <strong>associativos à direita</strong>.</p>
+
+<h2>Associativos à direita</h2>
+
+<p>Associativo à direita significa que sempre que as prioridades são iguais, os operadores devem ser avaliados da direita para a esquerda.</p>
+
+<p>Como observado acima, operadores unários geralmente são associativos à direita. Outro exemplo para um operador associativo à direita é o operador de exponenciação ($a \wedge b \wedge c$ é geralmente percebido como $a^{b^c}$ e não como $(a^b)^c$).</p>
+
+<p>Que diferença precisamos fazer para lidar corretamente com os operadores associativos à direita? Acontece que as mudanças são muito mínimas. A única diferença será que, se as prioridades forem iguais, adiaremos a execução da operação associativa à direita.</p>
+
+<p>A única linha que precisa ser substituída é</p>
+
+<pre><code class="cpp">while (!op.empty() &amp;&amp; priority(op.top()) &gt;= priority(cur_op))
+</code></pre>
+
+<p>por</p>
+
+<pre><code class="cpp">while (!op.empty() &amp;&amp; (
+        (left_assoc(cur_op) &amp;&amp; priority(op.top()) &gt;= priority(cur_op)) ||
+        (!left_assoc(cur_op) &amp;&amp; priority(op.top()) &gt; priority(cur_op))
+    ))
+</code></pre>
+
+<p>onde <code>left_assoc</code> é uma função que decide se um operador é associativo_a_esquerda ou não.</p>
+
+<p>Aqui está uma implementação para os operadores binários $+$ $-$ $*$ $/$ e os operadores unários $+$ e $-$.</p>
+
+<pre><code class="cpp">bool delim(char c) {
+    return c == ' ';
+}
+
+bool is_op(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/';
+}
+
+bool is_unary(char c) {
+    return c == '+' || c=='-';
+}
+
+int priority (char op) {
+    if (op &lt; 0) // unary operator
+        return 3;
+    if (op == '+' || op == '-')
+        return 1;
+    if (op == '*' || op == '/')
+        return 2;
+    return -1;
+}
+
+void process_op(stack&lt;int&gt;&amp; st, char op) {
+    if (op &lt; 0) {
+        int l = st.top(); st.pop();
+        switch (-op) {
+            case '+': st.push(l); break;
+            case '-': st.push(-l); break;
+        }
+    } else {
+        int r = st.top(); st.pop();
+        int l = st.top(); st.pop();
+        switch (op) {
+            case '+': st.push(l + r); break;
+            case '-': st.push(l - r); break;
+            case '*': st.push(l * r); break;
+            case '/': st.push(l / r); break;
+        }
+    }
+}
+
+int evaluate(string&amp; s) {
+    stack&lt;int&gt; st;
+    stack&lt;char&gt; op;
+    bool may_be_unary = true;
+    for (int i = 0; i &lt; (int)s.size(); i++) {
+        if (delim(s[i]))
+            continue;
+
+        if (s[i] == '(') {
+            op.push('(');
+            may_be_unary = true;
+        } else if (s[i] == ')') {
+            while (op.top() != '(') {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.pop();
+            may_be_unary = false;
+        } else if (is_op(s[i])) {
+            char cur_op = s[i];
+            if (may_be_unary &amp;&amp; is_unary(cur_op))
+                cur_op = -cur_op;
+            while (!op.empty() &amp;&amp; (
+                    (cur_op &gt;= 0 &amp;&amp; priority(op.top()) &gt;= priority(cur_op)) ||
+                    (cur_op &lt; 0 &amp;&amp; priority(op.top()) &gt; priority(cur_op))
+                )) {
+                process_op(st, op.top());
+                op.pop();
+            }
+            op.push(cur_op);
+            may_be_unary = true;
+        } else {
+            int number = 0;
+            while (i &lt; (int)s.size() &amp;&amp; isalnum(s[i]))
+                number = number * 10 + s[i++] - '0';
+            --i;
+            st.push(number);
+            may_be_unary = false;
+        }
+    }
+
+    while (!op.empty()) {
+        process_op(st, op.top());
+        op.pop();
+    }
+    return st.top();
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
