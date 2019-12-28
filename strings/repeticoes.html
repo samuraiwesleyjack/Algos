@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Repetições - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando repetições</h1>
+
+<p>Dada uma string $s$ de tamanho $n$.</p>
+
+<p>Uma <strong>repetição</strong> é duas ocorrências de uma string em uma linha. Em outras palavras, uma repetição pode ser descrita por um par de índices $i &lt; j$ de modo que a substring $s[i \dots j]$ consista em duas strings idênticas escritas uma após a outra.</p>
+
+<p>O desafio é <strong>encontrar todas as repetições</strong> em uma determinada string $s$.
+Ou uma tarefa simplificada: encontre <strong>qualquer</strong> repetição ou a repetição <strong>mais longa</strong>.</p>
+
+<p>O algoritmo descrito aqui foi publicado em 1982 por Main e Lorentz.</p>
+
+<h2>Exemplo</h2>
+
+<p>Considere as repetições na seguinte string:
+$$acababaee$$
+A sequência contém as três repetições a seguir:</p>
+
+<ul>
+<li>$s[2 \dots 5] = abab$</li>
+<li>$s[3 \dots 6] = baba$</li>
+<li>$s[7 \dots 7] = ee$</li>
+</ul>
+
+<p>Outro exemplo:
+$$abaaba$$
+Aqui existem apenas duas repetições</p>
+
+<ul>
+<li>$s[0 \dots 5] = abaaba$</li>
+<li>$s[2 \dots 3] = aa$</li>
+</ul>
+
+<h2>Número de repetições</h2>
+
+<p>Em geral, pode haver até $O(n^2)$ repetições em uma string de tamanho $n$.
+Um exemplo óbvio é uma string que consiste em $n$ vezes a mesma letra; nesse caso, qualquer substring de comprimento par é uma repetição. Em geral, qualquer sequência periódica com um período curto conterá muitas repetições.</p>
+
+<p>Por outro lado, esse fato não impede o cálculo do número de repetições em tempo $O(n \log n)$, porque o algoritmo pode fornecer as repetições em diferentes formas e em grupos de várias peças ao mesmo tempo.</p>
+
+<p>Existe até o conceito, que descreve grupos de substrings periódicos com tuplas de tamanho quatro. Provou-se que o número de tais grupos é no máximo linear em relação ao comprimento da string.</p>
+
+<p>Além disso, aqui estão alguns resultados mais interessantes relacionados ao número de repetições:</p>
+
+<ul>
+<li>O número de repetições primitivas (aquelas cujas metades não são repetições) é no máximo $O(n \log n)$.</li>
+<li>Se codificarmos repetições com tuplas de números $(i,~ p,~ r)$ (onde $i$ é a posição do início, $p$ o tamanho da substring que se repete e $r$ o número de repetições), então todas as repetições podem ser descritas com $O(n \log n)$ dessas "triplas".</li>
+<li>Strings de Fibonacci: 
+$$\begin{align}
+t_0 &amp;= a, &#92;&#92;
+t_1 &amp;= b, &#92;&#92;
+t_i &amp;= t_{i-1} + t_{i-2},
+\end{align}$$
+são "fortemente" periódicos. O número de repetições na string de Fibonacci $f_i$, até mesmo nas triplas comprimidas será $O(f_n \log f_n)$.
+O número de repetições primitivas também é $O(f_n \log f_n)$.</li>
+</ul>
+
+<h2>Algoritmo de Main-Lorentz</h2>
+
+<p>A idéia por trás do algoritmo Main-Lorentz é <strong>dividir e conquistar</strong>.</p>
+
+<p>Ele divide a string inicial em duas metades e calcula o número de repetições que se encontram completamente em cada metade por duas chamadas recursivas.
+Depois vem a parte difícil. O algoritmo encontra todas as repetições começando na primeira metade e terminando na segunda metade (que chamaremos de <strong>repetições cruzadas</strong>).
+Esta é a parte essencial do algoritmo Main-Lorentz, e vamos discuti-lo em detalhes aqui.</p>
+
+<p>A complexidade dos algoritmos de dividir e conquistar é bem pesquisada. O teorema principal diz que acabaremos com um algoritmo $O(n \log n)$, se pudermos calcular as repetições de cruzamento em $O(n)$.</p>
+
+<h3>Procurar por repetições cruzadas</h3>
+
+<p>Então, queremos encontrar todas essas repetições que começam na primeira metade da string, vamos chamar de $u$, e terminam na segunda metade, vamos chamar de $v$:
+$$s = u + v$$
+Seus tamanhos são aproximadamente iguais ao comprimento de $s$ dividido por dois.</p>
+
+<p>Considere uma repetição arbitrária e observe o caractere do meio (mais precisamente o primeiro caractere da segunda metade da repetição). Ou seja, se a repetição for uma substring $s[i \dots j]$, o caractere do meio será $(i + j + 1) / 2$.</p>
+
+<p>Chamamos uma repetição <strong>esquerda</strong> ou <strong>direita</strong> dependendo de qual string esse caractere está localizado - na string $u$ ou na string $v$.
+Em outras palavras, uma string é chamada esquerda, se a maioria estiver em $u$, caso contrário, a chamaremos direita.</p>
+
+<p>Agora discutiremos como encontrar <strong>todas repetições a esquerda</strong>.
+Encontrar todas as repetições a direita pode ser feito da mesma maneira.</p>
+
+<p>Vamos denotar o tamanho da repetição esquerda em $2l$ (ou seja, cada metade da repetição tem comprimento $l$).
+Considere o primeiro caractere da repetição que fica na string $v$ (na posição $|u|$ na string $s$).
+Ele coincide com o caractere  $l$ posições antes dele, vamos denotar essa posição $cntr$.</p>
+
+<p>Fixaremos esta posição $cntr$, e procuraremos todas as repetições nessa posição $cntr$.</p>
+
+<p>Por exemplo:
+$$c ~ \underset{cntr}{a} ~ c ~ | ~ a ~ d ~ a$$
+As linhas verticais dividem as duas metades. Aqui fixamos a posição $cntr = 1$, e, nessa posição, encontramos a repetição $caca$.</p>
+
+<p>É claro que, se fixarmos a posição $cntr$, simultaneamente fixaremos o tamanho das repetições possíveis: $l = |u| - cntr$.
+Depois que soubermos encontrar essas repetições, iteraremos sobre todos os valores possíveis para $cntr$ de $0$ até $|u|-1$, e encontraremos todas as repetições cruzadas à esquerda de tamanho $l = |u|,~ |u|-1,~ \dots, 1$.</p>
+
+<h3>Critério para repetições cruzadas à esquerda</h3>
+
+<p>Agora, como podemos encontrar todas essas repetições para um $cntr$ fixo?
+Lembre-se de que ainda pode haver várias repetições desse tipo.</p>
+
+<p>Vejamos novamente uma visualização, desta vez para a repetição $abcabc$:
+$$\overbrace{a}^{l_1} ~ \overbrace{\underset{cntr}{b} ~ c}^{l_2} ~ \overbrace{a}^{l_1} ~ | ~ \overbrace{b ~ c}^{l_2}$$
+Aqui denotamos os comprimentos das duas partes da repetição com $l_1$ e $l_2$:
+$l_1$ é o comprimento da repetição até a posição $cntr-1$, e $l_2$ é o comprimento da repetição de $cntr$ até o final da metade da repetição. Temos $2l = l_1 + l_2 + l_1 + l_2$ como o comprimento total da repetição.</p>
+
+<p>Vamos gerar condições suficientes para essa repetição na posição $cntr$ de tamanho $2l = 2(l_1 + l_2) = 2(|u| - cntr)$:</p>
+
+<ul>
+<li>Seja $k_1$ o maior número, de modo que os primeiros $k_1$ caracteres antes da posição $cntr$ coincidam com os últimos $k_1$ caracteres na string $u$:
+$$u[cntr - k_1 \dots cntr - 1] = u[|u| - k_1 \dots |u| - 1]$$</li>
+<li>Seja $k_2$ o maior número, de modo que os $k_2$ caracteres iniciando na posição $cntr$ coincidam com os primeiros $k_2$ caracteres na string $v$:
+$$u[cntr \dots cntr + k_2 - 1] = v[0 \dots k_2 - 1]$$</li>
+<li>Em seguida, temos uma repetição exatamente para qualquer par $(l_1,~ l_2)$ com
+$$\begin{align}
+l_1 &amp;\le k_1, &#92;&#92;
+l_2 &amp;\le k_2. &#92;&#92;
+\end{align}$$</li>
+</ul>
+
+<p>Para resumir:</p>
+
+<ul>
+<li>Fixamos uma posição específica $cntr$.</li>
+<li>Toda repetição que encontraremos agora tem comprimento $2l = 2(|u| - cntr)$.
+Pode haver várias repetições, pois elas dependem dos comprimentos $l_1$ e $l_2 = l - l_1$.</li>
+<li>Encontramos $k_1$ e $k_2$ como descrito acima.</li>
+<li>Então, todas as repetições adequadas são aquelas para as quais os comprimentos $l_1$ e $l_2$ satisfazem as condições:
+$$\begin{align}
+l_1 + l_2 &amp;= l = |u| - cntr &#92;&#92;
+l_1 &amp;\le k_1, &#92;&#92;
+l_2 &amp;\le k_2. &#92;&#92;
+\end{align}$$</li>
+</ul>
+
+<p>Portanto, a única parte restante é como podemos calcular os valores $k_1$ e $k_2$ rapidamente para cada posição $cntr$.
+Felizmente, podemos calculá-los em $O(1)$ usando a <a href="https://cp-algorithms-brasil.com/strings/funcz.html">função Z</a>:</p>
+
+<ul>
+<li>Podemos encontrar o valor $k_1$ para cada posição calculando a função Z para a string $\overline{u}$ (ou seja, a string reversa $u$).
+Então, o valor $k_1$ para um particular $cntr$ será igual ao valor correspondente da array da função Z.</li>
+<li>Para pré-calcular todos os valores $k_2$, calculamos a função Z para a string $v + &#92;# + u$ (ou seja, a string $u$ concatenada com o caractere separador $&#92;#$ e a string $v$).
+Novamente, precisamos apenas procurar o valor correspondente na função Z para obter o valor $k_2$.</li>
+</ul>
+
+<p>Portanto, isso é suficiente para encontrar todas as repetições cruzadas à esquerda.</p>
+
+<h3>Repetições cruzadas à direita</h3>
+
+<p>Para calcular as repetições cruzadas à direita, agimos da mesma forma: definimos o centro $cntr$ como o caractere correspondente ao último caractere na string $u$.</p>
+
+<p>Então o comprimento $k_1$ será definido como o maior número de caracteres antes da posição $cntr$ que coincida com os últimos caracteres da string $u$.
+E o comprimento $k_2$ será definido como o maior número de caracteres começando em $cntr + 1$ que coincide com os caracteres da string $v$.</p>
+
+<p>Assim, podemos encontrar os valores $k_1$ e $k_2$ calculando a função Z para as strings $\overline{u} + &#92;# + \overline{v}$ e $v$.</p>
+
+<p>Depois disso, podemos encontrar as repetições observando todas as posições $cntr$, e usar o mesmo critério que tínhamos para repetições cruzadas à esquerda.</p>
+
+<h3>Implementação</h3>
+
+<p>A implementação do algoritmo Main-Lorentz encontra todas as repetições na forma de tuplas: $(cntr,~ l,~ k_1,~ k_2)$ em tempo $O(n \log n)$.
+Se você deseja apenas encontrar o número de repetições em uma string, ou apenas a maior repetição em uma string, essas informações são suficientes e o tempo de execução ainda será $O(n \log n)$.</p>
+
+<p>Observe que se você deseja expandir essas tuplas para obter a posição inicial e final de cada repetição, o tempo de execução será de $O(n^2)$ (podem existir $O(n^2)$ repetições).
+Nesta implementação, faremos isso e armazenaremos toda a repetição encontrada em um vetor de pares de índices inicial e final.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; z_function(string const&amp; s) {
+    int n = s.size();
+    vector&lt;int&gt; z(n);
+    for (int i = 1, l = 0, r = 0; i &lt; n; i++) {
+        if (i &lt;= r)
+            z[i] = min(r-i+1, z[i-l]);
+        while (i + z[i] &lt; n &amp;&amp; s[z[i]] == s[i+z[i]])
+            z[i]++;
+        if (i + z[i] - 1 &gt; r) {
+            l = i;
+            r = i + z[i] - 1;
+        }
+    }
+    return z;
+}
+
+int get_z(vector&lt;int&gt; const&amp; z, int i) {
+    if (0 &lt;= i &amp;&amp; i &lt; (int)z.size())
+        return z[i];
+    else
+        return 0;
+}
+
+vector&lt;pair&lt;int, int&gt;&gt; repetitions;
+
+void convert_to_repetitions(int shift, bool left, int cntr, int l, int k1, int k2) {
+    for (int l1 = max(1, l - k2); l1 &lt;= min(l, k1); l1++) {
+        if (left &amp;&amp; l1 == l) break;
+        int l2 = l - l1;
+        int pos = shift + (left ? cntr - l1 : cntr - l - l1 + 1);
+        repetitions.emplace_back(pos, pos + 2*l - 1);
+    }
+}
+
+void find_repetitions(string s, int shift = 0) {
+    int n = s.size();
+    if (n == 1)
+        return;
+
+    int nu = n / 2;
+    int nv = n - nu;
+    string u = s.substr(0, nu);
+    string v = s.substr(nu);
+    string ru(u.rbegin(), u.rend());
+    string rv(v.rbegin(), v.rend());
+
+    find_repetitions(u, shift);
+    find_repetitions(v, shift + nu);
+
+    vector&lt;int&gt; z1 = z_function(ru);
+    vector&lt;int&gt; z2 = z_function(v + '#' + u);
+    vector&lt;int&gt; z3 = z_function(ru + '#' + rv);
+    vector&lt;int&gt; z4 = z_function(v);
+
+    for (int cntr = 0; cntr &lt; n; cntr++) {
+        int l, k1, k2;
+        if (cntr &lt; nu) {
+            l = nu - cntr;
+            k1 = get_z(z1, nu - cntr);
+            k2 = get_z(z2, nv + 1 + cntr);
+        } else {
+            l = cntr - nu + 1;
+            k1 = get_z(z3, nu + 1 + nv - 1 - (cntr - nu));
+            k2 = get_z(z4, (cntr - nu) + 1);
+        }
+        if (k1 + k2 &gt;= l)
+            convert_to_repetitions(shift, cntr &lt; nu, cntr, l, k1, k2);
+    }
+}
+</code></pre>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
