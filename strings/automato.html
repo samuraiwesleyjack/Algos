@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sufixo Autômato - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, Suffix Tree, Árvore de Sufixos, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Sufixo Autômato</h1>
+
+<p>Um <strong>sufixo autômato</strong> é uma estrutura de dados poderosa que permite resolver muitos problemas relacionados a strings.</p>
+
+<p>Por exemplo, você pode procurar todas as ocorrências de uma string em outra ou contar a quantidade de diferentes substrings de uma determinada string. Ambas as tarefas podem ser resolvidas em tempo linear com a ajuda de um sufixo autômato.</p>
+
+<p>Intuitivamente, um sufixo autômato pode ser entendido como forma comprimida de <strong>todas as substrings</strong> de uma dada string.
+Um fato impressionante é que o autômato contém todas essas informações de uma forma altamente comprimida.
+Para uma string de comprimento $n$ apenas requer $O(n)$ de memória.
+Além disso, também pode ser construído em tempo $O(n)$ (se considerarmos o tamanho $k$ do alfabeto como uma constante), caso contrário, a memória e a complexidade do tempo serão $O(n \log k)$.</p>
+
+<p>A linearidade do tamanho do sufixo autômato foi descoberta em 1983 por Blumer et al., e em 1985 os primeiros algoritmos lineares para a construção foram apresentados por Crochemore and Blumer.</p>
+
+<h2>Definição</h2>
+
+<p>Um sufixo autômato para uma determinada string $s$ é um mínimo <strong>DFA</strong> (máquina autônoma finita determinística / máquina de estado finito determinístico) que aceita todos os sufixos da string $s$.</p>
+
+<p>Em outras palavras:</p>
+
+<ul>
+<li>Um sufixo autômato é um grafo acíclico direcionado. Os vértices são chamados <strong>estados</strong>, e as arestas são chamadas <strong>transições</strong> entre estados.</li>
+<li>Um dos estados $t_0$ é o <strong>estado inicial</strong>, e deve ser a fonte do grafo (todos os outros estados são acessíveis a partir de $t_0$).</li>
+<li>Cada <strong>transição</strong> é rotulada com algum caractere..
+Todas as transições originárias de um estado devem ter rótulos <strong>diferentes</strong>.</li>
+<li>Um ou vários estados são marcados como <strong>estados terminais</strong>.
+Se começarmos do estado inicial $t_0$ e nos movermos sobre as transições para um estado terminal, os rótulos das transições passadas deverão formar um dos sufixos da string $s$.
+Cada um dos sufixos de $s$ deve ser formado usando um caminho de $t_0$ até um estado terminal.</li>
+<li>O sufixo autômato contém o número mínimo de vértices entre todos os autômatos que satisfazem as condições descritas acima.</li>
+</ul>
+
+<h3>Propriedade Substring</h3>
+
+<p>A propriedade mais simples e mais importante de um autômato de sufixo é que ele contém informações sobre todas as substrings da string $s$.
+Qualquer caminho que comece no estado inicial $t_0$, se escrevermos os rótulos das transições, formará uma <strong>substring</strong> de $s$.
+E, inversamente, cada substring de $s$ corresponde a um determinado caminho começando em $t_0$.</p>
+
+<p>Para simplificar as explicações, diremos que a substring <strong>corresponde</strong> a esse caminho (começando em $t_0$ e os rótulos formam a substring). E, inversamente, dizemos que qualquer caminho <strong>corresponde</strong> a string formada pelos rótulos.</p>
+
+<p>Um ou vários caminhos podem levar a um estado. Assim, diremos que um estado <strong>corresponde</strong> ao conjunto de strings, que correspondem a esses caminhos.</p>
+
+<h3>Exemplos</h3>
+
+<p>Aqui mostraremos alguns exemplos de autômatos de sufixos para várias strings simples.</p>
+
+<p>Vamos denotar o estado inicial com azul e os estados terminais com verde.</p>
+
+<p>Para a string $s =~ ""$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SA.png" alt="Suffix automaton for &quot;&quot;" /></p>
+
+<p>Para a string $s =~ "a"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAa.png" alt="Suffix automaton for &quot;a&quot;" /></p>
+
+<p>Para a string $s =~ "aa"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAaa.png" alt="Suffix automaton for &quot;aa&quot;" /></p>
+
+<p>Para a string $s =~ "ab"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAab.png" alt="Suffix automaton for &quot;ab&quot;" /></p>
+
+<p>Para a string $s =~ "aba"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAaba.png" alt="Suffix automaton for &quot;aba&quot;" /></p>
+
+<p>Para a string $s =~ "abb"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAabb.png" alt="Suffix automaton for &quot;abb&quot;" /></p>
+
+<p>Para a string $s =~ "abbb"$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SAabbb.png" alt="Suffix automaton for &quot;abbb&quot;" /></p>
+
+<h2>Construção em tempo linear</h2>
+
+<p>Antes de descrevermos o algoritmo para construir um autômato de sufixo em tempo linear, precisamos introduzir vários novos conceitos e provas simples, o que será muito importante para entender a construção.</p>
+
+<h3>Posições finais $endpos$</h3>
+
+<p>Considere qualquer substring não vazia $t$ da string $s$.
+Denotaremos $endpos(t)$ o conjunto de todas as posições na string $s$, nas quais as ocorrências de $t$ terminam. Por exemplo, temos $endpos("bc") = &#123;2, 4&#125;$ para a string $"abcbc"$.</p>
+
+<p>Vamos chamar duas substrings $t_1$ e $t_2$ $endpos$-equivalentes, se seus conjuntos finais coincidirem: $endpos(t_1) = endpos(t_2)$.
+Assim, todas as substrings não vazias da string $s$ podem ser decompostas em várias <strong>classes de equivalência</strong> de acordo com seus conjuntos $endpos$.</p>
+
+<p>Acontece que, em uma máquina de sufixo, as substrings $endpos$-equivalentes <strong>correspondem ao mesmo estado</strong>.
+Em outras palavras, o número de estados em um autômato de sufixo é igual ao número de classes de equivalência entre todas as substrings, mais o estado inicial. Cada estado de um autômato de sufixo corresponde a uma ou mais substrings com o mesmo valor $endpos$.</p>
+
+<p>Mais tarde descreveremos a construção do algoritmo usando essa suposição. Veremos, então, que todas as propriedades necessárias de um autômato de sufixo, exceto a minima, são cumpridas. E a minoria segue o teorema de Nerode (que não será provado neste artigo).</p>
+
+<p>Podemos fazer algumas observações importantes sobre os valores $endpos$:</p>
+
+<p><strong>Lema 1</strong>:
+Duas substrings não-vazias $u$ e $w$ (com $length(u) \le length(w)$) são $endpos$-equivalentes se a string $u$ ocorre em $s$ apenas na forma de um sufixo de $w$.</p>
+
+<p>Se $u$ e $w$ tem os mesmos valores $endpos$, então $u$ é um sufixo de $w$ e aparece apenas na forma de um sufixo de $w$ em $s$.
+E se $u$ é um sufixo de $w$ e aparecer apenas na forma como um sufixo em $s$, então os valores $endpos$ são iguais por definição.</p>
+
+<p><strong>Lema 2</strong>:
+Considere duas substrings não vazias $u$ e $w$ (com $length(u) \le length(w)$).
+Então, seus conjuntos $endpos$ não se cruzam, ou $endpos(w)$ é um subconjunto de $endpos(u)$.
+And it depends on if $u$ is a suffix of $w$ or not.</p>
+
+<p>$$\begin{cases}
+endpos(w) \subseteq endpos(u) &amp; \text{if } u \text{ is a suffix of } w &#92;&#92;
+endpos(w) \cap endpos(u) = \emptyset &amp; \text{otherwise}
+\end{cases}$$</p>
+
+<p>Prova:
+Se os conjuntos $endpos(u)$ e $endpos(w)$ tiverem pelo menos um elemento comum, as strings $u$ e $w$ terminam nessa posição, ou seja, $u$ será um sufixo de $w$.
+Mas, a cada ocorrência de $w$ também aparece a substring $u$, o que significa que $endpos(w)$ é um subconjunto de $endpos(u)$.</p>
+
+<p><strong>Lema 3</strong>:
+Considere um $endpos$-equivalente.
+Ordene todas as substrings nessa classe pelo comprimento não-crescente.
+Então, na sequência resultante, cada substring será uma mais curta que a anterior e, ao mesmo tempo, será um sufixo da anterior.
+Em outras palavras, em uma mesma classe de equivalência, as substrings mais curtas são na verdade sufixos dos substrings mais longas, e assumem todos os comprimentos possíveis em um determinado intervalo $[x; y]$.</p>
+
+<p>Prova:
+Se ele contiver apenas uma string, o lema é obviamente verdadeiro. Agora, digamos que o número de strings na classe seja maior que um.</p>
+
+<p>De acordo com o Lema 1, duas strings diferentes de $endpos$-equivalente estão sempre de tal maneira que a mais curta é um sufixo adequado da mais longa. Consequentemente, não pode haver duas strings de mesmo comprimento na classe de equivalência.</p>
+
+<p>Vamos denotar por $w$ o maior, e por $u$ a string mais curta na classe de equivalência.
+De acordo com o Lema 1, a string $u$ é um sufixo adequado da string $w$.
+Considere agora qualquer sufixo de $w$ com um comprimento no intervalo do comprimento mais curto até o mais longo - $[length(u); length(w)]$.
+É fácil ver que esse sufixo também está contido na mesma classe de equivalência. Mas esse sufixo só pode aparecer na forma de um sufixo de $w$ na string $s$ (já que o sufixo mais curto $u$ ocorre em $s$ apenas na forma de um sufixo de $w$).
+Consequentemente, de acordo com o Lema 1, esse sufixo é um $endpos$-equivalente à string $w$.</p>
+
+<h3>Links de sufixo $link$</h3>
+
+<p>Considere algum estado $v \ne t_0$ no autômato.
+Como sabemos, o estado $v$ corresponde à classe de strings com os mesmos valores de $endpos$.
+E se denotarmos por $w$ a mais longa dessas strings, todas as outras strings serão sufixos de $w$.</p>
+
+<p>Também sabemos os primeiros sufixos da string $w$ (se considerarmos sufixos em ordem decrescente de seu comprimento) estão todos contidos nessa classe de equivalência e todos os outros sufixos (pelo menos um - o sufixo vazio) estão em outras classes. Denotamos por $t$ o maior sufixo desse tipo e criamos um link para ele.</p>
+
+<p>Em outras palavras, um <strong>link de sufixo</strong> $link(v)$ leva ao estado que corresponde ao <strong>sufixo mais longo</strong> de $w$ que está em outra classe de equivalência $endpos$.</p>
+
+<p>Aqui assumimos que o estado inicial $t_0$ corresponde à sua própria classe de equivalência (contendo apenas a string vazia) e, por conveniência, definimos $endpos(t) = &#92;{-1, 0, \dots, length(s)-1&#92;}$.</p>
+
+<p><strong>Lema 4</strong>:
+Os links de sufixo formam uma <strong>árvore</strong> com raiz $t_0$.</p>
+
+<p>Prova:
+Considere um estado arbitrário $v \ne t_0$.
+Um link de sufixo $link(v)$ leva a um estado correspondente à strings com tamanho estritamente menor (isso segue da definição dos links de sufixo e do Lema 3). 
+Portanto, movendo-se pelos links de sufixo, mais cedo ou mais tarde chegaremos ao estado inicial $t_0$, que corresponde à string vazia.</p>
+
+<p><strong>Lema 5</strong>:
+Se construirmos uma árvore usando os conjuntos $endpos$ (pela regra de que o conjunto de um nó parente contém os conjuntos de todos os filhos como subconjuntos), a estrutura coincidirá com a árvore de links de sufixos.</p>
+
+<p>O fato de podermos construir uma árvore usando os conjuntos $endpos$ fsegue diretamente do Lema 2 (que dois conjuntos não se cruzam ou que um esta contido no outro).</p>
+
+<p>Vamos agora considerar um estado arbitrário $v \ne t_0$, e seu link de sufixo $link(v)$.
+A partir da definição do link do sufixo e do Lema 2, segue-se que:
+$$endpos(v) \subseteq endpos(link(v)),$$
+que juntamente com o lema anterior comprova a afirmação: a árvore dos links de sufixo é essencialmente uma árvore de conjuntos $endpos$.</p>
+
+<p>Aqui está um <strong>exemplo</strong> de uma árvore de links de sufixo no sufixo autômato construído para a string $"abcbc"$.
+Os nós são rotulados com a substring mais longa da classe de equivalência correspondente.</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/SA_suffix_links.png" alt="Suffix automaton for &quot;abcbc&quot; with suffix links" /></p>
+
+<h3>Recapitulação</h3>
+
+<p>Antes de prosseguir para o próprio algoritmo, recapitulamos anotações importantes e apresentamos algumas notações auxiliares.</p>
+
+<ul>
+<li>As substrings da string $s$ podem ser decompostas em classes de equivalência de acordo com suas posições finais $endpos$.</li>
+<li>O autômato de sufixo consiste do estado inicial $t_0$, assim como um estado para cada classe de equivalência $endpos$.</li>
+<li>Para cada estado $v$ uma ou várias substrings correspondem.
+Denotamos por $longest(v)$ a maior string desse tipo e por $len(v)$ seu tamanho.
+Denotamos por $shortest(v)$ a menor substring, e seu tamanho como $minlen(v)$.
+Todas as strings correspondentes a esse estado são sufixos diferentes da string $longest(v)$ e têm todos os comprimentos possíveis no intervalo $[minlength(v); len(v)]$.</li>
+<li>Para cada estado $v \ne t_0$ um link de sufixo é definido como um link que leva a um estado que corresponde ao sufixo da string $longest(v)$ of length $minlen(v) - 1$.
+The suffix links form a tree with the root in $t_0$, and at the same time this tree forms an inclusion relationship between the sets $endpos$.</li>
+<li>Podemos expressar $minlen(v)$ para $v \ne t_0$ usando o link de sufixo $link(v)$ como:
+$$minlen(v) = len(link(v)) + 1$$</li>
+<li>Se começarmos de um estado arbitrário $v_0$ e seguirmos os links do sufixo, mais cedo ou mais tarde chegaremos ao estado inicial $t_0$.
+Neste caso, obtemos uma sequência de intervalos disjuntos $[minlen(v_i); len(v_i)]$, quem em união formam um intervalo contínuo $[0; len(v_0)]$.</li>
+</ul>
+
+<h3>Algoritmo</h3>
+
+<p>Agora podemos prosseguir para o próprio algoritmo. O algoritmo será <strong>online</strong>, ou seja, adicionaremos os caracteres da string um a um e modificaremos o autômato de acordo com cada etapa.</p>
+
+<p>Para atingir o consumo linear de memória, armazenaremos apenas os valores $len$, $link$ e uma lista de transições em cada estado. Não rotularemos estados terminais (mas mostraremos mais tarde como organizar esses rótulos após a construção do sufixo autômato).</p>
+
+<p>Inicialmente, o autômato consiste em apenas um estado: $t_0$, que será o índice $0$ (os estados restantes receberão os índices $1, 2, \dots$).
+Atribuímos $len = 0$ e $link = -1$ por conveniência ($-1$ será um estado fictício e inexistente).</p>
+
+<p>Agora, toda a tarefa se resume à implementação do processo de <strong>adicionar um caractere</strong> $c$ ao final da string atual. Vamos descrever este processo:</p>
+
+<ul>
+<li>Deixe que $last$ seja o estado correspondente a toda a string antes de adicionar o caractere $c$.
+(Inicialmente, definimos $last = 0$, e alteraremos $last$ na última etapa do algoritmo de acordo)</li>
+<li>Crie um novo estado $cur$, e defina-o como $len(cur) = len(last) + 1$.
+O valor $link(cur)$ não é conhecido no momento.</li>
+<li>Agora vamos ao seguinte procedimento: Começamos no estado $last$.
+Enquanto não houver uma transição através da letra $c$, adicionaremos uma transição ao estado $cur$, e seguiremos o link do sufixo. Se em algum momento já existir uma transição através da letra $c$, pararemos e denotaremos esse estado como $p$.</li>
+<li>Se não tiver encontrado esse estado $p$, então chegamos ao estado fictício $-1$, então podemos apenas definir $link(cur) = 0$ e sair.</li>
+<li>Suponha agora que encontramos um estado $p$, a partir do qual existe uma transição através da letra $c$.
+Vamos denotar o estado ao qual a transição leva, como $q$.</li>
+<li>Agora temos dois casos: $len(p) + 1 = len(q)$ ou não.</li>
+<li>Se $len(p) + 1 = len(q)$, então podemos simplesmente definir $link(cur) = q$ e sair.</li>
+<li><p>Caso contrário será um pouco mais complicado.
+Será necessário <strong>clonar</strong> o estado $q$:
+criamos um novo estado $clone$, copiamos todos os dados de $q$ (link de sufixo e transição) exceto o valor $len$.
+Vamos definir $len(clone) = len(p) + 1$.</p>
+
+<p>Após a clonagem, direcionamos o link do sufixo de $cur$ para $clone$, e também de $q$ para clone.</p>
+
+<p>Finalmente, precisamos voltar do estado $p$, usando links de sufixo e desde que haja uma transição de $c$ para o estado $q$, e redirecionar todos para o estado $clone$.</p></li>
+<li>Em qualquer um dos três casos, após a conclusão do procedimento, atualizamos o valor $last$ com o estado $cur$.</li>
+</ul>
+
+<p>Se também queremos saber quais estados são <strong>terminais</strong> e quais não são, podemos encontrar todos os estados terminais após construir o autômato de sufixo completo para toda a string $s$.
+Para fazer isso, pegamos o estado correspondente a toda a string (armazenada na variável $last$), e seguimos seus links de sufixo até chegarmos ao estado inicial. Marcaremos todos os estados visitados como terminal. Ao fazer isso, estaremos marcando exatamente os estados correspondentes a todos os sufixos da string $s$, nos quais são exatamente os estados terminais.</p>
+
+<p>Na próxima seção, examinaremos detalhadamente cada etapa e mostraremos sua <strong>certeza</strong>.</p>
+
+<p>Aqui, apenas observamos que, como criamos apenas um ou dois novos estados para cada caractere de $s$, o autômato de sufixo contém um <strong>número linear de estados</strong>.</p>
+
+<p>A linearidade do número de transições e, em geral, a linearidade do tempo de execução do algoritmo é menos clara, e elas serão comprovadas após a comprovação da correção.</p>
+
+<h3>Correção</h3>
+
+<ul>
+<li><p>Vamos chamar uma transição $(p, q)$ <strong>contínua</strong> se $len(p) + 1 = len(q)$.
+Caso contrário (quando $len(p) + 1 &lt; len(q)$) <strong>descontínua</strong>.</p>
+
+<p>Como podemos ver pela descrição do algoritmo, transições contínuas e não contínuas levarão a diferentes casos do algoritmo. Transições contínuas são fixas e nunca serão alteradas novamente. Por outro lado, a transição não contínua pode mudar quando novas letras são adicionadas à string (o final da borda da transição pode mudar).</p></li>
+<li><p>Para evitar ambiguidade, definiremos a string, para a qual o autômato de sufixo foi construído antes de adicionar o caractere atual $c$, como $s$.</p></li>
+<li><p>O algoritmo começa com a criação de um novo estado $cur$, que corresponderá a toda a string $s + c$.
+Está claro por que precisamos criar um novo estado. Juntamente com o novo caractere, uma nova classe de equivalência é criada.</p></li>
+<li><p>Depois de criar um novo estado, percorremos os links de sufixo começando pelo estado correspondente a toda a string $s$.
+Para cada estado, tentamos adicionar uma transição com o caractere $c$ para o novo estado $cur$.
+Assim, anexamos a cada sufixo de $s$ o caractere $c$.
+No entanto, só podemos adicionar essas novas transições, se elas não entrarem em conflito com uma já existente. Portanto, assim que encontrarmos uma transição já existente com $c$ precisamos parar.</p></li>
+<li><p>No caso mais simples, chegamos ao estado fictício $-1$.
+Isso significa que adicionamos a transição com $c$ para todos os sufixos de $s$.
+Isso também significa que o caractere $c$ não fazia parte da string $s$ antes.
+Portanto, o link de sufixo de $cur$ deve levar ao estado $0$.</p></li>
+<li><p>No segundo caso, encontramos uma transição existente $(p, q)$.
+Isso significa que tentamos adicionar uma string $x + c$ (onde $x$ é um sufixo de $s$) à máquina que já existe na máquina (a string $x + c$ já aparece como uma substring de $s$).
+Como assumimos que o autômato para a string $s$ é construído corretamente, não devemos adicionar uma nova transição aqui.</p>
+
+<p>No entanto, há uma dificuldade. Para qual estado o link de sufixo do estado $cur$ deve apontar?
+Temos que fazer um link de sufixo para um estado, no qual a string mais longa seja exatamente $x + c$, o $len$ desse estado deve ser $len(p) + 1$.
+No entanto, é possível que esse estado ainda não exista, ou seja, $len(q) > len(p) + 1$.
+ Nesse caso, temos que criar esse estado <strong>dividindo</strong> o estado $q$.</p></li>
+<li><p>Se a transição $(p, q)$ for contínua, então $len(q) = len(p) + 1$.
+Nesse caso, tudo é simples. Dirigimos o link do sufixo de $cur$ para o estado $q$.</p></li>
+<li><p>Caso contrário, a transição não é contínua, ou seja, $len(q) > len(p) + 1$.
+Isso significa que o estado $q$ corresponde não apenas ao sufixo de $s + c$ com comprimento $len(p) + 1$, mas também a substrings mais longas de $s$.
+ Não podemos fazer outra coisa senão <strong>dividir</strong> o estado $q$ em dois sub-estados, para que o primeiro tenha $len(p) + 1$.</p>
+
+<p>Como podemos dividir um estado?
+Nós <strong>clonamos</strong> o estado $q$, o que nos dá o estado $clone$, e definimos $len(clone) = len(p) + 1$.
+Copiamos todas as transições de $q$ para $clone$, porque não queremos alterar os caminhos que atravessam por $q$.
+Também definimos o link do sufixo de $clone$ para o destino do link do sufixo de $q$, e definimos o link do sufixo de $q$ para $clone$.</p>
+
+<p>E depois de dividir o estado, definimos o link do sufixo de $cur$ para $clone$.</p>
+
+<p>Na última etapa alteramos algumas das transições para $q$ e as redirecionamos para $clone$.
+Quais transições temos que mudar? Basta redirecionar apenas as transições correspondentes a todos os sufixos da string $w + c$ (onde $w$ é a string mais longa de $p$), ou seja, precisamos continuar avançando nos links do sufixo, começando no vértice $p$ até atingirmos o estado fictício $-1$ ou uma transição que leva a um estado diferente de $q$.</p></li>
+</ul>
+
+<h3>Número linear de operações</h3>
+
+<p>Primeiro, assumimos imediatamente que o tamanho do alfabeto é <strong>constante</strong>.
+Se esse não for o caso, não será possível falar sobre a complexidade linear do tempo.
+A lista de transições de um vértice será armazenada em uma árvore balanceada, o que permite executar rapidamente operações de busca e adição de chaves. Portanto, se denotarmos como $k$ o tamanho do alfabeto, o comportamento assintótico do algoritmo será $O(n \log k)$ com $O(n)$ de memória.
+No entanto, se o alfabeto for pequeno o suficiente, você poderá sacrificar a memória evitando árvores balanceadas e armazenar as transições em cada vértice como uma array de comprimento $k$ (para busca rápida por chave) e uma lista dinâmica (para percorrer rapidamente todas as chaves disponíveis). Assim, atingimos a complexidade de tempo $O(n)$ para o algoritmo, mas a um custo de complexidade de memória $O(n k)$.</p>
+
+<p>Portanto, consideraremos o tamanho do alfabeto constante, ou seja, cada operação de busca por uma transição de um caractere, adição de uma transição, busca da próxima transição - todas essas operações podem ser feitas em $O(1)$.</p>
+
+<p>Se considerarmos todas as partes do algoritmo, ele conterá três lugares no algoritmo em que a complexidade linear não é óbvia:</p>
+
+<ul>
+<li>O primeiro lugar é percorrer pelos links de sufixo do estado $last$, adicionando transições com o caractere $c$.</li>
+<li>O segundo lugar é a cópia de transições quando o estado $q$ é clonado em um novo estado $clone$.</li>
+<li>O terceiro lugar é mudar a transição que leva a $q$, redirecionando-os para $clone$.</li>
+</ul>
+
+<p>Usamos o fato de que o tamanho do autômato de sufixo (tanto em número de estados quanto em número de transições) é <strong>linear</strong>.
+(A prova da linearidade do número de estados é o próprio algoritmo, e a prova da linearidade do número de estados é apresentada abaixo, após a implementação do algoritmo).</p>
+
+<p>Assim, cada operação do primeiro e segundo lugar adiciona apenas uma nova transição amortizada ao autômato.</p>
+
+<p>Resta estimar a complexidade total do <strong>terceiro</strong>, no qual redirecionamos as transições, que apontavam originalmente para $q$, para $clone$.
+Definimos $v = longest(p)$.
+Este é um sufixo da string $s$, e, a cada iteração, seu comprimento diminui - e, portanto, a posição $v$ como sufixo da string $s$ aumenta monotonicamente a cada iteração. Nesse caso, se antes da primeira iteração do loop, a string correspondente $v$ estava na profundidade $k$ ($k \ge 2$) de $last$ (contando a profundidade como o número de links de sufixos) , depois da última iteração, a string $v + c$ será o segundo link de sufixo no caminho a partir de $cur$ (que se tornará o novo valor $last$).</p>
+
+<p>Assim, cada iteração desse loop leva ao fato de que a posição da string $longest(link(link(last))$ como sufixo da string atual aumentará monotonicamente, portanto esse ciclo não pode ser executado mais do que $n$ iterações, que foi necessário para provar.</p>
+
+<h3>Implementação</h3>
+
+<p>Primeiro, descrevemos uma estrutura de dados que armazenará todas as informações sobre uma transição específica ($len$, $link$ e a lista de transições). Se necessário, você pode adicionar um bool para o terminal aqui, além de outras informações. Armazenaremos a lista de transições na forma de $map$, o que nos permite obter um total de $O(n)$ de memória e tempo $O(n \log k)$ para processar toda a string.</p>
+
+<pre><code class="cpp">struct state {
+    int len, link;
+    map&lt;char, int&gt; next;
+};
+</code></pre>
+
+<p>O próprio autômato de sufixo será armazenado em uma array dessas estruturas $state$.
+rmazenamos o tamanho atual $sz$ e também a variável $last$, o estado correspondente a toda a string no momento.</p>
+
+<pre><code class="cpp">const int MAXLEN = 100000;
+state st[MAXLEN * 2];
+int sz, last;
+</code></pre>
+
+<p>Fornecemos uma função que inicializa o autômato de sufixo (criando um autômato de sufixo com um único estado).</p>
+
+<pre><code class="cpp">void sa_init() {
+    st[0].len = 0;
+    st[0].link = -1;
+    sz++;
+    last = 0;
+}
+</code></pre>
+
+<p>E finalmente damos a implementação da função principal - que adiciona o próximo caractere ao final da linha atual, reconstruindo a máquina de acordo.</p>
+
+<pre><code class="cpp">void sa_extend(char c) {
+    int cur = sz++;
+    st[cur].len = st[last].len + 1;
+    int p = last;
+    while (p != -1 &amp;&amp; !st[p].next.count(c)) {
+        st[p].next[c] = cur;
+        p = st[p].link;
+    }
+    if (p == -1) {
+        st[cur].link = 0;
+    } else {
+        int q = st[p].next[c];
+        if (st[p].len + 1 == st[q].len) {
+            st[cur].link = q;
+        } else {
+            int clone = sz++;
+            st[clone].len = st[p].len + 1;
+            st[clone].next = st[q].next;
+            st[clone].link = st[q].link;
+            while (p != -1 &amp;&amp; st[p].next[c] == q) {
+                st[p].next[c] = clone;
+                p = st[p].link;
+            }
+            st[q].link = st[cur].link = clone;
+        }
+    }
+    last = cur;
+}
+</code></pre>
+
+<p>Como mencionado acima, se você sacrificar a memória ($O(n k)$, onde $k$ é o tamanho constante do alfabeto), poderá obter o tempo de construção da máquina em $O(n)$, para qualquer alfabeto tamanho $k$.
+Mas, para isso, você terá que armazenar uma array de tamanho $k$ em cada estado (para pular rapidamente para a transição da letra) e uma lista adicional de todas as transições (para iterar rapidamente as transições).</p>
+
+<h2>Propriedades adicionais</h2>
+
+<h3>Número de estados</h3>
+
+<p>O número de estados em um autômato com sufixo da $s$ de tamanho $n$ não excede $2n - 1$ (com $n \ge 2$).</p>
+
+<p>A prova é a própria construção do algoritmo, já que inicialmente o autômato consiste em um estado e, na primeira e na segunda iteração, apenas um único estado será criado e nas restantes $n-2$ etapas, no máximo $2$ estados serão criados em cada etapa.</p>
+
+<p>No entanto, também podemos mostrar essa estimativa sem conhecer o algoritmo.
+O número de estados é igual ao número de conjuntos diferentes de $endpos$.
+Além disso, esses conjuntos $endpos$ formam uma árvore (um vértice pai contém todos os conjuntos filhos em seu conjunto). Considere esta árvore e a transforme um pouco: desde que tenha um vértice interno com apenas um filho (o que significa que o conjunto do filho perde pelo menos uma posição do conjunto pai), criamos um novo filho com o conjunto das posições ausentes. No final, temos uma árvore na qual cada vértice interno possui um grau maior que um, e o número de folhas não excede $n$.
+Portanto, não há mais que $2n - 1$ vértices nessa árvore.</p>
+
+<p>Esse limite do número de estados pode realmente ser alcançado para cada $n$.
+Uma possível string é:
+$$"abbb\dots bbb"$$
+Em cada iteração, iniciando na terceira, o algoritmo dividirá um estado, resultando em exatamente $2n - 1$ estados.</p>
+
+<h3>Número de transições</h3>
+
+<p>O número de transições em um autômato de sufixo de uma string $s$ de tamanho $n$ não excede $3n - 4$ (para $n \ge 3$).</p>
+
+<p>Vamos primeiro estimar o número de transições contínuas. Considere uma spanning tree dos caminhos mais longos no autômato começando no estado $t_0$.
+Esse esqueleto consistirá apenas nas arestas contínuas e, portanto, seu número é menor que o número de estados, ou seja, não excede $2n - 2$.</p>
+
+<p>Agora vamos estimar o número de transições não contínuas. Deixe a transição não contínua atual ser $(p, q)$ com o caractere $c$.
+Pegamos a string correspondente $u + c + w$, onde a string $u$ corresponde ao caminho mais longo do estado inicial para $p$, e $w$ ao caminho mais longo de $q$ para qualquer estado terminal. Por um lado, cada uma dessas strings $u + c + w$ para cada string incompleta será diferente (já que as strings $u$ e $w$ são formadas apenas por transições completas). Por outro lado, cada uma dessas string $u + c + w$, pela definição dos estados terminais, será um sufixo de toda a string $s$.
+Como existem apenas $n$ sufixos não vazios de $s$, e nenhuma das strings $u + c + w$ pode conter $s$ (porque a string completa contém apenas transições completas), o número total de transições incompletas não excede $n - 1$.</p>
+
+<p>A combinação dessas duas estimativas nos dá o limite de $3n - 3$.
+No entanto, como o número máximo de estados só pode ser alcançado com o caso de teste $"abbb\dots bbb"$ e esse caso tem claramente menos de $3n - 3$ transições, obtemos o limite mais restrito de $3n - 4$ para o número de transições em um autômato com sufixo.</p>
+
+<p>Esse limite também pode ser alcançado com a string:
+$$"abbb\dots bbbc"$$</p>
+
+<h2>Aplicações</h2>
+
+<p>Aqui, examinamos algumas tarefas que podem ser resolvidas usando o autômato de sufixo. Para simplificar, assumimos que o tamanho do alfabeto $k$ é constante, o que nos permite considerar a complexidade de anexar um caractere e a travessia como constante.</p>
+
+<h3>Verificar por uma ocorrência</h3>
+
+<p>Dado um texto $T$, e vários padrões $P$.
+Temos que verificar se as strings $P$ aparecem ou não como uma substring de $T$.</p>
+
+<p>Construímos um autômato de sufixo do texto $T$ em tempo $O(comprimento(T))$.
+ Para verificar se um padrão $P$ aparece em $T$, seguimos as transições, começando em $t_0$, de acordo com os caracteres de $P$.
+Se em algum momento não existir uma transição, então o padrão $P$ não aparece como uma substring de $T$.
+Se pudermos processar toda a string $P$ dessa forma, então as strings aparecem em $T$.</p>
+
+<p>Isso levará tempo $O(comprimento(P))$ para cada string $P$.
+Além disso, o algoritmo realmente encontra o comprimento do prefixo mais longo de $P$ que aparece no texto.</p>
+
+<h3>Número de substrings diferentes</h3>
+
+<p>Dada uma string $S$.
+Você deseja calcular o número de diferentes substrings.</p>
+
+<p>Vamos criar um autômato de sufixo para a string $S$.</p>
+
+<p>Cada substring de $S$ corresponde a algum caminho no autômato. Portanto, o número de substrings diferentes é igual ao número de caminhos diferentes no autômato começando em $t_0$.</p>
+
+<p>Dado que o autômato de sufixo é um grafo acíclico direcionado, o número de maneiras diferentes pode ser calculado usando programação dinâmica.</p>
+
+<p>Seja $d[v]$ o número de maneiras, começando no estado $v$ (incluindo o caminho do comprimento zero). Então temos a recursão:
+$$d[v] = 1 + \sum_{w : (v, w, c) \in DAWG} d[w]$$
+$d[v]$ pode ser expresso como a soma de respostas para todos os finais das transições de $v$.</p>
+
+<p>O número de substrings diferentes é o valor $d[t_0] - 1$ (já que não contamos a substring vazia).</p>
+
+<p>Complexidade de tempo total: $O(comprimento(S))$</p>
+
+<h3>Comprimento total de todas as diferentes substrings</h3>
+
+<p>Dada uma string $S$.
+Queremos calcular o comprimento total de todas as suas várias substrings.</p>
+
+<p>A solução é semelhante à anterior, mas agora é necessário considerar duas quantidades para a parte da programação dinâmica: o número de diferentes substrings $d[v]$ e seu comprimento total $ans[v]$.</p>
+
+<p>Já descrevemos como calcular $d[v]$ na tarefa anterior. O valor $ans[v]$ pode ser calculado usando a recursão:
+$$ans[v] = \sum_{w : (v, w, c) \in DAWG} d[w] + ans[w]$$
+Pegamos a resposta de cada vértice adjacente $w$, e adicionamos a ele $d[w]$ (uma vez que cada substring tem um caractere a mais ao iniciar a partir do estado $v$).</p>
+
+<p>Novamente, esta tarefa pode ser calculada em $O(comprimento(S))$.</p>
+
+<h3>$k$-ésima substring lexicograficamente</h3>
+
+<p>Dada uma string $S$.
+Temos que responder a várias consultas. Para cada número $K_i$ temos que encontrar a $K_i$-ésima string na lista lexicograficamente ordenada de todas as substrings.</p>
+
+<p>A solução desse problema é baseada na idéia dos dois problemas anteriores. A $k$-ésima substring lexicográfica corresponde ao $k$-ésimo caminho lexicográfico no autômato de sufixo.
+Portanto, depois de contar o número de caminhos de cada estado, podemos procurar o $k$-ésimo caminho começando a partir da raiz do autômato.</p>
+
+<p>Isso leva tempo $O(comprimento(S))$ para pré-processamento e, em seguida, $O(comprimento(ans) \cdot k)$ para cada consulta (onde $ans$ é a resposta para a consulta e $k$ é o tamanho do alfabeto).</p>
+
+<h3>Menor mudança cíclica</h3>
+
+<p>Dada uma string $S$.
+Queremos encontrar a menor mudança cíclica lexicograficamente.</p>
+
+<p>Construímos um autômato de sufixo para a string $S + S$.
+Então o autômato conterá em si mesmo os caminhos todas as mudanças cíclicas da string $S$.</p>
+
+<p>Consequentemente, o problema é reduzido para encontrar o caminho lexicograficamente menor do comprimento $length(S)$, que pode ser feito de uma maneira trivial: começamos no estado inicial e passamos pelas transições com os caracteres mínimos.</p>
+
+<p>A complexidade do tempo total é $O(comprimento(S))$.</p>
+
+<h3>Número de ocorrências</h3>
+
+<p>Para um determinado texto $T$.
+Temos que responder a várias consultas. Para cada padrão fornecido $P$ precisamos descobrir quantas vezes a string $P$ aparece na string $T$ como substring.</p>
+
+<p>Construímos o autômato de sufixo para o texto $T$.</p>
+
+<p>Em seguida, fazemos o seguinte pré-processamento: para cada estado $v$ no autômato, calculamos o número $cnt[v]$ que é igual ao tamanho do conjunto $endpos(v)$.
+De fato, todas as strings correspondentes ao mesmo estado $v$ aparecem no texto $T$ uma quantidade igual de vezes, que é igual ao número de posições no conjunto $endpos$.</p>
+
+<p>No entanto, não podemos construir os conjuntos $endpos$ explicitamente, portanto, consideramos apenas seus tamanhos $cnt$.</p>
+
+<p>Para calculá-los, procedemos da seguinte forma. Para cada estado, se não foi criado por clonagem (e se não for o estado inicial $t_0$), inicializamos com $cnt = 1$.
+Depois, percorreremos todos os estados em ordem decrescente de seu comprimento $len$, e adicionaremos o valor atual $cnt[v]$ aos links do sufixo:
+$$cnt[link(v)] \text{ += } cnt[v]$$
+Isso fornece o valor correto para cada estado.</p>
+
+<p>
+Por que isso está correto? O total de estatísticas não obtidas pela clonagem é exatamente $length(T)$, e o primeiro $i$ deles apareceram quando adicionamos os primeiros $i$ caracteres.
+Consequentemente, para cada um desses estados, contamos a posição correspondente na qual ele foi processado. Portanto, inicialmente temos  $cnt = 1$ para cada um desses estados e $cnt = 0$ para todos os outros.</p>
+
+<p>Em seguida, aplicamos a seguinte operação para cada $v$: $cnt[link(v)] \text{ += } cnt[v]$.
+O significado por trás disso é que, se uma string $v$ aparecer $cnt[v]$ vezes, todos os sufixos também aparecerão nas mesmas posições finais, portanto também $cnt[v]$ vezes.</p>
+
+<p>Por que não contamos demais neste procedimento (ou seja, não contamos algumas posições duas vezes)? Como adicionamos as posições de um estado a apenas outro estado, não pode acontecer que um estado direcione suas posições para outro estado duas vezes de duas maneiras diferentes.</p>
+
+<p>Assim, podemos calcular as quantidades $cnt$ para todos os estados no autômato em tempo $O(comprimento(T))$.</p>
+
+<p>Depois disso, responda a uma consulta apenas pesquisando o valor de $cnt[t]$, onde $t$ é o estado correspondente ao padrão, se esse estado existir. Caso contrário, responda com $0$.
+Responder a uma consulta leva tempo $O(comprimento(P))$.</p>
+
+<h3>Posição da primeira ocorrência</h3>
+
+<p>Dado um texto $T$ e várias consultas. Para cada consulta da string $P$ queremos encontrar a posição da primeira ocorrência de $P$ na string $T$ (a posição do início de $P$).</p>
+
+<p>Novamente construímos um autômato com sufixo. Além disso, pré-calculamos a posição $firstpos$ para todos os estados do autômato, ou seja, para cada estado $v$ queremos encontrar a posição $firstpos[v]$ do final da primeira ocorrência. Em outras palavras, queremos encontrar antecipadamente o elemento mínimo de cada conjunto $endpos$ (não é possível manter todos os conjuntos $endpos$ explicitamente).</p>
+
+<p>Para manter essas posições $firstpos$ estendemos a função <code>sa_extend()</code>.
+Quando criamos um novo estado $cur$, definimos:
+$$firstpos(cur) = len(cur) - 1$$
+E quando clonamos um vértice $q$ como $clone$, definimos:
+$$firstpos(clone) = firstpos(q)$$
+(já que a única outra opção para um valor seria $firstpos(cur)$ que é definitivamente muito grande)</p>
+
+<p>Portanto, a resposta para uma consulta é simplesmente $firstpos(t) - length(P) + 1$, onde $t$ é o estado correspondente à string $P$.
+Responder uma consulta novamente leva apenas tempo $O(length(P))$.</p>
+
+<h3>Todas as posições da ocorrência</h3>
+
+<p>Desta vez, temos que exibir todas as posições das ocorrências na string $T$.</p>
+
+<p>Novamente, construímos um autômato de sufixo para o texto $T$.
+Semelhante à tarefa anterior, calculamos a posição $firstpos$ para todos os estados.</p>
+
+<p>Claramente, $firstpos(t)$ faz parte da resposta, se $t$ for o estado correspondente a uma consulta da string $P$.
+Então, levamos em conta o estado do autômato contendo $P$.
+Que outros estados precisamos levar em consideração? Todos os estados que correspondem a cadeias para as quais $P$ é um sufixo.
+Em outras palavras, precisamos encontrar todos os estados que podem atingir o estado $t$ por meio de links de sufixo.</p>
+
+<p>Portanto, para resolver o problema, precisamos salvar para cada estado uma lista de referências de sufixos que levam a ele. A resposta para a consulta conterá todos os $firstpos$ para cada estado que podemos encontrar usando uma DFS / BFS começando do estado $t$ usando apenas as referências de sufixo.</p>
+
+<p>Essa solução alternativa funcionará em tempo $O(resposta(P))$, porque não visitaremos um estado duas vezes (porque apenas um link de sufixo sai de cada estado, portanto, não pode haver dois caminhos diferentes que levam ao mesmo estado).</p>
+
+<p>Só precisamos levar em consideração que dois estados diferentes podem ter o mesmo valor de $firstpos$ value.
+Isso acontece se um estado foi obtido pela clonagem de outro. No entanto, isso não arruina a complexidade, pois cada estado pode ter no máximo um clone.</p>
+
+<p>Além disso, também podemos nos livrar das posições duplicadas, se não produzirmos as posições dos estados clonados. De fato, o estado que um estado clonado pode alcançar também é acessível a partir do estado original. Portanto, se usarmos o sinalizador bool <code>is_cloned</code> para cada estado, podemos simplesmente ignorar os estados clonados e gerar apenas $firstpos$ para todos os outros estados.</p>
+
+<p>Aqui estão alguns esboços de implementação:</p>
+
+<pre><code class="cpp">struct state {
+    ...
+    bool is_clone;
+    int first_pos;
+    vector&lt;int&gt; inv_link;
+};
+
+// after constructing the automaton
+for (int v = 1; v &lt; sz; v++) {
+    st[st[v].link].inv_link.push_back(v);
+}
+
+// output all positions of occurrences
+void output_all_occurrences(int v, int P_length) {
+    if (!st[v].is_clone)
+        cout &lt;&lt; st[v].first_pos - P_length + 1 &lt;&lt; endl;
+    for (int u : st[v].inv_link)
+        output_all_occurrences(u, P_length);
+}
+</code></pre>
+
+<h3>String mais curta que não aparece</h3>
+
+<p>Dada uma string $S$ e um determinado alfabeto. Temos que encontrar uma string de menor tamanho, que não apareça em $S$.</p>
+
+<p>Aplicaremos programação dinâmica (dp) no autômato de sufixo criado para a string $S$.</p>
+
+<p>Deixe que $d[v]$ seja a resposta para o nó $v$, ou seja, já processamos parte da substring, estamos atualmente no estado $v$, e queremos encontrar o menor número de caracteres que devem ser adicionados para encontrar uma transição inexistente. Calcular $d[v]$ é bem simples.
+Se não houver transição usando pelo menos um caractere do alfabeto, então $d[v] = 1$.
+Caso contrário, um caractere não é suficiente e, portanto, precisamos obter o mínimo de todas as respostas de todas as transições:
+$$d[v] = 1 + \min_{w:(v,w,c) \in SA} d[w].$$</p>
+
+<p>A resposta para o problema será $d[t_0]$, e a string pode ser restaurada usando a array calculada $d[]$.</p>
+
+<h3>Maior substring comum de duas strings</h3>
+
+<p>Dada duas strings $S$ e $T$.
+emos que encontrar a substring comum mais longa, ou seja, uma string  $X$ que aparece como substring em $S$ e também em $T$.</p>
+
+<p>Construímos um autômato de sufixo para a string $S$.</p>
+
+<p>Vamos agora pegar a string $T$, e, para cada prefixo, procurar o sufixo mais longo desse prefixo em $S$.
+Em outras palavras, para cada posição na string $T$, queremos encontrar a substring comum mais longa de $S$ e $T$ que termina nessa posição.</p>
+
+<p>Para isso, usaremos duas variáveis, o <strong>estado atual</strong> $v$ e o <strong>comprimento atual</strong> $l$.
+Essas duas variáveis ​​descreverão a parte correspondente atual: seu comprimento e o estado que corresponde a ela.</p>
+
+<p>Inicialmente $v = t_0$ e $l = 0$.</p>
+
+<p>Agora vamos descrever como podemos adicionar um caractere $T[i]$ e recalcular a resposta para ele.</p>
+
+<ul>
+<li>Se existir uma transição de $v$ com o caractere $T[i]$, simplesmente seguiremos a transição e aumentaremos $l$ em um.</li>
+<li>Se não houver essa transição, precisamos reduzir a parte correspondente atual, o que significa que precisamos seguir o link do sufixo:
+$$v = link(v)$$
+Ao mesmo tempo, o comprimento atual deve ser reduzido. Precisamos atribuir $l = len(v)$, pois, após passar pelo link do sufixo, acabamos no estado cuja string mais longa é uma substring.</li>
+<li>Se ainda não houver transição usando o caractere necessário, repetimos e, novamente, seguimos o link do sufixo e diminuímos $l$ até encontrarmos uma transição ou alcançarmos o estado fictício $-1$ (o que significa que o símbolo $T[i]$ não aparece em $S$, então definimos $v = l = 0$).</li>
+</ul>
+
+<p>A resposta para a tarefa será o máximo de todos os valores $l$.</p>
+
+<p>A complexidade dessa parte é $O(comprimento(T))$, pois em um movimento podemos aumentar $l$ em um ou fazer várias passagens pelos links de sufixo, cada um deles reduzindo o valor de $l$.</p>
+
+<p>Implementação:</p>
+
+<pre><code class="cpp">string lcs (string S, string T) {
+    sa_init();
+    for (int i = 0; i &lt; S.size(); i++)
+        sa_extend(S[i]);
+
+    int v = 0, l = 0, best = 0, bestpos = 0;
+    for (int i = 0; i &lt; T.size(); i++) {
+        while (v &amp;&amp; !st[v].next.count(T[i])) {
+            v = st[v].link ;
+            l = st[v].length ;
+        }
+        if (st[v].next.count(T[i])) {
+            v = st [v].next[T[i]];
+            l++;
+        }
+        if (l &gt; best) {
+            best = l;
+            bestpos = i;
+        }
+    }
+    return t.substr(bestpos - best + 1, best);
+} 
+</code></pre>
+
+<h3>Maior substring comum de várias strings</h3>
+
+<p>Existem $k$ strings ($S_i$ será uma string individual) fornecidas.
+Temos que encontrar a substring comum mais longa, ou seja, uma string $X$ que aparece como substring em cada string $S_i$.</p>
+
+<p>Juntamos todas as strings em uma grande string $T$, separando-as por caracteres especiais $D_i$ (um para cada string):
+$$T = S_1 + D_1 + S_2 + D_2 + \dots + S_k + D_k.$$</p>
+
+<p>Em seguida, construímos o autômato de sufixo para a string $T$.</p>
+
+<p>Agora precisamos encontrar uma string na máquina, que esteja contida em todas as strings $S_i$, e isso pode ser feito usando os caracteres adicionados especiais. Observe que, se uma substring for incluída em alguma string $S_j$, no autômato de sufixo existe um caminho que começa nessa substring, contendo o caractere $D_j$ e não os outros caracteres $D_1, \dots, D_{j-1}, D_{j+1}, \dots, D_k$.</p>
+
+<p>Portanto, precisamos calcular para cada estado da máquina e para cada símbolo $D_i$ se existe esse caminho.
+Isso pode ser feito com uma DFS ou BFS e com programação dinâmicas(dp).
+Depois disso, a resposta para o problema será a string $longest(v)$ para o estado $v$, a partir da qual os caminhos existem para todos os caracteres especiais.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.spoj.com/problems/SUBLEX/">SPOJ - SUBLEX</a></li>
+<li><a href="https://codeforces.com/problemset/problem/235/C">Codeforces - Cyclical Quest</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
