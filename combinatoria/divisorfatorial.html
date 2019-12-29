@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Potência de um divisor fatorial - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando a potência de um divisor fatorial</h1>
+
+<p>Você recebe dois números $n$ e $k$. Encontre a maior potência de $k$ $x$ tal que $n!$ é divisível por $k^x$.</p>
+
+<h2>Primo $k$</h2>
+
+<p>Vamos primeiro considerar o caso do primo $k$. A expressão explícita para um fatorial:</p>
+
+<p>$$n! = 1 \cdot 2 \cdot 3 \ldots (n-1) \cdot n$$</p>
+
+<p>Observe que todo $k$-ésimo elemento do produto é divisível por $k$, ou seja, acrescenta $+1$ para a resposta; o número de tais elementos é $\Bigl\lfloor\dfrac{n}{k}\Bigr\rfloor$.</p>
+
+<p>A seguir, cada $k^2$-ésimo elemento é divisível por $k^2$, ou seja, acrescenta outro $+1$ para a resposta (a primeira potência de $k$ já foi contada no parágrafo anterior). O número de tais elementos é $\Bigl\lfloor\dfrac{n}{k^2}\Bigr\rfloor$.</p>
+
+<p>E assim por diante, para cada $i$  e então cada $k^i$-ésimo elemento acrescenta outro $+1$ para a resposta, e existem $\Bigl\lfloor\dfrac{n}{k^i}\Bigr\rfloor$ tais elementos.</p>
+
+<p>A resposta final será</p>
+
+<p>$$\Bigl\lfloor\dfrac{n}{k}\Bigr\rfloor + \Bigl\lfloor\dfrac{n}{k^2}\Bigr\rfloor + \ldots + \Bigl\lfloor\dfrac{n}{k^i}\Bigr\rfloor + \ldots$$</p>
+
+<p>A soma é obviamente finita, uma vez que apenas aproximadamente os primeiros $\log_k n$ elementos são diferentes de zero. Portanto, o tempo de execução desse algoritmo é $O(\log_k n)$.</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp"><br />int fact_pow (int n, int k) {
+    int res = 0;
+    while (n) {
+        n /= k;
+        res += n;
+    }
+    return res;
+}
+
+</code></pre>
+
+<h2>Composto $k$</h2>
+
+<p>A mesma ideia não pode ser aplicada diretamente. Em vez disso, podemos fatorar $k$, representando-o como $k = k_1^{p_1} \cdot \ldots \cdot k_m^{p_m}$. Para cada $k_i$, encontramos o número de vezes que ele está presente em $n!$ Usando o algoritmo descrito acima - vamos chamar esse valor de $a_i$. A resposta para um $k$ composto será</p>
+
+<p>$$\min_ {i=1 \ldots m} \dfrac{a_i}{p_i}$$</p>
+
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
