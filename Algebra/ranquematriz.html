@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ranque de uma matriz - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando o ranque de uma matriz</h1>
+
+<p><strong>O ranque de uma matriz</strong> é o maior número de linhas / colunas linearmente independentes da matriz. Essa classificação não é definida apenas para matrizes quadradas.</p>
+
+<p>O ranque de uma matriz também pode ser definido como a maior ordem de qualquer "minor"(um "minor" é o determinante da matriz quadrada formada pela exclusão de uma linha e uma coluna de alguma matriz quadrada maior; como existem muitas linhas e colunas na matriz original, você pode fazer muitos "minors" com isso) diferente de zero na matriz.</p>
+
+<p>Deixe que a matriz seja retangular e tenha tamanho $N \times M$.
+Observe que se a matriz for quadrada e seu determinante for diferente de zero, o ranque dela será $N$ ($=M$); caso contrário, será menor. Geralmente, o ranque de uma matriz não excede $\min (N, M)$.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Você pode procurar o ranque usando a <a href="https://cp-algorithms-brasil.com/Algebra/gausslinear.html">eleminação de Guass</a>. Realizaremos as mesmas operações de quando resolver o sistema ou encontrar seu determinante. Mas se, em qualquer etapa da $i$-ésima coluna não houver linhas com uma entrada não vazia entre as que não foram selecionadas, pularemos esta etapa. Caso contrário, se encontrarmos uma linha com um elemento diferente de zero na $i$-ésima coluna durante a $i$-ésima etapa, marcaremos essa linha como a selecionada, aumentamos o ranque em um (inicialmente o ranque é definido como $0$), e executamos as operações usuais de remover esta linha do resto.</p>
+
+<h2>Complexidade</h2>
+
+<p>Esse algoritmo é executado em $\mathcal{O}(n^3)$.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">const double EPS = 1E-9;
+
+int compute_rank(vector&lt;vector&lt;double&gt;&gt; A) {
+    int n = A.size();
+    int m = A[0].size();
+
+    int rank = 0;
+    vector&lt;bool&gt; row_selected(n, false);
+    for (int i = 0; i &lt; m; ++i) {
+        int j;
+        for (j = 0; j &lt; n; ++j) {
+            if (!row_selected[j] &amp;&amp; abs(A[j][i]) &gt; EPS)
+                break;
+        }
+
+        if (j != n) {
+            ++rank;
+            row_selected[j] = true;
+            for (int p = i + 1; p &lt; m; ++p)
+                A[j][p] /= A[j][i];
+            for (int k = 0; k &lt; n; ++k) {
+                if (k != j &amp;&amp; abs(A[k][i]) &gt; EPS) {
+                    for (int p = i + 1; p &lt; m; ++p)
+                        A[k][p] -= A[j][p] * A[k][i];
+                }
+            }
+        }
+    }
+    return rank;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1041">TIMUS1041 Nikifor</a></li>
+</ul>
+
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
