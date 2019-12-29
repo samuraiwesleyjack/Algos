@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Gauss Determinante - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Calculando o determinante de uma matriz por Gauss</h1>
+
+<p>Problema: Dada uma matriz $A$ de tamanho $N x N$. Calcule seu determinante.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Usamos as idéias do <a href="https://cp-algorithms-brasil.com/Algebra/gausslinear.html">método de Gauss para resolver sistemas de equações lineares</a></p>
+
+<p>Executaremos as mesmas etapas da solução de sistemas de equações lineares, excluindo apenas a divisão da linha atual em $a_{ij}$. Essas operações não irão alterar o valor absoluto do determinante da matriz. No entanto, quando trocamos duas linhas da matriz o sinal do determinante pode mudar.</p>
+
+<p>Após aplicar Gauss na matriz, recebemos uma matriz diagonal, cujo determinante é apenas o produto dos elementos na diagonal. O sinal, como mencionado anteriormente, pode ser determinado pelo número de linhas trocadas (se ímpares, o sinal do determinante deve ser revertido). Assim, podemos usar o algoritmo de Gauss para calcular o determinante da matriz com complexidade $O(N^3)$.</p>
+
+<p>Observe que, em algum momento, se não encontrarmos uma célula diferente de zero na coluna atual, o algoritmo deverá parar e retornar 0.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">const double EPS = 1E-9;
+int n;
+vector &lt; vector&lt;double&gt; &gt; a (n, vector&lt;double&gt; (n));
+
+double det = 1;
+for (int i=0; i&lt;n; ++i) {
+    int k = i;
+    for (int j=i+1; j&lt;n; ++j)
+        if (abs (a[j][i]) &gt; abs (a[k][i]))
+            k = j;
+    if (abs (a[k][i]) &lt; EPS) {
+        det = 0;
+        break;
+    }
+    swap (a[i], a[k]);
+    if (i != k)
+        det = -det;
+    det *= a[i][i];
+    for (int j=i+1; j&lt;n; ++j)
+        a[i][j] /= a[i][i];
+    for (int j=0; j&lt;n; ++j)
+        if (j != i &amp;&amp; abs (a[j][i]) &gt; EPS)
+            for (int k=i+1; k&lt;n; ++k)
+                a[j][k] -= a[i][k] * a[j][i];
+}
+
+cout &lt;&lt; det;
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://codeforces.com/contest/167/problem/E">Codeforces - Wizards and Bets</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
