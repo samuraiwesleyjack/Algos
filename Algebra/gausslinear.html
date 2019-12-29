@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Gauss sistema de equações lineares - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Método de Gauss para resolver sistemas de equações lineares</h1>
+
+<p>Dado um sistema de $n$ equações algébricas lineares (SLAE) com $m$ incógnitas. Você é solicitado a resolver o sistema: para determinar se ele não tem solução, exatamente uma solução ou número infinito de soluções. E, caso tenha pelo menos uma solução, encontre uma delas.</p>
+
+<p>Formalmente, o problema é formulado da seguinte maneira: resolva o sistema:</p>
+
+<p>$$a_{11} x_1 + a_{12} x_2 + \dots + a_{1m} x_m = b_1$$
+$$a_{21} x_1 + a_{22} x_2 + \dots + a_{2m} x_m = b_2$$
+$$\dots$$
+$$a_{n1} x_1 + a_{n2} x_2 + \dots + a_{nm} x_m = b_n$$</p>
+
+<p>onde os coeficientes $a_{ij}$ (com $i$ de 1 até $n$, $j$ de 1 até $m$) e $b_i$ ($i$ de 1 até $n$) são conhecidos e as variáveis $x_i$ ($i$ de 1 até $m$) são desconhecidas.</p>
+
+<p>Esse problema também tem uma representação de uma matriz simples:
+$$Ax = b$$,
+onde $A$ é uma matriz de tamanho $n \times m$ de coeficientes $a_{ij}$ e $b$ é o vetor coluna de tamanho $n$.</p>
+
+<p>Vale ressaltar que o método apresentado neste artigo também pode ser utilizado para resolver uma equação módulo qualquer número p, ou seja:</p>
+
+<p>$$a_{11} x_1 + a_{12} x_2 + \dots + a_{1m} x_m \equiv b_1 \pmod p$$
+$$a_{21} x_1 + a_{22} x_2 + \dots + a_{2m} x_m \equiv b_2 \pmod p$$
+$$\dots$$
+$$a_{n1} x_1 + a_{n2} x_2 + \dots + a_{nm} x_m \equiv b_n \pmod p$$</p>
+
+<h2>Gauss</h2>
+
+<p>Formalmente falando, o método descrito abaixo deve ser chamado de "Gauss-Jordan", ou eliminação de Gauss-Jordan, porque é uma variação do método de Gauss, descrito por Jordan em 1887.</p> 
+
+<h2>Visão geral</h2>
+
+<p>O algoritmo é uma <code>eliminação sequencial</code> das variáveis ​​em cada equação, até que cada equação tenha apenas uma variável restante. Se $n = m$, você pode pensar nisso como transformar a matriz $A$ em uma matriz identidade e resolver a equação nesse caso óbvio, em que a solução é única e é igual ao coeficiente $b_i$.</p>
+
+<p>A eliminação de gauss é baseada em duas transformações simples:
+* É possível trocar duas equações
+* Qualquer equação pode ser substituída por uma combinação linear dessa linha (com coeficiente diferente de zero) e algumas outras linhas (com coeficientes arbitrários).</p>
+
+<p>Na primeira etapa, o algoritmo de Gauss-Jordan divide a primeira linha por $a_{11}$. Em seguida, o algoritmo adiciona a primeira linha às linhas restantes, de modo que os coeficientes na primeira coluna se tornem todos zeros. Para alcançar isso, na i-ésima linha, devemos adicionar a primeira linha multiplicada por $- a_{i1}$. Observe que esta operação também deve ser executada no vetor $b$. De certo modo, ele se comporta como se o vetor $b$ fosse a $m+1$-ésima coluna da matriz $A$.</p>
+
+<p>Como resultado, após a primeira etapa, a primeira coluna da matriz $A$ consistirá em $1$ na primeira linha e $0$ em outras linhas.</p>
+
+<p>Da mesma forma, realizamos a segunda etapa do algoritmo, onde consideramos a segunda coluna da segunda linha. Primeiro, a linha é dividida por $a_{22}$, e, em seguida, é subtraída de outras linhas, para que toda a segunda coluna se torne $0$ (exceto a segunda linha).</p>
+
+<p>Continuamos esse processo para todas as colunas da matriz $A$. Se $n = m$, então $A$ se tornará a matriz identidade.</p>
+
+<h2>Procure o elemento dinâmico</h2>
+
+<p>O esquema descrito deixou de fora muitos detalhes. Na $i$th etapa, se $a_{ii}$ for zero, não podemos aplicar diretamente o método descrito. Em vez disso, devemos primeiro <code>selecionar uma linha dinâmica</code>: encontre uma linha da matriz em que a $i$th coluna seja diferente de zero e depois troque as duas linhas.</p>
+
+<p>Observe que aqui trocamos linhas, mas não colunas. Isso ocorre porque, se você trocar colunas, quando encontrar uma solução, precisa lembrar de trocar novamente para corrigir os locais. Assim, a troca de linhas é muito mais fácil de fazer.</p>
+
+<p>Em muitas implementações, quando $a_{ii} \neq 0$, você pode ver as pessoas ainda trocando a $i$th linha com alguma linha dinâmica, usando algumas heurísticas, como escolher a linha dinâmica(ou central) com o valor absoluto máximo de $a_{ji}$. Essa heurística é usada para reduzir o intervalo de valores da matriz em etapas posteriores. Sem essa heurística, mesmo para matrizes de tamanho de aproximadamente $20$, o erro será muito grande e poderá causar overflow para tipos de dados de pontos <em>floating</em> do C++.</p>
+
+<h2>Casos degenerados</h2>
+
+<p>No caso em que $m = n$ e o sistema não é degenerado (ou seja, tem determinante diferente de zero e tem solução única), o algoritmo descrito acima transformará $A$ em uma matriz identidade.</p>
+
+<p>Agora, consideramos o <code>caso geral</code>, onde $n$ e $m$ não são necessariamente iguais, e o sistema pode não ser degenerado. Nesses casos, o elemento dinâmico na $i$-ésima etapa pode não ser encontrado. Isso significa que na $i$-ésima coluna, iniciando na linha atual, todos contêm zeros. Nesse caso, não há um valor possível da variável $x_i$ (ou seja, o SLAE não tem solução) ou $x_i$ é uma variável independente e pode assumir um valor arbitrário. Ao implementar Gauss-Jordan, você deve continuar o trabalho para as variáveis ​​subseqüentes e pular a $i$-ésima coluna (isso equivale a remover a $i$-ésima coluna da matriz).</p>
+
+<p>Portanto, algumas das variáveis ​​do processo podem ser consideradas independentes. Quando o número de variáveis $m$ é maior que o número de equações $n$, então, pelo menos $m - n$ variáveis ​​independentes podem ser encontradas.</p>
+
+<p>No geral, se você encontrar pelo menos uma variável independente, ela pode assumir qualquer valor arbitrário, enquanto as outras variáveis ​​(dependentes) são expressas por ela. Isso significa que, quando trabalhamos no campo de números reais, o sistema potencialmente tem infinitas soluções. Mas lembre-se de que, quando existem variáveis ​​independentes, é possível que o SLAE não tenha nenhuma solução. Isso acontece quando as demais equações não tratadas têm pelo menos um termo constante diferente de zero. Você pode verificar isso atribuindo zeros a todas as variáveis ​​independentes, calcular outras variáveis ​​e conectar ao SLAE original para verificar se elas satisfazem as equações.</p>
+
+<h2>Implementação</h2>
+
+<p>A seguir está uma implementação do Gauss-Jordan. A escolha da linha dinâmica é feita com a heurística: " escolha o valor máximo na coluna atual ".</p>
+
+<p>O input da função <code>gauss</code> é o sistema matriz $a$. A última coluna desta matriz é o vetor $b$.</p>
+
+<p>A função retorna o número de soluções do sistema $(0, 1,\textrm{or } \infty)$. Se existir pelo menos uma solução, ela será retornada no vetor $ans$.</p>
+
+<pre><code class="cpp">const double EPS = 1e-9; 
+const int INF = 2; // na verdade, não precisa ser infinito ou um grande número
+
+int gauss (vector &lt; vector&lt;double&gt; &gt; a, vector&lt;double&gt; &amp; ans) {
+    int n = (int) a.size();
+    int m = (int) a[0].size() - 1;
+
+    vector&lt;int&gt; where (m, -1);
+    for (int col=0, row=0; col&lt;m &amp;&amp; row&lt;n; ++col) {
+        int sel = row;
+        for (int i=row; i&lt;n; ++i)
+            if (abs (a[i][col]) &gt; abs (a[sel][col]))
+                sel = i;
+        if (abs (a[sel][col]) &lt; EPS)
+            continue;
+        for (int i=col; i&lt;=m; ++i)
+            swap (a[sel][i], a[row][i]);
+        where[col] = row;
+
+        for (int i=0; i&lt;n; ++i)
+            if (i != row) {
+                double c = a[i][col] / a[row][col];
+                for (int j=col; j&lt;=m; ++j)
+                    a[i][j] -= a[row][j] * c;
+            }
+        ++row;
+    }
+
+    ans.assign (m, 0);
+    for (int i=0; i&lt;m; ++i)
+        if (where[i] != -1)
+            ans[i] = a[where[i]][m] / a[where[i]][i];
+    for (int i=0; i&lt;n; ++i) {
+        double sum = 0;
+        for (int j=0; j&lt;m; ++j)
+            sum += ans[j] * a[i][j];
+        if (abs (sum - a[i][m]) &gt; EPS)
+            return 0;
+    }
+
+    for (int i=0; i&lt;m; ++i)
+        if (where[i] == -1)
+            return INF;
+    return 1;
+}
+</code></pre>
+
+<p>Notas da implementação:</p>
+
+<ul>
+<li>A função usa dois ponteiros - a coluna atual $col$ e a linha atual $row$.</li>
+<li>Para cada variável $x_i$, o valor $where(i)$ é a linha em que esta coluna não é zero. Esse vetor é necessário porque algumas variáveis ​​podem ser independentes.</li>
+<li>Nesta implementação, a $i$th linha atual não é dividida por $a_{ii}$ conforme descrito acima, portanto, no final, a matriz não é uma matriz identidade (embora aparentemente a divisão da $i$th linha pode ajudar a reduzir erros).</li>
+<li>Após encontrar uma solução, ela é inserida novamente na matriz - para verificar se o sistema possui pelo menos uma solução ou não. Se a solução de teste for bem-sucedida, a função retornará 1 ou $\inf$, dependendo se há pelo menos uma variável independente.</li>
+</ul>
+
+<h2>Complexidade</h2>
+
+<p>Agora devemos estimar a complexidade desse algoritmo. O algoritmo consiste em $m$ fases, em cada fase:</p>
+
+<ul>
+<li>Pesquise e reorganize a linha dinâmica. Isso leva $O(n + m)$ ao usar a heurística mencionada acima.</li>
+<li>Se o elemento pivô(dinâmico) na coluna atual for encontrado - devemos adicionar esta equação a todas as outras equações, o que leva tempo $O(nm)$.</li>
+</ul>
+
+<p>Portanto, a complexidade final do algoritmo é $O(\min (n, m) . nm)$.
+No caso em que $n = m$, a complexidade é simplesmente $O(n^3)$.</p>
+
+<p>Observe que quando o SLAE não está sendo usado com números reais, mas está em módulo de dois, o sistema pode ser resolvido muito mais rapidamente, conforme descrito abaixo.</p>
+
+<h2>Aceleração do algoritmo</h2>
+
+<p>A implementação anterior pode ser acelerada duas vezes, dividindo o algoritmo em duas fases: em frente e reversa:</p>
+
+<ul>
+<li>Fase em frente: semelhante à implementação anterior, mas a linha atual é adicionada apenas às linhas após ela. Como resultado, obtemos uma matriz triangular em vez de uma diagonal.</li>
+<li>Fase reversa: Quando a matriz é triangular, primeiro calculamos o valor da última variável. Em seguida, conecte esse valor para encontrar o valor da próxima variável. Em seguida, conecte esses dois valores para encontrar as próximas variáveis ​​...</li>
+</ul>
+
+<p>A fase reversa leva apenas $O(nm)$, que é muito mais rápido que a primeira fase. Na fase "em frente", reduzimos pela metade o número de operações, reduzindo o tempo de execução da implementação.</p>
+
+<h2>SLAE modular</h2>
+
+<p>Para resolver o SLAE em algum módulo, ainda podemos usar o algoritmo descrito acima. No entanto, caso o módulo seja igual a dois, podemos executar a eliminação de Gauss-Jordan com muito mais eficiência usando operações bitwise e tipos de dados bitset no C++:</p>
+
+<pre><code class="cpp">int gauss (vector &lt; bitset&lt;N&gt; &gt; a, int n, int m, bitset&lt;N&gt; &amp; ans) {
+    vector&lt;int&gt; where (m, -1);
+    for (int col=0, row=0; col&lt;m &amp;&amp; row&lt;n; ++col) {
+        for (int i=row; i&lt;n; ++i)
+            if (a[i][col]) {
+                swap (a[i], a[row]);
+                break;
+            }
+        if (! a[row][col])
+            continue;
+        where[col] = row;
+
+        for (int i=0; i&lt;n; ++i)
+            if (i != row &amp;&amp; a[i][col])
+                a[i] ^= a[row];
+        ++row;
+    }
+        // O resto da implementação é o mesmo que acima
+}
+</code></pre>
+
+<p>Como usamos a compressão de bits, a implementação não é apenas mais curta, mas também 32 vezes mais rápida.</p>
+
+<h2>Uma pequena observação sobre diferentes heurísticas da escolha da linha dinâmica</h2>
+
+<p>Não há regra geral para quais heurísticas usar.</p>
+
+<p>As heurísticas usadas na implementação anterior funcionam muito bem na prática. Ele também fornece quase as mesmas respostas que uma procura completa - onde a linha dinâmica é pesquisada entre todos os elementos da submatriz (das linhas e colunas atuais).</p>
+
+<p>No entanto, observe que ambas as heurísticas dependem de quanto as equações originais foram dimensionadas. Por exemplo, se uma das equações foi multiplicada por $10^6$, é quase certo que essa equação será escolhida como dinâmica na primeira etapa. Isso parece um tanto estranho, então parece lógico mudar para uma heurística mais complicada $:)$, chamada de <code>dinâmica implícita</code>.</p>
+
+<p>A dinâmica implícita compara os elementos como se as duas linhas estivessem normalizadas, para que o elemento máximo fosse uma unidade. Para implementar essa técnica, é necessário manter o máximo em cada linha (ou manter cada linha para que o máximo seja a unidade, mas isso pode levar ao aumento do erro acumulado na matriz/equações).</p>
+
+<h2>Melhorando a solução</h2>
+
+<p>Apesar de várias heurísticas, o algoritmo de Gauss-Jordan ainda pode levar a grandes erros em matrizes especiais, mesmo as de tamanho $50 - 100$.</p>
+
+<p>Portanto, às vezes, a solução resultante de Gauss-Jordan deve ser aprimorada aplicando algum método numérico mais fácil - por exemplo, um método de iteração simples.</p>
+
+<p>Assim, a solução se transforma em duas etapas: primeiro, o algoritmo de Gauss-Jordan é aplicado e, em seguida, um método numérico que utiliza a solução inicial como solução na primeira etapa.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/XMAX/">Spoj - Xor Maximization</a></li>
+<li><a href="https://www.codechef.com/SEP12/problems/KNGHTMOV">Codechef - Knight Moving</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1279">Lightoj - Graph Coloring</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4775">UVA 12910 - Snakes and Ladders</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1042">TIMUS1042 Central Heating</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1766">TIMUS1766 Humpty Dumpty</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1266">TIMUS1266 Kirchhoff's Law</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
