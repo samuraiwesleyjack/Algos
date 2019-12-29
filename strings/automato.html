@@ -570,12 +570,12 @@ Isso acontece se um estado foi obtido pela clonagem de outro. No entanto, isso n
     vector&lt;int&gt; inv_link;
 };
 
-// after constructing the automaton
+// depois de construir o autômato
 for (int v = 1; v &lt; sz; v++) {
     st[st[v].link].inv_link.push_back(v);
 }
 
-// output all positions of occurrences
+// output de todas as posições das ocorrências
 void output_all_occurrences(int v, int P_length) {
     if (!st[v].is_clone)
         cout &lt;&lt; st[v].first_pos - P_length + 1 &lt;&lt; endl;
