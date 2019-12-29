@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Coeficientes Binomiais - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Coeficientes Binomiais</h1>
+
+<p>Coeficientes binomiais $\binom n k$ são o número de maneiras de selecionar um conjunto de $k$ elementos a partir de $n$ elementos diferentes sem levar em conta a ordem de organização desses elementos (ou seja, o número de conjuntos não ordenados).</p>
+
+<p>Os coeficientes binomiais também são os coeficientes na expansão de $(a + b) ^ n$ (o chamado teorema do binômio):</p>
+
+<p>$$ (a+b)^n = \binom n 0 a^n + \binom n 1 a^{n-1} b + \binom n 2 a^{n-2} b^2 + \cdots + \binom n k a^{n-k} b^k + \cdots + \binom n n b^n $$</p>
+
+<p>Acredita-se que essa fórmula, assim como o triângulo que permite o cálculo eficiente dos coeficientes, tenha sido descoberta por Blaise Pascal no século XVII. No entanto, era conhecido pelo matemático chinês Yang Hui, que viveu no século XIII. Talvez tenha sido descoberto por um estudioso persa Omar Khayyam. Além disso, o matemático indiano Pingala obteve resultados semelhantes. O mérito de Newton é que ele generalizou essa fórmula para expoentes que não são naturais.</p>
+
+<h2>Cálculo</h2>
+
+<p><strong>Fórmula analítica</strong> para o cálculo:</p>
+
+<p>$$ \binom n k = \frac {n!} {k!(n-k)!} $$</p>
+
+<p>Essa fórmula pode ser deduzida do problema de resolver o  - número de maneiras de selecionar $k$ elementos diferentes de $n$ elementos diferentes - . Primeiro, vamos contar o número de seleções ordenadas de $k$ elementos. Existem $n$ maneiras de selecionar o primeiro elemento, $n-1$ maneiras de selecionar o segundo elemento, $n-2$ maneiras de selecionar o terceiro elemento e assim por diante. Como resultado, obtemos a fórmula do número de arranjos ordenados: $n (n-1) (n-2) \cdots (n - k + 1) = \frac {n!} {(n-k)!}$. Podemos facilmente passar para arranjos não ordenados, observando que cada arranjo não ordenado corresponde exatamente a $k!$ arranjos ordenados ($k!$ é o número de permutações possíveis de $k$ elementos). Obtemos a fórmula final dividindo $\frac {n!} {(n-k)!}$ by $k!$.</p>
+
+<p><strong>Fórmula recursiva</strong> (associada ao famoso "Triângulo de Pascal"):</p>
+
+<p>$$ \binom n k = \binom {n-1} {k-1} + \binom {n-1} k $$</p>
+
+<p>Nota: é mais fácil de deduzir isso usando a fórmula analítica.</p>
+
+<p>Observe que para $n \lt k$ o valor de $\binom n k$ é assumido como zero.</p>
+
+<h2>Propriedades</h2>
+
+<p>Os coeficientes binomiais têm muitas propriedades diferentes. Aqui estão as mais simples deles:</p>
+
+<ul>
+<li>Simetria:
+$$ \binom n k = \binom n {n-k} $$</li>
+<li>Fatorando:
+$$ \binom n k = \frac n k \binom {n-1} {k-1} $$</li>
+<li>Soma sobre $k$:
+$$ \sum_{k = 0}^n \binom n k = 2 ^ n $$</li>
+<li>Soma sobre $n$:
+$$ \sum_{m = 0}^n \binom m k = \binom {n + 1} {k + 1} $$</li>
+<li>Soma sobre $n$ e $k$:
+$$ \sum_{k = 0}^m  \binom {n + k} k = \binom {n + m + 1} m $$</li>
+<li>Soma dos quadrados:
+$$ {\binom n 0}^2 + {\binom n 1}^2 + \cdots + {\binom n n}^2 = \binom {2n} n $$</li>
+<li><a href="https://math.stackexchange.com/questions/2180181/find-the-value-of-sum-k-1nk-binomnk">Soma com pesos</a>:
+$$ 1 \binom n 1 + 2 \binom n 2 + \cdots + n \binom n n = n 2^{n-1} $$</li>
+<li>Conexão com os <a href="https://cp-algorithms-brasil.com/Algebra/fibonacci.html">números de Fibonacci</a>:
+$$ \binom n 0 + \binom {n-1} 1 + \cdots + \binom {n-k} k + \cdots + \binom 0 n = F_{n+1} $$</li>
+</ul>
+
+<h2>Cálculo</h2>
+
+<h3>Cálculo direto usando a fórmula analítica</h3>
+
+<p>A primeira fórmula direta é mais fácil de codificar, mas é provável que esse método cause overflow mesmo para valores relativamente pequenos de $n$ e $k$ (mesmo se a resposta se encaixar completamente em alguns dos tipos de dados, o cálculo dos fatoriais intermediários pode causar overflow). Portanto, esse método geralmente só pode ser usado com <a href="https://cp-algorithms-brasil.com/Algebra/bignum.html">aritmética longa</a>:</p>
+
+<pre><code class="cpp">int C(int n, int k) {
+    int res = 1;
+    for (int i = n - k + 1; i &lt;= n; ++i)
+        res *= i;
+    for (int i = 2; i &lt;= k; ++i)
+        res /= i;
+}
+</code></pre>
+
+<h3>Implementação aprimorada</h3>
+
+<p>Observe que, na implementação acima, o numerador e denominador têm o mesmo número de fatores ($k$), cada um dos quais é maior que ou igual a 1. Portanto, podemos substituir nossa fração por um produto de $k$ frações, cada uma das quais é com um valor real. No entanto, em cada etapa após multiplicar a resposta atual por cada uma das próximas frações, a resposta ainda será inteira (isso segue da propriedade da fatoração). Implementação em C++:</p>
+
+<pre><code class="cpp">int C(int n, int k) {
+    double res = 1;
+    for (int i = 1; i &lt;= k; ++i)
+        res = res * (n - k + i) / i;
+    return (int)(res + 0.01);
+}
+</code></pre>
+
+<p>Aqui, projetamos cuidadosamente o número do tipo float para um número inteiro, levando em consideração que, devido aos erros acumulados, ele pode ser um pouco menor que o valor real (por exemplo $2.99999$ em vez de $3$).</p>
+
+<h3>Triângulo de Pascal</h3>
+
+<p>Usando a relação recursiva, podemos construir uma tabela de coeficientes binomiais (triângulo de Pascal) e obter o resultado dela. A vantagem desse método é que os resultados intermediários nunca excedem a resposta e o cálculo de cada novo elemento da tabela requer apenas uma adição. A falha é a execução lenta para grandes $n$ e $k$ se você precisar apenas de um valor único e não de toda a tabela (porque, para calcular $\binom n k$ será necessário criar uma tabela com todos os $\binom i j, 1 \le i \le n, 1 \le j \le n$, ou pelo menos até $1 \le j \le \min (i, 2k)$). A complexidade do tempo pode ser considerada como $\mathcal{O}(n^2)$.
+Implementação em C++:</p>
+
+<pre><code class="cpp">const int maxn = ...;
+int C[maxn + 1][maxn + 1];
+C[0][0] = 1;
+for (int n = 1; n &lt;= maxn; ++n) {
+    C[n][0] = C[n][n] = 1;
+    for (int k = 1; k &lt; n; ++k)
+        C[n][k] = C[n - 1][k - 1] + C[n - 1][k];
+}
+</code></pre>
+
+<p>Se a tabela inteira de valores não for necessária, armazenar apenas duas últimas linhas será suficiente (a atual $n$-ésima linha e a $n-1$-ésima anterior).</p>
+
+<h3>Cálculo em $O(1)$</h3>
+
+<p>Finalmente, em algumas situações, é benéfico pré-calcular todos os fatoriais para produzir qualquer coeficiente binomial necessário com apenas duas divisões posteriormente. Isso pode ser vantajoso quando se usa <a href="https://cp-algorithms-brasil.com/Algebra/bignum.html">aritmética longa</a>, quando a memória não permite a pré-computação de todo o triângulo de Pascal.</p>
+
+<h2>Calculando coeficientes binomiais módulo $m$.</h2>
+
+<p>Você pode precisar em algum problema calcular os coeficientes binomiais módulo algum número $m$.</p>
+
+<h3>Coeficiente binomial para pequenos $n$</h3>
+
+<p>A abordagem discutida anteriormente do triângulo de Pascal pode ser usada para calcular todos os valores de $\binom{n}{k} \bmod m$ para $n$'s razoavelmente pequenos, pois requer complexidade de tempo $\mathcal{O}(n^2)$. Essa abordagem pode lidar com qualquer módulo, pois apenas operações de adição são usadas.</p>
+
+<h3>Coeficiente binomial módulo algum número primo grande</h3>
+
+<p>A fórmula para os coeficientes binomiais é
+$$\binom n k = \frac {n!} {k!(n-k)!},$$
+então se quisermos calculá-lo módulo algum primo $m > n$, obtemos:
+$$\binom n k \equiv n! \cdot (k!)^{-1} \cdot ((n-k)!)^{-1} \mod m.$$</p>
+
+<p>Primeiro, pré-calculamos todos os fatoriais módulo $m$ até $\text{MAXN}!$ em tempo $O(\text{MAXN})$.</p>
+
+<pre><code class="cpp">factorial[0] = 1;
+for (int i = 1; i &lt;= MAXN; i++) {
+    factorial[i] = factorial[i - 1] * i % m;
+}
+</code></pre>
+
+<p>E depois podemos calcular o coeficiente binomial em tempo $O(\log m)$.</p>
+
+<pre><code class="cpp">long long binomial_coefficient(int n, int k) {
+    return factorial[n] * inverse(factorial[k]) % m * inverse(factorial[n - k]) % m;
+}
+</code></pre>
+
+<p>Podemos até calcular o coeficiente binomial em $O(1)$ se pré-calcularmos os inversos de todos os fatoriais em $O(\text{MAXN} \log m)$ usando o método regular para calcular o inverso, ou mesmo em $O(\text{MAXN})$ usando a congruência $(x!)^{-1} \equiv ((x-1)!)^{-1} \cdot x^{-1}$ e o método para <a href="https://cp-algorithms-brasil.com/Algebra/inversomod.html">calcular todos os inversos</a> em $O(n)$.</p>
+
+<h3>Coeficiente binomial módulo uma potência prima</h3>
+
+<p>Aqui queremos calcular o coeficiente binomial módulo alguma potência prima, ou seja, $m = p^b$ para algum primo $p$.
+Se $p > \max(k, n-k)$, podemos usar o mesmo método descrito na seção anterior. Mas se $p \le \max(k, n-k)$, então, pelo menos um dos $k!$ e $(n-k)!$ não são coprimos com $m$, e, portanto, não podemos calcular os inversos - eles não não existe. No entanto, podemos calcular os coeficientes binomiais.</p>
+
+<p>A idéia é a seguinte: Calculamos para cada $x!$ o maior expoente $c$ no qual $p^c$ divide $x!$, ou seja, $p^c ~|~ x!$.
+Seja $c(x)$ esse número.
+E seja $g(x) := \frac{x!}{p^{c(x)}}$.
+Então, podemos escrever o coeficiente binomial como:
+$$\binom n k = \frac {g(n) p^{c(n)}} {g(k) p^{c(k)} g(n-k) p^{c(n-k)}} = \frac {g(n)} {g(k) g(n-k)}p^{c(n) - c(k) - c(n-k)}$$</p>
+
+<p>O interessante é que agora $g(x)$ está livre do divisor primo $p$.
+Portanto, $g(x)$ é coprimo de m, e podemos calcular os inversos modulares de $g(k)$ e $g(n-k)$.</p>
+
+<p>Após pré-computar todos os valores de $g$ e $c$, o que pode ser feito com eficiência usando programação dinâmica em $\mathcal{O}(n)$, podemos calcular o coeficiente binomial em $O(\log m)$.
+Ou pré-calcular todos os inversos e todas as potências de $p$, e depois calcular os coeficientes binomiais em $O(1)$.</p>
+
+<p>Observe que, se $c(n) - c(k) - c(n-k) \ge b$, então $p^b ~|~ p^{c(n) - c(k) - c(n-k)}$, e o coeficiente binomial será $0$.</p>
+
+<h3>Coeficiente binomial módulo um número arbitrário</h3>
+
+<p>Agora calculamos o coeficiente binomial módulo algum número arbitrário $m$.</p>
+
+<p>Deixe que a fatoração em primos de $m$ seja $m = p_1^{e_1} p_2^{e_2} \cdots p_h^{e_h}$.
+Podemos calcular o coeficiente binomial módulo $p_i^{e_i}$ para todo $i$.
+Isso nos dá $h$ diferentes congruências. Como todos os módulos $p_i^{e_i}$ são coprimos, podemos aplicar o <a href="https://cp-algorithms-brasil.com/Algebra/teoremachines.html">teorema chinês do resto</a> para calcular o coeficiente binomial módulo o produto do módulo, que é o desejado coeficiente binomial módulo $m$.</p>
+
+<h3>Coeficiente binomial para grandes $n$ e pequenos módulos</h3>
+
+<p>Quando $n$ é muito grande, os algoritmos lineares $\mathcal{O}(n)$ discutidos acima se tornam impraticáveis. No entanto, se o módulo $m$ for pequeno, ainda existem maneiras de calcular $\binom{n}{k} \bmod m$.</p>
+
+<p>Quando o módulo $m$ for primo, existem 2 opções:</p>
+
+<ul>
+<li>O <a href="https://en.wikipedia.org/wiki/Lucas's_theorem">Teorema de Lucas</a> pode ser aplicado, decompondo o problema de calcular $\binom{n}{k} \bmod m$ em $\log_m n$ problemas da forma $\binom{x_i}{y_i} \bmod m$ onde $x_i, y_i &lt; m$. Se cada " coeficiente reduzido " for calculado usando fatoriais pré-computados e fatoriais inversos, a complexidade será $\mathcal{O}(m + \log_m n)$.</li>
+<li>O método de calcular o <a href="https://cp-algorithms-brasil.com/Algebra/fatorialp.html">fatorial módulo P</a> pode ser usado para obter os valores necessários de $g$ e $c$ e usá-los conforme descrito na seção "módulo alguma potência prima". Isso leva $\mathcal{O}(m \log_m n)$.</li>
+</ul>
+
+<p>Quando $m$ não é primo, mas sim um quadrado, os fatores primos de $m$ podem ser obtidos e o coeficiente módulo cada fator primo pode ser calculado usando qualquer um dos métodos acima, e a resposta geral pode ser obtida pelo Teorema do Resto Chinês.</p>
+
+<p>Quando $m$ não for um quadrado, a <a href="https://web.archive.org/web/20170202003812/http://www.dms.umontreal.ca/~andrew/PDF/BinCoeff.pdf">generalização do teorema de Lucas para potências primas</a> pode ser aplicada em vez do teorema de Lucas.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/LTIME24/problems/NWAYS/">Codechef - Number of ways</a></li>
+<li><a href="http://codeforces.com/problemset/problem/407/C">Codeforces - Curious Array</a></li>
+<li><a href="http://www.lightoj.com/volume_showproblem.php?problem=1419">LightOj - Necklaces</a></li>
+<li><a href="https://www.hackerearth.com/problem/algorithm/binomial-coefficient-1/description/">HACKEREARTH: Binomial Coefficient</a></li>
+<li><a href="http://www.spoj.com/problems/ADATEAMS/">SPOJ - Ada and Teams</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/61">DevSkill - Drive In Grid</a></li>
+<li><a href="http://www.spoj.com/problems/UCV2013E/">SPOJ - Greedy Walking</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=5137">UVa 13214 - The Robot's Grid</a></li>
+<li><a href="http://www.spoj.com/problems/GOODB/">SPOJ - Good Predictions</a></li>
+<li><a href="http://www.spoj.com/problems/HC12/">SPOJ - Card Game</a></li>
+<li><a href="http://www.spoj.com/problems/HLP_RAMS/">SPOJ - Topper Rama Rao</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=5095">UVa 13184 - Counting Edges and Graphs</a></li>
+<li><a href="http://codeforces.com/contest/785/problem/D">Codeforces - Anton and School 2</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/255">DevSkill - Parandthesis</a></li>
+<li><a href="http://codeforces.com/contest/760/problem/F">Codeforces - Bacterial Melee</a></li>
+<li><a href="http://codeforces.com/contest/872/problem/E">Codeforces - Points, Lines and Ready-made Titles</a></li>
+<li><a href="https://www.spoj.com/problems/DCEPC13D/">SPOJ - The Ultimate Riddle</a></li>
+<li><a href="https://www.codechef.com/MAY17/problems/SANDWICH/">CodeChef - Long Sandwich</a></li>
+</ul>
+
+<h2>Referências</h2>
+
+<ul>
+<li><a href="https://fishi.devtail.io/weblog/2015/06/25/computing-large-binomial-coefficients-modulo-prime-non-prime/">Blog fishi.devtail.io</a></li>
+<li><a href="https://math.stackexchange.com/questions/95491/n-choose-k-bmod-m-using-chinese-remainder-theorem">Question on Mathematics StackExchange</a></li>
+<li><a href="https://discuss.codechef.com/questions/98129/your-approach-to-solve-sandwich">Question on CodeChef Discuss</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
