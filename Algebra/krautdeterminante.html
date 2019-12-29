@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Kraut Determinante - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Calculando o determinante usando o método de Kraut em $O(N^3)$</h1>
+
+<p>Neste artigo, descreveremos como encontrar o determinante da matriz usando o método Kraut, que funciona em $O(N^3)$.</p>
+
+<p>O algoritmo de Kraut encontra a decomposição da matriz $A$ como $A = L U$ onde $L$ é a matriz triangular inferior e $U$ é a matriz triangular superior. Sem perda de generalidade, podemos assumir que todos os elementos diagonais de $L$ são iguais a 1. Uma vez conhecidas essas matrizes, é fácil calcular o determinante de $A$: é igual ao produto de todos os elementos na diagonal principal da matriz $U$.</p>
+
+<p>Existe um teorema que afirma que qualquer matriz invertível tem uma <a href="https://www.youtube.com/watch?v=UlWcofkUDDU">decomposição</a> em L e U, e ela é única, se e somente se todos os seus elementos principais menores forem diferentes de zero. onsideramos apenas essa decomposição na qual a diagonal da matriz $L$ consiste apenas de um's.</p>
+
+<p>Seja $A$ a matriz e $N$ seu tamanho. Vamos encontrar os elementos das matrizes $L$ e $U$ usando as seguintes etapas:</p>
+
+<ol>
+<li>Seja $L_{i i} = 1$ for $i = 1, 2, ..., N$.</li>
+<li>Para cada $j = 1, 2, ..., N$ execute:
+
+<ul>
+<li>Para $i = 1, 2, ..., j$ encontre os valores 
+$$U_{ij} = A_{ij} - \sum_{k=1}^{i-1} L_{ik} \cdot U_{kj}$$</li>
+<li>Em seguida, para $i = j+1, j+2, ..., N$ encontre os valores
+$$L_{ij} = \frac{1}{U_{jj}} \left(A_{ij} - \sum_{k=1}^{j-1} L_{ik} \cdot U_{kj} \right)$$.</li>
+</ul></li>
+</ol>
+
+<h2>Implementação</h2>
+
+<pre><code class="java">static BigInteger det (BigDecimal a [][], int n) {
+    try {
+
+    for (int i=0; i&lt;n; i++) {
+        boolean nonzero = false;
+        for (int j=0; j&lt;n; j++)
+            if (a[i][j].compareTo (new BigDecimal (BigInteger.ZERO)) &gt; 0)
+                nonzero = true;
+        if (!nonzero)
+            return BigInteger.ZERO;
+    }
+
+    BigDecimal scaling [] = new BigDecimal [n];
+    for (int i=0; i&lt;n; i++) {
+        BigDecimal big = new BigDecimal (BigInteger.ZERO);
+        for (int j=0; j&lt;n; j++)
+            if (a[i][j].abs().compareTo (big) &gt; 0)
+                big = a[i][j].abs();
+        scaling[i] = (new BigDecimal (BigInteger.ONE)) .divide
+            (big, 100, BigDecimal.ROUND_HALF_EVEN);
+    }
+
+    int sign = 1;
+
+    for (int j=0; j&lt;n; j++) {
+        for (int i=0; i&lt;j; i++) {
+            BigDecimal sum = a[i][j];
+            for (int k=0; k&lt;i; k++)
+                sum = sum.subtract (a[i][k].multiply (a[k][j]));
+            a[i][j] = sum;
+        }
+
+        BigDecimal big = new BigDecimal (BigInteger.ZERO);
+        int imax = -1;
+        for (int i=j; i&lt;n; i++) {
+            BigDecimal sum = a[i][j];
+            for (int k=0; k&lt;j; k++)
+                sum = sum.subtract (a[i][k].multiply (a[k][j]));
+            a[i][j] = sum;
+            BigDecimal cur = sum.abs();
+            cur = cur.multiply (scaling[i]);
+            if (cur.compareTo (big) &gt;= 0) {
+                big = cur;
+                imax = i;
+            }
+        }
+
+        if (j != imax) {
+            for (int k=0; k&lt;n; k++) {
+                BigDecimal t = a[j][k];
+                a[j][k] = a[imax][k];
+                a[imax][k] = t;
+            }
+
+            BigDecimal t = scaling[imax];
+            scaling[imax] = scaling[j];
+            scaling[j] = t;
+
+            sign = -sign;
+        }
+
+        if (j != n-1)
+            for (int i=j+1; i&lt;n; i++)
+                a[i][j] = a[i][j].divide
+                    (a[j][j], 100, BigDecimal.ROUND_HALF_EVEN);
+
+    }
+
+    BigDecimal result = new BigDecimal (1);
+    if (sign == -1)
+        result = result.negate();
+    for (int i=0; i&lt;n; i++)
+        result = result.multiply (a[i][i]);
+
+    return result.divide
+        (BigDecimal.valueOf(1), 0, BigDecimal.ROUND_HALF_EVEN).toBigInteger();
+    }
+    catch (Exception e) {
+        return BigInteger.ZERO;
+    }
+}
+</code></pre>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
