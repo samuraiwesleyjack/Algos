@@ -140,7 +140,7 @@ De fato, se houver um erro $\delta$ na primeira fase, esse erro pode se propagar
 <p>Formalmente, o algoritmo de Floyd-Warshall não se aplica em grafos que contêm ciclos de pesos negativos. 
 Mas para todos os pares de vértices $i$ e $j$ para o qual não existe um caminho começando em $i$, visitando um ciclo negativo, e terminando em $j$, o algoritmo ainda funcionará corretamente.</p>
 
-<p>For the pair of vertices for which the answer does not exist (due to the presence of a negative cycle in the path between them), the Floyd algorithm will store any number (perhaps highly negative, but not necessarily) in the distance matrix.
+<p>Para o par de vértices para os quais a resposta não existe (devido à presença de um ciclo negativo no caminho entre eles), o algoritmo de Floyd armazenará qualquer número (talvez altamente negativo, mas não necessariamente) na matriz de distâncias.
 
 No entanto, é possível melhorar o algoritmo de Floyd-Warshall, para tratar com cuidado esses pares de vértices e gerá-los, por exemplo, definidos como $-\text{INF}$.</p>
 
