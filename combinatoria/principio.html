@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Princípio da inclusão-exclusão - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>O princípio da inclusão-exclusão</h1>
+
+<p>O princípio de inclusão-exclusão é uma maneira combinatória importante de calcular o tamanho de um conjunto ou a probabilidade de eventos complexos. Ele relaciona o tamanho de conjuntos individuais com sua união.</p>
+
+<h2>Descrição</h2>
+
+<h3>A fórmula verbal</h3>
+
+<p>O princípio de inclusão-exclusão pode ser expresso da seguinte maneira:</p>
+
+<p>Para calcular o tamanho de uma união de vários conjuntos, é necessário somar os tamanhos desses conjuntos separadamente e subtrair os tamanhos de todos os pares de interseções dos conjuntos e, em seguida, adicionar novamente o tamanho das interseções de triplos dos conjuntos, subtraia o tamanho dos quádruplos dos conjuntos e assim por diante, até a interseção de todos os conjuntos.</p>
+
+<h3>A formulação em termos de conjuntos</h3>
+
+<p>A definição acima pode ser expressa matematicamente da seguinte maneira:</p>
+
+<p>$$\left| \bigcup_{i=1}^n A_i \right| = \sum_{i=1}^n|A_i| - \sum_{1\leq i&lt;j\leq n} |A_i \cap A_j| + \sum _{1\leq i&lt;j&lt;k\leq n}|A_i \cap A_j \cap A_k| - \cdots + (-1)^{n-1} | A_1 \cap \cdots \cap A_n |$$</p>
+
+<p>E de uma forma mais compacta:</p>
+
+<p>$$\left|\bigcup_{i=1}^n A_i \right| = \sum_{\emptyset \neq J\subseteq &#92;{1,2,\ldots ,n&#92;}} (-1)^{|J|-1}{\Biggl |}\bigcap_{j\in J}A_{j}{\Biggr |}$$</p>
+
+<h3>A formulação usando diagramas de Venn</h3>
+
+<p>O diagrama mostra três conjuntos $A$, $B$ e $C$:</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/venn-inclusion-exclusion.png" alt="Venn diagram" title="Venn diagram" /></p>
+
+<p>Então a área de sua união $A \cup B \cup C$ é igual à soma das áreas $A$, $B$ e $C$ <em>menos</em> as "duplas-áreas" cobertas $A \cap B$, $A \cap C$, $B \cap C$, mas com a adição da área coberta pelos três conjuntos $A \cap B \cap C$:</p>
+
+<p>$$S(A \cup B \cup C) = S(A) + S(B) + S(C) - S(A \cap B) - S(A \cap C) - S(B \cap C) + S(A \cap B \cap C)$$</p>
+
+<p>Também pode ser generalizado para uma associação de $n$ conjuntos.</p>
+
+<h3>A formulação em termos de probabilidade teórica</h3>
+
+<p>Se $A_i$ $(i = 1,2...n)$ são eventos, e ${\cal P}(A_i)$ a probabilidade de um evento de $A_i$ ocorrer, então a probabilidade de sua união (ou seja, a probabilidade de ocorrer pelo menos um dos eventos) é igual a:</p>
+
+<p>$$\begin{eqnarray}
+{\cal P} \left( \bigcup_{i=1}^n A_i \right) &amp;=&amp; \sum_{i=1}^n{\cal P}(A_i)\ - \sum_{1\leq i&lt;j\leq n} {\cal P}(A_i \cap A_j)\  + &#92;&#92;&#92;
+&amp;+&amp; \sum _{1\leq i&lt;j&lt;k\leq n}{\cal P}(A_i \cap A_j \cap A_k) - \cdots + (-1)^{n-1} {\cal P}( A_1 \cap \cdots \cap A_n )
+\end{eqnarray}$$</p>
+
+<p>E de uma forma mais comprimida:</p>
+
+<p>$${\cal P} \left(\bigcup_{i=1}^n A_i \right) = \sum_{\emptyset \neq J\subseteq &#92;{1,2,\ldots ,n&#92;}} (-1)^{|J|-1}\ {\cal P}{\Biggl (}\bigcap_{j\in J}A_{j}{\Biggr )}$$</p>
+
+<h2>Prova</h2>
+
+<p>Para a prova, é conveniente usar a formulação matemática em termos da teoria dos conjuntos:</p>
+
+<p>$$\left|\bigcup_{i=1}^n A_i \right| = \sum_{\emptyset \neq J\subseteq &#92;{1,2,\ldots ,n&#92;}} (-1)^{|J|-1}{\Biggl |}\bigcap_{j\in J}A_{j}{\Biggr |}$$</p>
+
+<p>Queremos provar que qualquer elemento contido em pelo menos um dos conjuntos $A_i$ ocorrerá na fórmula apenas uma vez (observe que:  elementos que não estão presentes em nenhum dos conjuntos $A_i$ nunca serão considerados na parte direita de a fórmula).</p>
+
+<p>Considere um elemento $x$ ocorrendo em $k \geq 1$ conjuntos $A_i$. Mostraremos que é contado apenas uma vez na fórmula. Note:</p>
+
+<ul>
+<li>em termos em que $|J| = 1$, o item $x$ será contado <strong>$+\ k$</strong> vezes;</li>
+<li>em termos em que $|J| = 2$, o item $x$ será contado <strong>$-\ \binom{k}{2}$</strong> vezes - bporque será contado nos termos que incluem dois dos $k$ conjuntos contendo $x$;</li>
+<li>em termos em que $|J| = 3$, o item $x$ será contado <strong>$+\ \binom{k}{3}$</strong> vezes;</li>
+<li>$\cdots$</li>
+<li>em termos em que $|J| = k$, o item $x$ será contado <strong>$(-1)^{k-1}\cdot \binom{k}{k}$</strong> vezes;</li>
+<li>em termos em que $|J| \gt k$, o item $x$ será contado <strong>zero</strong> vezes(ou seja, não será contado);</li>
+</ul>
+
+<p>Isso nos leva à seguinte soma dos <a href="https://cp-algorithms-brasil.com/combinatoria/binomial.html">coeficientes binomiais</a>:</p>
+
+<p>$$ T = \binom{k}{1} - \binom{k}{2} + \binom{k}{3} - \cdots + (-1)^{i-1}\cdot \binom{k}{i} + \cdots + (-1)^{k-1}\cdot \binom{k}{k}$$</p>
+
+<p>Essa expressão é muito semelhante à expansão binomial de $(1 - x)^k$:</p>
+
+<p>$$ (1 - x)^k = \binom{k}{0} - \binom{k}{1} \cdot x + \binom{k}{2} \cdot x^2 - \binom{k}{3} \cdot x^3 + \cdots + (-1)^k\cdot \binom{k}{k} \cdot x^k $$</p>
+
+<p>Quando $x = 1$, $(1 - x)^k$ se parece muito com $T$. No entanto, a expressão possui um adicional $\binom{k}{0} = 1$, e é multiplicado por $-1$. Isso nos leva a $(1 - 1)^k = 1 - T$. Portanto, $T = 1 - (1 - 1)^k = 1$, o que era necessário para provar. O elemento é contado apenas uma vez.</p>
+
+<h2>Generalização para calcular o número de elementos em $r$ conjuntos</h2>
+
+<p>O princípio de inclusão-exclusão pode ser reescrito para calcular o número de elementos presentes em conjuntos de zeros:</p>
+
+<p>$$\left|\bigcap_{i=1}^n \overline{A_i}\right|=\sum_{m=0}^n (-1)^m \sum_{|X|=m} \left|\bigcap_{i\in X} A_{i}\right|$$</p>
+
+<p>Considere sua generalização para calcular o número de elementos que estão presentes exatamente em $r$ conjuntos:</p>
+
+<p>$$\left|\bigcup_{|B|=r}\left[\bigcap_{i \in B} A_i \cap \bigcap_{j \not\in B} \overline{A_j}\right]\right|=\sum_{m=r}^n (-1)^{m-r}\dbinom{m}{r} \sum_{|X|=m} \left|\bigcap_{i \in X} A_{i}\right|$$</p>
+
+<p>Para provar essa fórmula, considere um particular $B$. Devido ao princípio básico de inclusão-exclusão, podemos dizer que:</p>
+
+<p>$$\left|\bigcap_{i \in B} A_i \cap \bigcap_{j \not \in B} \overline{A_j}\right|=\sum_{m=r}^{n} (-1)^{m-r} \sum_{\substack{|X|=m \newline B \subset X}}\left|\bigcap_{i\in X} A_{i}\right|$$</p>
+
+<p>Não há interseções dos conjuntos ao lado esquerdo para diferentes $B$, portanto, podemos somar diretamente. Também se deve observar que qualquer conjunto $X$ sempre terá o coeficiente $(-1)^{m-r}$ se ocorrer e ocorrerá exatamente por $\dbinom{m}{r}$ conjuntos $B$.</p>
+
+<h2>Uso na resolução de problemas</h2>
+
+<p>O princípio de inclusão-exclusão é difícil de entender sem estudar suas aplicações.</p>
+
+<p>Primeiro, examinaremos três tarefas mais simples "no papel", ilustrando aplicações do princípio, e depois consideraremos problemas mais práticos que são difíceis de resolver sem o princípio de inclusão-exclusão.</p>
+
+<p>As tarefas que pedem "encontrar o número de maneiras" merecem destaque, pois às vezes elas levam a soluções polinomiais, não necessariamente exponenciais.</p>
+
+<h3>Uma tarefa simples sobre permutações</h3>
+
+<p>Tarefa: conte quantas permutações de números de $0$ a $9$ existem para que o primeiro elemento seja maior que $1$ e o último seja menor que $8$.</p>
+
+<p>Vamos contar o número de permutações "ruins", ou seja, permutações nas quais o primeiro elemento é $\leq 1$ e / ou o último é $\geq 8$.</p>
+
+<p>Denotaremos por $X$ o conjunto de permutações em que o primeiro elemento é $\leq 1$ e $Y$ o conjunto de permutações em que o último elemento é $\geq 8$. Então, o número de permutações "ruins", como na fórmula de inclusão-exclusão, será:</p>
+
+<p>$$ |X \cup Y| = |X| + |Y| - |X \cap Y| $$</p>
+
+<p>Após um cálculo combinatório simples, chegaremos a:</p>
+
+<p>$$ 2 \cdot 9! + 2 \cdot 9! - 2 \cdot 2 \cdot 8! $$</p>
+
+<p>A única coisa que resta é subtrair esse número do total $10!$  para obter o número de permutações "boas".</p>
+
+<h3>Uma tarefa simples com sequências (0, 1, 2)</h3>
+
+<p>Tarefa: conte quantas seqüências de comprimento $n$ existem consistindo apenas com números $0,1,2$ de modo que cada número ocorra pelo menos uma vez.</p>
+
+<p>Novamente, voltemos ao problema inverso, ou seja, calculamos o número de sequências que <strong>não</strong> contêm pelo menos um dos números.</p>
+
+<p>Vamos denotar por $A_i (i = 0,1,2)$ o conjunto de sequências em que <strong>pelo menos</strong> $i$ dos números <strong>não</strong> ocorrem. A fórmula da inclusão-exclusão no número de sequências "ruins" será:</p>
+
+<p>$$ |A_0 \cup A_1 \cup A_2| = |A_0| + |A_1| + |A_2| - |A_0 \cap A_1| - |A_0 \cap A_2| - |A_1 \cap A_2| + |A_0 \cap A_1 \cap A_2| $$</p>
+
+<ul>
+<li>O tamanho de cada $A_i$ é $2^n$, pois cada sequência pode conter apenas dois dos dígitos.</li>
+<li>O tamanho de cada par de interseção $A_i \cap A_j$  é igual a $1$, pois haverá apenas um dígito para construir a sequência.</li>
+<li>O tamanho da interseção dos três conjuntos é igual a $0$, pois não haverá dígitos para criar a sequência.</li>
+</ul>
+
+<p>Como resolvemos o problema de maneira inversa, subtraímos do total de $3^n$ seqüências:</p>
+
+<p>$$3^n - (3 \cdot 2^n - 3 \cdot 1 + 0)$$</p>
+
+<h3>O número de soluções inteiras para a equação</h3>
+
+<p>Considere a seguinte equação:
+$$x_1 + x_2 + x_3 + x_4 + x_5 + x_6 = 20$$
+onde $0 \le x_i \le 8 (i = 1,2,\ldots 6)$.</p>
+
+<p>Tarefa: conte o número de soluções para a equação.</p>
+
+<p>Esqueça a restrição em $x_i$ por um momento e conte o número de soluções não-negativas para esta equação. Isso é feito facilmente usando <a href="https://cp-algorithms-brasil.com/combinatoria/binomial.html">coeficientes binomiais</a>: queremos dividir uma sequência de $20$ unidades em $6$ grupos, que é o mesmo que distribuir $5$ "paredes" sobre $25$ slots:</p>
+
+<p>$$N_0 = \binom{25}{5}$$</p>
+
+<p>Vamos agora calcular o número de soluções "ruins" com o princípio de inclusão-exclusão. As soluções "ruins" serão aquelas em que um ou mais $x_i$ são maiores que $9$.</p>
+
+<p>Denotaremos por  $A_k (k = 1,2\ldots 6)$ o conjunto de soluções em que $x_k \ge 9$, e todos os outros $x_i \ge 0 (i \ne k)$ (eles podem ser $\ge 9$ ou não). Para calcular o tamanho de $A_k$, observe que temos essencialmente o mesmo problema combinatório que foi resolvido nos dois parágrafos acima, mas agora $9$ das unidades são excluídos dos slots e definitivamente pertencem ao primeiro grupo. Portanto:</p>
+
+<p>$$ | A_k | = \binom{16}{5} $$</p>
+
+<p>Da mesma forma, o tamanho da interseção entre os conjuntos $A_k$ e $A_p$ será igual a:</p>
+
+<p>$$ \left| A_k \cap A_p \right| = \binom{7}{5}$$</p>
+
+<p>O tamanho de cada interseção de três conjuntos é zero, já que $20$ unidades não serão suficientes para três ou mais variáveis ​​maiores ou iguais a $9$.</p>
+
+<p>Combinando tudo isso na fórmula de inclusões e exceções e considerando que resolvemos o problema inverso, finalmente obtemos a resposta:</p>
+
+<p>$$\binom{25}{5} - \left(\binom{6}{1} \cdot \binom{16}{5} - \binom{6}{2} \cdot \binom{7}{5}\right) $$</p>
+
+<h3>O número de coprimos em um determinado intervalo</h3>
+
+<p>arefa: dados dois números $n$ e $r$, conte o número de números inteiros no intervalo $[1;r]$ que são relativamente primos(coprimos) com n (ou seja, o maior divisor comum entre eles será $gcd/mdc(i,n)=1$).</p>
+
+<p>Vamos resolver o problema inverso - calcule a quantidade de números que não são mutuamente primos com $n$.</p>
+
+<p>Vamos denotar os fatores primos de $n$ como $p_i (i = 1\cdots k)$.</p>
+
+<p>Quantos números no intervalo $[1;r]$ são divisíveis por $p_i$? A resposta a esta pergunta é:</p>
+
+<p>$$ \left\lfloor \frac{ r }{ p_i } \right\rfloor $$</p>
+
+<p>No entanto, se simplesmente somarmos esses números, alguns números serão resumidos várias vezes (aqueles que compartilham vários $p_i$ como seus fatores). Portanto, é necessário usar o princípio de inclusão-exclusão.</p>
+
+<p>Iremos iterar todos os $2^k$ subconjuntos de $p_i$s, calcular seu produto e adicionar ou subtrair o número de múltiplos de seu produto.</p>
+
+<p>Aqui está uma implementação em C++:</p>
+
+<pre><code class="cpp">int solve (int n, int r) {
+    vector&lt;int&gt; p;
+    for (int i=2; i*i&lt;=n; ++i)
+        if (n % i == 0) {
+            p.push_back (i);
+            while (n % i == 0)
+                n /= i;
+        }
+    if (n &gt; 1)
+        p.push_back (n);
+
+    int sum = 0;
+    for (int msk=1; msk&lt;(1&lt;&lt;p.size()); ++msk) {
+        int mult = 1,
+            bits = 0;
+        for (int i=0; i&lt;(int)p.size(); ++i)
+            if (msk &amp; (1&lt;&lt;i)) {
+                ++bits;
+                mult *= p[i];
+            }
+
+        int cur = r / mult;
+        if (bits % 2 == 1)
+            sum += cur;
+        else
+            sum -= cur;
+    }
+
+    return r - sum;
+}
+</code></pre>
+
+<p>O comportamento assintótico da solução é $O (\sqrt{n})$.</p>
+
+<h3>O número de inteiros em um determinado intervalo que são múltiplos de pelo menos um dos números fornecidos</h3>
+
+<p>Dados $n$ números $a_i$ e um número $r$. Você deseja contar a quantidade de números inteiros no intervalo $[1; r]$ que são múltiplos de pelo menos um dos $a_i$.</p>
+
+<p>O algoritmo da solução é quase idêntico ao da tarefa anterior - construa a fórmula de exclusão-inclusão nos números $a_i$, ou seja, cada termo nessa fórmula é o número de números divisíveis por um determinado subconjunto de números $a_i$ (em outras palavras, divisíveis pelo seu <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">mínimo múltiplo comum</a>).</p>
+
+<p>Portanto, agora iteraremos todos os $2^n$ subconjuntos de inteiros $a_i$ com $O(n \log r)$ operações para encontrar seu mínimo múltiplo comum, adicionando ou subtraindo o número de múltiplos dele no intervalo. O comportamento assintótico é $O (2^n\cdot n\cdot \log r)$.</p>
+
+<h3>O número de strings que satisfazem um determinado padrão</h3>
+
+<p>Considere $n$ padrões de strings do mesmo tamanho, consistindo apenas de letras ($a...z$) e pontos de interrogação. Você também recebe um número $k$. Uma string corresponde a um padrão se ela tiver o mesmo comprimento que o padrão e, em cada posição, os caracteres correspondentes forem iguais ou o caractere no padrão for um ponto de interrogação. A tarefa é contar o número de strings que correspondem exatamente a $k$ dos padrões (primeiro problema) e pelo menos $k$ dos padrões (segundo problema).</p>
+
+<p>Observe primeiro que podemos contar facilmente o número de strings que satisfazem ao mesmo tempo todos os padrões especificados. Para fazer isso, basta "cruzar" os padrões: itere sobre as posições ("slots") e observe uma posição sobre todos os padrões. Se todos os padrões tiverem um ponto de interrogação nessa posição, o caractere poderá ser qualquer letra de $a$ até $z$. Caso contrário, o caractere dessa posição é definido exclusivamente pelos padrões que não contêm um ponto de interrogação.</p>
+
+<p>Precisamos resolver a primeira versão do problema: quando a sequência deve satisfazer exatamente $k$ padrões.</p>
+
+<p>Para resolver, iremos iterar e fixar um subconjunto específico $X$ do conjunto de padrões consistindo de $k$ padrões. Então temos que contar o número de strings que satisfazem esse conjunto de padrões, e que apenas correspondem a ele, ou seja, eles não correspondem a nenhum outro padrão. Usaremos o princípio de inclusão-exclusão de uma maneira ligeiramente diferente: somamos todos os superconjuntos $Y$ (subconjuntos do conjunto original de strings que contêm $X$), e então adicionar a resposta atual ou subtrair do número de strings:</p>
+
+<p>$$ ans(X) = \sum_{Y \supseteq X} (-1)^{|Y|-k} \cdot f(Y) $$</p>
+
+<p>onde $f(Y)$ é o número de strings que correspondem a $Y$ (pelo menos $Y$).</p>
+
+<p>(Se você tiver dificuldade para descobrir isso, tente desenhar diagramas de Venn.)</p>
+
+<p>Se somarmos todos os $ans(X)$, obteremos a resposta final:</p>
+
+<p>$$ ans = \sum_{X ~ : ~ |X| = k} ans(X) $$</p>
+
+<p>No entanto, o comportamento assintótico da solução é $O(3^k \cdot k)$. Para aprimorá-lo, observe que diferentes cálculos de $ans(X)$ eralmente compartilham $Y$ conjuntos.</p>
+
+<p>Inverteremos a fórmula de inclusão-exclusão e somaremos em termos de $Y$ conjuntos. Agora fica claro que o mesmo conjunto $Y$ seria levado em consideração no cálculo de $ans(X)$ de $\binom{|Y|}{k}$ conjuntos com o mesmo sinal $(-1)^{|Y| - k}$.</p>
+
+<p>$$ ans = \sum_{Y ~ : ~ |Y| \ge k} (-1)^{|Y|-k} \cdot \binom{|Y|}{k} \cdot f(Y) $$</p>
+
+<p>Agora a solução passa a ter comportamento assintótico $O(2^k \cdot k)$.</p>
+
+<p>Agora vamos resolver a segunda versão do problema: encontre o número de strings que correspondem a pelo menos "$k$" dos padrões.</p>
+
+<p>Podemos apenas usar a solução para a primeira versão do problema e adicionar as respostas para conjuntos com tamanho maior que $k$. No entanto, você pode perceber que, nesse problema, um conjunto |Y| é considerado na fórmula para todos os conjuntos com tamanho $\ge k$ contidos em $Y$. Dito isto, podemos escrever a parte da expressão que está sendo multiplicada por $f(Y)$ como:</p>
+
+<p>$$ (-1)^{|Y|-k} \cdot \binom{|Y|}{k} + (-1)^{|Y|-k-1} \cdot \binom{|Y|}{k+1} + (-1)^{|Y|-k-2} \cdot \binom{|Y|}{k+2} + \cdots + (-1)^{|Y|-|Y|} \cdot \binom{|Y|}{|Y|} $$</p>
+
+<p>Olhando na obra de Graham (Graham, Knuth, Patashnik. "Concrete mathematics" [1998] ), vemos uma fórmula bem conhecida para os <a href="https://cp-algorithms-brasil.com/combinatoria/binomial.html">coeficientes binomiais</a>:</p>
+
+<p>$$ \sum_{k=0}^m (-1)^k \cdot \binom{n}{k} = (-1)^m \cdot \binom{n-1}{m} $$</p>
+
+<p>Aplicando-o aqui, descobrimos que toda a soma dos coeficientes binomiais é minimizada:</p>
+
+<p>$$ (-1)^{|Y|-k} \cdot \binom{|Y|-1}{|Y|-k} $$</p>
+
+<p>Assim, para esta tarefa, também obtivemos uma solução em $O(2^k \cdot k)$:</p>
+
+<p>$$ ans = \sum_{Y ~ : ~ |Y| \ge k} (-1)^{|Y|-k} \cdot \binom{|Y|-1}{|Y|-k} \cdot f(Y) $$</p>
+
+<h3>O número de maneiras de ir de uma célula para outra</h3>
+
+<p>Há um grid $n \times m$, e $k$ de suas células são paredes intransitáveis. Um robô está inicialmente na célula $(1,1)$. O robô só pode se mover para a direita ou para cima e, eventualmente, precisa entrar na célula $(n,m)$, evitando todos os obstáculos. Você precisa contar o número de maneiras pelas quais ele pode fazer isso.</p>
+
+<p>Assumindo que os tamanhos $n$ e $m$ são muito largos (digamos, $10^9$), e o número $k$ é pequeno (por volta de $100$).</p>
+
+<p>Por enquanto, ordene os obstáculos pela coordenada $x$, em caso de igualdade - coordenada $y$.</p>
+
+<p>Aprenda também como resolver um problema sem obstáculos: ou seja, aprenda como contar o número de maneiras de ir de uma célula para outra, isso pode ser feito com uma DFS. Em um eixo, precisamos passar por $x$ células, e no outro, $y$ células. Da combinatória obtemos uma fórmula usando <a href="https://cp-algorithms-brasil.com/combinatoria/binomial.html">coeficientes binomiais</a>:</p>
+
+<p>$$\binom{x+y}{x}$$</p>
+
+<p>Agora, para contar o número de maneiras de se deslocar de uma célula para outra, evitando todos os obstáculos, você pode usar a exclusão de inclusão para resolver o problema inverso: conte o número de maneiras de percorrer o grid, percorrendo em um subconjunto de obstáculos (e subtrair do número total de maneiras).</p>
+
+<p>WAo iterar sobre um subconjunto dos obstáculos que iremos enfrentar, para contar o número de maneiras de fazer isso, multiplique o número de todos os caminhos, desde a célula inicial até o primeiro dos obstáculos selecionados, de um primeiro obstáculo para o segundo e assim por diante, e então, adicione ou subtraia esse número da resposta, de acordo com a fórmula padrão de inclusão-exclusão.</p>
+
+<p>No entanto, isso novamente terá complexidade não polinomial $O(2^k \cdot k)$.</p>
+
+<p>Aqui está outra solução:</p>
+
+<p>Usaremos a programação dinâmica: vamos calcular os números $d[i][j]$ — o número de maneiras de ir do $i-ésimo$ ponto para o $j-ésimo$, sem percorrer nenhum outro obstáculo (exceto por $i$ e $j$). Nós calcularemos esse número para todas as células-obstáculo e também para as células inicial e final (todos os pares possíveis de células).</p>
+
+<p>Vamos esquecer por um segundo os obstáculos e apenas contar o número de caminhos da célula $i$ a $j$. Precisamos considerar alguns caminhos "ruins", os que atravessam os obstáculos, e subtraí-los do número total de maneiras de passar de $i$ para $j$.</p>
+
+<p>Ao considerar um obstáculo $t$ entre $i$ e $j$ ($i &lt; t &lt; j$), no qual podemos pisar, vemos que o número de caminhos de $i$ para $j$ que passa por $t$ no qual tem $t$ como o <strong>primeiro obstáculo entre $i$ e $j$</strong>. Podemos calcular isso como: $d[i][t]$ multiplicado pelo número de caminhos arbitrários de $t$ para $j$. Podemos contar o número de maneiras "ruins" que somam isso para todos os $t$ entre $i$ e $j$.</p>
+
+<p>Podemos calcular $d[i][j]$ em $O(k)$ para $O(k^2)$ pares, então, essa solução tem complexidade $O(k^3)$.</p>
+
+<h3>O número de coprimos quadruplos</h3>
+
+<p>Dado $n$ números: $a_1, a_2, \ldots, a_n$. Você deve contar o número de maneiras de escolher quatro números para que seu maior divisor comum combinado seja igual a um($gcd(x,y,z,t)=1$).</p>
+
+<p>Vamos resolver o problema inverso - calcule o número de quádruplos "ruins", ou seja, quádruplos nos quais todos os números são divisíveis por um número $d > 1$.</p>
+
+<p>Usaremos o princípio de inclusão-exclusão ao somar todos os grupos possíveis de quatro números divisíveis por um divisor $d$.</p>
+
+<p>$$ans = \sum_{d \ge 2} (-1)^{deg(d)-1} \cdot f(d)$$</p>
+
+<p>onde $deg(d)$ é o número de primos na fatoração do número $d$ e $f(d)$ o número de quádruplos divisíveis por $d$.</p>
+
+<p>Para calcular a função $f(d)$, basta contar o número de múltiplos de $d$ e usar os coeficientes binomiais para contar o número de maneiras de escolher quatro deles.</p>
+
+<p>Assim, usando a fórmula de inclusões-exclusões, somamos o número de grupos quadruplos divisíveis por um número primo e subtraímos o número de quádruplos que são divisíveis pelo produto de dois números primos, adicionamos quádruplos divisíveis por três números primos, etc.</p>
+
+<h3>O número de triplos harmônicos</h3>
+
+<p>Você recebe um número $n \le 10^6$. Você deve contar o número de triplos $2 \le a &lt; b &lt; c \le n$ que atendem a uma das seguintes condições:</p>
+<em>nota: gcd = mdc</em>
+<ul>
+<li> ${\rm gcd}(a,b) = {\rm gcd}(a,c) = {\rm gcd}(b,c) = 1$,</li>
+<li>ou ${\rm gcd}(a,b) > 1, {\rm gcd}(a,c) > 1, {\rm gcd}(b,c) > 1$.</li>
+</ul>
+
+<p>Primeiro, vá direto ao problema inverso - ou seja, conte o número de triplos não harmônicos.</p>
+
+<p>Segundo, observe que qualquer trigêmeo não harmônico é composto de um par de coprimos($mdc(x,y) = 1$) e um terceiro número que não é coprimo com pelo menos um do par.</p>
+
+<p>Assim, o número de triplos não harmônicos que contêm $i$ é igual ao número de inteiros de $2$ a $n$ que são coprimos com $i$ multiplicado pelo número de inteiros que não são coprimos com $i$.</p>
+
+<p>$gcd(a,b) = 1 \wedge gcd(a,c) > 1 \wedge gcd(b,c) > 1$</p>
+
+<p>ou $gcd(a,b) = 1 \wedge gcd(a,c) = 1 \wedge gcd(b,c) > 1$</p>
+
+<p>Nos dois casos, será contado duas vezes. O primeiro caso será contado quando $i = a$ e quando $i = b$. O segundo caso será contado quando $i = b$ e quando $i = c$. Portanto, para calcular o número de triplos não harmônicos, somamos esse cálculo a todos os $i$ de $2$ a $n$ e dividimos por $2$.</p>
+
+<p>Agora, tudo o que temos a resolver é aprender a contar o número de coprimos até i no intervalo $[2;n]$. Embora esse problema já tenha sido mencionado, a solução acima não é adequada aqui - exigiria a fatoração de cada um dos inteiros de $2$ a $n$ e, em seguida, a iteração por todos os subconjuntos desses números primos.</p>
+
+<p>Uma solução mais rápida é possível com essa modificação do crivo de Eratóstenes:</p>
+
+<ol>
+<li><p>Primeiro, encontramos todos os números no intervalo $[2;n]$ de modo que sua simples fatoração não inclua um fator primo duas vezes. Também precisamos saber, para esses números, quantos fatores isso inclui.</p>
+
+<ul>
+<li>Para fazer isso, manteremos uma array $deg[i]$ para armazenar o número de primos na fatoração de $i$, e uma array $good[i]$, para marcar se $i$ contém cada fator no máximo duas vezes ($good[i] = 1$) ou não ($good[i] = 0$). Ao iterar de $2$ até $n$, se atingirmos um número que tem $deg$ igual a $0$, então, será um primo e seu $deg$ será $1$.</li>
+<li>Durante o crivo de Eratóstenes, iteraremos $i$ de $2$ até $n$. Ao processar um número primo, passamos por todos os seus múltiplos e aumentamos seus $deg[]$. Se um desses múltiplos é múltiplo do quadrado de $i$, então podemos definir $good$ como falso.</li>
+</ul></li>
+<li><p>Segundo, precisamos calcular a resposta para todos os $i$ de $2$ até $n$, ou seja, a array $cnt[]$ — o número de inteiros que não são coprimos com $i$.</p>
+
+<ul>
+<li>Para fazer isso, lembre-se de como a fórmula da inclusão-exclusão funciona - na verdade, implementamos o mesmo conceito, mas com lógica invertida: iteramos sobre um componente (um produto dos primos da fatoração) e adicionamos ou subtraímos seu termo à fórmula inclusão-exclusão de cada um de seus múltiplos.</li>
+<li>Então, digamos que estamos processando um número $i$, no qual $good[i] = true$, ou seja: que esteja envolvido na fórmula da inclusão-exclusão. Itere por todos os números que são múltiplos de $i$, e adicione ou subtraia $\lfloor N/i \rfloor$ do $cnt[]$ deles (o sinal depende de $deg[i]$: se $deg[i]$ for ímpar, deveremos adicionar, caso contrário subtraímos).</li>
+</ul></li>
+</ol>
+
+<p>Implementação:</p>
+
+<pre><code class="cpp">int n;
+bool good[MAXN];
+int deg[MAXN], cnt[MAXN];
+
+long long solve() {
+    memset (good, 1, sizeof good);
+    memset (deg, 0, sizeof deg);
+    memset (cnt, 0, sizeof cnt);
+
+    long long ans_bad = 0;
+    for (int i=2; i&lt;=n; ++i) {
+        if (good[i]) {
+            if (deg[i] == 0)  deg[i] = 1;
+            for (int j=1; i*j&lt;=n; ++j) {
+                if (j &gt; 1 &amp;&amp; deg[i] == 1)
+                    if (j % i == 0)
+                        good[i*j] = false;
+                    else
+                        ++deg[i*j];
+                cnt[i*j] += (n / i) * (deg[i]%2==1 ? +1 : -1);
+            }
+        }
+        ans_bad += (cnt[i] - 1) * 1ll * (n-1 - cnt[i]);
+    }
+
+    return (n-1) * 1ll * (n-2) * (n-3) / 6 - ans_bad / 2;
+}
+</code></pre>
+
+<p>O comportamento assintótico da solução é $O(n \log n)$, pois para quase todos os números até $n$ fazemos $n/i$ iterações no loop.</p>
+
+<h3>O número de permutações sem pontos fixos - <em>desarranjos</em></h3>
+
+<p>Prove que o número de permutações de comprimento $n$ sem pontos fixos (ou seja, nenhum número $i$ está na posição $i$ - desarranjo) é igual ao seguinte número:</p>
+
+<p>$$n! - \binom{n}{1} \cdot (n-1)! + \binom{n}{2} \cdot (n-2)! - \binom{n}{3} \cdot (n-3)! + \cdots \pm \binom{n}{n} \cdot (n-n)! $$</p>
+
+<p>e aproximadamente igual a:</p>
+
+<p>$$ \frac{ n! }{ e } $$</p>
+
+<p>(se você arredondar essa expressão para o número inteiro mais próximo - você obtém exatamente o número de permutações sem pontos fixos)</p>
+
+<p>Denote por $A_k$ o conjunto de permutações de tamanho $n$ com um ponto fixo na posição $k$ ($1 \le k \le n$) (ou seja, o elemento $k$ está na posição $k$).</p>
+
+<p>Agora usamos a fórmula da inclusão-exclusão para contar o número de permutações com pelo menos um ponto fixo. Para isso, precisamos aprender a contar os tamanhos de uma interseção dos conjuntos $A_i$, da seguinte maneira:</p>
+
+<p>$$\begin{eqnarray}
+\left| A_p \right| &amp;=&amp; (n-1)!\ , &#92;&#92;&#92;
+\left| A_p \cap A_q \right| &amp;=&amp; (n-2)!\ , &#92;&#92;&#92;
+\left| A_p \cap A_q \cap A_r \right| &amp;=&amp; (n-3)!\ , &#92;&#92;&#92;
+\cdots ,
+\end{eqnarray}$$</p>
+
+<p>porque se soubermos que o número de pontos fixos é igual a $x$, saberemos a posição de $x$ elementos da permutação e todos os outros $(n-x)$ elementos podem ser colocados em qualquer outro lugar.</p>
+
+<p>Substituindo isso na fórmula de inclusão-exclusão, e considerando que o número de maneiras de escolher um subconjunto de tamanho $x$ do conjunto de $n$ elementos é igual a $\binom{n}{x}$, obtemos uma fórmula para o número de permutações com pelo menos um ponto fixo:</p>
+
+<p>$$\binom{n}{1} \cdot (n-1)! - \binom{n}{2} \cdot (n-2)! + \binom{n}{3} \cdot (n-3)! - \cdots \pm \binom{n}{n} \cdot (n-n)! $$</p>
+
+<p>Então o número de permutações sem pontos fixos é igual a:</p>
+
+<p>$$n! - \binom{n}{1} \cdot (n-1)! + \binom{n}{2} \cdot (n-2)! - \binom{n}{3} \cdot (n-3)! + \cdots \pm \binom{n}{n} \cdot (n-n)! $$</p>
+
+<p>Simplificando esta expressão, obtemos expressões exatas e aproximadas para o número de permutações sem pontos fixos:</p>
+
+<p>$$ n! \left( 1 - \frac{1}{1!} + \frac{1}{2!} - \frac{1}{3!} + \cdots \pm \frac{1}{n!} \right ) \approx \frac{n!}{e} $$</p>
+
+<p>(a soma entre parênteses são os primeiros $n+1$ termos da expansão na série de Taylor $e^{-1}$)</p>
+
+<p>Vale a pena notar que um problema semelhante pode ser resolvido desta maneira: quando você precisa dos pontos fixos e eles não estão dentre os $m$ primeiros elementos das permutações (e também não entre todos, como acabamos de resolver). A fórmula obtida irá até a soma de $k$, em vez de $n$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1266">UVA #10325 "The Lottery" </a></li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2906">UVA #11806 "Cheerleaders" </a></li>
+<li><a href="http://www.topcoder.com/stat?c=problem_statement&amp;pm=10875">TopCoder SRM 477 "CarelessSecretary" </a></li>
+<li><a href="http://community.topcoder.com/stat?c=problem_statement&amp;pm=6658&amp;rd=10068">TopCoder TCHS 16 "Divisibility"</a></li>
+<li><a href="http://www.spoj.com/problems/NGM2/">SPOJ #6285 NGM2 , "Another Game With Numbers" [difficulty: low]</a></li>
+<li><a href="http://community.topcoder.com/stat?c=problem_statement&amp;pm=8470">TopCoder SRM 382 "CharmingTicketsEasy" </a></li>
+<li><a href="http://www.topcoder.com/stat?c=problem_statement&amp;pm=8307">TopCoder SRM 390 "SetOfPatterns" </a></li>
+<li><a href="http://community.topcoder.com/stat?c=problem_statement&amp;pm=2013">TopCoder SRM 176 "Deranged" </a></li>
+<li><a href="http://community.topcoder.com/stat?c=problem_statement&amp;pm=10702&amp;rd=14144&amp;rm=303184&amp;cr=22697599">TopCoder SRM 457 "TheHexagonsDivOne" </a></li>
+<li><a href="http://esci.ru/ttb/statement-62.htm">Test>>>thebest "HarmonicTriples" (in Russian) </a></li>
+<li><a href="http://www.spoj.com/problems/MSKYCODE/">SPOJ #4191 MSKYCODE "Sky Code" </a></li>
+<li><a href="http://www.spoj.com/problems/SQFREE/">SPOJ #4168 SQFREE "Square-free integers" </a></li>
+<li><a href="http://www.codechef.com/JAN11/problems/COUNTREL/">CodeChef "Count Relations" </a></li>
+<li><a href="http://www.spoj.com/problems/KPRIMESB/">SPOJ - Almost Prime Numbers Again</a></li>
+<li><a href="http://www.spoj.com/problems/IITKWPCH/">SPOJ - Find number of Pair of Friends</a></li>
+<li><a href="http://www.spoj.com/problems/SUBSET/">SPOJ - Balanced Cow Subsets</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
