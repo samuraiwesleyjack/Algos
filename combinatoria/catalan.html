@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Números de Catalan - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Números de Catalan</h1>
+
+<p>Os números de Catalan são uma sequência numérica, considerada útil em vários problemas combinatórios, geralmente envolvendo objetos definidos recursivamente.</p>
+
+<p>Esta sequência recebeu o nome do matemático belga <a href="https://en.wikipedia.org/wiki/Eug%C3%A8ne_Charles_Catalan">Catalan</a>, que viveu no século XIX. (De fato, era conhecido anteriormente por Euler, que viveu um século antes de Catalan).</p>
+
+<p>Os primeiros números da sequência de Catalan, $C_n$:</p>
+
+<p>$1, 1, 2, 5, 14, 42, 132, 429, 1430, \ldots$</p>
+
+<h3>Aplicação em alguns problemas de combinatória</h3>
+
+<p>Os números de Catalan $C_n$ são soluções para:</p>
+
+<ul>
+<li>Número da sequência de colchetes correta, consistindo de $n$ colchetes de abertura e $n$ colchetes de fechamento.</li>
+<li>O número de árvores binárias completas enraizadas com $n + 1$ folhas (os vértices não são numerados). Uma árvore binária enraizada está completa ou cheia se cada vértice tiver dois filhos ou nenhum filho.</li>
+<li>O número de maneiras de colocar parênteses completamente em $n + 1$ fatores.</li>
+<li>O número de triângulos de um polígono convexo com $n + 2$ lados (ou seja, o número de partições de polígono em triângulos separados usando as diagonais).</li>
+<li>O número de maneiras de conectar $2n$ pontos em um círculo para formar $n$ acordes disjuntos.</li>
+<li>O número de árvores binárias completas <a href="https://en.wikipedia.org/wiki/Graph_isomorphism">não isomórficas</a> com $n$ nós internos (ou seja, nós com pelo menos um filho).</li>
+<li>O número de caminhos de rede monotônicos do ponto $(0, 0)$ para $(n, n)$ em uma rede quadrada de tamanho $n \times n$, que não passam acima da diagonal principal (por exemplo, conectando $(0, 0)$ até $(n, n)$).</li>
+<li>Número de permutações de tamanho $n$ que podem ser <a href="https://en.wikipedia.org/wiki/Stack-sortable_permutation">ordenadas em um stack</a> (ou seja, pode ser mostrado que o rearranjo é ordenado no stack se, e somente se, não houver o índice $i &lt; j &lt; k$, para o qual $a_k &lt; a_i &lt; a_j$ ).</li>
+<li>O número de <a href="https://en.wikipedia.org/wiki/Noncrossing_partition">partições que não se cruzam</a> em um conjunto de $n$ elementos.</li>
+<li>O número de maneiras de cobrir a escada $1 \ldots n$ usando $n$ retângulos (consistindo de $n$ colunas, onde a $i^{ésima}$ coluna tem altura $i$).</li>
+</ul>
+
+<h2>Cálculo</h2>
+
+<p>Existem duas fórmulas para os números de Catalan: <strong>Recursiva e Analítica</strong>. Como acreditamos que todos os problemas mencionados acima são equivalentes (têm a mesma solução), para a prova das fórmulas abaixo, escolheremos a tarefa que é mais fácil de fazer.</p>
+
+<h3>Fórmula recursiva</h3>
+
+<p>$$C_0 = C_1 = 1$$
+ $$C_n = \sum_{k = 0}^{n-1} C_k C_{n-1-k} , {n} \geq 2$$</p>
+
+<p>A fórmula recursiva pode ser facilmente deduzida do problema da sequência de colchetes correta.</p>
+
+<p>O parêntese de abertura mais à esquerda $l$ orresponde a um certo colchete de fechamento $r$, que divide a sequência em 2 partes que, por sua vez, devem ser uma sequência correta de colchetes. Assim, a fórmula também é dividida em 2 partes. Se denotarmos $k = {r - l - 1}$, então, para um $r$ fixo, haverá exatamente $C_k C_{n-1-k}$ tais sequências de colchetes. Somando isso, sobre todos os $k's$, obtemos a relação recursiva em $C_n$.</p>
+
+<p>Você também pode pensar dessa maneira. Por definição, $C_n$ indica o número de sequências de colchetes corretas. Agora, a sequência pode ser dividida em 2 partes de comprimento $k$ e ${n - k}$, cada uma das quais deve ser uma sequência de colchetes correta. Exemplo:</p>
+
+<p>$( ) ( ( ) )$ pode ser dividida em $( )$ e $( ( ) )$, mas não pode ser dividido em $( ) ($ e $( ) )$. Somando novamente todos os $k's$, obtemos a relação recursiva em $C_n$.</p>
+
+<h4>Implementação em C++:</h4>
+
+<pre><code class="cpp">const int MOD = ....
+const int MAX = ....
+int catalan[MAX];
+void init() {
+    catalan[0] = catalan[1] = 1;
+    for (int i=2; i&lt;=n; i++) {
+        catalan[i] = 0;
+        for (int j=0; j &lt; i; j++) {
+            catalan[i] += (catalan[j] * catalan[i-j-1]) % MOD;
+            if (catalan[i] &gt;= MOD) {
+                catalan[i] -= MOD;
+            }
+        }
+    }
+}
+</code></pre>
+
+<h3>Fórmula analítica</h3>
+
+<p>$$C_n = \frac{1}{n + 1} {\binom{2n}{n}}$$</p>
+
+<p>(aqui $\binom{n}{k}$ denota o coeficiente binomial usual, ou seja, as várias maneiras de selecionar $k$ objetos de um conjunto de $n$ objetos).</p>
+
+<p>A fórmula acima pode ser facilmente concluída a partir do problema dos caminhos monotônicos em um grid quadrado. O número total de caminhos monotônicos do grid de tamanho $n \times n$ é dado por $\binom{2n}{n}$.</p>
+
+<p>Agora contamos o número de caminhos monotônicos que cruzam a diagonal principal. Considere esses caminhos cruzando a diagonal principal e encontre a primeira aresta acima da diagonal. Reflita o caminho sobre a diagonal até o fim, seguindo essa extremidade. O resultado é sempre um caminho monotônico no grid $(n - 1) \times (n + 1)$. Por outro lado, qualquer caminho monotônico no grid $(n - 1) \times (n + 1)$ deve cruzar a diagonal. Portanto, enumeramos todos os caminhos monotônicos que cruzam a diagonal principal no grid $n \times n$.</p>
+
+<p>O número de caminhos monotônicos no grid $(n - 1) \times (n + 1)$ será $\binom{2n}{n-1}$. Vamos chamar esses caminhos de "ruins". Como resultado, para obter o número de caminhos monotônicos que não cruzam a diagonal principal subtraímos os caminhos "ruins" acima, obtendo assim a fórmula:</p>
+
+<p>$$C_n = \binom{2n}{n} - \binom{2n}{n-1} = \frac{1}{n + 1} \binom{2n}{n} , {n} \geq 0$$</p>
+
+<h2>Referências</h2>
+
+<ul>
+<li><a href="http://www.geometer.org/mathcircles/catalan.pdf">Catalan Number by Tom Davis</a></li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/APRIL12/problems/PANSTACK/">Codechef - PANSTACK</a></li>
+<li><a href="http://www.spoj.com/problems/SKYLINE/">Spoj - Skyline</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=932">UVA - Safe Salutations</a></li>
+<li><a href="http://codeforces.com/problemset/problem/9/D">Codeforces - How many trees?</a></li>
+<li><a href="http://www.spoj.com/problems/FUNPROB/">SPOJ - FUNPROB</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1170">LOJ - 1170 - Counting Perfect BST</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4752">UVA - 12887 - The Soldier's Dilemma</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
