@@ -29,9 +29,9 @@
 			<h1>Busca em Profundidade - DFS</h1>
 			
 			<p>Busca em profundidade é um dos principais algoritmos de grafos.</p>
-			<p>O algoritmo encontra o primeiro caminho lexicográfico<a href="https://pt.wikipedia.org/wiki/Ordem_lexicográfica">(wiki)</a> no grafo a partir de um vértice(nó) fonte $u$ para cada outro vértice.
+			<p>O algoritmo encontra o primeiro caminho lexicográfico no grafo a partir de um vértice(nó) fonte $u$ para cada outro vértice.
 			 O algoritmo também encontra os menores caminhos em uma <strong>árvore</strong>, porém, em grafos genéricos, este não é o caso.</p>
-			<p>O algoritmo funciona em tempo $O(m + n)$, onde $n$ é o número de vértices(nós) e $m$ é o número de arestas(ligações entre os nós).</p>
+			<p>O algoritmo funciona em tempo $O(m + n)$, onde $n$ é o número de vértices e $m$ é o número de arestas.</p>
 			<h2>Descrição</h2>
 			<p>A idéia por trás da DFS é ir o mais fundo possível no grafo, e voltar atrás quando você estiver em um vértice sem vértices adjacentes(nós filhos) <strong>não visitados</strong>.</p>
 			<p>Nós começamos a procura em um vértice.
@@ -47,7 +47,7 @@
 				Agora você pode encontrar a resposta para qualquer par de vértices $ (i, j) $ em $ O (1) $:
 				vértice $i$ é um ancestral do vértice $j$, se os tempos $\text{entrada}[i] &lt; \text{entrada}[j]$ e $\text{saída}[i] > \text{saída}[j]$.</p></li>
 				<li><p>Encontrar o menor ancestral comum de dois vértices.</p></li>
-				<li><p><strong>Ordenação(sorting) Topológica<a href="https://pt.wikipedia.org/wiki/Ordena%C3%A7%C3%A3o_topol%C3%B3gica">(wiki)</a>:</strong></p>
+				<li><p><a href="https://pt.wikipedia.org/wiki/Ordena%C3%A7%C3%A3o_topol%C3%B3gica">Ordenação topológica</a>:</p>
 				<p>Execute uma série de DFS's para poder visitar cada vértice exatamente uma vez em tempo $O(n + m)$.
                 A ordem topológica será os vértices ordenados em <strong>ordem descendente</strong> de tempo de saída.</p></li>
 				<li><p>Checar se um grafo é acíclico ou encontrar ciclos em um grafo. (Como mencionado acima, contando as arestas anteriores(back edges) em todos os componentes conectados).</p></li>
