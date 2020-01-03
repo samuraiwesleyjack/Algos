@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lema de Burnside / Teorema da enumeração de Pólya - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Lema de Burnside / Teorema da enumeração de Pólya</h1>
+
+<h2>Lema de Burnside</h2>
+
+<p>O <strong>lema de Burnside</strong> foi formulado e comprovado por <strong>Burnside</strong> em 1897, mas historicamente já tinha sido descoberto em 1887 por <strong>Frobenius</strong>, e até mesmo antes em 1845 por Cauchy. Portanto, as vezes ele é chamado de <strong>lema de Cauchy-Frobenius</strong>.</p>
+
+<p>O lema de Burnside nos permite contar o número de classes de equivalência em conjuntos, baseado na simetria interna.</p>
+
+<h3>Objetos e representações</h3>
+
+<p>Temos que distinguir claramente o número de objetos e o número de representações.</p>
+
+<p>Representações diferentes podem corresponder aos mesmos objetos, mas é claro que qualquer representação corresponde exatamente a um objeto. Consequentemente, o conjunto de todas as representações é dividido em classes de equivalência. Nossa tarefa é calcular o número de objetos ou, equivalentemente, o número de classes de equivalência. O exemplo a seguir tornará a diferença entre objeto e representação mais clara.</p>
+
+<h3>Coloração de árvores binárias</h3>
+
+<p>Suppose we have the following problem.
+Suponha que tenhamos o seguinte problema. Temos que contar o número de maneiras de colorir uma árvore binária enraizada com $n$ vértices with two colors, com duas cores, onde em cada vértice não distinguimos entre os filhos esquerdo e direito.</p>
+
+<p>Aqui, o conjunto de objetos é o conjunto de diferentes colorações da árvore.</p>
+
+<p>Agora, definimos o conjunto de representações. Uma representação de uma coloração é uma função $f(v)$, que atribui a cada vértice uma cor (aqui usamos as "cores" $0$ e $1$).
+O conjunto de representações é o conjunto que contém todas as funções possíveis desse tipo, e seu tamanho é igual a $2^n$.</p>
+
+<p>Ao mesmo tempo, introduzimos uma partição desse conjunto em classes de equivalência.</p>
+
+<p>Por exemplo, suponha que $n = 3$, e a árvore consiste da raiz $1$ e seus dois filhos $2$ e $3$.
+Então, as seguintes funções $f_1$ e $f_2$ são consideradas equivalentes.
+$$\begin{array}{ll}f_1(1) = 0 &amp; f_2(1) = 0&#92;&#92;
+f_1(2) = 1 &amp; f_2(2) = 0&#92;&#92;
+f_1(3) = 0 &amp; f_2(3) = 1
+\end{array}$$</p>
+
+<h3>Permutações invariantes</h3>
+
+<p>Por que essas duas funções $f_1$ e $f_2$ pertencem à mesma classe de equivalência? Intuitivamente, isso é compreensível - podemos reorganizar os filhos do vértice $1$, $2$ e $3$, e, após essa transformação da função $f_1$, ela irá coincidir com $f_2$.</p>
+
+<p>Mas formalmente isso significa que existe uma <strong>permutação invariável</strong> $\pi$ (ou seja, uma permutação que não altera o objeto em si, mas apenas sua representação), de modo que:
+$$f_2 \pi \equiv f_1$$</p>
+
+<p>Assim, a partir da definição de objetos, podemos encontrar todas as permutações invariantes, ou seja, todas as permutações que não alteram o objeto ao aplicar a permutação à representação. Em seguida, podemos verificar se duas funções $f_1$ e $f_2$ são equivalentes (ou seja, se correspondem ao mesmo objeto) checando a condição $f_2 \pi \equiv f_1$ para cada permutação invariante (ou equivalentemente $f_1 \pi \equiv f_2$).
+Se pelo menos uma permutação for encontrada, para a qual condição for satisfeita, então $f_1$ e $f_2$ são equivalentes, caso contrário, não serão equivalentes.</p>
+
+<p>Encontrar todas essas permutações invariantes com relação à definição do objeto é uma etapa fundamental para a aplicação do lema de Burnside e do teorema de enumeração de Pólya. É claro que essas permutações invariantes dependem do problema específico, e sua descoberta é um processo puramente heurístico baseado em considerações intuitivas. No entanto, na maioria dos problemas, é suficiente encontrar manualmente várias permutações "básicas", com as quais todas as outras permutações podem ser geradas (elas podem ser válidas na resposta para o problema e essa parte do trabalho pode ser transferida para um computador).</p>
+
+<p>Não é difícil entender que permutações invariantes formam um grupo, uma vez que o produto (composição) de permutações invariantes é novamente uma permutação invariável. Denotamos o grupo de permutações invariantes como $G$.</p>
+
+<h3>A declaração do lema</h3>
+
+<p>Para a formulação do lema, precisamos de mais uma definição da álgebra. Um <strong>ponto fixo</strong> $f$ para uma permutação $\pi$ é um elemento invariável sob essa permutação: $f \equiv f \pi$.
+Por exemplo, os pontos fixos são aquelas funções $f$ que correspondem a cores que não mudam quando a permutação $\pi$ é aplicada a eles (ou seja, elas não mudam no sentido formal da igualdade de funções) . Denotamos por $I(\pi)$ o <strong>número de pontos fixos</strong> para a permutação $\pi$.</p>
+
+<p>Então, o <strong>lema de Burnside</strong>:
+o número de classes de equivalência é igual à soma dos números de pontos fixos em relação a todas as permutações do grupo $G$, dividido pelo tamanho desse grupo:
+$$|\text{Classes}| = \frac{1}{|G|} \sum_{\pi \in G} I(\pi)$$</p>
+
+<p>Embora o lema de Burnside em si <strong>não seja tão conveniente de usar na prática</strong> (não fica claro como procurar rapidamente o valor $I(\pi)$, ele revela claramente a essência matemática na qual a idéia de calcular classes de equivalência se baseia.</p>
+
+<h3>Prova do lema de Burnside</h3>
+
+<p>A prova do lema de Burnside descrito aqui não é importante para as aplicações práticas, portanto pode ser ignorada na primeira leitura.</p>
+
+<p>A prova aqui é a mais simples conhecida, e não usa a teoria de conjuntos. A prova foi publicada por Kenneth P. Bogart em 1991.</p>
+
+<p>Precisamos provar a seguinte declaração:
+$$|\text{Classes}| \cdot |G| = \sum_{\pi \in G} I(\pi)$$</p>
+
+<p>O valor no lado direito nada mais é do que o número de "pares invariantes" $(f, \pi)$, ou seja, pares nos quais $f \pi \equiv f$.
+É óbvio que podemos mudar a ordem da soma. Deixamos a soma iterar sobre todos os elementos $f$ e somar sobre os valores $J(f)$ - o número de permutações para as quais $f$ é um ponto fixo.
+$$|\text{Classes}| \cdot |G| = \sum_{f} J(f)$$</p>
+
+<p>Para provar essa fórmula, comporemos uma tabela com colunas rotuladas com todas as funções $f_i$ e linhas rotuladas com todas as permutações $\pi_j$.
+E preenchemos as células com $f_i \pi_j$.
+Se observarmos as colunas nesta tabela como conjuntos, algumas delas coincidirão, e isso significa que as funções correspondentes $f$ para essas colunas também são equivalentes. Assim, o número de colunas diferentes (como conjuntos) é igual ao número de classes. Aliás, do ponto de vista da teoria dos grupos, a coluna rotulada com $f_i$ é a órbita desse elemento. Para elementos equivalentes, as órbitas coincidem e o número de órbitas fornece exatamente o número de classes.</p>
+
+<p>Assim, as colunas da tabela se decompõem em classes de equivalência. Vamos fixar uma classe e examinar as colunas nela. Primeiro, observe que essas colunas podem conter apenas os elementos $f_i$ da classe de equivalência (caso contrário, alguma permutação $\pi_j$ moveu uma das funções para uma classe de equivalência diferente, o que é impossível, pois consideramos apenas permutações invariantes). Em segundo lugar, cada elemento $f_i$ ocorrerá o mesmo número de vezes em cada coluna (isso também decorre do fato de as colunas corresponderem a elementos equivalentes). A partir disso, podemos concluir que todas as colunas da mesma classe de equivalência coincidem entre si como multiconjuntos.</p>
+
+<p>Agora escolha um elemento arbitrário $f$.
+Por um lado, ocorre em sua coluna exatamente $J(f)$ vezes (por definição).
+Por outro lado, todas as colunas na mesma classe de equivalência são iguais como multiconjuntos. Portanto, dentro de cada coluna de uma determinada classe de equivalência, qualquer elemento $g$ ocorre exatamente $J(g)$ vezes.</p>
+
+<p>Assim, se arbitrariamente pegarmos uma coluna de cada classe de equivalência e somarmos o número de elementos nelas, obteremos, por um lado, $|\text{Classes}| \cdot |G|$ (simplesmente multiplicando o número de colunas pelo número de linhas), e por outro lado obtemos a soma das quantidades de $J(f)$ para todo $f$ (isso vem de argumentos anteriores):
+$$|\text{Classes}| \cdot |G| = \sum_{f} J(f)$$</p>
+
+<h2>Teorema da enumeração de Pólya</h2>
+
+<p>O teorema de enumeração de Pólya é uma generalização do lema de Burnside e também fornece uma ferramenta mais conveniente para encontrar o número de classes de equivalência. Vale ressaltar que esse teorema já foi descoberto antes de Pólya por Redfield em 1927, mas sua publicação passou despercebida pelos matemáticos. Pólya obteve os mesmos resultados independentemente em 1937, e sua publicação foi mais bem sucedida.</p>
+
+<p>Aqui discutimos apenas um caso especial do teorema da enumeração de Pólya, que será muito útil na prática. A fórmula geral do teorema não será discutida.</p>
+
+<p>Denotamos por $C(\pi)$ o número de ciclos na permutação $\pi$.
+Então, a seguinte fórmula (um <strong>caso especial do teorema da enumeração de Pólya</strong>) é válida:
+$$|\text{Classes}| = \frac{1}{|G|} \sum_{\pi \in G} k^{C(\pi)}$$
+$k$ é o número de valores que cada elemento de representação pode receber, no caso da coloração de uma árvore binária, isso seria $k = 2$.</p>
+
+<h3>Evidência</h3>
+
+<p>Essa fórmula é uma conseqüência direta do lema de Burnside. Para obtê-lo, basta encontrar uma expressão explícita para $I(\pi)$, que aparece no lema. Lembre-se de que $I(\pi)$ é o número de pontos fixos na permutação $\pi$.</p>
+
+<p>Assim, consideramos uma permutação $\pi$ e algum elemento $f$.
+Durante a aplicação de $\pi$, os elementos em $f$ se movem pelos ciclos da permutação. Como o resultado deve obter $f \equiv f \pi$, os elementos tocados por um ciclo devem ser todos iguais. Ao mesmo tempo, diferentes ciclos são independentes. Assim, para cada ciclo de permutação $\pi$ podemos escolher um valor (entre $k$ possíveis) e, assim, obtemos o número de pontos fixos:
+$$I(\pi) = k^{C(\pi)}$$</p>
+
+<h2>Aplicação: colorindo colares</h2>
+
+<p>O problema "colares" é um dos problemas combinatórios clássicos. A tarefa é contar o número de colares diferentes de $n$ miçangas(ou seja, dentre um conjunto de colares), cada uma dos quais pode ser pintado com qualquer uma das $k$ cores.
+Ao comparar dois colares, eles podem ser rotacionados, mas não revertidos completamente (ou seja, é permitido uma mudança cíclica).</p>
+
+<p>Nesse problema, podemos encontrar imediatamente o grupo de permutações invariantes:
+$$\begin{align}
+\pi_0 &amp;= 1 2 3 \dots n&#92;&#92;
+\pi_1 &amp;= 2 3 \dots n 1&#92;&#92;
+\pi_2 &amp;= 3 \dots n 12&#92;&#92;
+&amp;\dots&#92;&#92;
+\pi_{n-1} &amp;= n 1 2 3\dots\end{align}$$</p>
+
+<p>Vamos encontrar uma fórmula explícita para calcular $C(\pi_i)$.
+Primeiro, observamos que a permutação $\pi_i$ tem, na $j$-ésima posição, o valor $i + j$ (sobre o módulo $n$).
+Se verificarmos a estrutura do ciclo para $\pi_i$.
+Vemos que $1$ vai para $1 + i$, $1 + i$ vai para $1 + 2i$, que vai para $1 + 3i$, etc., até chegarmos a um número no formato $1 + k n$.
+Definições similares podem ser feitas para os elementos restantes.
+Portanto, vemos que todos os ciclos têm o mesmo comprimento, ou seja, $\frac{&#92;text{lcm}(i, n)}{i} = \frac{n}{\gcd(i, n)}$.
+Assim, o número de ciclos em $\pi_i$ será igual a $\gcd(i, n)$.</p>
+
+<p>Substituindo esses valores no teorema da enumeração de Pólya, obtemos a solução:
+$$\frac{1}{n} \sum_{i=1}^n k^{\gcd(i, n)}$$</p>
+
+<p>Você pode deixar a fórmula assim ou simplificá-la ainda mais. Vamos transferir a soma para que possamos iterar sobre todos os divisores de $n$.
+Na soma original, haverá muitos termos equivalentes: se $i$ não for um divisor de $n$, esse divisor poderá ser encontrado após calcular o $\gcd/mdc(i, n)$.
+Portanto, para cada divisor $d ~|~ n$ seu termo $k^{\gcd(d, n)} = k^d$ aparecerá na soma várias vezes, ou seja, a resposta para o problema pode ser reescrita como
+$$\frac{1}{n} \sum_{d ~|~ n} C_d k^d,$$
+onde $C_d$ é o número desses números $i$ com $\gcd(i, n) = d$.
+Podemos encontrar uma expressão explícita para esse valor. Qualquer um desses números $i$ terá a forma $i = d j$ com $\gcd(j, n / d) = 1$ (caso contrário, $\gcd(i, n) > d$).
+Portanto, podemos contar o número de $j$ com esse comportamento.
+A <a href="https://cp-algorithms-brasil.com/Algebra/euler.html">função phi de Euler</a> fornece o resultado $C_d = \phi(n / d)$, e, portanto, obtemos a resposta:
+$$\frac{1}{n} \sum_{d ~|~ n} \phi\left(\frac{n}{d}\right) k^d$$</p>
+
+<h2>Aplicação: Colorindo um toro(uma rosquinha :D )</h2>
+
+<p>Muitas vezes, não podemos obter uma fórmula explícita para o número de classes de equivalência. Em muitos problemas, o número de permutações em um grupo pode ser muito grande para cálculos manuais e não é possível calcular analiticamente o número de ciclos neles.</p>
+
+<p>Nesse caso, devemos encontrar manualmente várias permutações "básicas", para que elas possam gerar todo o grupo $G$. Em seguida, podemos escrever um programa que irá gerar todas as permutações do grupo $G$, contar o número de ciclos neles e calcular a resposta com a fórmula.</p>
+
+<p>Considere o exemplo do problema para colorir um toro. Há uma folha de papel quadriculado $n \times m$ ($n &lt; m$), algumas das células são pretas. Em seguida, um cilindro é obtido desta folha colando os dois lados de comprimentos $m$.
+Em seguida, um toro é obtido do cilindro colando os dois círculos (superior e inferior) sem torcer. A tarefa é calcular o número de toros/rosquinhas de cores diferentes, supondo que não possamos ver as linhas coladas e que o toro possa ser girado e girado.</p>
+
+<p>Novamente, começamos com um pedaço $n \times m$ de papel.
+  Os seguintes tipos de transformações preservam a classe de equivalência: uma mudança cíclica das linhas, uma mudança cíclica das colunas e uma rotação da folha em 180 graus. Também é possível ver que essas transformações podem gerar todo o grupo de transformações invariantes. Se, de alguma forma, numerarmos as células do papel, podemos escrever três permutações $p_1$, $p_2$, $p_3$ correspondentes a esses tipos de transformação.</p>
+
+<p>Em seguida, resta apenas gerar todas as permutações obtidas como um produto. Todas essas permutações terão a forma $p_1^{i_1} p_2^{i_2} p_3^{i_3}$ onde $i_1 = 0 \dots m-1$, $i_2 = 0 \dots n-1$, $i_3 = 0 \dots 1$.</p>
+
+<p>Assim, podemos escrever as implementações para esse problema.</p>
+
+<pre><code class="cpp">using Permutation = vector&lt;int&gt;;  //boa maneira para lembrar as permutações
+
+void operator*=(Permutation&amp; p, Permutation const&amp; q) {
+    Permutation copy = p;
+    for (int i = 0; i &lt; p.size(); i++)
+        p[i] = copy[q[i]];
+}
+
+int count_cycles(Permutation p) {
+    int cnt = 0;
+    for (int i = 0; i &lt; p.size(); i++) {
+        if (p[i] != -1) {
+            cnt++;
+            for (int j = i; p[j] != -1;) {
+                int next = p[j];
+                p[j] = -1;
+                j = next;
+            }
+        }
+    }
+    return cnt;
+}
+
+int solve(int n, int m) {
+    Permutation p(n*m), p1(n*m), p2(n*m), p3(n*m);
+    for (int i = 0; i &lt; n*m; i++) {
+        p[i] = i;
+        p1[i] = (i % n + 1) % n + i / n * n;
+        p2[i] = (i / n + 1) % m * n + i % n;
+        p3[i] = (m - 1 - i / n) * n + (n - 1 - i % n);
+    }
+
+    set&lt;Permutation&gt; s;
+    for (int i1 = 0; i1 &lt; n; i1++) {
+        for (int i2 = 0; i2 &lt; m; i2++) {
+            for (int i3 = 0; i3 &lt; 2; i3++) {
+                s.insert(p);
+                p *= p3;
+            }
+            p *= p2;
+        }
+        p *= p1;
+    }
+
+    int sum = 0;
+    for (Permutation const&amp; p : s) {
+        sum += 1 &lt;&lt; count_cycles(p);
+    }
+    return sum / s.size();
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
