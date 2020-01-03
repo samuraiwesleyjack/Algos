@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Sequências de colchetes balanceados - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Sequências de colchetes balanceados</h1>
+
+<p>Uma <strong>sequência de colchetes balanceados</strong> é uma string que consiste apenas de colchetes, de modo que essa string, quando inseridos certos números e operações matemáticas, fornece uma expressão matemática válida. Formalmente, você pode definir uma string de colchetes balanceada como:</p>
+
+<ul>
+<li>$e$ (a string vazia) é uma sequência de colchetes balanceada.</li>
+<li>se $s$ for uma sequência de colchetes balanceada, " $(s)$ " também será.</li>
+<li>se $s$ e $t$ são sequências de colchetes balanceadas, então $s t$ também será.</li>
+</ul>
+
+<p>Por exemplo, $(())()$ é uma sequência de colchetes equilibrada, mas $())($ não é.</p>
+
+<p>É claro que você pode definir outras sequências de colchetes também com vários tipos de colchetes de maneira semelhante.</p>
+
+<p>Neste artigo, discutimos alguns problemas clássicos que envolvem sequências de colchetes balanceados (por simplicidade, as chamaremos apenas de sequências): validação, número de sequências, localização da próxima sequência lexicográfica, geração de todas as sequências de um determinado tamanho, localização do índice de sequência e gerando a $k$-ésima sequência. Também discutiremos duas variações para os problemas, a versão mais simples quando apenas um tipo de colchetes é permitido e o mais difícil quando houver vários tipos.</p>
+
+<h2>Validação</h2>
+
+<p>Queremos verificar se uma determinada string está equilibrada(balanceada) ou não.</p>
+
+<p>A princípio, suponha que haja apenas um tipo de colchetes. Para este caso, existe um algoritmo muito simples. Deixe que $\text{depth}$ o número atual de colchetes abertos. Inicialmente $\text{depth} = 0$.
+Nós iteramos sobre todos os caracteres da string, se o caractere de colchete atual é um colchete de abertura, aumentamos $\text{depth}$, caso contrário, diminuímos. Se a qualquer momento a variável $\text{depth}$ ficar negativa, ou no final for diferente de $0$, a string não será uma sequência balanceada.</p>
+
+<p>Se houver vários tipos de colchetes envolvidos, o algoritmo precisará ser alterado. Em vez de um contador $\text{depth}$ criamos um stack, na qual armazenaremos todos os colchetes de abertura que encontrarmos. Se o caractere de colchete atual for um de abertura, colocamos no stack. 
+Se for de fechamento, verificaremos se o stack não está vazio e se o elemento superior do stack é do mesmo <em>tipo</em>([ ],( )) que o colchete de fechamento atual. Se ambas as condições forem atendidas, removeremos o colchete de abertura do stack.
+Se a qualquer momento uma das condições não for atendida, ou no final o stack não estiver vazio, a sequência não será equilibrada.</p>
+
+<h2>Número de sequências balanceadas</h2>
+
+<h3>Fórmula</h3>
+
+<p>O número de seqüências de colchetes balanceados com apenas um tipo de colchete pode ser calculado usando os <a href="https://cp-algorithms-brasil.com/combinatoria/catalan.html">números de Catalan</a>.
+O número de sequências de colchetes balanceados de tamanho $2n$ ($n$ pares de colchetes) será:
+$$\frac{1}{n+1} \binom{2n}{n}$$</p>
+
+<p>Se permitirmos $k$ tipos de colchetes, então cada par pode ser qualquer um dos $k$ tipos (independentemente dos outros), portanto, o número de sequências de colchetes balanceados é:
+$$\frac{1}{n+1} \binom{2n}{n} k^n$$</p>
+
+<h3>Programação dinâmica</h3>
+
+<p>Por outro lado, esses números podem ser calculados usando <strong>programação dinâmica</strong>.
+Seja $d[n]$  o número de sequências de colchetes regulares com $n$ pares de colchetes.
+Observe que na primeira posição sempre há um colchete de abertura. E em algum momento mais tarde está o colchete de fechamento correspondente do par. É claro que dentro desse par há uma sequência de colchetes equilibrada e, da mesma forma, após esse par, há uma sequência de colchetes equilibrada. Então, para calcular $d[n]$, veremos quantas sequências balanceadas de $i$ pares de colchetes estão dentro do primeiro par, e quantas sequências balanceadas com $n-1-i$ pares estão após esse par. Consequentemente, a fórmula tem a forma:
+$$d[n] = \sum_{i=0}^{n-1} d[i] \cdot d[n-1-i]$$
+O valor inicial dessa recorrência é $d[0] = 1$.</p>
+
+<h2>Encontrando a próxima sequência equilibrada lexicográfica</h2>
+
+<p>Aqui, consideramos apenas o caso com um tipo de colchete válido.</p>
+
+<p>Dada uma sequência balanceada, temos que encontrar a próxima sequência balanceada (em ordem lexicográfica).</p>
+
+<p>Precisamos encontrar o colchete de abertura mais à direita, que podemos substituir por um colchete de fechamento sem violar a condição, de que existem mais colchetes de fechamento do que os de abertura até essa posição atual. Após substituir esta posição, podemos preencher a parte restante da string com a " mínima lexicográfica ": ou seja, primeiro com o máximo de colchetes de abertura possível e, em seguida, preencher as demais posições com colchetes de fechamento. Em outras palavras, tentamos manter um prefixo o maior possível, e o sufixo é substituído pelo mínimo lexicográfico.</p>
+
+<p>Para encontrar essa posição, podemos iterar sobre os caracteres da direita para a esquerda e manter o $\text{depth}$ balanceado de colchetes de abertura e fechamento.
+Quando encontrarmos um colchete de abertura, diminuiremos $\text{depth}$, e, quando encontrarmos um colchete de fechamento, aumentamos. Se em algum momento encontrarmos um colchete de abertura e o valor depois de processar esse símbolo for positivo, então encontramos a posição mais à direita que podemos mudar.
+Mudamos o símbolo, calculamos o número de colchetes de abertura e fechamento que precisamos adicionar ao lado direito e os organizamos da maneira lexicograficamente mínima.</p>
+
+<p>Se acharmos que a posição é adequada(o valor não for positivo depois de processar o símbolo de abertura), essa sequência já é a máxima possível e não há resposta.</p>
+
+<pre><code class="cpp">bool next_balanced_sequence(string &amp; s) {
+    int n = s.size();
+    int depth = 0;
+    for (int i = n - 1; i &gt;= 0; i--) {
+        if (s[i] == '(')
+            depth--;
+        else
+            depth++;
+
+        if (s[i] == '(' &amp;&amp; depth &gt; 0) {
+            depth--;
+            int open = (n - i - 1 - depth) / 2;
+            int close = n - i - 1 - open;
+            string next = s.substr(0, i) + ')' + string(open, '(') + string(close, ')');
+            s.swap(next);
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<p>Esta função calcula em tempo $O(n)$ a próxima sequência de colchetes balanceados ou retorna falso se não houver uma próxima.</p>
+
+<h2>Encontrando todas as sequências balanceadas</h2>
+
+<p>Às vezes, é necessário encontrar e produzir em um problema todas as sequências de colchetes balanceados de um comprimento específico $n$.</p>
+
+<p>Para gerar, podemos começar com a menor sequência lexicográfica $((\dots(())\dots))$, e continuar a encontrar as próximas sequências lexicográficas com o algoritmo descrito na seção anterior.</p>
+
+<p>No entanto, se o comprimento da sequência não for muito longo (por exemplo $n$ for menor que $12$), também poderemos gerar todas as permutações convenientemente com a função da STL do C++ <code>next_permutation</code>, e verificar se cada uma é balanceada.</p>
+
+<p>Elas também podem ser geradas usando as idéias que usamos para contar todas as sequências com programação dinâmica. Discutiremos as idéias nas próximas duas seções.</p>
+
+<h2>Índice da sequência</h2>
+
+<p>Dada uma sequência de colchetes equilibrada com $n$ pares de colchetes.
+Temos que encontrar seu índice na lista lexicograficamente ordenada de todas as sequências balanceadas com $n$ pares de colchete.</p>
+
+<p>Vamos definir uma array auxiliar $d[i][j]$, onde $i$ é o comprimento da sequência de colchetes (semi-balanceado, cada colchete de fechamento tem um colchete de abertura correspondente, mas nem todo colchete de abertura tem necessariamente um de fechamento correspondente) e $j$ é o "balanço/equilíbrio" atual (diferença entre os colchetes de abertura e fechamento).
+$d[i][j]$ é o número dessas sequências que se ajustam aos parâmetros. Vamos calcular esses números com apenas um tipo de colchete.</p>
+
+<p>Para o valor inicial $i = 0$ a resposta será: $d[0][0] = 1$, e $d[0][j] = 0$ com $j > 0$.
+Agora com $i > 0$ olhamos o último caractere na sequência. Se o último caractere for um colchete de abertura "$($", então o estado anterior era $(i-1, j-1)$, se for um colchete de fechamento "$)$", então o estado anterior era $(i-1, j+1)$.
+Assim, obtemos a fórmula recursiva:
+$$d[i][j] = d[i-1][j-1] + d[i-1][j+1]$$
+$d[i][j] = 0$ é válida para $j$'s negativos.
+Portanto, podemos calcular essa array em $O(n^2)$.</p>
+
+<p>Agora vamos gerar o índice para uma determinada sequência.</p>
+
+<p>Primeiro, deixe existir apenas um tipo de colchetes.
+Usaremos o contador $\text{depth}$ que nos diz como estamos no momento, e iteramos sobre os caracteres da sequência. Se o caractere atual $s[i]$ for igual a "$($", então aumentamos(incrementamos) $\text{depth}$.
+Se o caractere atual $s[i]$ for igual a "$)$", então, devemos adicionar $d[2n-i-1][\text{depth}+1]$ para a resposta, levando em consideração todos os finais possíveis começando com $($ (que são sequências lexicograficamente menores) e, em seguida, diminuir $\text{depth}$.</p>
+
+<p>Agora, sejam $k$ diferentes tipos de colchetes.</p>
+
+<p>Assim, quando olhamos para o caractere atual $s[i]$ antes de recalcular $\text{depth}$, precisamos passar por todos os tipos de colchetes menores que o caractere atual e tentar colocá-lo na posição atual (obtendo um novo "balanço/equilíbrio" $\text{ndepth} = \text{depth} \pm 1$), e adicionar o número de maneiras de concluir a sequência (comprimento $2n-i-1$ com balanço $ndepth$) para a resposta:
+$$d[2n - i - 1][\text{ndepth}] \cdot k^{\frac{2n - i - 1 - ndepth}{2}}$$
+Essa fórmula pode ser derivada da seguinte maneira: Primeiro, nós "esquecemos" que existem vários tipos de colchetes e aceitamos a resposta $d[2n - i - 1][\text{ndepth}]$.
+Agora, consideramos como a resposta será alterada se temos $k$ tipos de colchetes.
+Temos $2n - i - 1$ posições indefinidas, nas quais $\text{ndepth}$ já estão predeterminados devido aos colchetes de abertura. Mas todos os outros colchetes ($(2n - i - i - \text{ndepth})/2$ pares) podem ser de qualquer tipo, portanto, multiplicamos o número por uma potência de $k$.</p>
+
+<h2>Encontrando a $k$-ésima sequência</h2>
+
+<p>Seja $n$ o número de pares de colchetes na sequência. Temos que encontrar a  $k$-ésima sequência balanceada em uma lista lexicograficamente ordenada de todas as sequências balanceadas para um determinado $k$.</p>
+
+<p>Como na seção anterior, calculamos a array auxiliar $d[i][j]$ com dp, o número de sequências de colchetes semi-balanceadas de comprimento $i$ com um balanço $j$.</p>
+
+<p>Primeiro, começamos com apenas um tipo de colchete.</p>
+
+<p>Iremos iterar sobre os caracteres na string que queremos gerar. Como no problema anterior, armazenamos um contador $\text{depth}$.
+Em cada posição, temos que decidir se usamos a abertura de um colchete de fechamento. Para ter que colocar um caractere de colchete de abertura, $d[2n - i - 1][\text{depth}+1] \ge k$.
+Nós incrementamos o contador $\text{depth}$, e passamos para o próximo caractere. Caso contrário, decrementamos $k$ por $d[2n - i - 1][\text{depth}+1]$, colocamos um colchete de fechamento e seguimos em frente.</p>
+
+<pre><code class="cpp">string kth_balanced(int n, int k) {
+    vector&lt;vector&lt;int&gt;&gt; d(2*n+1, vector&lt;int&gt;(n+1, 0));
+    d[0][0] = 1;
+    for (int i = 1; i &lt;= 2*n; i++) {
+        d[i][0] = d[i-1][1];
+        for (int j = 1; j &lt; n; j++)
+            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
+        d[i][n] = d[i-1][n-1];
+    }
+
+    string ans;
+    int depth = 0;
+    for (int i = 0; i &lt; 2*n; i++) {
+        if (depth + 1 &lt;= n &amp;&amp; d[2*n-i-1][depth+1] &gt;= k) {
+            ans += '(';
+            depth++;
+        } else {
+            ans += ')';
+            if (depth + 1 &lt;= n)
+                k -= d[2*n-i-1][depth+1];
+            depth--;
+        }
+    }
+    return ans;
+}
+</code></pre>
+
+<p>Agora vamos ter $k$ tipos de colchetes.
+A solução diferirá apenas levemente porque temos que multiplicar o valor $d[2n-i-1][\text{ndepth}]$ por $k^{(2n-i-1-\text{ndepth})/2}$ e levar em consideração que pode haver diferentes tipos de colchetes para o próximo caractere.</p>
+
+<p>Aqui está uma implementação usando dois tipos de colchetes: "$($ $)$" e "$[$ $]$":</p>
+
+<pre><code class="cpp">string kth_balanced2(int n, int k) {
+    vector&lt;vector&lt;int&gt;&gt; d(2*n+1, vector&lt;int&gt;(n+1, 0));
+    d[0][0] = 1;
+    for (int i = 1; i &lt;= 2*n; i++) {
+        d[i][0] = d[i-1][1];
+        for (int j = 1; j &lt; n; j++)
+            d[i][j] = d[i-1][j-1] + d[i-1][j+1];
+        d[i][n] = d[i-1][n-1];
+    }
+
+    string ans;
+    int depth = 0;
+    stack&lt;char&gt; st;
+    for (int i = 0; i &lt; 2*n; i++) {
+        // '('
+        if (depth + 1 &lt;= n) {
+            int cnt = d[2*n-i-1][depth+1] &lt;&lt; ((2*n-i-1-depth-1) / 2);
+            if (cnt &gt;= k) {
+                ans += '(';
+                st.push('(');
+                depth++;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // ')'
+        if (depth &amp;&amp; st.top() == '(') {
+            int cnt = d[2*n-i-1][depth-1] &lt;&lt; ((2*n-i-1-depth+1) / 2);
+            if (cnt &gt;= k) {
+                ans += ')';
+                st.pop();
+                depth--;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // '['
+        if (depth + 1 &lt;= n) {
+            int cnt = d[2*n-i-1][depth+1] &lt;&lt; ((2*n-i-1-depth-1) / 2);
+            if (cnt &gt;= k) {
+                ans += '[';
+                st.push('[');
+                depth++;
+                continue;
+            }
+            k -= cnt;
+        }
+
+        // ']'
+        ans += ']';
+        st.pop();
+        depth--;
+    }
+    return ans;
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
