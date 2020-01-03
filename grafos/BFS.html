@@ -29,20 +29,20 @@
 			<h1>Busca em Largura</h1>
 			<p>Busca em largura ou em amplitude(Breadth for Search) é um dos algoritmos essenciais para busca e travessia em grafos.</p>
 			<p>Como uma consequência de como o algoritmo funciona, o caminho encontrado pela BFS para qualquer nó é o caminho mais curto para aquele nó, 
-			i.e o caminho que contém o menor número de arestas em um grafo sem pesos ou valores nas arestas(unweighted graphs).</p>
-			<p>O algoritmo funciona em tempo $O(n+m)$, em que $n$ é o número de vértices e $m$ é o número de arestas.</p>
+			ou seja, o caminho que contém o menor número de arestas em um grafo sem pesos nas arestas.</p>
+			<p>O algoritmo funciona em tempo $O(n+m)$, no qual $n$ é o número de vértices e $m$ é o número de arestas.</p>
 			<h2>Descrição</h2>
-			<p>O algoritmo recebe como input um grafo sem pesos e o index de um vértice fonte $s$. O grafo recebido no input pode ser direcionado ou indirecionado,
+			<p>O algoritmo recebe como entrada um grafo sem pesos e o índice de um vértice fonte $s$. O grafo recebido na entrada pode ser direcionado ou indirecionado,
             não importa para o algoritmo.</p>
-			<p>O algoritmo pode ser entendido como um incêndio no grafo: na etapa inicial apenas o vértice fonte $s$ está em chamas. Em cada passo, o fogo incendiando cada vértice alastra-se para todos os seus vizinhos conectados. Em uma iteração do algoritmo, o "anel de
-			fogo" é expandido em largura por uma unidade (consequentemente o nome do algoritmo).</p>
+			<p>O algoritmo pode ser entendido como um incêndio no grafo: na etapa inicial apenas o vértice fonte $s$ está em chamas. Em cada passo, o fogo vai incendiando cada vértice no mesmo nível e então alastra-se para todos os seus vizinhos conectados. Em uma iteração do algoritmo, o "anel de
+			fogo" é expandido em largura por uma unidade.</p>
 			<img src="img/fire.gif" width="200" height="150"/>
 			<p>Você pode visualizar melhor <a href="https://workshape.github.io/visual-graph-algorithms/">aqui</a>.</p>
-			<p>Mais precisamente, o algoritmo pode ser declarado como: Crie uma queue $q$ que irá conter os vértices para serem processados e uma
-            array de Booleans $usados[]$ que irá indicar para cada vértice se ele foi incendiado(visitado) ou não.</p>
-			<p>Inicialmente, integre a fonte $s$ na queue e declare $usados[s] = true$, e para todos os outros vértices $v$ declare $usados[v] = false$.
-            Então, loop até que a queue esteja vazia e em cada iteração, exclua um vértice da queue. Itere por todas as arestas saindo desse vértice
-            e se alguma dessas arestas revelarem vértices não incendiados, declare-os em chama e coloque eles dentro da queue.</p>
+			<p>Mais precisamente, o algoritmo pode ser declarado como: crie uma queue $q$ que irá conter os vértices a serem processados e uma
+            array de booleanos $usados[]$ que irá indicar para cada vértice se ele foi incendiado(visitado) ou não.</p>
+			<p>Inicialmente, coloque o vértice fonte $s$ na queue e declare $usados[s] = true$, e para todos os outros vértices $v$ declare $usados[v] = false$.
+            Então, o loop é executado até que a queue esteja vazia e em cada iteração ele vai excluindo um vértice da queue. Itere por todas as arestas saindo desse vértice
+            e se alguma dessas arestas revelarem vértices não incendiados, declare-os "em chamas" e coloque eles dentro da queue.</p>
 			<p>Como consequência, quando a queue estiver vazia, o "anel de fogo" contém todos os vértices alcançáveis pela fonte $s$, com cada vértice alcançado no menor caminho possível.
             Você também pode calcular o tamanho dos caminhos(que apenas requer manter uma array das distâncias dos caminhos $d[]$) como também salvar informações para restaurar todos estes caminhos (para isso, é necessário manter uma array de "parentes" $p[]$, que guarda, para cada vértice, o vértice no qual alcançamos).</p>
 			
