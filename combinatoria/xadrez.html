@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Colocando Bispos em um Tabuleiro de Xadrez - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Colocando Bispos em um Tabuleiro de Xadrez</h1>
+
+<p>Encontre o número de maneiras de colocar $K$ bispos em um tabuleiro de xadrez $N \times N$ para que dois bispos não se ataquem.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Esse problema pode ser resolvido usando a programação dinâmica.</p>
+
+<p>Vamos enumerar as diagonais do tabuleiro de xadrez da seguinte forma: diagonais pretas têm índices ímpares, diagonais brancas têm índices pares e as diagonais são numeradas em ordem não decrescente do número de quadrados nelas. Aqui está um exemplo para um tabuleiro de xadrez $5 \times 5$ chessboard.</p>
+
+<p>$$\begin{matrix}
+\bf{1} &amp; 2 &amp; \bf{5} &amp; 6 &amp; \bf{9} &#92;\
+2 &amp; \bf{5} &amp; 6 &amp; \bf{9} &amp; 8 &#92;\
+\bf{5} &amp; 6 &amp; \bf{9} &amp; 8 &amp; \bf{7} &#92;\
+6 &amp; \bf{9} &amp; 8 &amp; \bf{7} &amp; 4 &#92;\
+\bf{9} &amp; 8 &amp; \bf{7} &amp; 4 &amp; \bf{3} &#92;\
+\end{matrix}$$</p>
+
+<p>Deixe que <code>D[i][j]</code> denote número de maneiras de colocar <code>j</code> bispos em diagonais com índices até <code>i</code> que têm a mesma cor que a diagonal <code>i</code>.
+Assim, <code>i = 1...2N-1</code> e <code>j = 0...K</code>.</p>
+
+<p>Podemos calcular <code>D[i][j]</code> usando apenas valores de <code>D[i-2]</code> (subtraímos 2 porque consideramos apenas diagonais da mesma cor que $i$).
+Existem duas maneiras de obter <code>D[i][j]</code>.
+Ou colocamos todos os <code>j</code> bispos nas diagonais anteriores: então existem <code>D[i-2][j]</code> maneiras de conseguir isso. Ou colocamos um bispo na diagonal <code>i</code> e <code>j-1</code> bispos nas diagonais anteriores. O número de maneiras de fazer isso é igual ao número de quadrados na diagonal <code>i</code> menos <code>j-1</code>, porque cada um dos <code>j-1</code> bispos colocados nas diagonais anteriores bloqueará um quadrado na diagonal atual. O número de quadrados na diagonal <code>i</code> pode ser calculado da seguinte forma:</p>
+
+<pre><code class="cpp">int squares (int i) {
+    if (i &amp; 1)
+        return i / 4 * 2 + 1;
+    else
+        return (i - 1) / 4 * 2 + 2;
+}
+</code></pre>
+
+<p>O caso base é simples: <code>D[i][0] = 1</code>, <code>D[1][1] = 1</code>.</p>
+
+<p>Uma vez calculados todos os valores de <code>D[i][j]</code>, a resposta pode ser obtida da seguinte forma: considere todos os números possíveis de bispos colocados nas diagonais pretas <code>i=0...K</code>, com números correspondentes de bispos nas diagonais brancas <code>K-i</code>.
+Os bispos colocados nas diagonais pretas e brancas nunca se atacam, de modo que as colocações podem ser feitas independentemente. O índice da última diagonal preta é <code>2N-1</code>, o último branco é <code>2N-2</code>.
+Para cada <code>i</code> adicionamos <code>D[2N-1][i] * D[2N-2][K-i]</code> à resposta.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int bishop_placements(int N, int K)
+{
+    if (K &gt; 2 * N - 1)
+        return 0;
+
+    vector&lt;vector&lt;int&gt;&gt; D(N * 2, vector&lt;int&gt;(K + 1));
+    for (int i = 0; i &lt; N * 2; ++i)
+        D[i][0] = 1;
+    D[1][1] = 1;
+    for (int i = 2; i &lt; N * 2; ++i)
+        for (int j = 1; j &lt;= K; ++j)
+            D[i][j] = D[i-2][j] + D[i-2][j-1] * (squares(i) - j + 1);
+
+    int ans = 0;
+    for (int i = 0; i &lt;= K; ++i)
+        ans += D[N*2-1][i] * D[N*2-2][K-i];
+    return ans;
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
