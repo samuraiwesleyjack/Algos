@@ -59,7 +59,7 @@
 
 <pre><code class="cpp">struct edge       //aresta
 {
-    int a, b, cost;     // a -(+-c)> b
+    int a, b, cost;     // a (+-c)> b
 };
 
 int n, m, v;                   //numero de nos/vertices, arestas e o vertice inicial
@@ -226,8 +226,6 @@ void solve()
 			</code></pre>
 
 			<p>A implementação acima procura um ciclo negativo acessível a partir de algum vértice inicial $v$; entretanto, o algoritmo pode ser modificado para apenas procurar por qualquer ciclo negativo no grafo. Para isso precisamos colocar todas as distâncias $d[i]$ para zero e não infinito — como se estivéssemos procurando pelos caminhos mais curtos de todos os vértices simultâneamente.</p>
-
-			<p>Para mais desse tópico — veja o artigo, <a href="./graph/finding-negative-cycle-in-graph.html">Finding a negative cycle in the graph</a>.</p>
 
 			<h2>Caminho mais curto algoritmo mais rápido (SPFA)</h2>
 
