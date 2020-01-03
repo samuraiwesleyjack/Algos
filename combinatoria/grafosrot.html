@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Contanto grafos rotulados - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Contanto grafos rotulados</h1>
+
+<h2>Grafos rotulados</h2>
+
+<p>Deixe o número de vértices em um grafo ser $n$.
+Temos que calcular o número $G_n$ de grafos rotulados com $n$ vértices ("rotulados" significa que os vértices são marcados com os números de $1$ a $n$).
+As arestas dos grafos são consideradas não direcionadas e são proibidos loops e múltiplas arestas.</p>
+
+<p>Consideramos o conjunto de todas as arestas possíveis do grafo. Para cada aresta $(i, j)$ podemos assumir que $i &lt; j$ (o grafo não é direcionado e não há loops).
+Portanto, o conjunto de todas as arestas tem a cardinalidade $\binom{n}{2}$, ou seja, $\frac{n(n-1)}{2}$.</p>
+
+<p>Como qualquer grafo rotulado é determinado unicamente por suas arestas, o número de grafos rotulados com $n$ vértices é igual a:
+$$G_n = 2^{\frac{n(n-1)}{2}}$$</p>
+
+<h2>Grafos rotulados e conectados</h2>
+
+<p>Aqui, adicionalmente, impomos a restrição de que o grafo deve ser conectado.</p>
+
+<p>Vamos denotar o número necessário de grafos conectados com $n$ vértices como $C_n$.</p>
+
+<p>Primeiro, discutiremos quantos grafos desconectados existem. Em seguida, o número de grafos conectados será $G_n$ menos o número de grafos desconectados. Ainda mais, contaremos o número de grafos desconectados e enraizados. Um grafo enraizado é um grafo onde enfatizamos um vértice rotulando-o como raiz. Temos $n$ possibilidades para enraizar um grafo com $n$ vértices rotulados, portanto, precisaremos dividir o número de grafos desconectados e enraizados por $n$ no final para obter o número de grafos desconectados.</p>
+
+<p>O vértice raiz aparecerá em um componente conectado de tamanho $1, \dots n-1$.
+Existem $k \binom{n}{k} C_k G_{n-k}$ grafos nos quais o vértice raiz está em um componente conectado com $k$ vértices (existem $\binom{n}{k}$ maneiras de escolher $k$ vértices para o componente, esses são conectados em uma das $C_k$ maneiras, o vértice raiz pode ser qualquer um dos $k$ vértices, e os $n-k$ vértices restantes podem ser conectados/desconectados de qualquer maneira, no qual será um fator de $G_{n-k}$).
+Portanto, o número de grafos desconectados com $n$ vértices é:
+$$\frac{1}{n} \sum_{k=1}^{n-1} k \binom{n}{k} C_k G_{n-k}$$
+E, finalmente, o número de grafos conectados será:
+$$C_n = G_n - \frac{1}{n} \sum_{k=1}^{n-1} k \binom{n}{k} C_k G_{n-k}$$</p>
+
+<h2>Grafos rotulados com $k$ componentes conectados</h2>
+
+<p>Com base na fórmula da seção anterior, aprenderemos como contar o número de grafos rotulados com $n$ vértices e $k$ componentes conectados.</p>
+
+<p>Este número pode ser calculado usando programação dinâmica. Calcularemos $D[i][j]$ - o número de grafos rotulados com $i$ vértices e $j$ componentes - para cada $i \le n$ e $j \le k$.</p>
+
+<p>Vamos discutir como calcular o próximo elemento $D[n][k]$ se já conhecemos os valores anteriores. Utilizamos uma abordagem comum, pegamos o último vértice (índice $n$).
+Este vértice pertence a algum componente. Se o tamanho desse componente for $s$, então, existem $\binom{n-1}{s-1}$ maneiras de escolher esse conjunto de vértices, e $C_s$ maneiras para conectá-los. Depois de remover esse componente do grafo, teremos $n-s$ vértices restantes com $k-1$ componentes conectados.
+Portanto, obtemos a seguinte relação recursiva:
+$$D[n][k] = \sum_{s=1}^{n} \binom{n-1}{s-1} C_s D[n-s][k-1]$$</p>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
