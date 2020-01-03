@@ -64,7 +64,7 @@ while (!q.empty()) {
     for (int u : g[v]) {
         if (!usados[u]) {
             usados[u] = true;
-            q.push(u);  //na bfs apenas vamos puxando o nó filho, na dfs chamamos a função para ir mais fundo no grafo
+            q.push(u);  //na bfs vamos apenas puxando os nós filhos para a queue, na dfs chamamos a função para ir mais fundo no grafo
             d[u] = d[v] + 1;
             p[u] = v;
         }
