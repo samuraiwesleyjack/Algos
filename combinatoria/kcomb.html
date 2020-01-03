@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Gerando todas as $K$ combinações - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Gerando todas as $K$ combinações</h1>
+
+<p>Neste artigo, discutiremos o problema de gerar todas as  $K$ combinações.
+Dados os números naturais $N$ e $K$, e considerando um conjunto de números de $1$ a $N$.
+A tarefa é derivar todos os <strong>subconjuntos de tamanho $K$</strong>.</p>
+
+<h2>Gerando a próxima $K$-combinação lexicograficamente</h2>
+
+<p>Primeiro, vamos gerá-los em ordem lexicográfica. O algoritmo para isso é simples. A primeira combinação será ${1, 2, ..., K}$. Agora vamos ver como encontrar a combinação que se segue imediatamente, lexicograficamente. Para fazer isso, consideramos nossa combinação atual e encontramos o elemento mais à direita que ainda não atingiu seu maior valor possível. Depois de encontrar esse elemento, aumentamos em $1$, e atribuímos o menor valor válido a todos os elementos subseqüentes.</p>
+
+<pre><code class="cpp">bool next_combination(vector&lt;int&gt;&amp; a, int n) {
+    int k = (int)a.size();
+    for (int i = k - 1; i &gt;= 0; i--) {
+        if (a[i] &lt; n - k + i + 1) {
+            a[i]++;
+            for (int j = i + 1; j &lt; k; j++)
+                a[j] = a[j - 1] + 1;
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+
+<h2>Gerando todas $K$ combinações de modo que combinações adjacentes diferem por um elemento</h2>
+
+<p>Desta vez, queremos gerar todas as $K$-combinações nessa ordem, para que as combinações adjacentes diferem exatamente por um elemento.</p>
+
+<p>Isso pode ser resolvido usando o <a href="https://cp-algorithms-brasil.com/Algebra/graycode.html">código de Gray</a>:
+se atribuirmos uma bitmask para cada subconjunto e então, gerando e iterando sobre essas bitmasks com códigos de Gray, podemos obter nossa resposta.</p>
+
+<p>A tarefa de gerar $K$-combinações também pode ser resolvida usando códigos de Gray de uma maneira diferente: Gere os códigos de Gray para os números de $0$ até $2^N - 1$ e deixe apenas os códigos que contêm $K$ $1$s.
+O fato surpreendente é que, na sequência resultante de $K$ bits setados, qualquer duas masks vizinhas (incluindo a primeira e a última máscara - vizinhas em sentido cíclico) - irão diferir em exatamente 2 bits, que é o nosso objetivo (remover um número , adicionar um número).</p>
+
+<p>Vamos provar isso:</p>
+
+<p>Para a prova, lembramos o fato de que a sequência $G(N)$ (representando o $N$<sup>ésima</sup> código de Gray) pode ser obtida da seguinte forma:</p>
+
+<p>$$G(N) = 0G(N-1) \cup 1G(N-1)^\text{R}$$</p>
+
+<p>Ou seja, considere a sequência do código de Gray para $N-1$, e o prefixo $0$ antes de cada termo. E considere a sequência reversa do código de Gray para $N-1$ e o prefixo como $1$ antes de toda mask, e concatene essas duas seqüências.</p>
+
+<p>Agora podemos produzir nossa prova.</p>
+
+<p>Primeiro, provamos que a primeira e a última máscara diferem exatamente em dois bits. Para fazer isso, basta observar que a primeira máscara da sequência $G(N)$, será da forma $N-K$ $0$s, seguida por $K$ $1$s. Como o primeiro bit é definido como $0$, após o qual $(N-K-1)$ $0$s seguem, após os quais $K$ bits setados seguem-se e a última máscara será da forma $1$, então, $(N-K)$ $0$s, e então $K-1$ $1$s.
+A aplicação do princípio da indução matemática e o uso da fórmula para $G(N)$, concluem a prova.</p>
+
+<p>Agora, nossa tarefa é mostrar que quaisquer dois códigos adjacentes também diferem exatamente em dois bits. Podemos fazer isso considerando nossa equação recursiva para a geração dos códigos de Gray. Vamos supor que o conteúdo das duas metades formadas por $G(N-1)$ seja verdadeiro. Agora precisamos provar que o novo par consecutivo formado na junção (pela concatenação(adição) dessas duas metades) também é válido, ou seja, diferem exatamente em dois bits.</p>
+
+<p>Isso pode ser feito se soubermos a última máscara da primeira metade e a primeira máscara da segunda metade. A última máscara da primeira metade seria $1$, então $(N-K-1)$ $0$s, e então $K-1$ $1$s. E a primeira máscara da segunda metade seria $0$, então $(N-K-2)$ $0$s se seguiriam e, em seguida $K$ $1$s. Assim, comparando as duas máscaras, encontramos exatamente dois bits que diferem.</p>
+
+<p>A seguir, uma implementação que funciona gerando todos os $2^{n}$ subconjuntos possíveis, e localizando subconjuntos de tamanho
+$K$.</p>
+
+<pre><code class="cpp">int gray_code (int n) {
+    return n ^ (n &gt;&gt; 1);
+}
+
+int count_bits (int n) {
+    int res = 0;
+    for (; n; n &gt;&gt;= 1)
+        res += n &amp; 1;
+    return res;
+}
+
+void all_combinations (int n, int k) {
+    for (int i = 0; i &lt; (1 &lt;&lt; n); i++) {
+        int cur = gray_code (i);
+        if (count_bits(cur) == k) {
+            for (int j = 0; j &lt; n; j++) {
+                if (cur &amp; (1 &lt;&lt; j))
+                    cout &lt;&lt; j + 1;
+            }
+            cout &lt;&lt; "\n";
+        }
+    }
+}
+</code></pre>
+
+<p>Vale ressaltar que existe uma implementação mais eficiente que apenas recorre à criação de combinações válidas e, portanto, funciona em $O\left(N \cdot \binom{N}{K}\right)$ no entanto, é de natureza recursiva e para valores menores de $N$ provavelmente tem uma constante maior que a solução anterior.</p>
+
+<p>A implementação é derivada da fórmula:</p>
+
+<p>$$G(N, K) = 0G(N-1, K) \cup 1G(N-1, K-1)^\text{R}$$</p>
+
+<p>Essa fórmula é obtida modificando a equação geral para determinar o código de Gray e funciona selecionando a subsequência dos elementos apropriados.</p>
+
+<p>Sua implementação é a seguinte:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; ans;
+
+void gen(int n, int k, int idx, bool rev) {
+    if (k &gt; n || k &lt; 0)
+        return;
+
+    if (!n) {
+        for (int i = 0; i &lt; idx; ++i) {
+            if (ans[i])
+                cout &lt;&lt; i + 1;
+        }
+        cout &lt;&lt; "\n";
+        return;
+    }
+
+    ans[idx] = rev;
+    gen(n - 1, k - rev, idx + 1, false);
+    ans[idx] = !rev;
+    gen(n - 1, k - !rev, idx + 1, true);
+}
+
+void all_combinations(int n, int k) {
+    ans.resize(n);
+    gen(n, k, 0, false);
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
