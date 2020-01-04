@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Busca Ternária - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Busca ternária</h1>
+
+<p>Recebemos uma função $f(x)$ que é unimodal em um intervalo $[l, r]$. Por função unimodal, queremos dizer que ela pode ter um dos dois comportamentos</p>
+
+<ol>
+<li><p>A função primeiro aumenta estritamente, atinge o máximo (em um único ponto ou durante um intervalo) e depois estritamente vai diminuindo.</p></li>
+<li><p>A função primeiro diminui estritamente, atinge o mínimo e depois aumenta estritamente.</p></li>
+</ol>
+
+<p>Neste artigo, assumiremos o primeiro cenário. O segundo cenário é completamente simétrico ao primeiro.</p>
+
+<p>A tarefa é encontrar o máximo da função $f(x)$ no intervalo $[l, r]$.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Considere 2 pontos $m_1$ e $m_2$ no intervalo: $l &lt; m_1 &lt; m_2 &lt; r$. Avaliamos a função em $m_1$ e $m_2$, ou seja, encontramos os valores de $f(m_1)$ e $f(m_2)$. Agora, temos uma das três opções:</p>
+
+<ul>
+<li><p>$f(m_1) &lt; f(m_2)$</p>
+
+<p>O máximo desejado não pode ser localizado no lado esquerdo de $m_1$, ou seja, no intervalo $[l, m_1]$, pois ambos os pontos $m_1$ e $m_2$ ou apenas $m_1$ pertencem à área onde o função aumenta. Em ambos os casos, isso significa que precisamos procurar o máximo no segmento $[m_1, r]$.</p></li>
+<li><p>$f(m_1) > f(m_2)$</p>
+
+<p>ssa situação é simétrica à anterior: o máximo não pode ser localizado no lado direito de $m_2$, ou seja, no intervalo $[m_2, r]$, e o espaço de pesquisa é reduzido para o segmento $[l, m_2]$.</p></li>
+<li><p>$f(m_1) = f(m_2)$</p>
+
+<p>Podemos ver que esses dois pontos pertencem à área em que o valor da função é maximizado, ou $m_1$ está na área de valores crescentes e $m_2$ está na área de valores decrescentes (aqui usamos o rigor de função aumentando / diminuindo). Assim, o espaço de pesquisa é reduzido para $[m_1, m_2]$. Para simplificar o código, este caso pode ser combinado com qualquer um dos casos anteriores.</p></li>
+</ul>
+
+<p>Assim, com base na comparação dos valores nos dois pontos internos, podemos substituir o intervalo atual $[l, r]$ por um novo intervalo mais curto $[l^\prime, r^\prime]$. Aplicando repetidamente o procedimento descrito ao intervalo, podemos obter um intervalo arbitrariamente curto. Eventualmente, seu comprimento será menor que uma determinada constante predefinida (precisão) e o processo poderá ser interrompido. Este é um método numérico, portanto, podemos assumir que, depois disso, a função alcance seu máximo em todos os pontos do último intervalo modificado $[l, r]$. Sem perda de generalidade, podemos ter $f(l)$ como o valor de retorno.</p>
+
+<p>Não impusemos restrições à escolha dos pontos $m_1$ e $m_2$. Essa escolha definirá a taxa de convergência e a precisão da implementação. A maneira mais comum é escolher os pontos para que eles dividam o intervalo $[l, r]$ em três partes iguais. Assim, teremos</p>
+
+<p>$$m_1 = l + \frac{(r - l)}{3}$$</p>
+
+<p>$$m_2 = r - \frac{(r - l)}{3}$$</p>
+
+<p>Se $m_1$ e $m_2$ forem escolhidos para serem próximos, a taxa de convergência aumentará um pouco.</p>
+
+<h3>Análise do tempo de execução</h3>
+
+<p>$$T(n) = T({2n}/{3}) + 1 = \Theta(\log n)$$</p>
+
+<p>Ele pode ser visualizado da seguinte forma: toda vez que avaliamos a função nos pontos $m_1$ e $m_2$, estamos basicamente ignorando cerca de um terço do intervalo, o esquerdo ou o direito. Portanto, o tamanho do espaço de pesquisa é ${2n}/{3}$ do espaço original.</p>
+
+<p>Aplicando o <a href="https://en.wikipedia.org/wiki/Master_theorem_(analysis_of_algorithms)">teorema mestre</a>, obtemos a estimativa de complexidade desejada.</p>
+
+<h3>O caso dos argumentos inteiros</h3>
+
+<p>Se $f(x)$ usar inteiros como parâmetro, o intervalo $[l, r]$ se tornará discreto. Como não impusemos restrições à escolha dos pontos $m_1$ e $m_2$, a certeza do algoritmo não é afetada. Ainda é possível escolher $m_1$ e $m_2$ para dividir $[l, r]$ em três partes aproximadamente iguais.</p>
+
+<p>A diferença ocorre no critério de parada do algoritmo. A busca ternária terá que parar quando $(r - l) &lt; 3$, porque nesse caso não podemos mais selecionar $m_1$ e $m_2$ para serem diferentes entre si, bem como entre $l$ e $r$, e isso pode causar um loop infinito. Depois que $(r - l) &lt; 3$, o restante de escolhas para os pontos $(l, l + 1, \ldots, r)$ precisa ser verificado para encontrar o ponto que produz o valor máximo de $f(x)$.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">double ternary_search(double l, double r) {
+    double eps = 1e-9;              //definir o erro limite
+    while (r - l &gt; eps) {
+        double m1 = l + (r - l) / 3;
+        double m2 = r - (r - l) / 3;
+        double f1 = f(m1);      //avalia a função em m1
+        double f2 = f(m2);      //avalia a função em m2
+        if (f1 &lt; f2)
+            l = m1;
+        else
+            r = m2;
+    }
+    return f(l);                    //retorna o máximo de f(x) em [l, r]
+}
+</code></pre>
+
+<p>Aqui, <code>eps</code> é, de fato, o erro absoluto (sem levar em conta erros devido ao cálculo impreciso da função).</p>
+
+<p>Em vez do critério <code>r - l &gt; eps</code>, podemos selecionar um número constante de iterações como critério de parada. O número de iterações deve ser escolhido para garantir a precisão necessária. Normalmente, na maioria dos desafios de programação, o limite de erros é ${10}^{-6}$ e, portanto, 200 - 300 iterações são suficientes. Além disso, o número de iterações não depende dos valores de $l$ e $r$; o número de iterações corresponde ao erro relativo necessário.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/AMCS03">Codechef - Race time</a></li>
+<li><a href="https://www.hackerearth.com/september-circuits/algorithm/rescuer-1/">Hackerearth - Rescuer</a></li>
+<li><a href="http://www.spoj.com/problems/KOPC12A/">Spoj - Building Construction</a></li>
+<li><a href="http://codeforces.com/problemset/problem/578/C">Codeforces - Weakness and Poorness</a></li>
+<li><a href="http://lightoj.com/volume_showproblem.php?problem=1146">LOJ - Closest Distance</a></li>
+<li><a href="http://codeforces.com/gym/101309">GYM - Dome of Circus (D)</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4898">UVA - Galactic Taxes</a></li>
+<li><a href="http://codeforces.com/gym/100829">GYM - Chasing the Cheetahs (A)</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3349">UVA - 12197 - Trick or Treat</a></li>
+<li><a href="http://www.spoj.com/problems/KOPC12A/">SPOJ - Building Construction</a></li>
+<li><a href="https://codeforces.com/problemset/problem/439/D">Codeforces - Devu and his Brother</a></li>
+</ul>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
