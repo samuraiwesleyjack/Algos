@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Integral pela fórmula de Simpson - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Integral pela fórmula de Simpson</h1>
+
+<p>Iremos calcular o valor de uma integral definida</p>
+
+<p>$$\int_a ^ b f (x) dx$$</p>
+
+<p>A solução descrita aqui foi publicada em uma das dissertações de <strong>Thomas Simpson</strong> em 1743.</p>
+
+<h2>Fórmula de Simpson</h2>
+
+<p>Seja $n$ um número natural. Dividimos o segmento de integração $[a, b]$ em $2n$ partes iguais:</p>
+
+<p>$$x_i = a + i h, ~~ i = 0 \ldots 2n,$$
+$$h = \frac {b-a} {2n}.$$</p>
+
+<p>Agora calculamos a integral separadamente em cada um dos segmentos $[x_ {2i-2}, x_ {2i}]$, $i = 1 \ldots n$, e, em seguida, adicionamos todos os valores.</p>
+
+<p>Portanto, suponha que consideremos o próximo segmento $[x_ {2i-2}, x_ {2i}],  i = 1 \ldots n$. Substitua a função $f(x)$ por uma parábola $P(x)$ passando por 3 pontos $(x_ {2i-2}, x_ {2i-1}, x_ {2i})$. Essa parábola sempre existe e é única; pode ser encontrado analiticamente. Por exemplo, podemos construí-lo usando a interpolação polinomial de Lagrange. A única coisa que resta a fazer é integrar esse polinômio. Se você fizer isso para uma função geral $f$, você receberá essa expressão:</p>
+
+<p>$$\int_{x_ {2i-2}} ^ {x_ {2i}} f (x) ~dx \approx \int_{x_ {2i-2}} ^ {x_ {2i}} P (x) ~dx = \left(f(x_{2i-2}) + 4f(x_{2i-1})+(f(x_{2i})\right)\frac {h} {3} $$</p>
+
+<p>Adicionando esses valores em todos os segmentos, obtemos a fórmula final de Simpson:</p>
+
+<p>$$\int_a ^ b f (x) dx \approx \left(f (x_0) + 4 f (x_1) + 2 f (x_2) + 4f(x_3) + 2 f(x_4) + \ldots + 4 f(x_{2N-1}) + f(x_{2N}) \right)\frac {h} {3} $$</p>
+
+<h2>Erro</h2>
+
+<p>O erro na aproximação de uma integral pela fórmula de Simpson é</p>
+
+<p>$$ -\tfrac{1}{90} \left(\tfrac{b-a}{2}\right)^5 f^{(4)}(\xi)$$</p>
+
+<p>onde $\xi$ é um número entre $a$ e $b$.</p>
+
+<p>O erro é assintoticamente proporcional a $(b-a)^5$. No entanto, as derivações acima sugerem um erro proporcional a $(b-a)^4$. A regra de Simpson ganha uma ordem extra porque os pontos nos quais o integrando é avaliado são distribuídos simetricamente no intervalo $[a, b]$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui, $f(x)$ é uma função definida pelo usuário.</p>
+
+<pre><code class="cpp">const int N = 1000 * 1000; // número de etapas 
+
+double simpson_integration(double a, double b){
+    double h = (b - a) / N;
+    double s = f(a) + f(b); // a = x_0 and b = x_2n
+    for (int i = 1; i &lt;= N - 1; ++i) { // refere-se a fórmula final de Simpson
+        double x = a + h * i;
+        s += f(x) * ((i &amp; 1) ? 4 : 2);
+    }
+    s *= h / 3;
+    return s;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.urionlinejudge.com.br/judge/en/problems/view/1297">URI - Environment Protection</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
