@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Método de Newton para encontrar raízes - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Método de Newton para encontrar raízes</h1>
+
+<p>Este é um método iterativo inventado por Isaac Newton por volta de 1664. No entanto, esse método também é chamado de método Raphson, já que Raphson inventou o mesmo algoritmo alguns anos depois de Newton, mas seu artigo foi publicado muito antes.</p>
+
+<p>A tarefa é a seguinte. Dada a equação:</p>
+
+<p>$$f(x) = 0$$</p>
+
+<p>Queremos resolver a equação. Mais precisamente, queremos encontrar uma de suas raízes (presume-se que a raiz exista). Assumindo que $f(x)$ seja contínua e diferenciável em um intervalo $[a, b]$.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Os parâmetros de entrada do algoritmo consistem não apenas na função $f(x)$ mas também na aproximação inicial - algum $x_0$, com o qual o algoritmo inicia.</p>
+
+<p>Suponha que já calculamos $x_i$, agora calcularemos $x_{i+1}$ da seguinte maneira. Desenhe a tangente no gráfico da função $f(x)$ no ponto $x = x_i$, e encontre o ponto de interseção dessa tangente com o eixo $x$.  $x_{i+1}$ é definido igual à coordenada $x$ do ponto encontrado, e repetimos todo o processo desde o início.</p>
+
+<p>Obtemos a seguinte fórmula:</p>
+
+<p>$$ x_{i+1} = x_i - \frac{f(x_i)}{f^\prime(x_i)} $$</p>
+
+<p>É intuitivo que se a função $f(x)$ for "boa"(simples), e $x_i$ estiver próximo o suficiente da raiz, então $x_{i+1}$ estará ainda mais próximo da raiz desejada .</p>
+
+<p>A taxa de convergência é quadrática, isso significa que o número de dígitos exatos no valor aproximado de $x_i$ dobra a cada iteração.</p>
+
+<h2>Aplicação para calcular a raiz quadrada</h2>
+
+<p>Vamos usar o cálculo da raiz quadrada como um exemplo do método de Newton.</p>
+
+<p>Se substituirmos $f(x) = x^2 - n$, depois de simplificar a expressão, obtemos:</p>
+
+<p>$$ x_{i+1} = \frac{x_i + \frac{n}{x_i}}{2} $$</p>
+
+<p>A primeira variante típica do problema é quando um número racional $n$ é fornecido e sua raiz deve ser calculada com alguma precisão <code>eps</code>:</p>
+
+<pre><code class="cpp">double sqrt_newton(double n) {
+    const double eps = 1E-15;
+    double x = 1;
+    for (;;) {
+        double nx = (x + n / x) / 2;
+        if (abs(x - nx) &lt; eps)
+            break;
+        x = nx;
+    }
+    return x;
+}
+</code></pre>
+
+<p>Outra variante comum do problema é quando precisamos calcular a raiz inteira (para o $n$ fornecido, encontre o maior $x$ de modo que $x^2 \le n$). Aqui é necessário alterar levemente a condição de terminação do algoritmo, pois pode acontecer que $x$ comece a "pular" perto da resposta. Portanto, adicionamos uma condição de que, se o valor $x$ diminuiu na etapa anterior e ela tenta aumentar na etapa atual, o algoritmo deve ser parado.</p>
+
+<pre><code class="cpp">int isqrt_newton(int n) {
+    int x = 1;
+    bool decreased = false;
+    for (;;) {
+        int nx = (x + n / x) &gt;&gt; 1;
+        if (x == nx || nx &gt; x &amp;&amp; decreased)
+            break;
+        decreased = nx &lt; x;
+        x = nx;
+    }
+    return x;
+}
+</code></pre>
+
+<p>Finalmente, recebemos a terceira variante - para o caso da aritmética bignum ou modular rápida. Como o número $n$ pode ser grande o suficiente, faz sentido prestar atenção à aproximação inicial. Obviamente, quanto mais próximo da raiz, mais rápido o resultado será alcançado. É bastante simples e eficaz usar a aproximação inicial como o número $2^{\textrm{bits}/2}$, onde $\textrm{bits}$ é o número de bits no número $n$. Aqui está o código em Java que demonstra essa variante:</p>
+
+<pre><code class="java">public static BigInteger isqrtNewton(BigInteger n) {
+    BigInteger a = BigInteger.ONE.shiftLeft(n.bitLength() / 2);
+    boolean p_dec = false;
+    for (;;) {
+        BigInteger b = n.divide(a).add(a).shiftRight(1);
+        if (a.compareTo(b) == 0 || a.compareTo(b) &lt; 0 &amp;&amp; p_dec)
+            break;
+        p_dec = a.compareTo(b) &gt; 0;
+        a = b;
+    }
+    return a;
+}
+</code></pre>
+
+<p>Por exemplo, esse código é executado em $60$ milissegundos quando $n = 10^{1000}$, e, se removermos a seleção aprimorada da aproximação inicial (apenas começando com $1$), ele será executado em cerca de $120$ milisegundos.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=16&amp;page=show_problem&amp;problem=1369">UVa 10428 - The Roots</a></li>
+</ul>
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
