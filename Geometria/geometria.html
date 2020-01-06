@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Geometria - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Geometria </h1>
+
+<p>Neste artigo, consideraremos operações básicas em pontos no espaço euclidiano que mantêm a base de toda a geometria analítica. Consideraremos para cada ponto $\mathbf r$ o vetor $\vec{\mathbf r}$ direcionado de $\mathbf 0$ para $\mathbf r$.
+Posteriormente, não distinguiremos entre $\mathbf r$ e $\vec{\mathbf r}$ e usaremos o termo <strong>ponto</strong> como sinônimo de <strong>vetor</strong>.</p>
+
+<h2>Operações lineares</h2>
+
+<p>Os pontos 2D e 3D mantêm espaço linear, o que significa que, para eles, a soma e multiplicação de pontos por algum número são definidos. Aqui estão as implementações para pontos 2D:</p>
+
+<pre><code class="cpp">struct point2d {
+    ftype x, y;
+    point2d() {}
+    point2d(ftype x, ftype y): x(x), y(y) {}
+    point2d&amp; operator+=(const point2d &amp;t) {
+        x += t.x;
+        y += t.y;
+        return *this;
+    }
+    point2d&amp; operator-=(const point2d &amp;t) {
+        x -= t.x;
+        y -= t.y;
+        return *this;
+    }
+    point2d&amp; operator*=(ftype t) {
+        x *= t;
+        y *= t;
+        return *this;
+    }
+    point2d&amp; operator/=(ftype t) {
+        x /= t;
+        y /= t;
+        return *this;
+    }
+    point2d operator+(const point2d &amp;t) const {
+        return point2d(*this) += t;
+    }
+    point2d operator-(const point2d &amp;t) const {
+        return point2d(*this) -= t;
+    }
+    point2d operator*(ftype t) const {
+        return point2d(*this) *= t;
+    }
+    point2d operator/(ftype t) const {
+        return point2d(*this) /= t;
+    }
+};
+point2d operator*(ftype a, point2d b) {
+    return b * a;
+}
+</code></pre>
+
+<p>E para pontos 3D:</p>
+
+<pre><code class="cpp">struct point3d {
+    ftype x, y, z;
+    point3d() {}
+    point3d(ftype x, ftype y, ftype z): x(x), y(y), z(z) {}
+    point3d&amp; operator+=(const point3d &amp;t) {
+        x += t.x;
+        y += t.y;
+        z += t.z;
+        return *this;
+    }
+    point3d&amp; operator-=(const point3d &amp;t) {
+        x -= t.x;
+        y -= t.y;
+        z -= t.z;
+        return *this;
+    }
+    point3d&amp; operator*=(ftype t) {
+        x *= t;
+        y *= t;
+        z *= t;
+        return *this;
+    }
+    point3d&amp; operator/=(ftype t) {
+        x /= t;
+        y /= t;
+        z /= t;
+        return *this;
+    }
+    point3d operator+(const point3d &amp;t) const {
+        return point3d(*this) += t;
+    }
+    point3d operator-(const point3d &amp;t) const {
+        return point3d(*this) -= t;
+    }
+    point3d operator*(ftype t) const {
+        return point3d(*this) *= t;
+    }
+    point3d operator/(ftype t) const {
+        return point3d(*this) /= t;
+    }
+};
+point3d operator*(ftype a, point3d b) {
+    return b * a;
+}
+</code></pre>
+
+<p>Aqui <code>ftype</code> é algum tipo usado para coordenadas, geralmente <code>int</code>, <code>double</code> ou <code>long long</code>.</p>
+
+<h2>Produto escalar(<a href="https://en.wikipedia.org/wiki/Dot_product">Dot product</a>)</h2>
+
+<h3>Definição</h3>
+
+<p>O produto escalar $\mathbf a \cdot \mathbf b$ para os vetores $\mathbf a$ e $\mathbf b$ pode ser definido de duas maneiras idênticas. Geometricamente, é o produto do comprimento do primeiro vetor pelo comprimento da projeção do segundo vetor no primeiro. Como você pode ver na imagem abaixo, essa projeção é o mesmo que $|\mathbf a| \cos \theta$ onde $\theta$ é o ângulo entre $\mathbf a$ e $\mathbf b$. <strong>Portanto</strong>, $\mathbf a\cdot  \mathbf b = |\mathbf a| \cos \theta \cdot |\mathbf b|$.</p>
+
+<p><center><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Dot_Product.svg/300px-Dot_Product.svg.png" alt="" /></center></p>
+
+<p>O produto escalar possui algumas propriedades notáveis:</p>
+
+<ol>
+<li>$\mathbf a \cdot \mathbf b = \mathbf b \cdot \mathbf a$</li>
+<li>$(\alpha \cdot \mathbf a)\cdot \mathbf b = \alpha \cdot (\mathbf a \cdot \mathbf b)$</li>
+<li>$(\mathbf a + \mathbf b)\cdot \mathbf c = \mathbf a \cdot \mathbf c + \mathbf b \cdot \mathbf c$</li>
+</ol>
+
+<p>Ou seja, é uma função comutativa que é linear em relação a ambos os argumentos. Vamos denotar os vetores de unidade como
+$$\mathbf e_x = \begin{pmatrix} 1 &#92;\ 0 &#92;\ 0 \end{pmatrix}, \mathbf e_y = \begin{pmatrix} 0 &#92;\ 1 &#92;\ 0 \end{pmatrix}, \mathbf e_z = \begin{pmatrix} 0 &#92;\ 0 &#92;\ 1 \end{pmatrix}.$$
+Com essa notação, podemos escrever o vetor $\mathbf r = (x;y;z)$ como $r = x \cdot \mathbf e_x + y \cdot \mathbf e_y + z \cdot \mathbf e_z$.
+E como para vetores de unidades 
+$$\mathbf e_x\cdot \mathbf e_x = \mathbf e_y\cdot \mathbf e_y = \mathbf e_z\cdot \mathbf e_z = 1,&#92;\
+\mathbf e_x\cdot \mathbf e_y = \mathbf e_y\cdot \mathbf e_z = \mathbf e_z\cdot \mathbf e_x = 0$$
+podemos ver que, em termos de coordenadas, para $\mathbf a = (x_1;y_1;z_1)$ e $\mathbf b = (x_2;y_2;z_2)$ é válido
+$$\mathbf a\cdot \mathbf b = (x_1 \cdot \mathbf e_x + y_1 \cdot\mathbf e_y + z_1 \cdot\mathbf e_z)\cdot( x_2 \cdot\mathbf e_x + y_2 \cdot\mathbf e_y + z_2 \cdot\mathbf e_z) = x_1 x_2 + y_1 y_2 + z_1 z_2$$</p>
+
+<p>Essa também é a definição algébrica do produto escalar. A partir disso, podemos escrever funções que o calculam.</p>
+
+<pre><code class="cpp">ftype dot(point2d a, point2d b) {
+    return a.x * b.x + a.y * b.y;
+}
+ftype dot(point3d a, point3d b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+</code></pre>
+
+<p>Ao resolver problemas, deve-se usar a definição algébrica para calcular produtos escalares, mas lembre-se da definição geométrica e das propriedades para usá-las.</p>
+
+<h3>Propriedades</h3>
+
+<p>Podemos definir muitas propriedades geométricas através do produto escalar. Por exemplo</p>
+
+<ol>
+<li>Norm de $\mathbf a$ (comprimento ao quadrado): $|\mathbf a|^2 = \mathbf a\cdot \mathbf a$</li>
+<li>Comprimento de $\mathbf a$: $|\mathbf a| = \sqrt{\mathbf a\cdot \mathbf a}$</li>
+<li>Projeção de $\mathbf a$ em $\mathbf b$: $\dfrac{\mathbf a\cdot\mathbf b}{|\mathbf b|}$</li>
+<li>Ângulo entre vetores: $\arccos \left(\dfrac{\mathbf a\cdot \mathbf b}{|\mathbf a| \cdot |\mathbf b|}\right)$</li>
+<li>Do ponto anterior, podemos ver que o produto escalar é positivo se o ângulo entre eles for agudo, negativo se for obtuso e igual a zero se forem ortogonais, ou seja, formarem um ângulo reto.</li>
+</ol>
+
+<p>Observe que todas essas funções não dependem do número de dimensões, portanto, serão as mesmas para pontos 2D e 3D:</p>
+
+<pre><code class="cpp">ftype norm(point2d a) {
+    return dot(a, a);
+}
+double abs(point2d a) {
+    return sqrt(norm(a));
+}
+double proj(point2d a, point2d b) {
+    return dot(a, b) / abs(b);
+}
+double angle(point2d a, point2d b) {
+    return acos(dot(a, b) / abs(a) / abs(b));
+}
+</code></pre>
+
+<p>Para ver a próxima propriedade importante, devemos examinar o conjunto de pontos $\mathbf r$ para os quais $\mathbf r\cdot \mathbf a = C$ para alguma constante fixa $C$.
+Você pode ver que esse conjunto de pontos é exatamente o conjunto de pontos para os quais a projeção em $\mathbf a$ é o ponto $C \cdot \dfrac{\mathbf a}{|\mathbf a|}$ e eles formam um hiperplano ortogonal a $\mathbf a$.
+Você pode ver o vetor $\mathbf a$ ao lado de vários vetores com o mesmo produto escalar em 2D na imagem abaixo:</p>
+
+<p><center><img src="https://i.imgur.com/eyO7St4.png" alt="Vectors having same dot product with a" /></center></p>
+
+<p>Em 2D, esses vetores formarão uma linha e, em 3D, formarão um plano. Observe que esse resultado nos permite definir uma linha em 2D como $\mathbf r\cdot \mathbf n=C$ ou $(\mathbf r - \mathbf r_0)\cdot \mathbf n=0$ onde $\mathbf n$ é um vetor ortogonal à linha e $\mathbf r_0$ é qualquer vetor já presente na linha e $C = \mathbf r_0\cdot \mathbf n$.
+Da mesma maneira, um plano pode ser definido em 3D.</p>
+
+<h2>Produto vetorial(<a href="https://en.wikipedia.org/wiki/Cross_product">Cross product</a>)</h2>
+
+<h3>Definição</h3>
+
+<p>Suponha que você tenha três vetores $\mathbf a$, $\mathbf b$ e $\mathbf c$ no espaço 3D unidos em um paralelepípedo, como na figura abaixo:
+<center><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Parallelepiped_volume.svg/240px-Parallelepiped_volume.svg.png" alt="Three vectors" /></center></p>
+
+<p>Como você calcularia seu volume? Sabemos que devemos multiplicar a área da base pela altura, que é a projeção de $\mathbf a$ na direção ortogonal à base. Isso significa que, se definirmos $\mathbf b \times \mathbf c$ como o vetor ortogonal a $\mathbf b$ e $\mathbf c$ e cujo comprimento seja igual à área do paralelogramo formado por $\mathbf b$ e $\mathbf c$ assim, $|\mathbf a\cdot (\mathbf b\times\mathbf c)|$ será igual ao volume do paralelepípedo. Por integridade, diremos que qualquer $\mathbf b\times \mathbf c$ será sempre direcionado de tal forma que a rotação do vetor $\mathbf b$ para o vetor $\mathbf c$ a partir do ponto de $\mathbf b\times \mathbf c$ é sempre no sentido anti-horário (veja a figura abaixo).</p>
+
+<p><center><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Cross_product_vector.svg/250px-Cross_product_vector.svg.png" alt="cross product" /></center></p>
+
+<p>Isso define o produto vetorial $\mathbf b\times \mathbf c$ dos vetores $\mathbf b$ e $\mathbf c$ e o produto triplo $\mathbf a\cdot(\mathbf b\times \mathbf c)$ dos vetores $\mathbf a$, $\mathbf b$ e $\mathbf c$.</p>
+
+<p>Algumas propriedades notáveis ​​dos produtos vetoriais e triplos:</p>
+
+<ol>
+<li>$\mathbf a\times \mathbf b = -\mathbf b\times \mathbf a$</li>
+<li>$(\alpha \cdot \mathbf a)\times \mathbf b = \alpha \cdot (\mathbf a\times \mathbf b)$</li>
+<li>Para qualquer $\mathbf b$ e $\mathbf c$ existe exatamente um vetor  $\mathbf r$ no qual $\mathbf a\cdot (\mathbf b\times \mathbf c) = \mathbf a\cdot\mathbf r$ para qualquer vetor $\mathbf a$. <br>De fato, se existem dois vetores $\mathbf r_1$ e $\mathbf r_2$, então $\mathbf a\cdot (\mathbf r_1 - \mathbf r_2)=0$ para todos os vetores $\mathbf a$ o que só é possível quando $\mathbf r_1 = \mathbf r_2$.</li>
+<li>$\mathbf a\cdot (\mathbf b\times \mathbf c) = \mathbf b\cdot (\mathbf c\times \mathbf a) = -\mathbf a\cdot( \mathbf c\times \mathbf b)$</li>
+<li>$(\mathbf a + \mathbf b)\times \mathbf c = \mathbf a\times \mathbf c + \mathbf b\times \mathbf c$.
+De fato, para todos os vetores $\mathbf r$ a cadeia de equações é válida:
+$$\mathbf r\cdot( (\mathbf a + \mathbf b)\times \mathbf c) = (\mathbf a + \mathbf b) \cdot (\mathbf c\times \mathbf r) =  \mathbf a \cdot(\mathbf c\times \mathbf r) + \mathbf b\cdot(\mathbf c\times \mathbf r) = \mathbf r\cdot (\mathbf a\times \mathbf c) + \mathbf r\cdot(\mathbf b\times \mathbf c) = \mathbf r\cdot(\mathbf a\times \mathbf c + \mathbf b\times \mathbf c)$$
+O que prova $(\mathbf a + \mathbf b)\times \mathbf c = \mathbf a\times \mathbf c + \mathbf b\times \mathbf c$ de acordo com o ponto 3.</li>
+<li>$|\mathbf a\times \mathbf b|=|\mathbf a| \cdot |\mathbf b| \sin \theta$ onde $\theta$ é o ângulo entre $\mathbf a$ e $\mathbf b$, como $|\mathbf a\times \mathbf b|$ é igual a área do paralelogramo formado por $\mathbf a$ e $\mathbf b$. </li>
+</ol>
+
+<p>Dado tudo isso e que a seguinte equação é válida para os vetores de unidade
+$$\mathbf e_x\times \mathbf e_x = \mathbf e_y\times \mathbf e_y = \mathbf e_z\times \mathbf e_z = \mathbf 0,&#92;\
+\mathbf e_x\times \mathbf e_y = \mathbf e_z,~\mathbf e_y\times \mathbf e_z = \mathbf e_x,~\mathbf e_z\times \mathbf e_x = \mathbf e_y$$
+podemos calcular o produto vetorial de $\mathbf a = (x_1;y_1;z_1)$ and $\mathbf b = (x_2;y_2;z_2)$ na forma de coordenadas:</p>
+
+<p>$$\mathbf a\times \mathbf b = (x_1 \cdot \mathbf e_x + y_1 \cdot \mathbf e_y + z_1 \cdot \mathbf e_z)\times (x_2 \cdot \mathbf e_x + y_2 \cdot \mathbf e_y + z_2 \cdot \mathbf e_z) =$$
+$$(y_1 z_2 - z_1 y_2)\mathbf e_x  + (z_1 x_2 - x_1 z_2)\mathbf e_y + (x_1 y_2 - y_1 x_2)$$</p>
+
+<p>Também pode ser escrito de uma forma mais elegante:
+$$\mathbf a\times \mathbf b = \begin{vmatrix}\mathbf e_x &amp; \mathbf e_y &amp; \mathbf e_z &#92;\ x_1 &amp; y_1 &amp; z_1 &#92;\ x_2 &amp; y_2 &amp; z_2 \end{vmatrix},~a\cdot(b\times c) = \begin{vmatrix} x_1 &amp; y_1 &amp; z_1 &#92;\ x_2 &amp; y_2 &amp; z_2 &#92;\ x_3 &amp; y_3 &amp; z_3 \end{vmatrix}$$
+Aqui $| \cdot |$ representa o determinante de uma matriz.</p>
+
+<p>Alguns tipos de produtos vetoriais podem ser implementados para dimensões 2D.
+Se quisermos calcular a área do paralelogramo formada pelos vetores $\mathbf a$ e $\mathbf b$ iríamos calcular $|\mathbf e_z\cdot(\mathbf a\times \mathbf b)| = |x_1 y_2 - y_1 x_2|$.
+Outra maneira de obter o mesmo resultado é multiplicar $|\mathbf a|$ (base do paralelogramo) pela altura, que é a projeção do vetor $\mathbf b$ no vetor $\mathbf a$ rotacionado por $90^\circ$ que por sua vez é $\widehat{\mathbf a}=(-y_1;x_1)$.
+Isto é, para calcular $|\widehat{\mathbf a}\cdot\mathbf b|=|x_1y_2 - y_1 x_2|$.</p>
+
+<p>Se considerarmos o sinal, a área será positiva se a rotação de $\mathbf a$ para $\mathbf b$ (ou seja, do ponto de vista de $\mathbf e_z$) for realizada no sentido anti-horário e negativa caso contrário. Isso define o produto pseudo-escalar. Observe que ele também é igual a $|\mathbf a| \cdot |\mathbf b| \sin \theta$ onde $\theta$ é o ângulo de $\mathbf a$ para $\mathbf b$ no sentido anti-horário (e negativo se a rotação for no sentido horário).</p>
+
+<p>Vamos implementar tudo isso.</p>
+
+<pre><code class="cpp">point3d cross(point3d a, point3d b) {
+    return point3d(a.y * b.z - a.z * b.y,
+                   a.z * b.x - a.x * b.z,
+                   a.x * b.y - a.y * b.x);
+}
+ftype triple(point3d a, point3d b, point3d c) {
+    return dot(a, cross(b, c));
+}
+ftype cross(point2d a, point2d b) {
+    return a.x * b.y - a.y * b.x;
+}
+</code></pre>
+
+<h3>Propriedades</h3>
+
+<p>Quanto ao produto cruzado, ele é igual ao vetor zero se os vetores $\mathbf a$ e $\mathbf b$ são colineares (formam uma linha em comum, ou seja, são paralelos). O mesmo vale para o produto triplo, que é igual a zero se os vetores $\mathbf a$, $\mathbf b$ e $\mathbf c$ são coplanares (eles formam um plano em comum).</p>
+
+<p>A partir disso, podemos obter equações universais que definem linhas e planos. Uma linha pode ser definida através da direção de seu vetor $\mathbf d$ e um ponto inicial $\mathbf r_0$ ou por dois pontos $\mathbf a$ e $\mathbf b$.
+É definido como $(\mathbf r - \mathbf r_0)\times\mathbf d=0$ ou como $(\mathbf r - \mathbf a)\times (\mathbf b - \mathbf a) = 0$.
+Em relação a planos, pode ser definido por três pontos: $\mathbf a$, $\mathbf b$ e $\mathbf c$ como $(\mathbf r - \mathbf a)\cdot((\mathbf b - \mathbf a)\times (\mathbf c - \mathbf a))=0$ ou pelo ponto inicial $\mathbf r_0$ e por dois vetores de direção existentes neste plano $\mathbf d_1$ e $\mathbf d_2$: $(\mathbf r - \mathbf r_0)\cdot(\mathbf d_1\times \mathbf d_2)=0$.</p>
+
+<p>Em 2D, o produto pseudo-escalar também pode ser usado para verificar a orientação entre dois vetores, porque é positivo se a rotação do primeiro para o segundo vetor for no sentido horário ou negativa, caso contrário. Pode também ser usado para calcular áreas de polígonos, descritas em outro artigo. Um produto triplo pode ser usado para a mesma finalidade no espaço 3D.</p>
+
+<h2>Exercícios</h2>
+
+<h3>Interseção de linha</h3>
+
+<p>Existem muitas maneiras possíveis de definir uma linha em 2D e você não deve hesitar em combiná-las. Por exemplo, temos duas linhas e queremos encontrar seus pontos de interseção. Podemos dizer que todos os pontos da primeira linha podem ser parametrizados como $\mathbf r = \mathbf a_1 + t \cdot \mathbf d_1$ onde $\mathbf a_1$ é o ponto inicial, $\mathbf d_1$ é a direção e $t$  é algum parâmetro real. Quanto à segunda linha, todos os seus pontos devem satisfazer $(\mathbf r - \mathbf a_2)\times \mathbf d_2=0$. A partir disso, podemos facilmente encontrar o parâmetro $t$:</p>
+
+<p>$$(\mathbf a_1 + t \cdot \mathbf d_1 - \mathbf a_2)\times \mathbf d_2=0 \quad\Rightarrow\quad t = \dfrac{(\mathbf a_2 - \mathbf a_1)\times\mathbf d_2}{\mathbf d_1\times \mathbf d_2}$$</p>
+
+<p>Vamos implementar a função da interseção de duas linhas.</p>
+
+<pre><code class="cpp">point2d intersect(point2d a1, point2d d1, point2d a2, point2d d2) {
+    return a1 + cross(a2 - a1, d2) / cross(d1, d2) * d1;
+}
+</code></pre>
+
+<h3>Interseção de planos</h3>
+
+<p>No entanto, às vezes pode ser difícil usar algumas idéias geométricas. Por exemplo, você recebe três planos definidos pelos pontos iniciais $\mathbf a_i$ e direções $\mathbf d_i$ e você deseja encontrar o ponto de interseção. Você pode notar que é necessário apenas precisa resolver o sistema de equações:</p>
+
+<p>$$\begin{cases}\mathbf r\cdot \mathbf n_1 = \mathbf a_1\cdot \mathbf n_1, &#92;\ \mathbf r\cdot \mathbf n_2 = \mathbf a_2\cdot \mathbf n_2, &#92;\ \mathbf r\cdot \mathbf n_3 = \mathbf a_3\cdot \mathbf n_3\end{cases}$$</p>
+
+<p>Em vez de pensar na abordagem geométrica, é possível elaborar uma abordagem algébrica que pode ser obtida imediatamente. Por exemplo, assumindo que já foi implementada uma classe de "pontos", será fácil resolver esse sistema usando a regra de Cramer, porque o produto triplo é simplesmente o determinante da matriz obtida dos vetores que são suas colunas:</p>
+
+<pre><code class="cpp">point3d intersect(point3d a1, point3d n1, point3d a2, point3d n2, point3d a3, point3d n3) {
+    point3d x(n1.x, n2.x, n3.x);
+    point3d y(n1.y, n2.y, n3.y);
+    point3d z(n1.z, n2.z, n3.z); 
+    point3d d(dot(a1, n1), dot(a2, n2), dot(a3, n3));
+    return point3d(triple(d, y, z),
+                   triple(x, d, z),
+                   triple(x, y, d)) / triple(n1, n2, n3);
+}
+</code></pre>
+
+<p>O próximo passo é descobrir abordagens e tentar operações geométricas comuns para se acostumar com tudo isso.</p>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
