@@ -69,7 +69,7 @@ $$h = \frac {b-a} {2n}.$$</p>
 
 double simpson_integration(double a, double b){
     double h = (b - a) / N;
-    double s = f(a) + f(b); // a = x_0 and b = x_2n
+    double s = f(a) + f(b); // a = x_0     b = x_2n
     for (int i = 1; i &lt;= N - 1; ++i) { // refere-se a fórmula final de Simpson
         double x = a + h * i;
         s += f(x) * ((i &amp; 1) ? 4 : 2);
