@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Encontrando a interseção de dois segmentos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando a interseção de dois segmentos</h1>
+
+<p>Você recebe dois segmentos AB e CD, descritos como pares de seus pontos de extremidade/finais. Cada segmento pode ser um único ponto se seus pontos finais forem os mesmos. Você precisa encontrar a interseção desses segmentos, que podem estar vazios (se os segmentos não se cruzam), um único ponto ou segmento (se os segmentos se cruzarem/sobrepuserem, ou seja, uma interseção).</p>
+
+<h2>Solução</h2>
+
+<p>Podemos encontrar o ponto de interseção dos segmentos da mesma maneira que na <a href="https://cp-algorithms-brasil.com/Geometria/interseclinhas.html">interseção de linhas</a>: 
+reconstruindo as equações de linha a partir dos pontos finais dos segmentos e verificando se são paralelas.</p>
+
+<p>Se as linhas não são paralelas, precisamos encontrar seu ponto de interseção e verificar se ele pertence aos dois segmentos (para fazer isso, é suficiente verificar se o ponto de interseção pertence a cada segmento projetado nos eixos X e Y). Nesse caso, a resposta será "sem interseção" ou o ponto único da interseção das linhas/retas.</p>
+
+<p>O caso de linhas paralelas é um pouco mais complicado (o caso de um ou mais segmentos sendo um único ponto também pertence aqui). Nesse caso, precisamos verificar se os dois segmentos pertencem à mesma linha. Caso contrário, a resposta é "sem interseção". Se o fizerem, a resposta é a interseção dos segmentos pertencentes à mesma linha, que é obtida ordenando os pontos finais de ambos os segmentos na ordem crescente das determinadas coordenadas e tomando o "mais à direita dos pontos finais esquerdos" e o "ponto mais à esquerda dos pontos finais à direita".</p>
+
+<p>No início do algoritmo, vamos adicionar uma caixa de seleção - é necessário para o caso em que os segmentos pertencem à mesma linha e (sendo uma verificação leve), permite que o algoritmo trabalhe mais rápido, em média, em testes aleatórios.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação incluindo todas as funções auxiliares para processamento de linhas e segmentos.</p>
+
+<p>A função principal <code>intersect</code> retorna true se os segmentos tiverem uma interseção não vazia e armazena pontos de extremidade do segmento de interseção nos argumentos <code>left</code> e <code>right</code>. 
+Se a resposta for um ponto único, os valores escritos para <code>left</code> e <code>right</code> serão os mesmos.</p>
+
+<pre><code class="cpp">const double EPS = 1E-9;
+
+struct pt {
+    double x, y;
+
+    bool operator&lt;(const pt&amp; p) const
+    {
+        return x &lt; p.x - EPS || (abs(x - p.x) &lt; EPS &amp;&amp; y &lt; p.y - EPS);
+    }
+};
+
+struct line {
+    double a, b, c;
+
+    line() {}
+    line(pt p, pt q)
+    {
+        a = p.y - q.y;
+        b = q.x - p.x;
+        c = -a * p.x - b * p.y;
+        norm();
+    }
+
+    void norm()
+    {
+        double z = sqrt(a * a + b * b);
+        if (abs(z) &gt; EPS)
+            a /= z, b /= z, c /= z;
+    }
+
+    double dist(pt p) const { return a * p.x + b * p.y + c; }
+};
+
+double det(double a, double b, double c, double d)
+{
+    return a * d - b * c;
+}
+
+inline bool betw(double l, double r, double x)
+{
+    return min(l, r) &lt;= x + EPS &amp;&amp; x &lt;= max(l, r) + EPS;
+}
+
+inline bool intersect_1d(double a, double b, double c, double d)
+{
+    if (a &gt; b)
+        swap(a, b);
+    if (c &gt; d)
+        swap(c, d);
+    return max(a, c) &lt;= min(b, d) + EPS;
+}
+
+bool intersect(pt a, pt b, pt c, pt d, pt&amp; left, pt&amp; right)
+{
+    if (!intersect_1d(a.x, b.x, c.x, d.x) || !intersect_1d(a.y, b.y, c.y, d.y))
+        return false;
+    line m(a, b);
+    line n(c, d);
+    double zn = det(m.a, m.b, n.a, n.b);
+    if (abs(zn) &lt; EPS) {
+        if (abs(m.dist(c)) &gt; EPS || abs(n.dist(a)) &gt; EPS)
+            return false;
+        if (b &lt; a)
+            swap(a, b);
+        if (d &lt; c)
+            swap(c, d);
+        left = max(a, c);
+        right = min(b, d);
+        return true;
+    } else {
+        left.x = right.x = -det(m.c, m.b, n.c, n.b) / zn;
+        left.y = right.y = -det(m.a, m.c, n.a, n.c) / zn;
+        return betw(a.x, b.x, left.x) &amp;&amp; betw(a.y, b.y, left.y) &amp;&amp;
+               betw(c.x, d.x, left.x) &amp;&amp; betw(c.y, d.y, left.y);
+    }
+}
+</code></pre>
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
