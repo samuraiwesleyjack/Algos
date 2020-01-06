@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ponto de interseção de linhas - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Ponto de interseção de linhas</h1>
+
+<p>Você recebe duas linhas, descritas pelas equações $a_1 x + b_1 y + c_1 = 0$ e $a_2 x + b_2 y + c_2 = 0$.
+Temos que encontrar o ponto de interseção das linhas ou determinar se as linhas são paralelas.</p>
+
+<h2>Solução</h2>
+
+<p>Se duas linhas não são paralelas, elas se cruzam. Para encontrar seu ponto de interseção, precisamos resolver o seguinte sistema de equações lineares:</p>
+
+<p>$$\begin{cases} a_1 x + b_1 y + c_1 = 0 &#92;&#92;
+a_2 x + b_2 y + c_2 = 0
+\end{cases}$$</p>
+
+<p>Usando a regra de Cramer, podemos escrever imediatamente a solução para o sistema, o que nos dará o ponto de interseção necessário das linhas:</p>
+
+<p>$$x = - \frac{\begin{vmatrix}c_1 &amp; b_1 \cr c_2 &amp; b_2\end{vmatrix}}{\begin{vmatrix}a_1 &amp; b_1 \cr a_2 &amp; b_2\end{vmatrix} } = - \frac{c_1 b_2 - c_2 b_1}{a_1 b_2 - a_2 b_1},$$
+$$y = - \frac{\begin{vmatrix}a_1 &amp; c_1 \cr a_2 &amp; c_2\end{vmatrix}}{\begin{vmatrix}a_1 &amp; b_1 \cr a_2 &amp; b_2\end{vmatrix}} = - \frac{a_1 c_2 - a_2 c_1}{a_1 b_2 - a_2 b_1}.$$</p>
+
+<p>Se o denominador for igual a $0$, ou seja,</p>
+
+<p>$$\begin{vmatrix}a_1 &amp; b_1 \cr a_2 &amp; b_2\end{vmatrix} = a_1 b_2 - a_2 b_1 = 0 $$</p>
+
+<p>então, o sistema não tem soluções (as linhas são paralelas e distintas) ou há infinitas soluções (as linhas se sobrepõem). Se precisarmos distinguir esses dois casos, devemos verificar se os coeficientes $c$ são proporcionais com a mesma proporção que os coeficientes $a$ e $b$.
+Para fazer isso, apenas calculamos os seguintes determinantes e, se ambos forem iguais a $0$, as linhas/retas se sobrepõem:</p>
+
+<p>$$\begin{vmatrix}a_1 &amp; c_1 \cr a_2 &amp; c_2\end{vmatrix}, \begin{vmatrix}b_1 &amp; c_1 \cr b_2 &amp; c_2\end{vmatrix} $$</p>
+
+<p>Observe que uma abordagem diferente para calcular o ponto de interseção é explicada em outro <a href="https://cp-algorithms-brasil.com/Geometria/geometria.html">artigo</a>.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct pt {
+    double x, y;
+};
+
+struct line {
+    double a, b, c;
+};
+
+const double EPS = 1e-9;
+
+double det(double a, double b, double c, double d) {
+    return a*d - b*c;
+}
+
+bool intersect(line m, line n, pt &amp; res) {
+    double zn = det(m.a, m.b, n.a, n.b);
+    if (abs(zn) &lt; EPS)
+        return false;
+    res.x = -det(m.c, m.b, n.c, n.b) / zn;
+    res.y = -det(m.a, m.c, n.a, n.c) / zn;
+    return true;
+}
+
+bool parallel(line m, line n) {
+    return abs(det(m.a, m.b, n.a, n.b)) &lt; EPS;
+}
+
+bool equivalent(line m, line n) {
+    return abs(det(m.a, m.b, n.a, n.b)) &lt; EPS
+        &amp;&amp; abs(det(m.a, m.c, n.a, n.c)) &lt; EPS
+        &amp;&amp; abs(det(m.b, m.c, n.b, n.c)) &lt; EPS;
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
