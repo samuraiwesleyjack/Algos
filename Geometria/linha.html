@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Equação de uma linha para um segmento - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando a equação de uma linha para um segmento</h1>
+
+<p>A tarefa é: dadas as coordenadas das extremidades de um segmento, construa uma linha passando por ele.</p>
+
+<p>Assumimos que o segmento não é um caso degenerado, ou seja, tem um comprimento maior que zero (caso contrário, é claro, infinitas linhas diferentes passam por ele).</p>
+
+<h3>Caso bidimensional</h3>
+
+<p>Seja o segmento $PQ$ ou seja, as coordenadas de suas extremidades: $P_x , P_y , Q_x , Q_y$ .</p>
+
+<p>É necessário construir a <strong>equação de uma linha no plano que passa por esse segmento</strong>, ou seja, encontrar os coeficientes $A , B , C$ na equação de uma linha:</p>
+
+<p>$$A x + B y + C = 0.$$</p>
+
+<p>Observe que, para os triplos necessários $(A, B, C)$ existem <strong>infinitas</strong> soluções que descrevem o segmento especificado: você pode multiplicar todos os três coeficientes por um número arbitrário diferente de zero e obter a mesma linha reta. Portanto, nossa tarefa é encontrar um desses triplos.</p>
+
+<p>É possível verificar (substituindo essas expressões e as coordenadas dos pontos $P$ e $Q$ na equação de uma linha reta) se o seguinte conjunto de coeficientes se encaixa:</p>
+
+<p>$$A = P_y - Q_y,$$
+$$B = Q_x - P_x,$$
+$$C = - A P_x - B P_y.$$</p>
+
+<h3>Caso de números inteiros</h3>
+
+<p>Uma vantagem importante desse método de construção de uma linha reta é que, se as coordenadas das extremidades forem inteiras, os coeficientes obtidos também serão inteiros . Em alguns casos, isso permite executar operações geométricas sem recorrer a números reais e possíveis erros de aproximação.</p>
+
+<p>No entanto, há uma pequena desvantagem: para a mesma linha reta, podem ser obtidos diferentes triplos de coeficientes. Para evitar isso, você pode aplicar a seguinte técnica, geralmente chamada de racionamento. Encontre o <a href="https://cp-algorithms-brasil.com/Algebra/euclids.html">maior divisor comum</a> dos números $| A | , | B | , | C |$ , dividimos todos os três coeficientes por ele, e então fazemos a normalização do sinal: se $A &lt;0$ ou $A = 0, B &lt;0$ e então é necessário multiplicar todos os coeficientes por $-1$ .
+Como resultado, chegaremos à conclusão de que, para linhas retas idênticas, serão obtidos triplos idênticos de coeficientes, o que facilita a verificação de igualdade de retas.</p>
+
+<h3>Caso de números reais</h3>
+
+<p>Ao trabalhar com números reais, você deve sempre estar ciente de erros.</p>
+
+<p>Os coeficientes $A$ e $B$ terão a ordem das coordenadas originais, o coeficiente $C$ é da ordem do quadrado delas. Isso já pode ser um número bastante grande e, por exemplo, quando cruzamos linhas retas, elas se tornam ainda maiores, o que pode levar a grandes erros de arredondamento quando as coordenadas dos pontos finais estão na ordem de $10^3$.</p>
+
+<p>Portanto, ao trabalhar com números reais, é desejável fazer uma "normalização"; de uma forma direta: tornar os coeficientes tais que $A ^ 2 + B ^ 2 = 1$. Para fazer isso, calcule o número $Z$ :</p>
+
+<p>$$Z = \sqrt{A ^ 2 + B ^ 2},$$</p>
+
+<p>e divida todos os três coeficientes $A , B , C$ por ele.</p>
+
+<p>Portanto, a ordem dos coeficientes  $A$ e $B$ não dependerá da ordem das coordenadas de entrada, e o coeficiente $C$ será da mesma ordem que as coordenadas de entrada. Na prática, isso leva a uma melhoria significativa na precisão dos cálculos.</p>
+
+<p>Por fim, mencionamos a comparação de linhas retas - após essa normalização, para a mesma linha reta, apenas dois triplos de coeficientes podem ser obtidos: até a multiplicação por $-1$.
+Assim, se fizermos uma normalização adicional levando em consideração o sinal (se $A &lt; -\varepsilon$  ou $| A | &lt; \varepsilon$, $B &lt;- \varepsilon$ e então multiplicar por $-1$ ), os coeficientes resultantes serão únicos.</p>
+
+<h3>Caso tridimensional e multidimensional</h3>
+
+<p>Já no caso tridimensional não existe uma equação simples que descreva uma linha reta (pode ser definida como a interseção de dois planos, ou seja, um sistema de duas equações, mas esse é um método inconveniente).</p>
+
+<p>Essa é uma linha reta em que todos os pontos que podem ser obtidos a partir de um ponto $p$ adicionando um vetor $v$ com um coeficiente arbitrário.</p>
+
+<p>$$p + v t, ~~~ t \in \mathbb{R}.$$</p>
+
+<p>Portanto, uma linha reta é todos os pontos que podem ser obtidos a partir de um ponto $p$ adicionando um vetor $v$ com um coeficiente arbitrário.</p>
+
+<p>A construção de uma linha reta de uma forma paramétrica ao longo das coordenadas das extremidades de um segmento é trivial, basta pegar uma extremidade do segmento para o ponto $p$ e o vetor do primeiro ao segundo extremo - para o vetor $v$.</p>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
