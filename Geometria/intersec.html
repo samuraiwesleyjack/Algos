@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Verifique a interseção de dois segmentos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Verifique a interseção de dois segmentos</h1>
+
+<p>Você recebe dois segmentos $(a, b)$ e $(c, d)$.
+Você tem que verificar se eles se cruzam. Obviamente, você pode encontrar a interseção e verificar se ela não está vazia, mas isso não pode ser feito em números inteiros para segmentos com coordenadas inteiras. A abordagem descrita aqui pode funcionar em números inteiros.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Primeiro, considere o caso em que os segmentos fazem parte da mesma linha. Nesse caso, é suficiente verificar se suas projeções sobre $Ox$ e $Oy$ se cruzam.
+No outro caso,  $a$ e $b$ não devem estar no mesmo lado da linha  $(c, d)$, e $c$ e $d$ não devem estar no mesmo lado da linha $(a, b)$.
+Pode ser verificado com alguns produtos vetoriais.</p>
+
+<h2>Implementação</h2>
+
+<p>O algoritmo fornecido é implementado para inteiros. Obviamente, pode ser facilmente modificado para trabalhar com doubles.</p>
+
+<pre><code class="cpp">struct pt {
+    long long x, y;
+    pt() {}
+    pt(long long _x, long long _y) : x(_x), y(_y) {}
+    pt operator-(const pt&amp; p) const { return pt(x - p.x, y - p.y); }
+    long long cross(const pt&amp; p) const { return x * p.y - y * p.x; }
+    long long cross(const pt&amp; a, const pt&amp; b) const { return (a - *this).cross(b - *this); }
+};
+
+int sgn(const long long&amp; x) { return x &gt;= 0 ? x ? 1 : 0 : -1; }
+
+bool inter1(long long a, long long b, long long c, long long d) {
+    if (a &gt; b)
+        swap(a, b);
+    if (c &gt; d)
+        swap(c, d);
+    return max(a, c) &lt;= min(b, d);
+}
+
+bool check_inter(const pt&amp; a, const pt&amp; b, const pt&amp; c, const pt&amp; d) {
+    if (c.cross(a, d) == 0 &amp;&amp; c.cross(b, d) == 0)
+        return inter1(a.x, b.x, c.x, d.x) &amp;&amp; inter1(a.y, b.y, c.y, d.y);
+    return sgn(a.cross(b, c)) != sgn(a.cross(b, d)) &amp;&amp;
+           sgn(c.cross(d, a)) != sgn(c.cross(d, b));
+}
+</code></pre>
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
