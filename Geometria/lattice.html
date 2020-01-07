@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lattice points em um polígono - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Pontos de um grid dentro de um polígono</h1>
+<em>lattice points inside non-lattice polygon</em>
+<p>Para polígonos formados por um grid de pontos equidistantes existe a fórmula de Pick para enumerar os pontos dentro do polígono.
+E quanto aos polígonos com vértices arbitrários?</p>
+
+<p>Vamos processar cada uma das arestas do polígono individualmente e, depois disso, podemos somar a quantidade de pontos sob cada aresta, considerando suas orientações para escolher um sinal (como no cálculo da área de um polígono usando trapézios).</p>
+
+<p>Antes de tudo, devemos observar que, se a aresta atual tiver pontos finais em $A=(x_1;y_1)$ and $B=(x_2;y_2)$ ela poderá ser representada como uma função linear:</p>
+
+<p>$$y=y_1+(y_2-y_1) \cdot \dfrac{x-x_1}{x_2-x_1}=\left(\dfrac{y_2-y_1}{x_2-x_1}\right)\cdot x + \left(\dfrac{y_1x_2-x_1y_2}{x_2-x_1}\right)$$</p>
+
+<p>$$y = k \cdot x + b,~k = \dfrac{y_2-y_1}{x_2-x_1},~b = \dfrac{y_1x_2-x_1y_2}{x_2-x_1}$$</p>
+
+<p>Agora, faremos uma substituição $x=x'+\lceil x_1 \rceil$ para que $b' = b + k \cdot \lceil x_1 \rceil$.
+Isso nos permite trabalhar com $x_1'=0$ e $x_2'=x_2 - \lceil x_1 \rceil$.
+Vamos denotar $n = \lfloor x_2' \rfloor$.</p>
+
+<p>Não somaremos pontos em $x = n$ e em $y = 0$ para a integridade do algoritmo. Eles podem ser adicionados manualmente posteriormente.
+Portanto, temos que somar $\sum\limits_{x'=0}^{n - 1} \lfloor k' \cdot x' + b'\rfloor$. Também assumimos que $k' \geq 0$ and $b'\geq 0$.
+Caso contrário, deve-se substituir $x'=-t$ e adicionar $\lceil|b'|\rceil$ em $b'$.</p>
+
+<p>Vamos discutir como podemos avaliar uma soma $\sum\limits_{x=0}^{n - 1} \lfloor k \cdot x + b\rfloor$.
+Temos dois casos:</p>
+
+<ul>
+<li><p>$k \geq 1$ or $b \geq 1$.
+Então devemos começar somando pontos abaixo $y=\lfloor k \rfloor \cdot x + \lfloor b \rfloor$. O valor deles é igual a
+$$\sum\limits_{x=0}^{n - 1} \lfloor k \rfloor \cdot x + \lfloor b \rfloor=\dfrac{(\lfloor k \rfloor(n-1)+2\lfloor b \rfloor) n}{2}.$$
+Agora estamos interessados ​​apenas nos pontos $(x;y)$ tais que $\lfloor k \rfloor \cdot x + \lfloor b \rfloor &lt; y \leq k\cdot x + b$.
+Esse valor é igual ao número de pontos nos quais $0 &lt; y \leq (k - \lfloor k \rfloor) \cdot x + (b - \lfloor b \rfloor)$.
+Portanto, reduzimos nosso problema para $k'= k - \lfloor k \rfloor$, $b' = b - \lfloor b \rfloor$ e ambos $k'$ e $b'$ são menores que $1$ agora.
+Aqui está uma figura, apenas somamos os pontos azuis  e subtraímos a função linear azul da preta para reduzir o problema a valores menores para $k$ e $b$:
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/lattice.png" alt="Subtracting floored linear function" /></center></p></li>
+<li><p>$k &lt; 1$ e $b &lt; 1$.
+Se $\lfloor k \cdot n + b\rfloor$ for igual a $0$, poderemos retornar com segurança $0$.
+Se não for esse o caso, podemos dizer que não há pontos de rede/grid(<em>lattice points</em>) tais que $x &lt; 0$ e $0 &lt; y \leq k \cdot x + b$.
+Isso significa que teremos a mesma resposta se considerarmos um novo sistema de referência no qual $O'=(n;\lfloor k\cdot n + b\rfloor)$, o eixo $x'$ seja direcionado para baixo e o eixo $y'$ é direcionado para a esquerda. Para este sistema de referência, estamos interessados ​​em pontos no conjunto
+$$\left&#92;{(x;y)~\bigg|~0 \leq x &lt; \lfloor k \cdot n + b\rfloor,~ 0 &lt; y \leq \dfrac{x+(k\cdot n+b)-\lfloor k\cdot n + b \rfloor}{k}\right&#92;}$$
+que nos retorna ao caso $k>1$.
+Você pode ver o novo ponto de referência $O'$ e os eixos $X'$ e $Y'$ na figura abaixo:
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/mirror.png" alt="New reference and axes" /></center>
+Como você vê, no novo sistema de referência, a função linear terá o coeficiente $\tfrac 1 k$ e seu zero estará no ponto $\lfloor k\cdot n + b \rfloor-(k\cdot n+b)$ o que torna fórmula acima correta.</p></li>
+</ul>
+
+<h2>Análise de complexidade</h2>
+
+<p>Temos que contar no máximo $\dfrac{(k(n-1)+2b)n}{2}$ pontos.
+Entre eles, contaremos $\dfrac{\lfloor k \rfloor (n-1)+2\lfloor b \rfloor}{2}$ no primeiro passo. Podemos considerar que $b$ é insignificantemente pequeno porque podemos começar com um valor menor de $1$.
+Nesse caso, podemos dizer que contamos cerca de $\dfrac{\lfloor k \rfloor}{k} \geq \dfrac 1 2$  de todos os pontos.
+Assim, terminaremos com $O(\log n)$ etapas.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma função simples que calcula o número de pontos inteiros $(x;y)$ para $0 \leq x &lt; n$ and $0 &lt; y \leq \lfloor k x+b\rfloor$:</p>
+
+<pre><code class="cpp">int count_lattices(Fraction k, Fraction b, long long n) {
+    auto fk = k.floor();
+    auto fb = b.floor();
+    auto cnt = 0LL;
+    if (k &gt;= 1 || b &gt;= 1) {
+        cnt += (fk * (n - 1) + 2 * fb) * n / 2;
+        k -= fk;
+        b -= fb;
+    }
+    auto t = k * n + b;
+    auto ft = t.floor();
+    if (ft &gt;= 1) {
+        cnt += count_lattices(1 / k, (t - t.floor()) / k, t.floor());
+    }
+    return cnt;
+}
+</code></pre>
+
+<p>Aqui <code>Fraction</code> é uma classe que manipula números racionais.
+Na prática, parece que se todos os denominadores e numeradores estiverem no máximo no valor $C$(como valor absoluto) nas chamadas recursivas eles serão no máximo $C^2$ se continuar dividindo numeradores e denominadores pelo maior divisor comum.
+Dada essa suposição, podemos dizer que é possível usar <em>doubles</em> e exigir precisão $\varepsilon^2$("EPS") onde $\varepsilon$ é a precisão com a qual $k$ e $b$ são dados.
+Isso significa que(em <em>floor</em>) deve-se considerar os números como número inteiro, se diferirem no máximo em $\varepsilon^2$ de um inteiro.</p>
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
