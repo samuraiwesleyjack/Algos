@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Área de um polígono simples - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrar área de um polígono simples em $O(N)$</h1>
+
+<p>Seja um polígono simples (isto é, sem auto-interseção, não necessariamente convexo). É necessário calcular sua área, considerando seus vértices.</p>
+
+<h2>Método 1</h2>
+
+<p>Isso é fácil se percorrermos todas as arestas e adicionarmos áreas trapezoidais delimitadas/ligadas por cada aresta e eixo x. A área precisa ser adiquirida com um sinal para que a área extra seja reduzida. Portanto, a fórmula é a seguinte:</p>
+
+<p>$$A = \sum_{(p,q)\in \text{edges}} \frac{(p_x - q_x) \cdot (p_y + q_y)}{2}$$</p>
+
+<p>Implementação:</p>
+
+<pre><code class="cpp">double area(const vector&lt;point&gt;&amp; fig) {
+    double res = 0;
+    for (unsigned i = 0; i &lt; fig.size(); i++) {
+        point p = i ? fig[i - 1] : fig.back();
+        point q = fig[i];
+        res += (p.x - q.x) * (p.y + q.y);
+    }
+    return fabs(res) / 2;
+}
+</code></pre>
+
+<h2>Método 2</h2>
+
+<p>Podemos escolher um ponto $O$ arbitrariamente, iterar sobre todas as arestas, adicionando a área orientada do triângulo formado pela aresta e ponto $O$. Novamente, devido ao sinal de área, a área extra será reduzida.</p>
+
+<p>Esse método é melhor, pois pode ser generalizado para casos mais complexos (como quando alguns lados são arcos em vez de linhas retas).</p>
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
