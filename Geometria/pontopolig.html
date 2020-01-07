@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Verifique se um ponto pertence ao polígono convexo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Verifique se um ponto pertence ao polígono convexo em $O(\log N)$</h1>
+
+<p>Considere o seguinte problema: você recebe um polígono convexo com vértices inteiros e muitas consultas/queries. 
+Cada consulta é um ponto, para o qual devemos determinar se ele está dentro/no limite do polígono ou não. Suponha que o polígono esteja ordenado no sentido anti-horário. Responderemos a cada consulta em $O(\log n)$ online.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Vamos escolher o ponto com a menor coordenada x. Se houver vários deles, escolhemos aquele com a menor coordenada y. Vamos denotá-lo como $p_0$.
+Agora todos os outros pontos $p_1,\dots,p_n$ do polígono são ordenados pelo ângulo polar do ponto escolhido (porque o polígono é ordenado no sentido anti-horário).</p>
+
+<p>Se o ponto pertence ao polígono, ele pertence a algum triângulo $p_0, p_i, p_{i + 1}$ (talvez mais de um, se estiver no limite dos triângulos). Considere o triângulo $p_0, p_i, p_{i + 1}$ de modo que $p$ pertença a esse triângulo e $i$ seja o máximo entre todos esses triângulos.</p>
+
+<p>Há um caso especial, $p$ está no segmento $(p_0, p_n)$. Neste caso, verificaremos separadamente. Caso contrário, todos os pontos $p_j$ com $j \le i$ estão no sentido anti-horário de $p$ em relação a $p_0$, e todos os outros pontos não estão no sentido anti-horário a partir de $p$.
+Isso significa que podemos aplicar <em>binary search</em> para procurar o ponto $p_i$, de modo que $p_i$ não esteja no sentido anti-horário de $p$ em relação a $p_0$, e $i$ seja o máximo entre todos esses pontos. E depois verificamos se os pontos estão realmente no triângulo determinado.</p>
+
+<p>O sinal de $(a - c) \times (b - c)$ nos dirá, se o ponto $a$ está no sentido horário ou anti-horário a partir do ponto $b$ em relação ao ponto $c$.
+Se $(a - c) \times (b - c) > 0$, então o ponto $a$ está à direita do vetor que vai de $c$ para $b$, o que significa no sentido horário de $b$ em relação a $c$.
+E se $(a - c) \times (b - c) &lt; 0$, então o ponto está à esquerda ou no sentido anti-horário. E está exatamente na linha entre os pontos $b$ e $c$.</p>
+
+<p>De volta ao algoritmo:
+Considere uma consulta de ponto $p$.
+Primeiramente, devemos verificar se o ponto está entre $p_1$ e $p_n$.
+Caso contrário, já sabemos que ele não pode fazer parte do polígono. Isso pode ser feito verificando se o produto vetorial $(p_1 - p_0)\times(p - p_0)$ é zero ou tem o mesmo sinal com $(p_1 - p_0)\times(p_n - p_0)$, e $(p_n - p_0)\times(p - p_0)$ é zero ou tem o mesmo sinal com $(p_n - p_0)\times(p_1 - p_0)$.
+Em seguida, tratamos do caso especial em que $p$ faz parte da linha $(p_0, p_1)$.
+E então podemos executar <em>binary search</em> no último ponto de $p_1,\dots p_n$ que não está no sentido anti-horário de $p$ em relação a $p_0$.
+Para um único ponto $p_i$ essa condição pode ser verificada - verificando se $(p_i - p_0)\times(p - p_0) \le 0$. Depois de encontrarmos esse ponto $p_i$, precisamos testar se $p$ existe dentro do triângulo $p_0, p_i, p_{i + 1}$.
+Para testar se ele pertence ao triângulo, podemos simplesmente verificar se $|(p_i - p_0)\times(p_{i + 1} - p_0)| = |(p_0 - p)\times(p_i - p)| + |(p_i - p)\times(p_{i + 1} - p)| + |(p_{i + 1} - p)\times(p_0 - p)|$.
+Isto verifica se a área do triângulo $p_0, p_i, p_{i+1}$ tem exatamente o mesmo tamanho da soma dos lados do triângulo $p_0, p_i, p$, do triângulo $p_0, p, p_{i+1}$ e do triângulo $p_i, p_{i+1}, p$.
+Se $p$ estiver fora, a soma desses três triângulos será maior que o tamanho do triângulo. Se estiver dentro, será igual.</p>
+
+<h2>Implementação</h2>
+
+<p>A função <code>prepair</code> garantirá que o menor ponto lexicográfico (menor valor $x$ e menor valor $y$) seja $p_0$, e calculará os vetores $p_i - p_0$.
+Posteriormente, a função <code>pointInConvexPolygon</code> calcula o resultado de uma consulta.</p>
+
+<pre><code class="cpp">struct pt{
+    long long x, y;
+    pt(){}
+    pt(long long _x, long long _y):x(_x), y(_y){}
+    pt operator+(const pt &amp; p) const { return pt(x + p.x, y + p.y); }
+    pt operator-(const pt &amp; p) const { return pt(x - p.x, y - p.y); }
+    long long cross(const pt &amp; p) const { return x * p.y - y * p.x; }
+    long long dot(const pt &amp; p) const { return x * p.x + y * p.y; }
+    long long cross(const pt &amp; a, const pt &amp; b) const { return (a - *this).cross(b - *this); }
+    long long dot(const pt &amp; a, const pt &amp; b) const { return (a - *this).dot(b - *this); }
+    long long sqrLen() const { return this-&gt;dot(*this); }
+};
+
+bool lexComp(const pt &amp; l, const pt &amp; r){
+    return l.x &lt; r.x || (l.x == r.x &amp;&amp; l.y &lt; r.y);
+}
+
+int sgn(long long val){
+    return val &gt; 0 ? 1 : (val == 0 ? 0 : -1);
+}
+
+vector&lt;pt&gt; seq;
+int n;
+
+bool pointInTriangle(pt a, pt b, pt c, pt point){
+    long long s1 = abs(a.cross(b, c));
+    long long s2 = abs(point.cross(a, b)) + abs(point.cross(b, c)) + abs(point.cross(c, a));
+    return s1 == s2;
+}
+
+void prepare(vector&lt;pt&gt; &amp; points){
+    n = points.size();
+    int pos = 0;
+    for(int i = 1; i &lt; n; i++){
+        if(lexComp(points[i], points[pos]))
+            pos = i;
+    }
+    rotate(points.begin(), points.begin() + pos, points.end());
+
+    n--;
+    seq.resize(n);
+    for(int i = 0; i &lt; n; i++)
+        seq[i] = points[i + 1] - points[0];
+}
+
+bool pointInConvexPolygon(pt point){
+    if(seq[0].cross(point) != 0 &amp;&amp; sgn(seq[0].cross(point)) != sgn(seq[0].cross(seq[n - 1])))
+        return false;
+    if(seq[n - 1].cross(point) != 0 &amp;&amp; sgn(seq[n - 1].cross(point)) != sgn(seq[n - 1].cross(seq[0])))
+        return false;
+
+    if(seq[0].cross(point) == 0)
+        return seq[0].sqrLen() &gt;= point.sqrLen();
+
+    int l = 0, r = n - 1;
+    while(r - l &gt; 1){
+        int mid = (l + r)/2;
+        int pos = mid;
+        if(seq[pos].cross(point) &gt;= 0)l = mid;
+        else r = mid;
+    }
+    int pos = l;
+    return pointInTriangle(seq[pos], seq[pos + 1], pt(0, 0), point);
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<p><a href="https://codeforces.com/problemsets/acmsguru/problem/99999/253">SGU253 Theodore Roosevelt</a></p>
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
