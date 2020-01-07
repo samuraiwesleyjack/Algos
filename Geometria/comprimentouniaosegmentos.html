@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Comprimento da união de segmentos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Comprimento da união de segmentos</h1>
+
+<p>Dados $n$ segmentos em uma linha, cada um deles descrito por um par de coordenadas $(a_{i1}, a_{i2})$.
+Temos que encontrar o comprimento da união deles.</p>
+
+<p>O algoritmo a seguir foi proposto por Klee em 1977. Ele funciona em $O(n logn)$ e provou ser o assintoticamente ideal/otimizado.</p>
+
+<h2>Solução</h2>
+
+<p>Armazenamos em uma array $x$ os pontos finais de todos os segmentos ordenados por seus valores. Além disso, armazenamos se é uma extremidade esquerda ou direita de um segmento. Agora, iteramos sobre a array, mantendo um contador $c$ dos segmentos abertos no momento. Sempre que o elemento atual for um do "lado esquerdo", aumentamos esse contador e, caso contrário, o diminuímos. Para calcular a resposta, tomamos o comprimento entre o último até os $x$ valores $x_i - x_{i-1}$, sempre que chegamos a uma nova coordenada, e atualmente haver pelo menos um segmento aberto.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int length_union(const vector&lt;pair&lt;int, int&gt;&gt; &amp;a) {
+    int n = a.size();
+    vector&lt;pair&lt;int, bool&gt;&gt; x(n*2);
+    for (int i = 0; i &lt; n; i++) {
+        x[i*2] = {a[i].first, false};
+        x[i*2+1] = {a[i].second, true};
+    }
+
+    sort(x.begin(), x.end());
+
+    int result = 0;
+    int c = 0;
+    for (int i = 0; i &lt; n * 2; i++) {
+        if (i &gt; 0 &amp;&amp; x[i].first &gt; x[i-1].first &amp;&amp; c &gt; 0)
+            result += x[i].first - x[i-1].first;
+        if (x[i].second)
+            c--;
+        else
+            c++;
+    }
+    return result;
+}
+</code></pre>
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
