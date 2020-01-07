@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Interseção círculo & círculo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Interseção círculo & círculo</h1>
+
+<p>Você recebe dois círculos em um plano 2D, cada um deles descrito como coordenadas do centro e do raio. Encontre os pontos da interseção (casos possíveis: um ou dois pontos, nenhuma interseção ou círculos coincidem).</p>
+
+<h2>Solução</h2>
+
+<p>Vamos reduzir esse problema ao problema da <a href="https://cp-algorithms-brasil.com/Geometria/circulo&linha.html">interseção círculo & linha</a>.</p>
+
+<p>Suponha, sem perda de generalidade, que o primeiro círculo esteja centrado na origem (se isso não for verdade, podemos mover a origem para o centro do primeiro círculo e ajustar as coordenadas dos pontos de interseção). Temos um sistema de duas equações:</p>
+
+<p>$$x^2+y^2=r_1^2$$
+$$(x - x_2)^2 + (y - y_2)^2 = r_2^2$$</p>
+
+<p>Subtraia a primeira equação da segunda para se livrar das potências das variáveis:</p>
+
+<p>$$x^2+y^2=r_1^2$$
+$$x \cdot (-2x_2) + y \cdot (-2y_2) + (x_2^2+y_2^2+r_1^2-r_2^2) = 0$$</p>
+
+<p>Assim, reduzimos o problema original ao problema de encontrar interseções do primeiro círculo e uma linha:</p>
+
+<p>$$Ax + By + C = 0$$
+$$A = -2x_2$$
+$$B = -2y_2$$
+$$C = x_2^2+y_2^2+r_1^2-r_2^2$$</p>
+
+<p>E esse problema pode ser resolvido conforme descrito neste <a href="https://cp-algorithms-brasil.com/Geometria/circulo&linha.html">artigo</a>.</p>
+
+<p>O único caso degenerado que precisamos considerar separadamente é quando os centros dos círculos coincidem. Nesse caso, $x_2=y_2=0$, e a equação da linha será $C = r_1^2-r_2^2 = 0$. Se os raios dos círculos são os mesmos, existem infinitos pontos de interseção; se eles diferem, não há interseções.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=7766">RadarFinder</a></li>
+<li><a href="http://codeforces.com/problemset/problem/681/E">Runaway to a shadow - Codeforces Round #357</a></li>
+<li><a href="http://codeforces.com/gym/100199/problem/F">ASC 1 Problem F "Get out!"</a></li>
+<li><a href="http://www.spoj.com/problems/CIRCINT/">SPOJ: CIRCINT</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1242">UVA - 10301 - Rings and Glue</a></li>
+</ul>
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
