@@ -30,10 +30,10 @@
 			
 			<p>Busca em profundidade é um dos principais algoritmos de grafos.</p>
 			<p>O algoritmo encontra o primeiro caminho lexicográfico no grafo a partir de um vértice(nó) fonte $u$ para cada outro vértice.
-			 O algoritmo também encontra os menores caminhos em uma <strong>árvore</strong>, porém, em grafos genéricos, este não é o caso.</p>
+			 O algoritmo também encontra os menores caminhos em uma árvore, porém, em grafos genéricos, este não é o caso.</p>
 			<p>O algoritmo funciona em tempo $O(m + n)$, onde $n$ é o número de vértices e $m$ é o número de arestas.</p>
 			<h2>Descrição</h2>
-			<p>A idéia por trás da DFS é ir o mais fundo possível no grafo, e voltar atrás quando você estiver em um vértice sem vértices adjacentes(nós filhos) <strong>não visitados</strong>.</p>
+			<p>A idéia por trás da DFS é ir o mais fundo possível no grafo, e voltar atrás quando você estiver em um vértice sem vértices adjacentes(nós filhos) não visitados.</p>
 			<p>Nós começamos a procura em um vértice.
 			Depois de visitar o vértice, nós executamos uma DFS para cada vértice adjacente(nós filhos) que não foram visitados antes.
 			Nesse caminho nós visitamos todos os vértices que são alcançáveis pelo vértice inicial.</p>
