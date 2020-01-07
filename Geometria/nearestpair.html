@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Encontrando o par de pontos mais próximo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando o par de pontos mais próximo</h1>
+
+<h2>Declaração do problema</h2>
+
+<p>Dados $n$ pontos no plano. Cada ponto $p_i$ é definido por suas coordenadas $(x_i,y_i)$. É necessário encontrar entre eles dois desses pontos, de modo que a distância entre eles seja mínima:</p>
+
+<p>$$ \min_{\scriptstyle i, j=0 \ldots n-1,\atop \scriptstyle i \neq j } \rho (p_i, p_j). $$</p>
+
+<p>Tomamos as distâncias euclidianas usuais:</p>
+
+<p>$$ \rho (p_i,p_j) = \sqrt{(x_i-x_j)^2 + (y_i-y_j)^2} .$$</p>
+
+<p>O algoritmo trivial - iterando sobre todos os pares e calculando a distância para cada um - funciona em $O(n^2)$.</p>
+
+<p>O algoritmo executando em tempo $O(n \log n)$ is described below. é descrito abaixo. Esse algoritmo foi proposto por Preparata em 1975. Preparata e Shamos também mostraram que esse algoritmo é ideal no modelo de árvore de decisão.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Construímos um algoritmo de acordo com o esquema geral dos algoritmos de <strong>dividir e conquistar</strong>: o algoritmo é projetado como uma função recursiva, para a qual passamos um conjunto de pontos; essa função recursiva divide esse conjunto pela metade, chama-se recursivamente em cada metade e executa algumas operações para combinar as respostas. A operação de combinação consiste em detectar os casos em que um ponto da solução ideal caiu na metade e o outro no outro (nesse caso, chamadas recursivas de cada uma das metades não podem detectar esse par separadamente). A principal dificuldade, como sempre no caso de algoritmos de dividir e conquistar, reside na implementação efetiva do estágio de mesclagem. Se um conjunto de $n$ pontos for passado para a função recursiva, o estágio de mesclagem não deve funcionar mais do que O(n), então o comportamento assintótico de todo o algoritmo $T(n)$ será encontrado na equação:</p>
+
+<p>$$T(n) = 2T(n/2) + O(n).$$</p>
+
+<p>A solução para esta equação é $T(n) = O(n \log n).$</p>
+
+<p>Então, prosseguimos para a construção do algoritmo. Para chegar a uma implementação eficaz do estágio de mesclagem no futuro, dividiremos o conjunto de pontos em dois subconjuntos, de acordo com suas coordenadas $x$: Na verdade, "desenhamos" uma linha vertical dividindo o conjunto de pontos em dois subconjuntos aproximadamente do mesmo tamanho. É conveniente fazer essa partição da seguinte maneira: ordenamos os pontos da maneira padrão como pares de números, ou seja:</p>
+
+<p>$$p_i &lt; p_j \Longleftrightarrow (x_i &lt; x_j) \lor \Big(\left(x_i = x_j\right) \wedge \left(y_i &lt; y_j \right) \Big) $$</p>
+
+<p>Em seguida, pegamos o ponto do meio depois de ordenar $p_m (m = \lfloor n/2 \rfloor)$, e todos os pontos antes dele e o próprio $p_m$ são atribuídos à primeira metade e todos os pontos depois dele - segunda metade:</p>
+
+<p>$$A_1 = &#123;p_i \ | \ i = 0 \ldots m &#125;$$
+$$A_2 = &#123;p_i \ | \ i = m + 1 \ldots n-1 &#125;.$$</p>
+
+<p>Agora, chamando recursivamente cada um dos conjuntos $A_1$ e $A_2$, encontraremos as respostas $h_1$ e $h_2$ para cada uma das metades. E então pegamos o melhor deles $h = \min(h_1, h_2)$.</p>
+
+<p>Agora precisamos fazer um estágio de mesclagem , ou seja, tentamos encontrar esses pares de pontos, para os quais a distância entre eles seja menor que $h$ e um ponto estar em $A_1$ e o outro em $A_2$.
+É suficiente considerar apenas os pontos que são separados da linha vertical por uma distância inferior a $h$, ou seja, o conjunto $B$ dos pontos considerados nesta etapa é igual a:</p>
+
+<p>$$B = &#123; p_i\ | \ | x_i - x_m\ | &lt; h &#125;.$$</p>
+
+<p>Para cada ponto no conjunto $B$, tentamos encontrar os pontos que estão mais próximos do que $h$. Por exemplo, é suficiente considerar apenas os pontos cuja coordenada $y$ difere em não mais que $h$. Além disso, não faz sentido considerar os pontos cuja coordenada $y$ é maior que a coordenada $y$ do ponto atual. Assim, para cada ponto $p_i$ definimos o conjunto de pontos considerados $C(p_i)$ da seguinte maneira:</p>
+
+<p>$$C(p_i) = &#123; p_j\ |\ p_j \in B,\ \ y_i - h &lt; y_j \le y_i &#125;.$$</p>
+
+<p>Se ordenarmos os pontos do conjunto $B$ pela coordenada $y$, será mais fácil encontrar $C(p_i)$: esses são vários pontos na linha seguidos do ponto $p_i$.</p>
+
+<p>Portanto, na nova notação, o <em>estágio de mesclagem</em> se parece com isso: construa um conjunto $B$, ordene os pontos nele pela coordenada $y$, e então para cada ponto $p_i \in B$ considere todos os pontos $p_j \in C(p_i)$, e para cada par $(p_i,p_j)$ calcule a distância e compare com a melhor distância atual.</p>
+
+<p>À primeira vista, este ainda é um algoritmo não ideal: parece que os tamanhos dos conjuntos $C(p_i)$ serão da ordem de $n$, e o comportamento assintótico necessário não funcionará. No entanto, surpreendentemente, pode-se provar que o tamanho de cada um dos conjuntos $C(p_i)$ é uma quantidade $O(1)$, ou seja, não excede alguma pequena constante, independentemente dos próprios pontos. A prova desse fato é dada na próxima seção.</p>
+
+<p>Finalmente, prestamos atenção à ordenação(sorting) que o algoritmo acima contém: primeiro, ordenamos pelos pares $(x, y)$, e, em seguida, ordenamos os elementos do conjunto $B$ por $y$. De fato, esses duas ordenações dentro da função recursiva podem ser eliminadas (caso contrário, não atingiríamos a estimativa $O(n)$ para o <strong>estágio de mesclagem</strong>, e o comportamento assintótico do algoritmo iria ser $O(n \log^2 n)$). É fácil se livrar da primeira ordenação - basta fazer essa ordenação antes de iniciar a recursão: afinal, os próprios elementos não mudam dentro da recursão, portanto, não há necessidade de ordenar novamente. Com a segunda ordenação é um pouco mais difícil, executá-la anteriormente não funcionará. Mas, lembrando o tipo de mesclagem, que também funciona com o princípio de dividir e conquistar, podemos simplesmente incorporar esse tipo em nossa recursão. Deixe a recursão, pegando algum conjunto de pontos (como lembramos, ordenados pelos pares $(x, y)$), retornando o mesmo conjunto, porém, ordenados pela coordenada $y$. Para fazer isso, simplesmente basta mesclar (em $O(n)$) os dois resultados retornados por chamadas recursivas. Isso resultará em um conjunto ordenado pela coordenada $y$.</p>
+
+<h2>Análise assintótica</h2>
+
+<p>Para mostrar que o algoritmo acima é realmente executado em $O(n \log n)$, precisamos provar o seguinte fato: $|C(p_i)| = O(1)$.</p>
+
+<p>Então, vamos considerar algum ponto $p_i$; lembre-se de que o conjunto $C(p_i)$ é um conjunto de pontos cuja coordenada $y$ está no segmento $[y_i-h; y_i]$, e, além disso, ao longo da coordenada $x$, do próprio ponto $p_i$ e de todos os pontos do conjunto $C(p_i)$ estão dentro do limite(largura) $2h$. Em outras palavras, os pontos que estamos considerando $p_i$ e $C(p_i)$ estão em um retângulo de tamanho $2h \times h$.</p>
+
+<p>Nossa tarefa é estimar o número máximo de pontos que podem estar nesse retângulo  $2h \times h$; portanto, estimamos o tamanho máximo do conjunto $C(p_i)$. Ao mesmo tempo, ao avaliar, não devemos esquecer que pode haver pontos repetidos.</p>
+
+<p>Lembre-se de que $h$ foi obtido a partir dos resultados de duas chamadas recursivas - nos conjuntos $A_1$ e $A_2$, e $A_1$ contém pontos à esquerda da linha de partição e parcialmente nela, $A_2$ contém os pontos restantes da linha de partição e pontos para a direita dela. Para qualquer par de pontos de $A_1$, também de $A_2$, a distância não pode ser menos que $h$ — caso contrário, isso significaria uma operação incorreta da função recursiva.</p>
+
+<p>Para estimar o número máximo de pontos no retângulo $2h \times h$ dividimos em dois quadrados $h \times h$, o primeiro quadrado inclui todos os pontos $C(p_i) \cap A_1$, e o segundo contém todos os outros, ou seja, $C(p_i) \cap A_2$. Resulta das considerações acima que em cada um desses quadrados a distância entre dois pontos é de pelo menos $h$.</p>
+
+<p>Mostramos que existem no máximo quatro pontos em cada quadrado. Por exemplo, isso pode ser feito da seguinte maneira: divida o quadrado em $4$ sub-quadrados com lados $h/2$. Então não pode haver mais de um ponto em cada um desses sub-quadrados (já que até a diagonal é igual a $h / \sqrt{2}$, o que é menor que $h$). Portanto, não pode haver mais que $4$ pontos em todo o quadrado.</p>
+
+<p>Portanto, provamos que em um retângulo $2h \times h$ não pode haver mais que $4 \cdot 2 = 8$ pontos, e, portanto, o tamanho do conjunto $C(p_i)$ não pode exceder $7$, como requerido.</p>
+
+<h2>Implementação</h2>
+
+<p>Introduzimos uma estrutura de dados para armazenar um ponto (suas coordenadas e um número) e operadores de comparação necessários para dois tipos de ordenação:</p>
+
+<pre><code class="cpp">struct pt {
+    int x, y, id;
+};
+
+struct cmp_x {
+    bool operator()(const pt &amp; a, const pt &amp; b) const {
+        return a.x &lt; b.x || (a.x == b.x &amp;&amp; a.y &lt; b.y);
+    }
+};
+
+struct cmp_y {
+    bool operator()(const pt &amp; a, const pt &amp; b) const {
+        return a.y &lt; b.y;
+    }
+};
+
+int n;
+vector&lt;pt&gt; a;
+</code></pre>
+
+<p>Para uma implementação conveniente da recursão, apresentamos uma função auxiliar upd_ans(), que calcula a distância entre dois pontos e verifica se é melhor que a resposta atual:</p>
+
+<pre><code class="cpp">double mindist;
+pair&lt;int, int&gt; best_pair;
+
+void upd_ans(const pt &amp; a, const pt &amp; b) {
+    double dist = sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+    if (dist &lt; mindist) {
+        mindist = dist;
+        best_pair = {a.id, b.id};
+    }
+}
+</code></pre>
+
+<p>Finalmente, a implementação da recursão em si. Supõe-se que, antes de chamá-la, a array $a[]$ ja foi ordenada pela coordenada $x$. Na recursão, passamos apenas dois ponteiros $l, r$, o que indica que ele deve procurar a resposta para $a[l \ldots r)$. Se a distância entre $r$ e $l$ for muito pequena, a recursão deve ser interrompida e deve ser executado um algoritmo trivial para encontrar o par mais próximo e, em seguida, ordenar a subarray pela coordenada $y$.</p>
+
+<p>Para mesclar dois conjuntos de pontos, recebidos de chamadas recursivas, em um (ordenados por $y$), usamos a função STL $merge()$, e criamos um buffer auxiliar $t[]$(um para todas as chamadas recursivas). (Usar inplace_merge () é impraticável porque geralmente não funciona em tempo linear)</p>
+
+<p>Finalmente, o conjunto $B$ é armazenado na mesma array $t$.</p>
+
+<pre><code class="cpp">vector&lt;pt&gt; t;
+
+void rec(int l, int r) {
+    if (r - l &lt;= 3) {
+        for (int i = l; i &lt; r; ++i) {
+            for (int j = i + 1; j &lt; r; ++j) {
+                upd_ans(a[i], a[j]);
+            }
+        }
+        sort(a.begin() + l, a.begin() + r, cmp_y());
+        return;
+    }
+
+    int m = (l + r) &gt;&gt; 1;
+    int midx = a[m].x;
+    rec(l, m);
+    rec(m, r);
+
+    merge(a.begin() + l, a.begin() + m, a.begin() + m, a.begin() + r, t.begin(), cmp_y());
+    copy(t.begin(), t.begin() + r - l, a.begin() + l);
+
+    int tsz = 0;
+    for (int i = l; i &lt; r; ++i) {
+        if (abs(a[i].x - midx) &lt; mindist) {
+            for (int j = tsz - 1; j &gt;= 0 &amp;&amp; a[i].y - t[j].y &lt; mindist; --j)
+                upd_ans(a[i], t[j]);
+            t[tsz++] = a[i];
+        }
+    }
+}
+</code></pre>
+
+<p>A propósito, se todas as coordenadas forem inteiras, no momento da recursão, você não poderá mover para valores fracionários e armazenar em $mindist$ o quadrado da distância mínima.</p>
+
+<p>No programa principal("main()"), a recursão deve ser chamada da seguinte maneira:</p>
+
+<pre><code class="cpp">t.resize(n);
+sort(a.begin(), a.end(), cmp_x());
+mindist = 1E20;
+rec(0, n);
+</code></pre>
+
+<h2>Generalização: encontrando um triângulo com perímetro mínimo</h2>
+
+<p>O algoritmo descrito acima é curiosamente generalizado para esse problema: entre um determinado conjunto de pontos, escolha três pontos diferentes para que a soma das distâncias de pares entre eles seja a menor.</p>
+
+<p>De fato, para resolver esse problema, o algoritmo permanece o mesmo: dividimos o campo em duas metades da linha vertical, chamamos a solução recursivamente nas duas metades, escolhemos o mínimo $minper$ a partir dos perímetros encontrados, construimos uma "faixa" com o "espessura" de $minper / 2$, e iteramos por todos os triângulos que podem melhorar a resposta. (Observe que o triângulo com perímetro $\le minper$ tem o maior tamanho $\le minper / 2$.)</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1186">UVA 10245 "The Closest Pair Problem" </a></li>
+<li><a href="https://www.spoj.com/problems/CLOPPAIR/">SPOJ #8725 CLOPPAIR "Closest Point Pair" </a></li>
+<li><a href="http://codeforces.com/contest/120/problem/J">CODEFORCES Team Olympiad Saratov - 2011 "Minimum amount" </a></li>
+<li><a href="https://code.google.com/codejam/contest/311101/dashboard#s=a&amp;a=1">Google CodeJam 2009 Final " Min Perimeter "</a></li>
+<li><a href="https://www.spoj.com/problems/CLOSEST/">SPOJ #7029 CLOSEST "Closest Triple" </a></li>
+</ul>
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
