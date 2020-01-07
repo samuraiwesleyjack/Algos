@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pontes em um grafo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Localizando pontes em um grafo em $O(N+M)$</h1>
+
+<p>Seja um grafo não direcionado. Uma ponte é definida como uma aresta que, quando removida, desconecta o grafo (ou mais precisamente, aumenta o número de <a href="https://cp-algorithms-brasil.com/grafos/cc.html">componentes conectados</a> no grafo). A tarefa é encontrar todas as pontes no grafo fornecido.</p>
+
+<p>Informalmente, o problema é formulado da seguinte maneira: dado um mapa de cidades conectadas com estradas, encontre todas as estradas "importantes", isto é, estradas que, quando removidas, causam o desaparecimento de um caminho entre alguns pares de cidades.</p>
+
+<p>O algoritmo descrito aqui é baseado em uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> e tem complexidade $O(N+M)$, onde $N$ é o número de vértices e $M$ é o número de arestas no grafo.</p>
+
+<p>Também há o artigo  <a href="https://cp-algorithms.com/graph/bridge-searching-online.html">encontrando pontes online</a> - diferentemente do algoritmo offline descrito aqui, o algoritmo online é capaz de manter a lista de todas as pontes em um grafo em constante mudança (supondo que o único tipo de mudança seja a adição de novas arestas).</p>
+
+<h2>Algoritmo</h2>
+
+<p>Escolha um vértice arbitrário do grafo $raiz$ e execute uma DFS a partir dele. Note the following fact (which is easy to prove):</p>
+
+<ul>
+<li>Digamos que estamos na DFS, iterando através das arestas a partir do vértice $v$. A aresta atual $(v, to)$ é uma ponte, se e somente se, nenhum dos vértices $to$ e seus descendentes na travessia da árvore de uma DFS tiver uma "<em>back-edge</em>"(aresta de volta) para o vértice $v$ ou qualquer um de seus ancestrais. De fato, essa condição significa que não há outra maneira de voltar para $v$ de $to$ exceto a aresta $(v, to)$.</li>
+</ul>
+
+<p>Agora temos que aprender a verificar esse fato para cada vértice com eficiência. Usaremos o "tempo de entrada" do nó calculado pela DFS.</p>
+
+<p>Então, seja $tin[v]$ o tempo de entrada para o nó $v$. Introduzimos uma array $low$ que nos permitirá verificar o fato para cada vértice $v$. $low[v]$ é o mínimo de $tin[v]$, os tempos de entrada $tin[p]$ para cada nó $p$ que está conectado ao nó $v$ por uma back-edge $(v, p)$ e os valores de $low[to]$ para cada vértice $to$ que é um descendente direto de $v$ na árvore da DFS:</p>
+
+<p>$$low[v] = \min \begin{cases} tin[v] &#92;&#92; tin[p]&amp; \text{ para todo }p\text{ em que }(v, p)\text{ back edge} &#92;\ low[to]&amp; \text{ para todo }to\text{ em que }(v, to)\text{ tree edge} \end{cases}$$</p>
+
+<p>Agora, há uma back edge do vértice $v$ ou de um de seus descendentes para um de seus ancestrais se, e somente se, o vértice $v$ tiver um filho $to$ pelo qual $low[to] \leq tin[v]$. Se $low[to] = tin[v]$, a back edge vai diretamente em $v$, caso contrário, vai para um dos ancestrais de $v$.</p>
+
+<p>Portanto, a aresta atual $(v, to)$ na árvore da DFS é uma ponte se, e somente se, $low[to] > tin[v]$.</p>
+
+<h2>Implementação</h2>
+
+<p>A implementação precisa distinguir três casos: quando descemos na aresta da árvore da DFS, quando encontramos uma <em>back edge</em> para um ancestral do vértice e quando retornamos a um parente de um vértice. Casos:</p>
+
+<ul>
+<li>$visited[to] = false$ - a aresta faz parte da árvore da DFS;</li>
+<li>$visited[to] = true$ &amp;&amp; $to \neq parent$ - a aresta é uma back edge para um dos ancestrais;</li>
+<li>$to = parent$ - a aresta retorna a um parente na árvore da DFS.</li>
+</ul>
+
+<p>Para implementar isso, precisamos de uma função DFS que aceita o vértice parente do nó atual.</p>
+
+<p>Implementação em C++:</p>
+
+<pre><code class="cpp">int n; // número de nós
+vector&lt;vector&lt;int&gt;&gt; adj; // lista de adjacência - grafo
+
+vector&lt;bool&gt; visited;
+vector&lt;int&gt; tin, low;
+int timer;
+
+void dfs(int v, int p = -1) {
+    visited[v] = true;
+    tin[v] = low[v] = timer++;
+    for (int to : adj[v]) {
+        if (to == p) continue;
+        if (visited[to]) {
+            low[v] = min(low[v], tin[to]);
+        } else {
+            dfs(to, v);
+            low[v] = min(low[v], low[to]);
+            if (low[to] &gt; tin[v])
+                IS_BRIDGE(v, to);
+        }
+    }
+}
+
+void find_bridges() {
+    timer = 0;
+    visited.assign(n, false);
+    tin.assign(n, -1);
+    low.assign(n, -1);
+    for (int i = 0; i &lt; n; ++i) {
+        if (!visited[i])
+            dfs(i);
+    }
+}
+</code></pre>
+
+<p>A função principal é <code>find_bridges</code>; ela executa uma inicialização necessária e inicializa a DFS em cada componente conectado do grafo.</p>
+
+<p>A função <code>IS_BRIDGE(a, b)</code> é uma função que processará o fato de que a aresta $(a, b)$ é uma ponte, por exemplo, irá printar.</p>
+
+<p>Esta implementação não funciona corretamente se o grafo tiver <a href="https://en.wikipedia.org/wiki/Multiple_edges">arestas múltiplas</a>(<em>multiple edges</em>), pois as ignora. Obviamente, essas arestas nunca farão parte da resposta, portanto <code>IS_BRIDGE</code> pode verificar adicionalmente se a ponte relatada não é uma aresta múltipla. Como alternativa, é possível passar para a <code>dfs</code> o índice da aresta usada para entrar no vértice em vez do vértice parente (e armazenar o índice de todos os vértices).</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=737">UVA #796 "Critical Links"</a> </li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=551">UVA #610 "Street Directions"</a> </li>
+<li><a href="http://codeforces.com/problemset/problem/555/E">Case of the Computer Network (Codeforces Round #310 Div. 1 E)</a> </li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=3785">UVA 12363 - Hedge Mazes</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=251">UVA 315 - Network</a></li>
+<li><a href="http://codeforces.com/gym/100114">GYM - Computer Network (J)</a></li>
+<li><a href="http://www.spoj.com/problems/GRAFFDEF/">SPOJ - King Graffs Defense</a></li>
+<li><a href="http://www.spoj.com/problems/EC_P/">SPOJ - Critical Edges</a></li>
+<li><a href="http://codeforces.com/contest/700/problem/C">Codeforces - Break Up</a></li>
+<li><a href="http://codeforces.com/contest/732/problem/F">Codeforces - Tourist Reform</a></li>
+</ul>
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
