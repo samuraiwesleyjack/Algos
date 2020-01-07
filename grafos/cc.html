@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Componentes conectados em um grafo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Procure componentes conectados em um grafo</h1>
+
+<p>Dado um grafo não direcionado $G$ com $n$ nós e $m$ arestas. Devemos encontrar nele todos os componentes conectados, ou seja, vários grupos de vértices de modo que dentro de um grupo cada vértice possa ser alcançado pelo outro e não exista caminho entre grupos diferentes.</p>
+
+<h2>Um algoritmo para resolver o problema</h2>
+
+<ul>
+<li><p>Para resolver o problema, podemos usar DFS ou BFS.</p></li>
+<li><p>De fato, faremos uma série de DFS's: a primeira rodada começará no primeiro nó e todos os nós no primeiro componente conectado serão percorridos (encontrados, visitados). Em seguida, encontramos o primeiro nó não visitado dos nós restantes e executamos uma DFS nele, encontrando assim um segundo componente conectado. E assim por diante, até que todos os nós sejam visitados.</p></li>
+<li><p>O tempo de execução total desse algoritmo é $O(n + m)$ : na verdade, esse algoritmo não será executado no mesmo vértice duas vezes, o que significa que cada aresta será vista exatamente duas vezes (na extremidade do começo até a do final).</p></li>
+</ul>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int n;
+vector&lt;int&gt; g[MAXN] ;
+bool used[MAXN] ;
+vector&lt;int&gt; comp ;
+
+void dfs(int v) {
+    used[v] = true ;
+    comp.push_back(v);
+    for (size_t i = 0; i &lt; (int) g[v].size(); ++i) {
+        int to = g[v][i];
+        if (!used[to])
+            dfs(to);
+    }
+}
+
+void find_comps() {
+    for (int i = 0; i &lt; n ; ++i)
+        used [i] = false;
+    for (int i = 0; i &lt; n ; ++i)
+        if (!used[i]) {
+            comp.clear();
+            dfs(i);
+            cout &lt;&lt; "Component:" ;
+            for (size_t j = 0; j &lt; comp.size(); ++j)
+                cout &lt;&lt; ' ' &lt;&lt; comp[j];
+            cout &lt;&lt; endl ;
+        }
+}
+</code></pre>
+
+<ul>
+<li><p>A função mais importante usada é <code>find_comps()</code> que localiza e exibe os componentes conectados do grafo.</p></li>
+<li><p>O grafo é armazenado na representação de uma lista de adjacências, ou seja <code>g[i]</code> contém uma lista de vértices que possuem arestas do vértice <code>i</code>. A constante <code>MAXN</code> deve ser definida igual ao número máximo possível de vértices no grafo.</p></li>
+<li><p>O vetor <code>comp</code> contém uma lista de nós no componente conectado atual.</p></li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/CCOMPS/">SPOJ: CCOMPS</a></li>
+<li><a href="http://www.spoj.com/problems/CT23E/">SPOJ: CT23E</a></li>
+<li><a href="https://www.codechef.com/MARCH14/problems/GERALD07">CODECHEF: GERALD07</a></li>
+</ul>
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
