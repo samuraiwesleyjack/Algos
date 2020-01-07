@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Encontrando tangentes comuns em dois círculos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando tangentes comuns em dois círculos</h1>
+
+<p>Dados dois círculos. É necessário encontrar todas as tangentes comuns, isto é, todas as linhas que tocam os dois círculos simultaneamente.</p>
+
+<p>O algoritmo descrito também funcionará no caso em que um (ou ambos) círculos degeneram(ou seja, são validados apenas como pontos no plano) em pontos. Assim, esse algoritmo também pode ser usado para encontrar tangentes a um círculo que passa por um determinado ponto.</p>
+
+<h2>O número de tangentes comuns</h2>
+
+<p>O número de tangentes comuns a dois círculos pode ser <strong>0,1,2,3,4...</strong> e <strong>infinito</strong>. Olhe as imagens para diferentes casos.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/tangents-to-two-circles.png" alt="&quot;Different cases of tangents common to two circles&quot;" /></center></p>
+
+<p>Aqui, não consideraremos casos degenerados , ou seja, <em> quando os círculos coincidem (neste caso, eles têm infinitas tangentes comuns, última imagem), ou um círculo fica dentro do outro (nesse caso, eles não têm tangentes comuns, primeira imagem), ou se os círculos são tangentes, existe uma tangente comum, segunda imagem).</em></p>
+
+<p>Na maioria dos casos, dois círculos têm <strong>quatro</strong> tangentes comuns.</p>
+
+<p>Se os círculos <strong>forem tangentes</strong> , eles terão três tangentes comuns, mas isso pode ser entendido como um caso degenerado: como se as duas tangentes coincidissem.</p>
+
+<p>Além disso, o algoritmo descrito abaixo funcionará no caso de um ou ambos os círculos terem raio zero: nesse caso, haverá, respectivamente, duas ou uma tangente comum.</p>
+
+<p>Resumindo, sempre procuraremos quatro tangentes para todos os casos, exceto o caso de tangentes infinitas (o caso de tangentes infinitas precisa ser tratado separadamente e não é discutido aqui). Em casos degenerados, algumas das tangentes coincidem, mas, no entanto, esses casos também se encaixam no quadro geral.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Por uma questão de simplicidade do algoritmo, assumiremos, sem perder a generalidade, que o centro do primeiro círculo tem coordenadas $(0,0)$. (Se não for esse o caso, isso pode ser alcançado simplesmente mudando a imagem toda e, depois de encontrar uma solução, mudando as linhas retas obtidas de volta).</p>
+
+<p>Denote $r_1$ e $r_2$ os raios do primeiro e segundo círculos e por $(v_x,v_y)$ as coordenadas do centro do segundo círculo e o ponto $v$ diferente da origem. (Observação: não estamos considerando o caso em que os dois círculos são iguais).</p>
+
+<p>Para resolver o problema, abordamos-o puramente algebricamente. Precisamos encontrar todas as linhas da forma $ax + by + c = 0$ que se encontram a uma distância $r_1$ da origem das coordenadas e a uma distância $r_2$ de um ponto $v$. Além disso, impomos a condição de normalização da linha reta: a soma dos quadrados dos coeficientes deve ser igual a um (isso é necessário, caso contrário, a mesma linha reta corresponderá a infinitas representações na forma $ax + by + c = 0$). No total, obtemos esse sistema de equações para os coeficientes $a, b, c$:</p>
+
+<p>$$a^2 + b^2 = 1$$
+$$\mid a \cdot 0 + b \cdot 0 + c \mid = r_1$$
+$$\mid a \cdot v_x + b \cdot v_y + c \mid = r_2$$</p>
+
+<p>Para se livrar do módulo, observe que existem apenas quatro maneiras de abrir o módulo neste sistema. Todos esses métodos podem ser considerados no caso geral, se entendermos a abertura do módulo como o fato de que o coeficiente do lado direito pode ser multiplicado por -1. Em outras palavras, nos voltamos para este sistema:</p>
+
+<p>$$a^2 + b^2 = 1$$
+$$c = \pm r_1$$
+$$a \cdot v_x + b \cdot v_y + c = \pm r_2$$</p>
+
+<p>Introduzindo a notação $d_1 = \pm r_1$ and $d_2 = \pm r_2$, chegamos à conclusão de que o sistema deve ter quatro soluções:</p>
+
+<p>$$a^2 + b^2 = 1$$
+$$c = d_1$$
+$$a \cdot v_x + b \cdot v_y + c = d_2$$</p>
+
+<p>A solução deste sistema é reduzida para resolver uma equação quadrática. Omitiremos todos os cálculos complicados e daremos imediatamente uma resposta pronta(amém, mas não tanto):</p>
+
+<p>$$a = {( d_2 - d_1 ) v_x \pm v_y \sqrt{v_x^2 + v_y^2-(d_2-d_1)^2} \over {v_x^2 + v_y^2} }$$
+$$b = {( d_2 - d_1 ) v_y \pm v_x \sqrt{v_x^2 + v_y^2-(d_2-d_1)^2} \over {v_x^2 + v_y^2} }$$
+$$c = d_1$$</p>
+
+<p>No total, temos oito soluções em vez de quatro. No entanto, é fácil entender onde surgem as decisões supérfluas: de fato, no último sistema, basta apenas uma solução (por exemplo, a primeira). De fato, o significado geométrico do que tomamos como solução $\pm r_1$ e $\pm r_2$: na verdade, estamos ordenando de que lado de cada círculo há uma linha reta. Portanto, os dois métodos que surgem ao resolver o último sistema são redundantes: basta escolher uma das duas soluções (apenas, é claro, nos quatro casos, você deve escolher a mesma família de soluções).</p>
+
+<p>A última coisa que ainda não consideramos é como <strong>mudar a linha reta</strong> no caso em que o primeiro círculo não estava originalmente localizado na origem. No entanto, tudo é simples aqui: segue-se da linearidade da equação de uma linha reta que o valor $a \cdot x_0 + b \cdot y_0$ (onde $x_0$ e $y_0$ são as coordenadas do centro original do primeiro círculo) deve ser subtraído do coeficiente $c$.</p>
+
+<h2>Implementação</h2>
+
+<p>Primeiro, descrevemos todas as estruturas de dados necessárias e outras definições auxiliares:</p>
+
+<pre><code class="point-line-circle-struct">struct pt {
+    double x, y;
+
+    pt operator- (pt p) {
+        pt res = { x-p.x, y-p.y };
+        return res;
+    }
+};
+
+struct circle : pt {
+    double r;
+};
+
+struct line {
+    double a, b, c;
+};
+
+const double EPS = 1E-9;
+
+double sqr (double a) {
+    return a * a;
+}
+</code></pre>
+
+<p>Em seguida, a solução em si pode ser escrita dessa maneira (onde a função principal para a chamada é a segunda; e a primeira função é auxiliar):</p>
+
+<pre><code class="find-tangents-to-two-circles">void tangents (pt c, double r1, double r2, vector&lt;line&gt; &amp; ans) {
+    double r = r2 - r1;
+    double z = sqr(c.x) + sqr(c.y);
+    double d = z - sqr(r);
+    if (d &lt; -EPS)  return;
+    d = sqrt (abs (d));
+    line l;
+    l.a = (c.x * r + c.y * d) / z;
+    l.b = (c.y * r - c.x * d) / z;
+    l.c = r1;
+    ans.push_back (l);
+}
+
+vector&lt;line&gt; tangents (circle a, circle b) {
+    vector&lt;line&gt; ans;
+    for (int i=-1; i&lt;=1; i+=2)
+        for (int j=-1; j&lt;=1; j+=2)
+            tangents (b-a, a.r*i, b.r*j, ans);
+    for (size_t i=0; i&lt;ans.size(); ++i)
+        ans[i].c -= ans[i].a * a.x + ans[i].b * a.y;
+    return ans;
+}
+</code></pre>
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
