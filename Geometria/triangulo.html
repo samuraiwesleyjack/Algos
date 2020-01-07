@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Área orientada de um triângulo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Área orientada de um triângulo</h1>
+
+<p>Dados três pontos $p_1$, $p_2$ e $p_3$, calcule uma área orientada de um triângulo formado por eles. O sinal da área é determinado da seguinte maneira: imagine que você está no plano no ponto $p_1$ e está de frente com $p_2$. Você vai para $p_2$ e se $p_3$ estiver à sua direita (então dizemos que os três vetores giram no sentido horário), o sinal da área é positivo, caso contrário, é negativo. Se os três pontos são colineares, a área é zero.</p>
+
+<p>Usando esta área com sinal, podemos obter a área regular sem sinal (como o valor absoluto($abs$) da área com sinal) e determinar se os pontos estão no sentido horário ou anti-horário na ordem especificada (o que é útil, por exemplo, em algoritmos de convex hull).</p>
+
+<h2>Cálculo</h2>
+
+<p>Podemos usar o fato de que um determinante de uma matriz $2\times 2$ é igual à área com sinal de um paralelogramo estendido pelos vetores da coluna (ou linha) da matriz.
+Isso é análogo à definição do produto vetorial em 2D (consulte este <a href="https://cp-algorithms-brasil.com/Geometria/geometria.html">artigo</a>).
+Ao dividir essa área por dois, obtemos a área de um triângulo em que estamos interessados. Usaremos $\vec{p_1p_2}$ e $\vec{p_2p_3}$ como vetores coluna e calcularemos um determinante $2\times 2$:
+$$2S=\left|\begin{matrix}x_2-x_1 &amp; x_3-x_2&#92;&#92;y_2-y_1 &amp; y_3-y_2\end{matrix}\right|=(x_2-x_1)(y_3-y_2)-(x_3-x_2)(y_2-y_1)$$</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int signed_area_parallelogram(point2d p1, point2d p2, point2d p3) {
+    return cross(p2 - p1, p3 - p2);
+}
+
+double triangle_area(point2d p1, point2d p2, point2d p3) {
+    return abs(signed_area_parallelogram(p1, p2, p3)) / 2.0;
+}
+
+bool clockwise(point2d p1, point2d p2, point2d p3) {
+    return signed_area_parallelogram(p1, p2, p3) &lt; 0;
+}
+
+bool counter_clockwise(point2d p1, point2d p2, point2d p3) {
+    return signed_area_parallelogram(p1, p2, p3) &gt; 0;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/CHEFPOLY">Codechef - Chef and Polygons</a></li>
+</ul>
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
