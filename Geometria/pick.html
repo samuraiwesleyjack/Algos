@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Teorema de Pick - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Teorema de Pick</h1>
+<em>"area of lattice polygons"</em>
+<p>Um polígono sem auto-interseções é chamado "<em>lattice</em>" se todos os seus vértices tiverem coordenadas inteiras em algum grid 2D. O teorema de Pick fornece uma maneira de calcular a área desse polígono através do número de vértices que estão no limite e do número de vértices que estão estritamente dentro do polígono.</p>
+
+<h2>Fórmula</h2>
+
+<p>Dado um certo polígono(lattice polygon = um polígono construído sobre uma grade/grid de pontos, <a href="https://en.wikipedia.org/wiki/Pick%27s_theorem">veja</a>) com área diferente de zero.</p>
+
+<p>Denotamos sua área por $S$, o número de pontos com coordenadas inteiras estritamente dentro do polígono por $I$ e o número de pontos nos lados do polígono por $B$.</p>
+
+<p>Em seguida, a <strong>fórmula do Pick</strong> declara:</p>
+
+<p>$$S=I+\frac{B}{2}-1$$</p>
+
+<p>Em particular, se os valores de $I$ e $B$ para um polígono são fornecidos, a área pode ser calculada em $O(1)$ sem conhecer os vértices.</p>
+
+<p>Esta fórmula foi descoberta e comprovada pelo matemático austríaco Georg Alexander Pick em 1899.</p>
+
+<h2>Prova</h2>
+
+<p>A prova é realizada em várias etapas: de polígonos simples a arbitrários:</p>
+
+<ul>
+<li><p>Um único quadrado: $S=1, I=0, B=4$, o que satisfaz a fórmula.</p></li>
+<li><p>Um retângulo arbitrário não degenerado com lados paralelos aos eixos das coordenadas: assumindo que $a$ e $b$ sejam o comprimento dos lados do retângulo. Então, $S=ab, I=(a-1)(b-1), B=2(a+b)$. Ao substituir, vemos que a fórmula é verdadeira.</p></li>
+<li><p>Um ângulo reto com as "pernas"/segmentos que formam o ângulo paralelas aos eixos: para provar isso, observe que qualquer triângulo pode ser obtido cortando um retângulo em uma diagonal. Denotando o número de pontos integrais na diagonal por $c$, pode ser mostrado que a fórmula de Pick vale para esse triângulo, independentemente de $c$.</p></li>
+<li><p>Um triângulo arbitrário: Observe que qualquer triângulo pode ser transformado em um retângulo, anexando aos lados - triângulos retângulos com pernas paralelas aos eixos (você não precisará de mais do que três triângulos). A partir daqui, podemos obter a fórmula correta para qualquer triângulo.</p></li>
+<li><p>Um polígono arbitrário: para provar isso, "triangule-o", ou seja, divida-o em triângulos com coordenadas integrais. Além disso, é possível provar que o teorema de Pick mantém sua validade quando um polígono é adicionado a um triângulo. Assim, comprovamos a fórmula de Pick para polígono arbitrário.</p></li>
+</ul>
+
+<h2>Generalização para dimensões superiores</h2>
+
+<p>Infelizmente, esta fórmula simples e bonita não pode ser generalizada para dimensões superiores.</p>
+
+<p>John Reeve demonstrou isso propondo um tetraedro (tetraedro de Reeve) com os seguintes vértices em 1957:</p>
+
+<p>$$A=(0,0,0),
+B=(1,0,0),
+C=(0,1,0),
+D=(1,1,k),$$</p>
+
+<p>onde $k$ pode ser qualquer número natural. Então, para qualquer $k$, o tetraedro $ABCD$ não contém um número inteiro dentro e possui apenas $4$ pontos em suas bordas, $A, B, C, D$. Assim, o volume e a área de superfície podem variar, apesar do número inalterado de pontos dentro e no limite. Portanto, o teorema de Pick não permite generalizações.</p>
+
+<p>No entanto, as dimensões mais altas ainda têm uma generalização usando os <strong>polinômios de Ehrhart</strong> mas são bastante complexas e dependem não apenas dos pontos internos.</p>
+
+<h2>Recursos</h2>
+
+<p>Alguns exemplos simples e uma prova simples do teorema de Pick podem ser encontrados <a href="http://www.geometer.org/mathcircles/pick.pdf">aqui</a>.</p>
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
