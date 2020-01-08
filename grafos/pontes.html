@@ -34,11 +34,11 @@
 
 <p>O algoritmo descrito aqui é baseado em uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> e tem complexidade $O(N+M)$, onde $N$ é o número de vértices e $M$ é o número de arestas no grafo.</p>
 
-<p>Também há o artigo  <a href="https://cp-algorithms.com/graph/bridge-searching-online.html">encontrando pontes online</a> - diferentemente do algoritmo offline descrito aqui, o algoritmo online é capaz de manter a lista de todas as pontes em um grafo em constante mudança (supondo que o único tipo de mudança seja a adição de novas arestas).</p>
+<p>Também há o artigo  <a href="https://cp-algorithms-brasil.com/grafos/pontesonline.html">encontrando pontes online</a> - diferentemente do algoritmo offline descrito aqui, o algoritmo online é capaz de manter a lista de todas as pontes em um grafo em constante mudança (supondo que o único tipo de mudança seja a adição de novas arestas).</p>
 
 <h2>Algoritmo</h2>
 
-<p>Escolha um vértice arbitrário do grafo $raiz$ e execute uma DFS a partir dele. Note the following fact (which is easy to prove):</p>
+<p>Escolha um vértice arbitrário do grafo $raiz$ e execute uma DFS a partir dele. Observe que:</p>
 
 <ul>
 <li>Digamos que estamos na DFS, iterando através das arestas a partir do vértice $v$. A aresta atual $(v, to)$ é uma ponte, se e somente se, nenhum dos vértices $to$ e seus descendentes na travessia da árvore de uma DFS tiver uma "<em>back-edge</em>"(aresta de volta) para o vértice $v$ ou qualquer um de seus ancestrais. De fato, essa condição significa que não há outra maneira de voltar para $v$ de $to$ exceto a aresta $(v, to)$.</li>
