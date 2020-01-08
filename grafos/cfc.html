@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Componentes fortemente conectados e grafo de condensação - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Componentes fortemente conectados<br/>Construindo um grafo de condensação</h1>
+
+<h2>Definições</h2>
+
+<p>Você recebe um grafo direcionado $G$ com vértices $V$ e arestas $E$. É possível que haja loops e arestas múltiplas. Vamos denotar $n$ como número de vértices e $m$ como número de arestas em $G$.</p>
+
+<p>Um <strong>componente fortemente conectado</strong> é um subconjunto de vértices $C$ de modo que quaisquer dois vértices desse subconjunto sejam alcançáveis um pelo outro, ou seja, para qualquer $u, v \in C$:
+$$
+u \mapsto v, v \mapsto u
+$$
+onde $\mapsto$ significa que é alcançável, ou seja, existência do caminho do primeiro vértice ao segundo.</p>
+
+<p>Componentes fortemente conectados não se cruzam, ou seja, isto é uma partição de todos os vértices do grafo. Assim, podemos dar uma definição para um grafo de condensação $G^{SCC}$ como um grafo contendo todos os componentes fortemente conectados como um vértice. Cada vértice do grafo de condensação corresponde ao componente fortemente conectado do grafo $G$. Existe uma aresta orientada entre dois vértices $C_i$ e $C_j$ do grafo de condensação se e somente se houver dois vértices $u \in C_i, v \in C_j$ de modo que exista uma aresta no grafo inicial, ou seja, $(u, v) \in E$.</p>
+
+<p>A propriedade mais importante do grafo de condensação é que ele é <strong>acíclico</strong>. De fato, suponha que haja uma aresta entre $C$ e $C'$, vamos provar que não há aresta de $C'$ para $C$. Suponha que $C' \mapsto C$. Assim, existem dois vértices $u' \in C$ e $v' \in C'$ de modo que $v' \mapsto u'$. Mas como $u$ e $u'$ estão no mesmo componente fortemente conectado, há um caminho entre eles; o mesmo para $v$ e $v'$. Como resultado, se juntarmos esses caminhos, teremos que $v \mapsto u$ e ao mesmo tempo, $u \mapsto v$. Portanto, $u$ e $v$ deveriam estar no mesmo componente fortemente conectado, portanto, isso é uma contradição. Assim, isso completa a prova.</p>
+
+<p>O algoritmo descrito na próxima seção extrai todos os componentes fortemente conectados em um determinado grafo. E então fica mais fácil de construir um grafo de condensação.</p>
+
+<h2>Descrição</h2>
+
+<p>O algoritmo descrito foi sugerido de forma independente por Kosaraju e Sharir em 1979. Esse é um algoritmo mais fácil de implementar, ele é baseado em duas séries de <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>, levando tempo $O(n + m)$.</p>
+
+<p>Na <strong>primeira etapa</strong> do algoritmo, estamos realizando uma sequência de buscas em profundidade, visitando o grafo inteiro. Começamos em cada vértice do grafo e executamos uma DFS de cada vértice não visitado. Para cada vértice, estamos acompanhando o <strong>tempo de saída</strong> $tout[v]$. Esses tempos de saída têm um papel fundamental no algoritmo e isso é expresso no próximo teorema.</p>
+
+<p>Primeiro, vamos fazer anotações: vamos definir o tempo de saída $tout[C]$ do componente fortemente conectado $C$ como o máximo dos valores $tout[v]$ para todos os $v \in C$. Além disso, durante a prova do teorema, mencionaremos os tempos de entrada $tin[v]$ em cada vértice e da mesma maneira considerar $tin[C]$ para cada componente fortemente conectado $C$ como mínimo dos valores $tin[v]$ para todos os $v \in C$.</p>
+
+<p><strong>Teorema</strong>. Seja $C$ e $C'$ dois componentes fortemente conectados diferentes e há uma aresta $(C, C')$ em um grafo de condensação entre esses dois vértices. Então $tout[C] > tout[C']$.</p>
+
+<p>Existem dois casos diferentes principais na prova, dependendo de qual componente será visitado pela DFS primeiro, ou seja, irá depender da diferença entre $tin[C]$ e $tin[C']$:</p>
+
+<ul>
+<li><p>O componente $C$ foi atingido primeiro. Isso significa que a dfs ocorre em algum vértice $v$ do componente $C$ em algum momento, mas todos os outros vértices dos componentes $C$ e $C'$ não foram visitados ainda. Por condição, existe uma aresta $(C, C')$ em um grafo de condensação, portanto, não apenas o componente inteiro $C$ é alcançável por $v$ mas todo o componente $C'$ também é alcançável. Isso significa que a dfs que está sendo executada a partir do vértice $v$ visitará todos os vértices dos componentes $C$ e $C'$, portanto, eles serão descendentes de $v$ na árvore da DFS, ou seja, para cada vértice $u \in C \cup C', u \ne v$ temos que $tout[v] > tout[u]$, como afirmamos.</p></li>
+<li><p>Suponha que o componente $C'$ tenha sido visitado primeiro. Da mesma forma, a DFS ocorre em algum vértice $v$ do componente $C'$ em algum momento, mas todos os outros vértices dos componentes $C$ e $C'$ ainda não foram visitados. Mas, pela condição, existe uma aresta $(C, C')$ no grafo de condensação; portanto, devido à propriedade acíclica do grafo de condensação, não há caminho de retorno de $C'$ para $C$, ou seja, a dfs a partir do vértice $v$ não alcançará vértices de $C$. Isso significa que os vértices de $C$ serão visitados pela dfs depois, então $tout[C] > tout[C']$. Isso completa a prova.</p></li>
+</ul>
+
+<p>A prova é a base do algoritmo para encontrar componentes fortemente conectados. Segue-se que qualquer aresta $(C, C')$ no grafo de condensação vem de um componente com um valor maior de $tout$ para um componente com um valor menor.</p>
+
+<p>Se ordenarmos todos os vértices $v \in V$ por ordem decrescente do tempo de saída $tout[v]$, então, o primeiro vértice $u$ será um vértice do componente fortemente conectado da "raiz", ou seja, um vértice em que nenhuma aresta no grafo de condensação alcança/chega até ele. Agora, queremos executar essa busca nesse vértice $u$ para que ele visite todos os vértices desse componente fortemente conectado, mas não outros; fazendo isso, podemos gradualmente selecionar todos os componentes fortemente conectados: vamos remover todos os vértices correspondentes ao primeiro componente selecionado e, em seguida, vamos encontrar um vértice com o maior valor de $tout$, executar essa busca nele e assim por diante.</p>
+
+<p>Vamos considerar o grafo transposto $G^T$, ou seja, o grafo recebido de $G$ porém, alterando a direção de cada aresta no sentido oposto. Obviamente, este grafo terá os mesmos componentes fortemente conectados, como um grafo inicial. Além disso, o grafo de condensação $G^{SCC}$. Isso significa que não haverá arestas do nosso componente "raiz" para outros componentes.</p>
+
+<p>Portanto, para visitar todo o componente "raiz" fortemente conectado, contendo o vértice $v$, é suficiente executar uma busca a partir do vértice $v$ no grafo $G^T$. Essa busca visitará todos os vértices desse componente fortemente conectado e apenas eles. Como mencionado anteriormente, podemos remover esses vértices do grafo e encontrar o próximo vértice com um valor máximo de $tout[v]$ e executar a busca no grafo transposto a partir dele, e assim por diante.</p>
+
+<p>Assim, criamos o próximo algoritmo para selecionar componentes fortemente conectados:</p>
+
+<p>1º passo. Execute uma sequência de dfs do grafo $G$ que retornará vértices em ordem crescente dos tempos de saída $tout$, ou seja, uma lista $order$.</p>
+
+<p>2º passo. Construa o grafo transposto $G^T$. Execute uma série de (dfs/bfs)'s na ordem determinada pela lista $order$ (para ser exato na ordem inversa, ou seja, na ordem decrescente dos tempos de saída). Todo conjunto de vértices, alcançado após a próxima busca, será o próximo componente fortemente conectado.</p>
+
+<p>O comportamento assintótico do algoritmo é $O(n + m)$, porque são apenas as duas dfs's ou bfs's.</p>
+
+<p>Finalmente, é apropriado mencionar a <a href="https://cp-algorithms.com/graph/topological-sort.html">ordenação topológica</a> aqui. Primeiro, a etapa 1 do algoritmo representa a ordenação topológica invertida do grafo $G$ (na verdade, é exatamente isso que a ordenação dos vértices pelos tempos de saída significa). Em segundo lugar, o esquema do algoritmo gera componentes fortemente conectados em ordem decrescente de seus tempos de saída, gerando componentes - vértices do grafo de condensação/condensado - na ordem da ordenação topológica.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">    vector &lt; vector&lt;int&gt; &gt; g, gr;
+    vector&lt;bool&gt; used;
+    vector&lt;int&gt; order, component;
+
+    void dfs1 (int v) {
+        used[v] = true;
+        for (size_t i=0; i&lt;g[v].size(); ++i)
+            if (!used[ g[v][i] ])
+                dfs1 (g[v][i]);
+        order.push_back (v);
+    }
+
+    void dfs2 (int v) {
+        used[v] = true;
+        component.push_back (v);
+        for (size_t i=0; i&lt;gr[v].size(); ++i)
+            if (!used[ gr[v][i] ])
+                dfs2 (gr[v][i]);
+    }
+
+    int main() {
+        int n;
+        ... lendo n ...
+        for (;;) {
+            int a, b;
+            ... lendo próxima aresta (a,b) ...
+            g[a].push_back (b);
+            gr[b].push_back (a);
+        }
+
+        used.assign (n, false);
+        for (int i=0; i&lt;n; ++i)
+            if (!used[i])
+                dfs1 (i);
+        used.assign (n, false);
+        for (int i=0; i&lt;n; ++i) {
+            int v = order[n-1-i];
+            if (!used[v]) {
+                dfs2 (v);
+                ... printando próximo componente ...
+                component.clear();
+            }
+        }
+    }
+</code></pre>
+
+<p>Aqui, $g$ é o grafo e $gr$ é o grafo transposto. A função $dfs1$ implementa a busca em profundidade no grafo $G$, $dfs2$ - no grafo transposto $G^T$. A função $dfs1$ preenche a lista $order$ com vértices na ordem crescente de seus tempos de saída (na verdade, ele está fazendo uma ordenação topológica). A função $dfs2$ armazena todos os vértices alcançados na lista $component$, isso irá armazenar o próximo componente fortemente conectado após cada execução.</p>
+
+<h2>Literatura</h2>
+
+<ul>
+<li>Thomas Cormen, Charles Leiserson, Ronald Rivest, Clifford Stein. " Introduction to Algorithms " [2005].</li>
+<li>M. Sharir. " A strong-connectivity algorithm and its applications in data-flow analysis " [1979].</li>
+</ul>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/SUBMERGE/">SPOJ - Submerging Islands</a></li>
+<li><a href="http://www.spoj.com/problems/GOODA/">SPOJ - Good Travels</a></li>
+<li><a href="http://www.spoj.com/problems/LEGO/">SPOJ - Lego</a></li>
+<li><a href="https://www.codechef.com/AUG16/problems/CHEFRRUN">Codechef - Chef and Round Run</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/79">Dev Skills - A Song of Fire and Ice</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2938">UVA - 11838 - Come and Go</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=183">UVA 247 - Calling Circles</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4955">UVA 13057 - Prove Them All</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4393">UVA 12645 - Water Supply</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2870">UVA 11770 - Lighting Away</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=862&amp;page=show_problem&amp;problem=4805">UVA 12926 - Trouble in Terrorist Town</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2299">UVA 11324 - The Largest Clique</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2756">UVA 11709 - Trust groups</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=4598">UVA 12745 - Wishmaster</a></li>
+<li><a href="http://www.spoj.com/problems/TFRIENDS/">SPOJ - True Friends</a></li>
+<li><a href="http://www.spoj.com/problems/CAPCITY/">SPOJ - Capital City</a></li>
+<li><a href="http://codeforces.com/contest/22/problem/E">Codeforces - Scheme</a></li>
+<li><a href="http://www.spoj.com/problems/ADAPANEL/">SPOJ - Ada and Panels</a></li>
+</ul>
+
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
