@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Encontrando Pontes Online - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Encontrando Pontes Online</h1>
+
+<p>É fornecido um grafo não direcionado. Uma ponte é uma aresta cuja remoção desconecta o grafo (ou, mais precisamente, aumenta o número de componentes conectados). Nossa tarefa é encontrar todas as pontes no grafo fornecido.</p>
+
+<p>Informalmente, o problema é formulado da seguinte maneira: dado um mapa de cidades conectadas com estradas, encontre todas as estradas "importantes", isto é, estradas que, quando removidas, causam o desaparecimento de um caminho entre alguns pares de cidades, ou seja, algumas cidades ficam inacessíveis a outras.</p>
+
+<p>Já existe o artigo "<a href="https://cp-algorithms-brasil.com/grafos/pontes.html">Localizando pontes em um grafo em $O(N+M)$</a>" que resolve esta tarefa com uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>.
+Esse algoritmo será muito mais complicado, mas tem uma grande vantagem: o algoritmo descrito neste artigo funciona on-line, o que significa que o grafo de entrada(input) não precisa ser conhecido antecipadamente.
+As arestas são adicionadas uma vez por vez e, após cada adição, o algoritmo reconta todas as pontes no grafo atual. Em outras palavras, o algoritmo foi projetado para funcionar eficientemente em um grafo dinâmico, ou seja, com constantes mudanças.</p>
+
+<p>Mais rigorosamente, a declaração do problema é a seguinte: Inicialmente, o grafo está vazio e consiste de $n$ vértices.
+Em seguida, recebemos pares de vértices $(a, b)$, que indicam uma aresta adicionada ao grafo. Após cada aresta recebida, ou seja, após adicionar cada aresta, imprima o número atual de pontes no grafo.</p>
+
+<p>Também é possível manter uma lista de todas as <em>pontes</em>, bem como dar suporte explícito aos <em>componentes conectados</em> por 2 arestas no grafo.</p>
+
+<p>O algoritmo descrito abaixo funciona em $O(n \log n + m)$, onde $m$ é o número de arestas.
+O algoritmo é baseado na estrutura de dados "<a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html">Disjoint Set Union</a>".
+No entanto, a implementação neste artigo leva $O(n \log n + m \log n)$, porque usa a versão simplificada do DSU sem a "<em>union by rank</em>".</p>
+
+<h2>Algoritmo</h2>
+
+<p>Primeiro, vamos definir um "componente conectado por $k$ arestas":
+é um componente conectado que permanece conectado sempre que removemos um número de arestas menor que $k$.</p>
+
+<p>As pontes dividem o grafo em componentes conectados por 2 arestas.
+Se comprimirmos cada um desses componentes conectados por duas arestas em vértices e apenas deixarmos as pontes como arestas no grafo comprimido, obteremos um grafo acíclico, ou seja, uma <em>floresta</em>.</p>
+
+<p>O algoritmo descrito abaixo mantém essa floresta explícita, bem como os componentes conectados por 2 arestas.</p>
+
+<p>Inicialmente, quando o grafo está vazio, ele contém $n$ componentes conectados por 2 arestas, que por si só não estão conectados.</p>
+
+<p>Ao adicionar a próxima aresta $(a, b)$ podem ocorrer três situações:</p>
+
+<ul>
+<li><p>Ambos os vértices $a$ e $b$ estão no mesmo componente conectado por duas arestas - então essa aresta não é uma ponte e não altera nada na estrutura da floresta, então podemos apenas pular essa aresta. Assim, neste caso, o número de pontes não muda.</p></li>
+
+<li><p>Os vértices $a$ e $b$ estão em componentes conectados completamente diferentes, ou seja, cada um faz parte de uma árvore diferente. Nesse caso, a aresta $(a,b)$ se torna uma nova ponte e essas duas árvores são combinadas em uma (e todas as pontes antigas permanecem). Assim, neste caso, o número de pontes aumenta em um.</p></li>
+
+<li><p>Os vértices $a$ e $b$ estão em um componente conectado, mas em diferentes componentes conectados por 2 arestas. Nesse caso, essa aresta forma um ciclo junto com algumas das pontes antigas. Todas essas pontes acabam sendo pontes e o ciclo resultante deve ser comprimido em um novo componente conectado por 2 arestas. Assim, neste caso, o número de pontes diminui em dois ou mais.</p></li>
+</ul>
+
+<p>Consequentemente, toda a tarefa é reduzida à implementação efetiva de todas essas operações na <em>floresta</em> de componentes conectados por duas arestas.</p>
+
+<h2>Estruturas de dados para armazenar a floresta</h2>
+
+<p>A única estrutura de dados necessária é o <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html">Disjoint Set Union</a>.
+De fato, faremos duas cópias dessa estrutura: uma será para manter os componentes conectados, a outra para manter os componentes conectados por 2 arestas. Além disso, armazenamos a estrutura das árvores na floresta de componentes conectados por 2 arestas por meio de ponteiros: cada componente conectado por 2 arestas armazenará o índice <code>par[]</code> de seu ancestral na árvore.</p>
+
+<p>Agora, as operações que precisamos aprender a implementar:</p>
+
+<ul>
+<li><p>Verifique se os dois vértices estão no mesmo componente conectado / com 2 arestas. É feito com o algoritmo do DSU usual, apenas encontramos e comparamos os representantes das DSUs.</p></li>
+<li><p>Juntando duas árvores por alguma aresta $(a, b)$.
+Como pode acontecer que nem o vértice $a$ nem o vértice $b$ sejam as raízes de suas árvores, a única maneira de conectar essas duas árvores é re-enraizar uma delas. Por exemplo, você pode re-enraizar a árvore do vértice $a$ e, em seguida, anexá-la a outra árvore, definindo o ancestral de $a$ para $b$.</p>
+
+<p>No entanto, surge a pergunta sobre a eficácia da operação de re-enraizar: 
+para re-enraizar a árvore com a raiz $r$ para o vértice $v$, é necessário visitar todos os vértices no caminho entre $v$ e $r$ e redirecionar os ponteiros <code>par[]</code> na direção oposta e também alterar as referências dos ancestrais no DSU responsáveis pelos componentes conectados.</p>
+
+<p>Assim, o custo do enraizamento é $O(h)$, onde $h$ é a altura da árvore.
+Você pode fazer uma estimativa ainda pior assumindo que o custo é $O(\text{size})$ onde $\text{size}$ é o número de vértices na árvore. A complexidade final não será diferente.</p>
+
+<p>Agora aplicamos uma técnica padrão: re-enraízamos a árvore que contém menos vértices.
+Então é intuitivamente claro que o pior caso é quando duas árvores de tamanhos aproximadamente iguais são combinadas, o resultado é uma árvore com o dobro do tamanho. Isso não permite que essa situação aconteça várias vezes.</p>
+
+<p>No geral, o custo total pode ser escrito na forma de uma recursão:
+$$T(n) = \max_{k = 1 \ldots n-1} \left&#92;{ T(k) + T(n - k) + O(\min(k, n - k))\right&#92;}$$
+$T(n)$ é o número de operações necessárias para obter uma árvore com $n$ vértices por meio de re-enraizamentos e unificações de árvores. Uma árvore de tamanho $n$ pode ser criada combinando duas árvores menores de tamanho $k$ e $n - k$.
+Essa recorrência tem a solução $T(n) = O (n \log n)$.</p>
+
+<p>Assim, o tempo total gasto em todas as operações de re-enraizamento será de $O(n \log n)$, se sempre re-enraizarmos a menor das duas árvores.</p>
+
+<p>Teremos que manter o tamanho de cada componente conectado, mas a estrutura de dados DSU torna isso possível sem dificuldade.</p></li>
+
+<li><p>Procurando o ciclo formado pela adição de uma nova aresta $(a, b)$.
+Como $a$ e $b$ já estão conectados na árvore, precisamos encontrar o <em>menor ancestral comum(LCA)</em> dos vértices $a$ e $b$.
+O ciclo consistirá de caminhos de $b$ para o LCA, do LCA para $b$ e da aresta de $a$ para $b$.</p>
+
+<p>Depois de encontrar o ciclo, comprimimos todos os vértices do ciclo detectado em um vértice.
+Isso significa que já temos uma complexidade proporcional ao tamanho do ciclo, o que significa que também podemos usar qualquer algoritmo do LCA proporcional ao tamanho e não precisamos usar nenhum mais rápido.</p>
+
+<p>Como todas as informações sobre a estrutura da árvore estão disponíveis na array de ancestrais <code>par[]</code>, o único algoritmo LCA razoável é o seguinte:
+marque os vértices $a$ e $b$ como visitados, depois vamos para os ancestrais deles, <code>par[a]</code> e <code>par[b]</code>, e marcamos eles, e depois avançamos para seus ancestrais e assim por diante, até alcançarmos um vértice já marcado. Esse vértice é o LCA(menor ancestral comum) que estávamos procurando e podemos encontrar os vértices no ciclo percorrendo o caminho de $a$ e $b$ para o LCA novamente.</p>
+
+<p>A complexidade deste algoritmo é proporcional ao tamanho do ciclo desejado.</p></li>
+<li><p>Compressão do ciclo adicionando uma nova aresta $(a, b)$ em uma árvore.</p>
+
+<p>Precisamos criar um novo componente conectado por 2 arestas, que consistirá em todos os vértices do ciclo detectado (o próprio ciclo detectado poderia consistir em alguns componentes conectados a 2 arestas, mas isso não muda nada). Além disso, é necessário compactá-los de maneira que a estrutura da árvore não seja perturbada, e todos os ponteiros <code>par[]</code> e as duas DSU's ainda estão corretos.</p>
+
+<p>A maneira mais fácil de conseguir isso é comprimir todos os vértices do ciclo para o LCA deles.
+De fato, o LCA é o mais alto dos vértices, ou seja, seu ponteiro ancestral <code>par[]</code> permanece inalterado. Para todos os outros vértices do loop, os ancestrais não precisam ser atualizados, pois esses vértices simplesmente deixam de existir. Mas no DSU dos componentes conectados por 2 arestas, todos esses vértices simplesmente apontarão para o LCA.</p>
+
+<p>Implementaremos o DSU dos componentes conectados de 2 arestas sem a otimização do "<em>union by rank</em>"; portanto, obteremos a complexidade $O(\log n)$ em média por consulta. Para atingir a complexidade $O(1)$ em média por consulta, precisamos combinar os vértices do ciclo de acordo com o "<em>union by rank</em>", e então definir <code>par[]</code> de acordo.</p></li>
+</ul>
+
+<h2>Implementação</h2>
+
+<p>Aqui está a implementação final de todo o algoritmo.</p>
+
+<p>Como mencionado anteriormente, por uma questão de simplicidade, o DSU dos componentes conectados com 2 arestas é implementado sem union by rank, portanto, a complexidade resultante será $O(\log n)$ em média.</p>
+
+<p>Também nesta implementação, as próprias pontes não são armazenadas, apenas sua contagem: <code>bridges</code>.
+No entanto, não será difícil criar um <code>set</code> de todas as pontes.</p>
+
+<p>Inicialmente, a chamada da função <code>init()</code>, inicializa as duas DSUs (criando um conjunto separado para cada vértice e definindo o tamanho igual a um) e define os ancestrais <code>par</code>.</p>
+
+<p>A função principal é <code>add_edge(a, b)</code>, que processa e adiciona uma nova aresta.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; par, dsu_2ecc, dsu_cc, dsu_cc_size;
+int bridges;
+int lca_iteration;
+vector&lt;int&gt; last_visit;
+
+void init(int n) {
+    par.resize(n);
+    dsu_2ecc.resize(n);
+    dsu_cc.resize(n);
+    dsu_cc_size.resize(n);
+    lca_iteration = 0;
+    last_visit.assign(n, 0);
+    for (int i=0; i&lt;n; ++i) {
+        dsu_2ecc[i] = i;
+        dsu_cc[i] = i;
+        dsu_cc_size[i] = 1;
+        par[i] = -1;
+    }
+    bridges = 0;
+}
+
+int find_2ecc(int v) {
+    if (v == -1)
+        return -1;
+    return dsu_2ecc[v] == v ? v : dsu_2ecc[v] = find_2ecc(dsu_2ecc[v]);
+}
+
+int find_cc(int v) {
+    v = find_2ecc(v);
+    return dsu_cc[v] == v ? v : dsu_cc[v] = find_cc(dsu_cc[v]);
+}
+
+void make_root(int v) {
+    v = find_2ecc(v);
+    int root = v;
+    int child = -1;
+    while (v != -1) {
+        int p = find_2ecc(par[v]);
+        par[v] = child;
+        dsu_cc[v] = root;
+        child = v;
+        v = p;
+    }
+    dsu_cc_size[root] = dsu_cc_size[child];
+}
+
+void merge_path (int a, int b) {
+    ++lca_iteration;
+    vector&lt;int&gt; path_a, path_b;
+    int lca = -1;
+    while (lca == -1) {
+        if (a != -1) {
+            a = find_2ecc(a);
+            path_a.push_back(a);
+            if (last_visit[a] == lca_iteration)
+                lca = a;
+            last_visit[a] = lca_iteration;
+            a = par[a];
+        }
+        if (b != -1) {
+            path_b.push_back(b);
+            b = find_2ecc(b);
+            if (last_visit[b] == lca_iteration)
+                lca = b;
+            last_visit[b] = lca_iteration;
+            b = par[b];
+        }
+
+    }
+
+    for (int v : path_a) {
+        dsu_2ecc[v] = lca;
+        if (v == lca)
+            break;
+        --bridges;
+    }
+    for (int v : path_b) {
+        dsu_2ecc[v] = lca;
+        if (v == lca)
+            break;
+        --bridges;
+    }
+}
+
+void add_edge(int a, int b) {
+    a = find_2ecc(a);
+    b = find_2ecc(b);
+    if (a == b)
+        return;
+
+    int ca = find_cc(a);
+    int cb = find_cc(b);
+
+    if (ca != cb) {
+        ++bridges;
+        if (dsu_cc_size[ca] &gt; dsu_cc_size[cb]) {
+            swap(a, b);
+            swap(ca, cb);
+        }
+        make_root(a);
+        par[a] = dsu_cc[a] = b;
+        dsu_cc_size[cb] += dsu_cc_size[a];
+    } else {
+        merge_path(a, b);
+    }
+}
+</code></pre>
+
+<p>O DSU para os componentes conectados por 2 arestas é armazenado no vetor <code>dsu_2ecc</code>, e a função que retorna o representante é <code>find_2ecc(v)</code>.
+Essa função é usada várias vezes no restante do código, pois após a compactação de vários vértices em um deles, todos esses vértices deixam de existir e, em vez disso, apenas o <em>vértice/nó líder</em> do DSU tem o ancestral correto <code>par</code> na <em>floresta</em> de <em>componentes conectados</em> por duas arestas.</p>
+
+<p>O DSU para os componentes conectados é armazenado no vetor <code>dsu_cc</code>, e também há um vetor adicional  <code>dsu_cc_size</code> para armazenar os tamanhos dos componentes. A função <code>find_cc(v)</code> retorna o nó líder do componente de conectividade (que na verdade é a raiz da árvore).</p>
+
+<p>O enraizamento de uma árvore <code>make_root(v)</code> funciona como descrito:
+percorre do vértice $v$ pelos ancestrais até o vértice raiz, redirecionando sempre o ancestral <code>par</code> na direção oposta.
+O link para o representante do componente conectado <code>dsu_cc</code> também é atualizado, para que aponte para o novo vértice raiz.
+Após o re-enraizamento, precisamos atribuir à nova raiz o tamanho correto do componente conectado. Também temos que ter cuidado ao chamar <code>find_2ecc()</code> para obter os representantes do componente conectado por 2 arestas, em vez de outros vértices que já foram compactados.</p>
+
+<p>A função de compressão e procura do ciclo <code>merge_path(a, b)</code> também é implementada como descrito acima. Ela procura pelo LCA de $a$ e $b$ "aumentando" esses nós em paralelo, até encontrarmos um vértice pela segunda vez(que já tenha sido marcado). 
+Para fins de eficiência, escolhemos um identificador único para cada chamada para encontrar o LCA, e marcamos os vértices que foram percorridos com ele.
+Isso funciona em $O(1)$, enquanto outras abordagens, como usar $set$ apresentam desempenho pior. Os caminhos passados ​​são armazenados nos vetores <code>path_a</code> e <code>path_b</code>, e os usamos para percorrê-los uma segunda vez até o LCA, obtendo assim todos os vértices do ciclo.
+Todos os vértices do ciclo são compactados anexando-os ao LCA; portanto, a complexidade média é de $O(\log n)$ (já que não usamos "union by rank").
+Todas as arestas pelas quais passamos são pontes, portanto subtraímos 1 para cada aresta no ciclo.</p>
+
+<p>Finalmente, a função de consulta <code>add_edge(a, b)</code> determina os componentes conectados nos quais os vértices $a$ e $b$ estão. Se eles estiverem em diferentes componentes de conectividade, uma árvore menor será re-enraizada e, em seguida, anexada à árvore maior. Caso contrário, se os vértices $a$ e $b$ estiverem em uma árvore, mas em diferentes componentes conectados por 2 arestas, a função <code>merge_path(a, b)</code> será chamada, o que detectará o ciclo e o compactará em um componente conectado por 2 arestas.</p>
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
