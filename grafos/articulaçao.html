@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pontos de articulação em um grafo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		   <h1>Localizando pontos de articulação em um grafo em $O(N+M)$</h1>
+
+<p>Nos é dado um grafo não direcionado. Um ponto de articulação (ou vértice de corte) é definido como um vértice que, quando removido junto com as arestas associadas, desconecta o grafo (ou mais precisamente, aumenta o número de <a href="https://cp-algorithms-brasil.com/grafos/cc.html">componentes conectados</a> no grafo). A tarefa é encontrar todos os pontos de articulação no grafo fornecido.</p>
+
+<p>O algoritmo descrito aqui é baseado em uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> e tem complexidade $O(N+M)$, onde $N$ é o número de vértices e $M$ é o número de arestas no grafo.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Escolha um vértice arbitrário(raiz) do grafo e execute uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> a partir dele. Observe que:</p>
+
+<ul>
+<li><p>Digamos que estamos na DFS, examinando as arestas a partir do vértice $v\ne root$.
+Se a aresta atual $(v, to)$ for tal que nenhum dos vértices $to$ ou seus descendentes na árvore da travessia da DFS tiver uma <em>back-edge</em>(aresta de volta) para qualquer ancestral de $v$, então $v$ será uma articulação ponto. Caso contrário, $v$ não é um ponto de articulação.</p></li>
+<li><p>Vamos considerar o caso em que $v=raiz$.
+Esse vértice será o ponto de articulação se, e somente se, esse vértice tiver mais de um filho na árvore da DFS.</p></li>
+</ul>
+
+<p>Agora temos que aprender a verificar esse fato para cada vértice com eficiência. Usaremos o "tempo de entrada" do nó calculado pela DFS.</p>
+
+<p>Então, deixe que $tin[v]$ denotar o tempo de entrada para o nó $v$. Introduzimos uma array $low[v]$ que permitirá verificar o fato para cada vértice $v$. $low[v]$ é o mínimo de $tin[v]$, os tempos de entrada $tin[p]$ para cada nó $p$ que é conectado ao nó $v$ por uma <em>back-edge</em> $(v, p)$ e os valores $low[to]$ para cada vértice $to$ que é um descendente direto de $v$ na árvore da DFS:</p>
+
+<p>$$low[v] = \min \begin{cases} tin[v] &#92;&#92; tin[p] &amp;\text{ para todo }p\text{ em que }(v, p)\text{ back edge} &#92;\ low[to]&amp; \text{ para todo }to\text{ em que }(v, to)\text{ tree edge} \end{cases}$$</p>
+
+<p>Agora, há uma back edge do vértice $v$ ou de um de seus descendentes para um de seus ancestrais se, e somente se, o vértice $v$ tiver um filho $to$ no qual $low[to] &lt; tin[v]$. Se $low[to] = tin[v]$, a back edge vai diretamente para $v$, caso contrário, ela vai para um dos ancestrais de $v$.</p>
+
+<p>Portanto, o vértice $v$ na árvore da DFS é um <strong>ponto de articulação</strong>(vértice de corte) se, e somente se, $low[to] \geq tin[v]$.</p>
+
+<h2>Implementação</h2>
+
+<p>A implementação precisa distinguir três casos: quando percorremos a aresta na árvore da DFS, quando encontramos uma <em>back edge</em> de um ancestral do vértice e quando retornamos a um parente do vértice. Estes são os casos:</p>
+
+<ul>
+<li>$visited[to] = false$ - a aresta faz parte da árvore da DFS;</li>
+<li>$visited[to] = true$ &amp;&amp; $to \neq parent$ - a aresta é uma back edge para um dos ancestrais;</li>
+<li>$to = parent$ - a aresta retorna a um parente na árvore da DFS.</li>
+</ul>
+
+<p>Para implementar isso, precisamos de uma função DFS que aceite o vértice parente do nó atual.</p>
+
+<p>Implementação em C++</p>
+
+<pre><code class="cpp">int n; // número de nós
+vector&lt;vector&lt;int&gt;&gt; adj; // lista de adjacência - grafo
+
+vector&lt;bool&gt; visited;
+vector&lt;int&gt; tin, low;
+int timer;
+
+void dfs(int v, int p = -1) {
+    visited[v] = true;
+    tin[v] = low[v] = timer++;
+    int children=0;
+    for (int to : adj[v]) {
+        if (to == p) continue;
+        if (visited[to]) {
+            low[v] = min(low[v], tin[to]);
+        } else {
+            dfs(to, v);
+            low[v] = min(low[v], low[to]);
+            if (low[to] &gt;= tin[v] &amp;&amp; p!=-1)
+                IS_CUTPOINT(v);
+            ++children;
+        }
+    }
+    if(p == -1 &amp;&amp; children &gt; 1)
+        IS_CUTPOINT(v);
+}
+
+void find_cutpoints() {
+    timer = 0;
+    visited.assign(n, false);
+    tin.assign(n, -1);
+    low.assign(n, -1);
+    for (int i = 0; i &lt; n; ++i) {
+        if (!visited[i])
+            dfs (i);
+    }
+}
+</code></pre>
+
+<p>A função principal é <code>find_cutpoints</code>; ela executa a inicialização necessária e inicia a DFS em cada componente conectado do grafo.</p>
+
+<p>A função <code>IS_CUTPOINT(a)</code> processa o fato de que o vértice $a$ é um ponto de articulação, por exemplo, printando ele (isso pode ser chamado várias vezes para um vértice).</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=13&amp;page=show_problem&amp;problem=1140">UVA #10199 "Tourist Guide"</a> [difficulty: low]</li>
+<li><a href="http://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=5&amp;page=show_problem&amp;problem=251">UVA #315 "Network"</a> [difficulty: low]</li>
+<li><a href="http://www.spoj.com/problems/SUBMERGE/">SPOJ - Submerging Islands</a></li>
+</ul>
+
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
