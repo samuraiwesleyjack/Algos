@@ -82,7 +82,7 @@ onde a operação $\odot$ é definida da seguinte maneira:
 $$A \odot B = C~~\Longleftrightarrow~~C_{i j} = \min_{p = 1 \ldots n}\left(A_{i p} + B_{p j}\right)$$</p>
 
 <p>Assim, a solução do problema pode ser representada usando a multiplicação modificada:
-$$L_k = \underbrace{G \odot \ldots \odot G}_{k~\text{times}} = G^{\odot k}$$</p>
+$$L_k = \underbrace{G \odot \ldots \odot G}_{k~\text{vezes}} = G^{\odot k}$$</p>
 
 <p>Resta notar que também podemos calcular essa exponenciação de forma eficiente com <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>, porque a multiplicação modificada é obviamente associativa. Portanto, essa solução também possui complexidade $O(n^3 \log k)$.</p>
 
