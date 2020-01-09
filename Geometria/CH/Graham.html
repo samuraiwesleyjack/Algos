@@ -26,7 +26,7 @@
 				<button> < </button>
 		</a>
 		<div id="c">
-			<h1>Construção de um Convex Hull utilizando o <a href="https://pt.wikipedia.org/wiki/Exame_de_Graham">Scan de Graham</a></h1>
+			<h1>Construção de um Convex Hull utilizando o Scan de Graham</h1>
 			<p>Neste artigo discutiremos o problema de construir um convex hull(casco convexo) a partir de um conjunto de pontos.</p>
 
 <p>Considere $N$ pontos dados em um plano, e o objetivo é gerar um convex hull, i.e. <strong>o menor polígono convexo que contém todos os pontos fornecidos</strong>.</p>
@@ -62,7 +62,7 @@ em vez de uma orientação no sentido horário. Assim, se o ângulo feito pela l
 com a linha que liga o último ponto no convex hull inferior e o ponto atual não é no sentido anti-horário, removemos o ponto mais recente adicionado ao convex hull inferior, pois o ponto atual poderá conter
 o ponto anterior, uma vez adicionado ao convex hull.</p>
 
-<p>O convex hull final é obtido da união do superior e inferior convex hull, e a implementação fica da seguinte maneira.</p>
+<p>O <a href="https://web.stanford.edu/class/cs97si/09-computational-geometry.pdf">convex hull</a> final é obtido da união do superior e inferior convex hull, e a implementação fica da seguinte maneira.</p>
 
 <h2>Implementação</h2>
 
