@@ -61,7 +61,7 @@ Essa função cria uma aresta isolada do ponto <code>a</code> ao ponto <code>b</
 <li><code>splice(a, b)</code><br>
 Esta é uma função chave do algoritmo. Ela troca(swap) <code>a-&gt;Onext</code> com <code>b-&gt;Onext</code> e <code>a-&gt;Onext-&gt;Rot-&gt;Onext</code> com <code>b-&gt;Onext-&gt;Rot-&gt;Onext</code>.</li>
 <li><code>delete_edge(e)</code><br>
-Esta função exclui e da triangulação. Para excluir <code>e</code>, podemos simplesmente chamar <code>splice(e, e-&gt;Oprev)</code> e <code>splice(e-&gt;Rev, e-&gt;Rev-&gt;Oprev)</code>.</li>
+Esta função exclui <code>e</code> da triangulação. Para excluir <code>e</code>, podemos simplesmente chamar <code>splice(e, e-&gt;Oprev)</code> e <code>splice(e-&gt;Rev, e-&gt;Rev-&gt;Oprev)</code>.</li>
 <li><code>connect(a, b)</code><br>
 Esta função cria uma nova aresta <code>e</code> de <code>a-&gt;Dest</code> para <code>b-&gt;Org</code> de modo que <code>a</code>, <code>b</code>, <code>e</code> todos tenham a mesma face esquerda. Para fazer isso, chamamos <code>e = make_edge(a-&gt;Dest, b-&gt;Org)</code>, <code>splice(e, a-&gt;Lnext)</code> e <code>splice(e-&gt;Rev, b)</code>.</li>
 </ol>
