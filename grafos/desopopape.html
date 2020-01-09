@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>D´Esopo-Pape - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>D´Esopo-Pape</h1>
+
+<p>Dado um grafo com $n$ vértices e $m$ arestas com pesos $w_i$ e um vértice inicial $v_0$.
+A tarefa é encontrar o caminho mais curto do vértice $v_0$ para todos os outros vértices.</p>
+
+<p>O algoritmo de D´Esopo-Pape funcionará mais rápido que o algoritmo de <a href="https://cp-algorithms-brasil.com/grafos/Dijkstra.html">Dijkstra</a> e o de <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">Bellman-Ford</a> na maioria dos casos, e também funcionará para arestas negativas. No entanto, não para ciclos negativos.</p>
+
+<h2>Descrição</h2>
+
+<p>Deixe a array $d$ conter os menores comprimentos de caminho, ou seja: $d_i$ é o comprimento atual do caminho mais curto do vértice $v_0$ para o vértice $i$.
+Inicialmente, essa array é preenchida com "infinito" para cada vértice, exceto para o vértice inicial: $d_{v_0} = 0$.
+Após a conclusão do algoritmo, essa array conterá as menores distâncias.</p>
+
+<p>Deixe a array $p$ conter os ancestrais atuais, ou seja: $p_i$ é o ancestral direto do vértice $i$ no caminho mais curto atual de $v_0$ a $i$.
+Assim como a array $d$, a array $p$ muda gradualmente durante o algoritmo e no final assume seus valores finais.</p>
+
+<p>Agora para o algoritmo. Em cada etapa, três conjuntos de vértices são mantidos:</p>
+
+<ul>
+<li>$M_0$ - vértices, para os quais a distância já foi calculada (embora possa não ser a distância final)</li>
+<li>$M_1$ - vértices, para os quais a distância está calculada sendo calculada</li>
+<li>$M_2$ - vértices para os quais a distância ainda não foi calculada</li>
+</ul>
+
+<p>Os vértices no conjunto $M_1$ são armazenados em uma queue bidirecional (<em>deque</em>).</p>
+
+<p>Em cada etapa do algoritmo, pegamos um vértice do conjunto $M_1$ (da frente da queue).
+Seja $u$ o vértice selecionado.
+Colocamos esse vértice $u$ no conjunto $M_0$.
+Em seguida, iteramos sobre todas as arestas que saem desse vértice. 
+Seja $v$ o segundo extremo(final) da aresta atual e $w$ seu peso.</p>
+
+<ul>
+<li>Se $v$ pertencer a $M_2$, então $v$ será inserido no conjunto $M_1$ inserindo-o na parte de trás da queue.
+$d_v$ será definido como $d_u + w$.</li>
+<li>Se $v$ pertencer a $M_1$, então tentaremos melhorar o valor de $d_v$: $d_v = \min(d_v, d_u + w)$.
+Como $v$ já está em $M_1$, não precisamos inseri-lo em $M_1$ e na queue.</li>
+<li>Se $v$ pertencer a $M_0$, e se $d_v$ puder ser aprimorado $d_v > d_u + w$, então aprimoramos $d_v$ e inserimos o vértice $v$ de volta ao conjunto $M_1$, colocando-o no começo da queue.</li>
+</ul>
+
+<p>E, é claro, a cada atualização na array $d$ também precisamos atualizar o elemento correspondente na array $p$.</p>
+
+<h2>Implementação</h2>
+
+<p>Usaremos uma array $m$ para armazenar em que conjunto cada vértice está atualmente.</p>
+
+<pre><code class="cpp">struct Edge {
+    int to, w;
+};
+
+int n;
+vector&lt;vector&lt;Edge&gt;&gt; adj;
+
+const int INF = 1e9;
+
+void shortest_paths(int v0, vector&lt;int&gt;&amp; d, vector&lt;int&gt;&amp; p) {
+    d.assign(n, INF);
+    d[v0] = 0;
+    vector&lt;int&gt; m(n, 2);
+    deque&lt;int&gt; q;
+    q.push_back(v0);
+    p.assign(n, -1);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop_front();
+        m[u] = 0;
+        for (Edge e : adj[u]) {
+            if (d[e.to] &gt; d[u] + e.w) {
+                d[e.to] = d[u] + e.w;
+                p[e.to] = u;
+                if (m[e.to] == 2) {
+                    m[e.to] = 1;
+                    q.push_back(e.to);
+                } else if (m[e.to] == 0) {
+                    m[e.to] = 1;
+                    q.push_front(e.to);
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<h2>Complexidade</h2>
+
+<p>O algoritmo geralmente tem uma performance muito rápida. Na maioria dos casos, ainda mais rápida que o algoritmo de Dijkstra. No entanto, existem casos em que o algoritmo leva tempo exponencial.</p>
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
