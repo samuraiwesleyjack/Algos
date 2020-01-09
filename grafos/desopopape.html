@@ -72,12 +72,12 @@ Como $v$ já está em $M_1$, não precisamos inseri-lo em $M_1$ e na queue.</li>
 
 <p>Usaremos uma array $m$ para armazenar em que conjunto cada vértice está atualmente.</p>
 
-<pre><code class="cpp">struct Edge {
+<pre><code class="cpp">struct Edge {  //aresta
     int to, w;
 };
 
 int n;
-vector&lt;vector&lt;Edge&gt;&gt; adj;
+vector&lt;vector&lt;Edge&gt;&gt; adj;  //lista de adjacência - grafo
 
 const int INF = 1e9;
 
