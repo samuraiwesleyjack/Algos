@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>0-1 BFS - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>0-1 BFS</h1>
+
+<p>É bem conhecido que você pode encontrar os caminhos mais curtos entre uma única fonte e todos os outros vértices em $O(|E|)$ usando uma <a href="https://cp-algorithms-brasil.com/grafos/BFS.html">BFS</a> em um <strong>grafo sem pesos</strong>, ou seja, a distância é o número mínimo de arestas que você precisa para percorrer da fonte para outro vértice.
+Podemos interpretar esse grafo também como um grafo com pesos, em que cada aresta tem peso $1$.
+Se nem todas as arestas do grafo tiverem o mesmo peso, precisamos de um algoritmo mais geral, como o de <a href="https://cp-algorithms-brasil.com/grafos/Dijkstra.html">Dijkstra</a> executado em tempo $O(|V|^2 + |E|)$ ou $O(|E| \log |V|)$.</p>
+
+<p>No entanto, se os pesos forem mais restritos, geralmente podemos fazer melhor. Neste artigo, demonstramos como podemos usar uma BFS para resolver o problema do <em>caminho mais curto de origem única</em> em $O(|E|)$, se os pesos de cada aresta forem $0$ ou $1$.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Podemos desenvolver o algoritmo estudando de perto o algoritmo de Dijkstra e pensando nas consequências que o nosso grafo especial implica. A forma geral do algoritmo de Dijkstra é (aqui o <code>set</code> é usado para a <code>priority queue</code>):</p>
+
+<pre><code class="cpp">d.assign(n, INF);
+d[s] = 0;
+set&lt;pair&lt;int, int&gt;&gt; q;
+q.insert({0, s});
+while (!q.empty()) {
+    int v = q.begin()-&gt;second;
+    q.erase(q.begin());
+
+    for (auto edge : adj[v]) {
+        int u = edge.first;
+        int w = edge.second;
+
+        if (d[v] + w &lt; d[u]) {
+            q.erase({d[u], u});
+            d[u] = d[v] + w;
+            q.insert({d[u], u});
+        }
+    }
+}
+</code></pre>
+
+<p>Podemos notar que a diferença entre as distâncias da fonte <code>s</code> e entre dois outros vértices da queue difere no máximo por 1.
+Especialmente, sabemos que $d[v] \le d[u] \le d[v] + 1$ para cada $u \in Q$.
+A razão para isso é que apenas adicionamos vértices com distância igual ou com distância "+1" para a queue em cada iteração.
+Supondo que exista um $u$ na queue com $d[u] - d[v] > 1$, então $u$ deve ter sido inserido na queue por um vértice diferente $t$ com $d[t] \ge d[u] - 1 > d[v]$.
+No entanto, isso é impossível, pois o algoritmo de Dijkstra itera sobre os vértices em ordem crescente.</p>
+
+<p>Isso significa que a ordem da queue parece assim:
+$$Q = \underbrace{v}&#95;{d[v]}, \dots, \underbrace{u}&#95;{d[v]}, \underbrace{m}&#95;{d[v]+1} \dots \underbrace{n}&#95;{d[v]+1}$$</p>
+
+<p>Essa estrutura é tão simples que não precisamos de uma priority queue, ou seja, uma <em>árvore binária</em> balanceada, é um exagero.
+Podemos simplesmente usar uma queue normal e anexar novos vértices no começo se a aresta correspondente tiver peso $0$, ou seja, se $d[u] = d[v]$, ou no final se a aresta tiver peso $1$, ou seja: $d[u] = d[v] + 1$.
+Dessa forma a queue permanece ordenada todo o tempo.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; d(n, INF);
+d[s] = 0;
+deque&lt;int&gt; q;
+q.push_front(s);
+while (!q.empty()) {
+    int v = q.front();
+    q.pop_front();
+    for (auto edge : adj[v]) {
+        int u = edge.first;
+        int w = edge.second;
+        if (d[v] + w &lt; d[u]) {
+            d[u] = d[v] + w;
+            if (w == 1)
+                q.push_back(u);
+            else
+                q.push_front(u);
+        }
+    }
+}
+</code></pre>
+
+<h2>Dial's algorithm</h2>
+
+<p>Podemos estender isso ainda mais se permitirmos que os pesos das arestas sejam ainda maiores. Se todas as arestas do grafo tiverem um peso $\le k$, as distâncias dos vértices na queue diferirão em no máximo $k$ da distância de $v$ à origem.
+Assim, podemos manter $k + 1$ <em>buckets</em> para os vértices na queue, e, sempre que o bucket correspondente à menor distância ficar vazio, fazemos uma mudança cíclica para obter o bucket com a próxima distância mais alta. Essa extensão do algoritmo é chamada <strong>Dial's algorithm</strong>.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/REVERSE">CodeChef - Chef and Reversing</a></li>
+<li><a href="https://codeforces.com/contest/1063/problem/B">Labyrinth</a></li>
+<li><a href="http://www.spoj.com/problems/KATHTHI/">KATHTHI</a></li>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=10337">DoNotTurn</a></li>
+<li><a href="https://onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=2620">Ocean Currents</a></li>
+<li><a href="https://codeforces.com/problemset/problem/877/D">Olya and Energy Drinks</a></li>
+<li><a href="https://codeforces.com/problemset/problem/590/C">Three States</a></li>
+<li><a href="https://onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2621">Colliding Traffic</a></li>
+<li><a href="https://codeforces.com/problemset/problem/173/B">CHamber of Secrets</a></li>
+<li><a href="https://codeforces.com/problemset/problem/173/C">Spiral Maximum</a></li>
+</ul>
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
