@@ -37,7 +37,7 @@ Ou seja, após a "<em>orientação</em>", poderemos visitar qualquer vértice de
 Temos que atribuir uma direção a ela e, dessa forma, tornamos essa ponte "cruzável" em apenas uma direção. Isso significa que não podemos ir de uma das extremidades finais da ponte para a outra, portanto, não podemos tornar o grafo fortemente conectado.</p>
 
 <p>Agora, considere uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> sobre um grafo conexo sem pontes.
-Claramente, visitaremos cada vértice. E como não há pontes, podemos remover qualquer aresta da "árvore de travessia da DFS" e ainda podemos ir de "baixo" da aresta para "acima" da aresta usando um nó com um caminho que contenha pelo menos uma <em>back edge</em>(aresta de retorno).
+Claramente, visitaremos cada vértice. E como não há pontes, podemos remover qualquer aresta da "árvore de travessia da DFS" e ainda podemos ir de "baixo" da aresta para "cima" da aresta usando um nó com um caminho que contenha pelo menos uma <em>back edge</em>(aresta de retorno).
 A partir disso, segue-se que a partir de qualquer vértice, podemos ir para a raiz da árvore da DFS. Além disso, a partir da raiz da árvore da DFS, podemos visitar qualquer vértice que escolhermos. Encontramos uma forte orientação!</p>
 
 <p>Em outras palavras, para orientar fortemente um grafo conexo sem pontes,
