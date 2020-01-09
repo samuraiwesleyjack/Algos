@@ -175,7 +175,7 @@ bool is_unary(char c) {
 }
 
 int priority (char op) {
-    if (op &lt; 0) // unary operator
+    if (op &lt; 0) // operador unário
         return 3;
     if (op == '+' || op == '-')
         return 1;
