@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Caminhos de comprimento fixo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Número de caminhos e caminhos mais curtos com um comprimento fixo</h1>
+
+<p>O artigo a seguir descreve soluções para esses dois problemas baseados em uma mesma idéia: reduza o problema à construção de uma matriz e calcule a solução com a multiplicação usual da matriz ou com uma multiplicação modificada.</p>
+
+<h2>Número de caminhos de comprimento fixo</h2>
+
+<p>Dado um grafo direcionado e sem pesos $G$ com $n$ vértices e um inteiro $k$.
+A tarefa é a seguinte: para cada par de vértices $(i, j)$ precisamos encontrar o número de caminhos de comprimento $k$ entre esses vértices. Os caminhos não precisam ser simples, ou seja, vértices e arestas podem ser visitados inúmeras vezes em um único caminho.</p>
+
+<p>Assumimos que o grafo seja especificado como uma matriz de adjacência, ou seja, a matriz $G[][]$ de tamanho $n \times n$, em que cada elemento $G[i][j]$ é igual a $1$ se o vértice $i$ estiver conectado com $j$ por uma aresta, e $0$ se eles não estiverem conectados por uma aresta.
+O algoritmo a seguir também funciona no caso de arestas múltiplas:
+se algum par de vértices $(i, j)$ estiver conectado com $m$ arestas, então, podemos gravar isso na matriz de adjacência definindo $G[i][j] = m$.
+O algoritmo também funciona se o grafo contiver loops (um loop é uma aresta que conecta um vértice a ele mesmo).</p>
+
+<p>É óbvio que a matriz de adjacência construída é a resposta para o problema no caso em que $k = 1$.
+Ele contém o número de caminhos de comprimento $1$ entre cada par de vértices.</p>
+
+<p>Vamos construir a solução iterativamente: Vamos supor que sabemos a resposta para algum $k$.
+Aqui, descrevemos um método para construir a resposta para $k + 1$.
+Denote por $C_k$ a matriz para o caso $k$, e por $C_{k+1}$ a matriz que queremos construir.
+Com a seguinte fórmula, podemos calcular cada entrada de $C_{k+1}$:
+$$C_{k+1}[i][j] = \sum_{p = 1}^{n} C_k[i][p] \cdot G[p][j]$$</p>
+
+<p>É fácil ver que a fórmula calcula nada além do produto das matrizes $C_k$ e $G$:
+$$C_{k+1} = C_k \cdot G$$</p>
+
+<p>Portanto, a solução do problema pode ser representada da seguinte maneira:
+$$C_k = \underbrace{G \cdot G \cdots G}_{k \text{ times}} = G^k$$</p>
+
+<p>Resta notar que os produtos das matrizes podem ser elevados a uma alta potência com eficiência usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>.
+Isso fornece uma solução com complexidade $O(n^3 \log k)$.</p>
+
+<h2>Caminhos mais curtos de comprimento fixo</h2>
+<em>número de arestas utilizadas fixo</em>
+<p>Dado um grafo direcionado com pesos $G$ com $n$ vértices e um inteiro $k$.
+Para cada par de vértices $(i, j)$ precisamos encontrar o comprimento do caminho mais curto entre $i$ e $j$ que consiste exatamente em $k$ arestas.</p>
+
+<p>Assumimos que o grafo é especificado por uma matriz de adjacência, ou seja, através da matriz $G[][]$ de tamanho $n \times n$ onde cada elemento $G[i][j]$ contém o comprimento das arestas a partir do vértice $i$ até o vértice $j$.
+Se não houver aresta entre dois vértices, o elemento correspondente da matriz será atribuído como infinito $\infty$.</p>
+
+<p>É óbvio que, dessa forma, a matriz de adjacência é a resposta para o problema com $k = 1$.
+Ele contém os comprimentos dos caminhos mais curtos entre cada par de vértices, ou $\infty$ se um caminho que consiste em uma aresta não existir.</p>
+
+<p>Novamente, podemos construir a solução para o problema de forma iterativa: vamos supor que sabemos a resposta para algum $k$.
+Mostramos como podemos calcular a resposta para $k+1$.
+Denotaremos $L_k$ a matriz para $k$ e $L_{k+1}$ a matriz que queremos construir.
+Então, a fórmula a seguir calcula cada entrada de $L_{k+1}$:
+$$L_{k+1}[i][j] = \min_{p = 1 \ldots n} \left(L_k[i][p] + G[p][j]\right)$$</p>
+
+<p>Ao examinar mais de perto essa fórmula, podemos fazer uma analogia com a multiplicação de matrizes: 
+de fato, a matriz $L_k$ é multiplicada pela matriz $G$, a única diferença na operação de multiplicação é que pegamos o mínimo em vez da soma.
+$$L_{k+1} = L_k \odot G,$$
+onde a operação $\odot$ é definida da seguinte maneira:
+$$A \odot B = C~~\Longleftrightarrow~~C_{i j} = \min_{p = 1 \ldots n}\left(A_{i p} + B_{p j}\right)$$</p>
+
+<p>Assim, a solução do problema pode ser representada usando a multiplicação modificada:
+$$L_k = \underbrace{G \odot \ldots \odot G}_{k~\text{times}} = G^{\odot k}$$</p>
+
+<p>Resta notar que também podemos calcular essa exponenciação de forma eficiente com <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>, porque a multiplicação modificada é obviamente associativa. Portanto, essa solução também possui complexidade $O(n^3 \log k)$.</p>
+
+<h2>Generalização dos problemas para caminhos com comprimento de até $k$</h2>
+
+<p>As soluções acima resolvem os problemas para um $k$ fixo.
+No entanto, as soluções podem ser adaptadas para resolver problemas para os quais os caminhos não podem conter mais que $k$ arestas.</p>
+
+<p>Isso pode ser feito modificando ligeiramente o grafo de entrada.</p>
+
+<p>Duplicamos cada vértice: para cada vértice $v$ criamos mais um vértice $v'$ e adicionamos uma aresta $(v, v')$ e o loop $(v', v')$.
+O número de caminhos entre $i$ e $j$ com no máximo $k$ arestas é o mesmo número que o número de caminhos entre $i$ e $j'$ com exatamente $k + 1$ arestas, como existe uma bijeção que mapeia todo caminho $[p_0 = i,~p_1,~\ldots,~p_{m-1},~p_m = j]$ de comprimento $m \le k$, para o caminho $[p_0 = i,~p_1,~\ldots,~p_{m-1},~p_m = j, j', \ldots, j']$ de comprimento $k + 1$.</p>
+
+<p>O mesmo truque pode ser aplicado para calcular os caminhos mais curtos com no máximo $k$ arestas.
+Duplicamos novamente cada vértice e adicionamos as duas arestas mencionadas com peso $0$.</p>
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
