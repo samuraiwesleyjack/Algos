@@ -105,7 +105,7 @@ void find_bridges() {
 
 <p>A função principal é <code>find_bridges</code>; ela executa uma inicialização necessária e inicializa a DFS em cada componente conectado do grafo.</p>
 
-<p>A função <code>IS_BRIDGE(a, b)</code> é uma função que processará o fato de que a aresta $(a, b)$ é uma ponte.</p>
+<p>A função <code>IS_BRIDGE(a, b)</code> é uma função que processará o fato de que a aresta $(a, b)$ é uma ponte, por exemplo, printando a aresta.</p>
 
 <p>Esta implementação não funciona corretamente se o grafo tiver <a href="https://en.wikipedia.org/wiki/Multiple_edges">arestas múltiplas</a>(<em>multiple edges</em>), pois as ignora. Obviamente, essas arestas nunca farão parte da resposta, portanto <code>IS_BRIDGE</code> pode verificar adicionalmente se a ponte relatada não é uma aresta múltipla. Como alternativa, é possível passar para a <code>dfs</code> o índice da aresta usada para entrar no vértice em vez do vértice parente (e armazenar o índice de todos os vértices).</p>
 
