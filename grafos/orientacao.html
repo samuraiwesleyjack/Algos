@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Orientação forte - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Orientação forte</h1>
+
+<p>Uma "<strong>orientação forte</strong>" de um grafo não direcionado é uma atribuição de uma direção para cada aresta que o torna um <a href="https://cp-algorithms-brasil.com/grafos/cfc.html">grafo fortemente conectado</a>.
+Ou seja, após a "<em>orientação</em>", poderemos visitar qualquer vértice de qualquer vértice seguindo as arestas direcionadas.</p>
+
+<h2>Solução</h2>
+
+<p>Obviamente, isso não pode ser feito em qualquer grafo. Considere uma <a href="https://cp-algorithms-brasil.com/grafos/pontes.html">ponte</a> em um grafo.
+Temos que atribuir uma direção a ela e, dessa forma, tornamos essa ponte "cruzável" em apenas uma direção. Isso significa que não podemos ir de uma das extremidades finais da ponte para a outra, portanto, não podemos tornar o grafo fortemente conectado.</p>
+
+<p>Agora, considere uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> sobre um grafo conectado sem pontes.
+Clearly, we will visit each vertex.
+Claramente, visitaremos cada vértice. E como não há pontes, podemos remover qualquer aresta da "árvore de travessia da DFS" e ainda podemos ir de "baixo" da aresta para "acima" da aresta usando um nó com um caminho que contenha pelo menos uma <em>back edge</em>(aresta de retorno).
+A partir disso, segue-se que a partir de qualquer vértice, podemos ir para a raiz da árvore da DFS. Além disso, a partir da raiz da árvore da DFS, podemos visitar qualquer vértice que escolhermos. Encontramos uma forte orientação!</p>
+
+<p>Em outras palavras, para orientar fortemente um grafo conexo sem pontes,
+executamos uma DFS nele e deixamos que as arestas da árvore da DFS apontem para longe da raiz da DFS e
+que todas as outras arestas apontem do descendente para o ancestral na árvore da DFS.</p>
+
+<p>O resultado de que grafos conexos sem pontes são exatamente os grafos que têm orientações fortes é chamado de "<strong>Teorema de Robbins</strong>".</p>
+
+<h2>Extensão do problema</h2>
+
+<p>Vamos considerar o problema de encontrar uma orientação no grafo para que o número de componentes fortemente conectados seja mínimo.</p>
+
+<p>Cada componente do grafo pode ser considerado separadamente. Agora, como apenas os grafos sem ponte são 'fortemente orientáveis', vamos remover todas as pontes temporariamente.
+Terminamos com um número de componentes sem pontes
+e sabemos que podemos orientar fortemente cada um deles.</p>
+
+<p>Só podíamos orientar arestas, não removê-las, mas acaba que podemos orientar as pontes arbitrariamente.
+Claramente, a maneira mais fácil de orientá-los seria executar o algoritmo descrito acima sem modificações em cada componente conectado original.</p>
+
+<h3>Implementação</h3>
+
+<p>Aqui, a entrada é <em>n</em> — o número de vértices, <em>m</em> — o número de arestas, e então <em>m</em> linhas descrevendo as arestas.</p>
+
+<p>A saída é o número mínimo de componentes fortemente conectados na primeira linha e na segunda linha uma string de <em>m</em> caracteres,
+ <code>&gt;</code> — nos dizendo que a aresta correspondente da entrada é orientada da esquerda para o vértice direito (como na entrada) ,
+ou <code>&lt;</code> — o oposto.</p>
+
+<p>Este é um algoritmo de busca de pontes modificado para também orientar as arestas.
+Você também pode orientar as arestas como um primeiro passo e contar os componentes fortemente conectados no grafo orientado como um segundo.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj; // lista de adjacência - pares vértice e aresta
+vector&lt;pair&lt;int, int&gt;&gt; edges;
+
+vector&lt;int&gt; tin, low;
+int bridge_cnt;
+string orient;
+vector&lt;bool&gt; edge_used;
+void find_bridges(int v) {
+    static int time = 0;
+    low[v] = tin[v] = time++;
+    for (auto p : adj[v]) {
+        if (edge_used[p.second]) continue;
+        edge_used[p.second] = true;
+        orient[p.second] = v == edges[p.second].first ? '&gt;' : '&lt;';
+        int nv = p.first;
+        if (tin[nv] == -1) { // se nv não tiver sido visitado ainda
+            find_bridges(nv);
+            low[v] = min(low[v], low[nv]);
+            if (low[nv] &gt; tin[v]) {
+                // uma ponte entre v e nv
+                bridge_cnt++;
+            }
+        } else {
+            low[v] = min(low[v], low[nv]);
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    scanf("%d %d", &amp;n, &amp;m);
+    adj.resize(n);
+    tin.resize(n, -1);
+    low.resize(n, -1);
+    orient.resize(m);
+    edges.resize(m);
+    edge_used.resize(m);
+    for (int i = 0; i &lt; m; i++) {
+        int a, b;
+        scanf("%d %d", &amp;a, &amp;b);
+        a--; b--;
+        adj[a].push_back({b, i});
+        adj[b].push_back({a, i});
+        edges[i] = {a, b};
+    }
+    int comp_cnt = 0;
+    for (int v = 0; v &lt; n; v++) {
+        if (tin[v] == -1) {
+            comp_cnt++;
+            find_bridges(v);
+        }
+    }
+    printf("%d\n%s\n", comp_cnt + bridge_cnt, orient.c_str());
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://szkopul.edu.pl/problemset/problem/nldsb4EW1YuZykBlf4lcZL1Y/site/">26th Polish OI - Osiedla</a></li>
+</ul>
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
