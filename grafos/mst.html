@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore Geradora Mínima: Prim - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Árvore geradora mínima - algoritmo de Prim</h1>
+
+<p>Dado um grafo não direcionado e com pesos $G$ com $n$ vértices e $m$ arestas.
+Você deseja encontrar uma árvore geradora do grafo que conecte todos os vértices e tenha o menor peso (ou seja, a soma dos pesos das arestas é mínima).
+Uma árvore geradora é um conjunto de arestas nas quais qualquer vértice pode alcançar qualquer outro vértice por exatamente um caminho simples.
+A árvore geradora com o menor peso é chamada de árvore geradora mínima.</p>
+
+<p>Na imagem da esquerda, um grafo não direcionado com pesos e, na imagem da direita, a árvore geradora mínima correspondente.</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/MST_before.png" alt="Random graph" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/MST_after.png" alt="MST of this graph" /></center></p>
+
+<p>Qualquer árvore geradora necessariamente conterá $n-1$ arestas.</p>
+
+<p>Esse problema aparece naturalmente em muitos problemas.
+Por exemplo, no seguinte problema: existem $n$ cidades e, para cada par de cidades, temos o custo de construir uma estrada entre elas (ou podemos saber que é "fisicamente" impossível construir uma estrada entre elas).
+Temos que construir estradas, para que possamos ir de cada cidade a outra cidade, e o custo para a construção de todas as estradas deve ser mínimo.</p>
+
+<h2>Algoritmo de Prim</h2>
+
+<p>Esse algoritmo foi descoberto originalmente pelo matemático tcheco Vojtěch Jarník em 1930. No entanto, esse algoritmo é conhecido principalmente como algoritmo de Prim depois que o matemático americano Robert Clay Prim o redescobriu e republicou em 1957. Além disso, Edsger Dijkstra publicou esse algoritmo em 1959.</p>
+
+<h3>Descrição</h3>
+
+<p>Aqui, descrevemos o algoritmo em sua forma mais simples. A árvore geradora mínima é construída gradualmente adicionando arestas uma de cada vez. No início, a árvore geradora consiste apenas em um único vértice (escolhido arbitrariamente).
+Em seguida, a aresta de peso mínimo que sai desse vértice é selecionada e adicionada à árvore geradora.
+Depois disso, a árvore geradora já consiste de dois vértices.
+Agora selecione e adicione a aresta com o peso mínimo que tem uma extremidade em um vértice já selecionado (ou seja, um vértice que já faz parte da árvore geradora), e a outra extremidade em um vértice não selecionado.
+E assim por diante, ou seja, toda vez estaremos selecionando e adicionando a aresta com peso mínimo que conecta um vértice selecionado a um vértice não selecionado.
+O processo é repetido até que a árvore geradora contenha todos os vértices (ou equivalentemente até que tenhamos $n - 1$ arestas).</p>
+
+<p>No final, a árvore geradora construída será mínima. Se o grafo não era originalmente conexo, então não existe uma árvore de abrangência; portanto, o número de arestas selecionadas será menor que $n - 1$.</p>
+
+<h3>Prova</h3>
+
+<p>Deixe o grafo $G$ ser conexo, ou seja, deixe a resposta existir.
+Denotamos por $T$ o grafo resultante encontrado pelo algoritmo de Prim, e por $S$ a árvore geradora mínima.
+Claro que $T$ será de fato uma árvore geradora e um subgrafo de $G$.
+Só precisamos mostrar que os pesos de $S$ e $T$ coincidem.</p>
+
+<p>Considere a primeira vez no algoritmo quando adicionamos uma aresta a $T$ que não faz parte de $S$.
+Vamos denotar essa aresta como $e$, suas extremidade por $a$ e $b$, e o conjunto de vértices já selecionados como $V$ ($a \in V$ e $b \notin V$, ou vice versa).</p>
+
+<p>Na árvore geradora mínima $S$ os vértices $a$ e $b$ são conectados por algum caminho $P$.
+Nesse caminho, podemos encontrar uma aresta $f$ no qual uma extremidade de $f$ esteja em $V$ e a outra extremidade não.
+Como o algoritmo escolheu $e$ em vez de $f$, isso significa que o peso de $f$ é maior ou igual ao peso de $e$.</p>
+
+<p>Adicionamos a aresta $e$ à árvore geradora mínima $S$ e removemos a aresta $f$.
+Ao adicionar $e$ criamos um ciclo e, como $f$ também fazia parte do único ciclo, removendo-o, o grafo resultante fica novamente livre de ciclos.
+E como removemos apenas uma aresta de um ciclo, o grafo resultante ainda está conectado.</p>
+
+<p>A árvore geradora resultante não pode ter um peso total maior, já que o peso de $e$ não era maior que o peso de $f$, e também não pode ter um peso menor, já que $S$ era uma árvore geradora mínima. Isso significa que, substituindo a aresta $f$ por $e$ geramos uma árvore geradora mínima diferente. E $e$ precisa ter o mesmo peso que $f$.</p>
+
+<p>Assim, todas as arestas que escolhemos no algoritmo de Prim têm os mesmos pesos que as arestas de qualquer árvore geradora mínima, o que significa que o algoritmo de Prim realmente gera uma árvore geradora mínima.</p>
+
+<h2>Implementação</h2>
+
+<p>A complexidade do algoritmo depende de como procuramos a próxima aresta mínima entre as arestas apropriadas. Existem várias abordagens que levam a diferentes complexidades e diferentes implementações.</p>
+
+<h3>Implementações triviais: $O(n m)$ e $O(n^2 + m \log n)$</h3>
+
+<p>Se procuramos a aresta iterando sobre todas as arestas possíveis, então irá levar $O(m)$ para encontrar a aresta com o peso mínimo. A complexidade total será de $O(n m)$.
+Na pior das hipóteses, isso é $O(n^3)$, realmente, bem lento.</p>
+
+<p>Esse algoritmo pode ser aprimorado se observarmos apenas uma aresta de cada vértice já selecionado.
+Por exemplo, podemos ordenar as arestas de cada vértice em ordem crescente de seus pesos e armazenar um ponteiro para a primeira aresta válida (ou seja, uma aresta que vá para um vértice não selecionado).
+Depois de encontrar e selecionar a aresta mínima, atualizamos os ponteiros. Isso fornece uma complexidade $O(n^2 + m)$, e, para ordenar as arestas, um adicional de $O(m \log n)$, o que fornece a complexidade $O(n^2 \log n)$ no pior dos casos.</p>
+
+<p>Abaixo, consideramos dois algoritmos ligeiramente diferentes, um para grafos densos e outro para grafos esparsos, ambos com uma complexidade melhor.</p>
+
+<h3>Grafos densos: $O(n^2)$</h3>
+
+<p>Abordamos esse problema por um lado diferente: para cada vértice ainda não selecionado, armazenaremos a aresta mínima para um vértice já selecionado.</p>
+
+<p>Então, durante uma etapa, precisamos apenas observar essas arestas de peso mínimo, isso irá ter uma complexidade $O(n)$.</p>
+
+<p>Após adicionar uma aresta, alguns ponteiros das arestas mínimas devem ser recalculados. Observe que os pesos apenas podem diminuir, ou seja, a aresta de peso mínimo de todos os vértices ainda não selecionados pode permanecer a mesma ou será atualizada por uma aresta no vértice recém-selecionado. Portanto, essa fase também pode ser realizada em $O(n)$.</p>
+
+<p>Assim, recebemos uma versão do algoritmo de Prim com a complexidade $O(n^2)$.</p>
+
+<p>Em particular, essa implementação é muito conveniente para o problema da Árvore Geradora Mínima Euclidiana: temos $n$ pontos em um plano e a distância entre cada par de pontos é a <em>distância euclidiana</em> entre eles, e queremos encontrar uma árvore geradora mínima para esse grafo completo.
+Esta tarefa pode ser resolvida pelo algoritmo descrito em tempo $O(n^2)$ e com $O(n)$ de memória, o que não é possível com o algoritmo de Kruskal.</p>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; adj; // matriz de adjacência - grafo
+const int INF = 1000000000; // peso INF significa que não existe aresta
+
+struct Edge {
+    int w = INF, to = -1;
+};
+
+void prim() {
+    int total_weight = 0;
+    vector&lt;bool&gt; selected(n, false);
+    vector&lt;Edge&gt; min_e(n);
+    min_e[0].w = 0;
+
+    for (int i=0; i&lt;n; ++i) {
+        int v = -1;
+        for (int j = 0; j &lt; n; ++j) {
+            if (!selected[j] &amp;&amp; (v == -1 || min_e[j].w &lt; min_e[v].w))
+                v = j;
+        }
+
+        if (min_e[v].w == INF) {
+            cout &lt;&lt; "Sem MST!" &lt;&lt; endl;
+            exit(0);
+        }
+
+        selected[v] = true;
+        total_weight += min_e[v].w;
+        if (min_e[v].to != -1)
+            cout &lt;&lt; v &lt;&lt; " " &lt;&lt; min_e[v].to &lt;&lt; endl;
+
+        for (int to = 0; to &lt; n; ++to) {
+            if (adj[v][to] &lt; min_e[to].w)
+                min_e[to] = {adj[v][to], v};
+        }
+    }
+
+    cout &lt;&lt; total_weight &lt;&lt; endl;
+}
+</code></pre>
+
+<p>A matriz de adjacência <code>adj[][]</code> de tamanho $n \times n$ armazena os pesos das arestas e usa o peso <code>INF</code> se não existir uma aresta entre dois vértices. O algoritmo usa duas arrays: o sinalizador <code>selected[]</code>, que indica quais vértices já foram selecionados, e a array <code>min_e[]</code> que armazena a aresta com peso mínimo em um vértice selecionado para cada vértice ainda não selecionado (ele armazena o peso e vértice final). O algoritmo executa $n$ etapas, em cada iteração o vértice com a aresta de menor peso é selecionado e o <code>min_e[]</code> de todos os outros vértices é atualizado.</p>
+
+<h3>Grafos esparsos: $O(m \log n)$</h3>
+
+<p>No algoritmo descrito acima, é possível interpretar as operações de encontrar o mínimo e modificar alguns valores como operações em conjunto. Essas duas operações clássicas são suportadas por muitas estruturas de dados, por exemplo: <code>set</code> no C++ (que são implementadas por meio de árvores rubro-negras).</p>
+
+<p>O algoritmo principal permanece o mesmo, mas agora podemos encontrar a aresta mínima em $O(\log n)$.
+Por outro lado, o recálculo dos ponteiros agora levará $O(n \log n)$, o que é pior do que no algoritmo anterior.</p>
+
+<p>Mas quando consideramos que precisamos apenas atualizar $O(m)$ vezes no total e performar $O(n)$ buscas pela aresta mínima, então a complexidade total será $O(m \log n)$.
+Para grafos esparsos isso é melhor que o algoritmo acima mas, para grafos densos, isso será mais lento.</p>
+
+<pre><code class="cpp">const int INF = 1000000000;
+
+struct Edge {
+    int w = INF, to = -1;
+    bool operator&lt;(Edge const&amp; other) const {
+        return w &lt; other.w;
+    }
+};
+
+int n;
+vector&lt;vector&lt;Edge&gt;&gt; adj;
+
+void prim() {
+    int total_weight = 0;
+    vector&lt;Edge&gt; min_e(n);
+    min_e[0].w = 0;
+    set&lt;Edge&gt; q;
+    q.insert({0, 0});
+    vector&lt;bool&gt; selected(n, false);
+    for (int i = 0; i &lt; n; ++i) {
+        if (q.empty()) {
+            cout &lt;&lt; "No MST!" &lt;&lt; endl;
+            exit(0);
+        }
+
+        int v = q.begin()-&gt;to;
+        selected[v] = true;
+        total_weight += q.begin()-&gt;w;
+        q.erase(q.begin());
+
+        if (min_e[v].to != -1)
+            cout &lt;&lt; v &lt;&lt; " " &lt;&lt; min_e[v].to &lt;&lt; endl;
+
+        for (Edge e : adj[v]) {
+            if (!selected[e.to] &amp;&amp; e.w &lt; min_e[e.to].w) {
+                q.erase({min_e[e.to].w, e.to});
+                min_e[e.to] = {e.w, v};
+                q.insert({e.w, e.to});
+            }
+        }
+    }
+
+    cout &lt;&lt; total_weight &lt;&lt; endl;
+}
+</code></pre>
+
+<p>Aqui o grafo é representado por meio de uma lista de adjacência <code>adj[]</code>, onde <code>adj[v]</code> contém todas as arestas (na forma de pares de peso e alvo) para o vértice <code>v</code>.
+<code>min_e[v]</code> armazenará o peso da menor aresta do vértice <code>v</code> para um vértice já selecionado (novamente na forma de um par de peso e alvo/destino). Além disso, a queue <code>q</code> é preenchida com todos os vértices ainda não selecionados na ordem crescente de peso <code>min_e</code>.
+O algoritmo executa <code>n</code> etapas, em cada uma seleciona o vértice <code>v</code> com o menor peso <code>min_e</code> (extraindo-o do início da queue) e, em seguida, examina todas as arestas desse vértice e atualiza os valores em <code>min_e</code> (durante uma atualização precisamos remover a antiga aresta da queue <code>q</code> e colocar a nova aresta).</p>
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
