@@ -53,7 +53,7 @@ $$C_{k+1}[i][j] = \sum_{p = 1}^{n} C_k[i][p] \cdot G[p][j]$$</p>
 $$C_{k+1} = C_k \cdot G$$</p>
 
 <p>Portanto, a solução do problema pode ser representada da seguinte maneira:
-$$C_k = \underbrace{G \cdot G \cdots G}_{k \text{ times}} = G^k$$</p>
+$$C_k = \underbrace{G \cdot G \cdots G}_{k \text{ vezes}} = G^k$$</p>
 
 <p>Resta notar que os produtos das matrizes podem ser elevados a uma alta potência com eficiência usando <a href="https://cp-algorithms-brasil.com/Algebra/expobin.html">exponenciação binária</a>.
 Isso fornece uma solução com complexidade $O(n^3 \log k)$.</p>
