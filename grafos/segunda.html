@@ -67,7 +67,7 @@ Pode ser observado que a segunda melhor Árvore Geradora Mínima difere de $T$ p
 
 <p>A complexidade do tempo do algoritmo depende de como calculamos os $k$'s, que são as arestas de peso máximo na etapa 2 deste algoritmo. Uma maneira de computá-los eficientemente em $O(E \log V)$ é transformar o problema em um problema de menor ancestral comum (LCA).</p>
 
-<p>Nós pré-processaremos o LCA fazendo o enraizamento na MST e também calcularemos os pesos máximos das arestas de cada nó nos caminhos para seus ancestrais. Isso pode ser feito usando o <a href="https://cp-algorithms.com/graph/lca_binary_lifting.html">Binary Lifting</a> para o LCA.</p>
+<p>Nós pré-processaremos o LCA fazendo o enraizamento na MST e também calcularemos os pesos máximos das arestas de cada nó nos caminhos para seus ancestrais. Isso pode ser feito usando "<a href="https://cp-algorithms.com/graph/lca_binary_lifting.html">Binary Lifting</a>" para o LCA.</p>
 
 <p>A complexidade de tempo final dessa abordagem é $O(E \log V)$.</p>
 
