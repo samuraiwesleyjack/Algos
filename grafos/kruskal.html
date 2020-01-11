@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore Geradora Mínima: Kruskal - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Árvore Geradora Mínima - algoritmo de Kruskal</h1>
+
+<p>Dado um grafo não direcionado e com pesos.
+Queremos encontrar uma subárvore desse grafo na qual conecta todos os vértices (uma árvore geradora) com o menor peso (ou seja, a soma dos pesos de todas as arestas é mínima) de todas as árvores geradoras possíveis.
+A árvore geradora é chamada então de árvore geradora mínima.</p>
+
+<p>Na imagem da esquerda, você pode ver um grafo não direcionado e com pesos, na imagem da direita, a árvore geradora mínima correspondente.</p>
+
+<p><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/MST_before.png" alt="Random graph" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/MST_after.png" alt="MST of this graph" /></p>
+
+<p>Este artigo discutirá alguns fatos importantes associados às árvores geradoras mínimas(mst's) e, em seguida, fornecerá a implementação mais simples do algoritmo de Kruskal para encontrar a árvore geradora mínima.</p>
+
+<h2>Propriedades</h2>
+
+<ul>
+<li>Uma árvore geradora mínima de um grafo é única, se o peso de todas as arestas forem diferentes. Caso contrário, pode haver várias árvores geradoras mínimas. (Algoritmos específicos geralmente geram uma das possíveis árvores geradoras mínimas).</li>
+<li>A árvore geradora mínima também é a árvore com o produto mínimo de pesos das arestas. (pode ser comprovado substituindo os pesos de todas as arestas pelos seus logaritmos)</li>
+<li>Em uma árvore geradora mínima de um grafo, o peso máximo de uma aresta é o mínimo possível de todas as árvores geradoras possíveis desse grafo (isso decorre da validade do algoritmo de Kruskal).</li>
+<li>A árvore geradora máxima (árvore geradora com a soma dos pesos das arestas sendo máxima) de um grafo pode ser obtida de forma semelhante à da árvore geradora mínima, alterando os sinais dos pesos de todas as arestas para o seu oposto e aplicando qualquer do algoritmo de árvore geradora mínima.</li>
+</ul>
+
+<h2>Algoritmo de Kruskal</h2>
+
+<p>Este algoritmo foi descrito por Joseph Bernard Kruskal, Jr. em 1956.</p>
+
+<p>O algoritmo de Kruskal inicialmente isola todos os nós do grafo uns dos outros, para formar uma floresta de árvores de nós individuais, e então gradualmente mesclar essas árvores, combinando em cada iteração qualquer duas árvores com alguma aresta do grafo original. Antes da execução do algoritmo, todas as arestas são ordenadas pelos pesos (ordem decrescente). Em seguida, começa o processo de unificação: pegando todas as arestas da primeira até a última (ordenadas), e se as extremidades das aresta atuais pertencerem a subárvores diferentes, essas subárvores são combinadas, e a aresta é adicionada à resposta. Depois de iterar sobre todas as arestas, todos os vértices pertencerão à mesma subárvore e obteremos a resposta.</p>
+
+<h2>Implementação</h2>
+
+<p>O código a seguir implementa diretamente o algoritmo descrito acima e tem complexidade de tempo $O(M \log M + N^2)$.
+Ordenar arestas requer $O(M \log N)$ (o mesmo que $O(M \log M)$) operações.
+As informações sobre a subárvore à qual um vértice pertence são mantidas com a ajuda de uma array <code>tree_id[]</code> - para cada vértice <code>v</code>, <code>tree_id[v]</code> armazena o número da árvore à qual <code>v</code> pertence.
+Para cada aresta, se ela pertence às extremidades de diferentes árvores, pode ser determinada em $O(1)$.
+Finalmente, a união das duas árvores é realizada em $O(N)$ por uma simples passagem pela array <code>tree_id[]</code>.
+Dado que o número total de operações de mesclagem é $N-1$, obtemos o comportamento assintótico $O(M \log N + N^2)$.</p>
+
+<pre><code class="cpp">struct Edge {
+    int u, v, weight;
+    bool operator&lt;(Edge const&amp; other) {
+        return weight &lt; other.weight;
+    }
+};
+
+int n;
+vector&lt;Edge&gt; edges;
+
+int cost = 0;
+vector&lt;int&gt; tree_id(n);
+vector&lt;Edge&gt; result;
+for (int i = 0; i &lt; n; i++)
+    tree_id[i] = i;
+
+sort(edges.begin(), edges.end());
+
+for (Edge e : edges) {
+    if (tree_id[e.u] != tree_id[e.v]) {
+        cost += e.weight;
+        result.push_back(e);
+
+        int old_id = tree_id[e.u], new_id = tree_id[e.v];
+        for (int i = 0; i &lt; n; i++) {
+            if (tree_id[i] == old_id)
+                tree_id[i] = new_id;
+        }
+    }
+}
+</code></pre>
+
+<h2>Prova</h2>
+
+<p>Por que o algoritmo de Kruskal nos fornece o resultado correto?</p>
+
+<p>Se o grafo original era conexo, o grafo resultante também será conexo/conectado. Porque, caso contrário, haveria dois componentes que poderiam ser conexos com pelo menos uma aresta. No entanto, isso seria impossível pois Kruskal teria escolhido uma dessas arestas e os índices(ids) dos componentes são diferentes. Além disso, o grafo resultante não contém ciclos, pois proibimos isso explicitamente no algoritmo. Portanto, o algoritmo gera uma árvore geradora.</p>
+
+<p>Então, por que esse algoritmo nos fornece uma árvore geradora mínima?</p>
+
+<p>Podemos mostrar a proposta: "se $F$ é um conjunto de arestas escolhido pelo algoritmo em qualquer estágio do algoritmo, existe uma MST que contém todas as arestas de $F$" usando indução.</p>
+
+<p>A proposta é verdadeira no início, o conjunto vazio é um subconjunto de qualquer MST.</p>
+
+<p>Agora, vamos supor que $F$ é um algum conjunto de arestas definida em qualquer estágio do algoritmo, $T$ é uma MST contendo $F$ e $e$ é a nova aresta que queremos adicionar usando Kruskal.</p>
+
+<p>Se $e$ gera um ciclo, não o adicionamos e, portanto, a proposta ainda é verdadeira após esta etapa.</p>
+
+<p>No caso em que $T$ já contenha $e$, a proposta também será verdadeira após esta etapa.</p>
+
+<p>No caso em que $T$ não contenha a aresta $e$, então $T + e$ conterá um ciclo $C$.
+Esse ciclo conterá pelo menos uma aresta $f$, que não está emn $F$.
+O conjunto de arestas $T - f + e$ também será uma árvore geradora. Observe que o peso de $f$ não pode ser menor que o peso de $e$, porque, caso contrário, Kruskal teria escolhido $f$ anteriormente.
+Ele também não pode ter um peso maior, pois isso tornaria o peso total de $T - f + e$  menor que o peso total de $T$, o que é impossível, já que $T$ já é um MST. Isso significa que o peso de $e$ deve ser igual ao peso de $f$.
+Portanto, $T - f + e$ também é uma MST, e contém todas as arestas de $F + e$.
+Então, após a etapa, a proposta ainda é cumprida.</p>
+
+<p>Isso prova a proposta. O que significa que, após iterar em todas as arestas, o conjunto de arestas resultante será conectado e estará contido em uma MST, o que significa que ele já deve ser uma MST.</p>
+
+<h2>Implementação aprimorada</h2>
+
+<p>Podemos usar a estrutura de dados <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html"><strong>Disjoint Set Union</strong> (DSU)</a> para escrever uma implementação mais rápida do algoritmo de Kruskal com a complexidade do tempo em cerca de $O(M \log N)$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/KOICOST/">SPOJ - Koicost</a></li>
+<li><a href="http://www.spoj.com/problems/MARYBMW/">SPOJ - MaryBMW</a></li>
+<li><a href="https://www.codechef.com/ICL2016/problems/ICL16A">Codechef - Fullmetal Alchemist</a></li>
+<li><a href="http://codeforces.com/contest/160/problem/D">Codeforces - Edges in MST</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3328">UVA 12176 - Bring Your Own Horse</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1541">UVA 10600 - ACM Contest and Blackout</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1665">UVA 10724 - Road Construction</a></li>
+<li><a href="https://www.hackerrank.com/contests/june-world-codesprint/challenges/johnland/problem">Hackerrank - Roads in HackerLand</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2757">UVA 11710 - Expensive subway</a></li>
+<li><a href="https://www.codechef.com/problems/CHEFELEC">Codechef - Chefland and Electricity</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=1248">UVA 10307 - Killing Aliens in Borg Maze</a></li>
+<li><a href="http://codeforces.com/problemset/problem/32/C">Codeforces - Flea</a></li>
+<li><a href="http://codeforces.com/problemset/problem/598/D">Codeforces - Igon in Museum</a></li>
+<li><a href="http://codeforces.com/problemset/problem/744/A">Codeforces - Hongcow Builds a Nation</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/344">DevSkills - Repairing Road</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=849">UVA - 908 - Re-connecting Computer Sites</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3649">UVA 1208 - Oreon</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3676">UVA 1235 - Anti Brute Force Lock</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=975">UVA 10034 - Freckles</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=2169">UVA 11228 - Transportation system</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2678">UVA 11631 - Dark roads</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2833">UVA 11733 - Airports</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2847">UVA 11747 - Heavy Cycle Edges</a></li>
+<li><a href="http://www.spoj.com/problems/BLINNET/">SPOJ - Blinet</a></li>
+<li><a href="http://www.spoj.com/problems/IITKWPCG/">SPOJ - Help the Old King</a></li>
+<li><a href="http://codeforces.com/contest/17/problem/B">Codeforces - Hierarchy</a></li>
+</ul>
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
