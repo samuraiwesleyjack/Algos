@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Segunda melhor Árvore Geradora Mínima: Kruskal e LCA - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Segunda melhor Árvore Geradora Mínima</h1>
+
+<p>A Árvore Geradora Mínima $T$ é uma árvore para o grafo $G$ que se estende por todos os vértices do grafo fornecido e possui a soma mínima de peso de todas as arestas, de todas as árvores geradoras possíveis. Uma segunda melhor MST $T'$ é uma árvore geradora, que possui a segunda soma mínima de peso de todas as arestas, de todas as árvore geradoras do grafo $G$.</p>
+
+<h2>Observação</h2>
+
+<p>Seja $T$ a Árvore Geradora Mínima(MST) de um grafo $G$.
+Pode ser observado que a segunda melhor Árvore Geradora Mínima difere de $T$ por apenas uma substituição de aresta. (Para uma prova desta declaração, consulte o problema 23-1 <a href="http://www-bcf.usc.edu/~shanghua/teaching/Spring2010/public_html/files/HW2_Solutions_A.pdf">aqui</a>).</p>
+
+<p>Portanto, precisamos encontrar uma aresta $e_{new}$ que não esteja em $T$, e substituí-la por uma aresta em $T$ (seja $e_{old}$) de modo que o novo grafo $T' = (T \cup &#92;{e_{new}&#92;}) \setminus &#92;{e_{old}&#92;}$ é uma árvore geradora e a diferença dos pesos ($e_{new} - e_{old}$) seja mínima.</p>
+
+<h2>Usando o algoritmo de Kruskal</h2>
+
+<p>Podemos usar o algoritmo de Kruskal para encontrar a MST primeiro e, em seguida, apenas tentar remover uma única aresta dela e substituí-lo por outro.</p>
+
+<ol>
+<li>Ordenar as arestas em $O(E \log E)$, então encontrar a MST usando Kruskal em $O(E)$.</li>
+<li>Para cada aresta na MST (teremos $V-1$ arestas nela) exclua-a temporariamente da lista de arestas para que não possa ser escolhida.</li>
+<li>Em seguida, tente novamente encontrar uma MST em $O(E)$ usando as arestas restantes.</li>
+<li>Faça isso para todas as arestas da MST e tire a melhor de todas.</li>
+</ol>
+
+<p>Nota: não precisamos ordenar as arestas novamente na etapa 3.</p>
+
+<p>Portanto, a complexidade geral do tempo será $O(E \log V + E + V E)$ = $O(V E)$.</p>
+
+<h2>Modelando em um problema de menor ancestral comum (LCA)</h2>
+
+<p>Na abordagem anterior, tentamos todas as possibilidades de remover uma aresta do MST. Aqui vamos fazer exatamente o oposto. Tentamos adicionar todas as arestas que ainda não estão no MST.</p>
+
+<ol>
+<li>Ordene as arestas em $O(E \log E)$, e então encontre a MST usando Kruskal em $O(E)$.</li>
+<li>Para cada aresta $e$ que ainda não está na MST, temporariamente adicione na MST, criando um ciclo.</li>
+<li>Encontre a aresta $k$ com peso máximo no ciclo que não seja igual a $e$.</li>
+<li>Remova $k$ temporariamente, criando uma nova árvore geradora.</li>
+<li>Calcule a diferença de peso $\delta = peso(e) - peso(k)$, e lembre-se dele juntamente com a aresta alterada.</li>
+<li>Repita a etapa 2 para todas as outras arestas e retorne a árvore geradora com a menor diferença de peso ao MST.</li>
+</ol>
+
+<p>A complexidade do tempo do algoritmo depende de como calculamos os $k$'s, que são as arestas de peso máximo na etapa 2 deste algoritmo. Uma maneira de computá-los eficientemente em $O(E \log V)$ é transformar o problema em um problema de menor ancestral comum (LCA).</p>
+
+<p>Nós pré-processaremos o LCA fazendo o enraizamento na MST e também calcularemos os pesos máximos das arestas de cada nó nos caminhos para seus ancestrais. Isso pode ser feito usando o <a href="https://cp-algorithms.com/graph/lca_binary_lifting.html">Binary Lifting</a> para o LCA.</p>
+
+<p>A complexidade de tempo final dessa abordagem é $O(E \log V)$.</p>
+
+<p>Por exemplo:</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/second_best_mst_1.png" alt="MST" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/second_best_mst_2.png" alt="Second best MST" /> <br></p>
+
+<p><em>Na imagem à esquerda está a MST e à direita a segundo melhor MST.</em>
+</center></p>
+
+<p>No dado grafo suponha que enraizamos a MST no vértice azul do topo, e em seguida, executamos o algoritmo começando a escolher as arestas que não estão no MST. Deixe a aresta escolhida primeiro ser a aresta $(u, v)$ com peso 36.
+A adição dessa aresta à árvore forma um ciclo 36 - 7 - 2 - 34.</p>
+
+<p>Agora, encontraremos a aresta de peso máximo no ciclo encontrando o $\text{LCA}(u, v) = p$.
+Calculamos a aresta de peso máximo nos caminhos de $u$ para $p$ e de $v$ para $p$.
+Nota: o $\text{LCA}(u, v)$ pode também ser igual a $u$ ou $v$ em algum caso.
+Neste exemplo, obteremos a aresta com peso 34 como a aresta de peso máximo no ciclo.
+Ao remover a aresta, obtemos uma nova árvore geradora, que tem uma diferença de peso de apenas 2.</p>
+
+<p>Depois de fazer isso também com todas as outras arestas que não fazem parte da MST inicial, podemos ver que essa árvore geradora também é a segunda melhor árvore geradora no geral. Escolher a aresta com peso 14 aumentará o peso da árvore em 7, escolher a aresta com peso 27 aumenta em 14, escolher a aresta com peso 28 aumenta em 21 e escolher a aresta com peso 39 aumentará a árvore em 5.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct edge {
+    int s, e, w, id;
+    bool operator&lt;(const struct edge&amp; other) { return w &lt; other.w; }
+};
+typedef struct edge Edge;
+
+const int N = 2e5 + 5;
+long long res = 0, ans = 1e18;
+int n, m, a, b, w, id, l = 21;
+vector&lt;Edge&gt; edges;
+vector&lt;int&gt; h(N, 0), parent(N, -1), size(N, 0), present(N, 0);
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj(N), dp(N, vector&lt;pair&lt;int, int&gt;&gt;(l));
+vector&lt;vector&lt;int&gt;&gt; up(N, vector&lt;int&gt;(l, -1));
+
+pair&lt;int, int&gt; combine(pair&lt;int, int&gt; a, pair&lt;int, int&gt; b) {
+    vector&lt;int&gt; v = {a.first, a.second, b.first, b.second};
+    int topTwo = -3, topOne = -2;
+    for (int c : v) {
+        if (c &gt; topOne) {
+            topTwo = topOne;
+            topOne = c;
+        } else if (c &gt; topTwo &amp;&amp; c &lt; topOne) {
+            topTwo = c;
+        }
+    }
+    return {topOne, topTwo};
+}
+
+void dfs(int u, int par, int d) {
+    h[u] = 1 + h[par];
+    up[u][0] = par;
+    dp[u][0] = {d, -1};
+    for (auto v : adj[u]) {
+        if (v.first != par) {
+            dfs(v.first, u, v.second);
+        }
+    }
+}
+
+pair&lt;int, int&gt; lca(int u, int v) {
+    pair&lt;int, int&gt; ans = {-2, -3};
+    if (h[u] &lt; h[v]) {
+        swap(u, v);
+    }
+    for (int i = l - 1; i &gt;= 0; i--) {
+        if (h[u] - h[v] &gt;= (1 &lt;&lt; i)) {
+            ans = combine(ans, dp[u][i]);
+            u = up[u][i];
+        }
+    }
+    if (u == v) {
+        return ans;
+    }
+    for (int i = l - 1; i &gt;= 0; i--) {
+        if (up[u][i] != -1 &amp;&amp; up[v][i] != -1 &amp;&amp; up[u][i] != up[v][i]) {
+            ans = combine(ans, combine(dp[u][i], dp[v][i]));
+            u = up[u][i];
+            v = up[v][i];
+        }
+    }
+    ans = combine(ans, combine(dp[u][0], dp[v][0]));
+    return ans;
+}
+
+int main(void) {
+    cin &gt;&gt; n &gt;&gt; m;
+    for (int i = 1; i &lt;= n; i++) {
+        parent[i] = i;
+        size[i] = 1;
+    }
+    for (int i = 1; i &lt;= m; i++) {
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; w; // 1-indexed
+        edges.push_back({a, b, w, i - 1});
+    }
+    sort(edges.begin(), edges.end());
+    for (int i = 0; i &lt;= m - 1; i++) {
+        a = edges[i].s;
+        b = edges[i].e;
+        w = edges[i].w;
+        id = edges[i].id;
+        if (unite_set(a, b)) { 
+            adj[a].emplace_back(b, w);
+            adj[b].emplace_back(a, w);
+            present[id] = 1;
+            res += w;
+        }
+    }
+    dfs(1, 0, 0);
+    for (int i = 1; i &lt;= l - 1; i++) {
+        for (int j = 1; j &lt;= n; ++j) {
+            if (up[j][i - 1] != -1) {
+                int v = up[j][i - 1];
+                up[j][i] = up[v][i - 1];
+                dp[j][i] = combine(dp[j][i - 1], dp[v][i - 1]);
+            }
+        }
+    }
+    for (int i = 0; i &lt;= m - 1; i++) {
+        id = edges[i].id;
+        w = edges[i].w;
+        if (!present[id]) {
+            auto rem = lca(edges[i].s, edges[i].e);
+            if (rem.first != w) {
+                if (ans &gt; res + w - rem.first) {
+                    ans = res + w - rem.first;
+                }
+            } else if (rem.second != -1) {
+                if (ans &gt; res + w - rem.second) {
+                    ans = res + w - rem.second;
+                }
+            }
+        }
+    }
+    cout &lt;&lt; ans &lt;&lt; "\n";
+    return 0;
+}
+</code></pre>
+
+<h2>Referências</h2>
+
+<ol>
+<li>Competitive Programming-3, by Steven Halim</li>
+<li><a href="http://web.mit.edu/6.263/www/quiz1-f05-sol.pdf">web.mit.edu</a></li>
+</ol>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://codeforces.com/problemset/problem/609/E">Codeforces - Árvore Geradora Mínima for each edge</a></li>
+</ul>
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
