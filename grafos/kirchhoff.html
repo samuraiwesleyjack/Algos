@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Teorema de Kirchhoff - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Teorema de Kirchhoff - Encontrando o número de Árvores Geradoras</h1>
+
+<p>Problema: Você recebe um grafo não direcionado e conexo (com possíveis várias arestas) representado usando uma matriz de adjacência. Encontre o número de diferentes árvores geradoras deste grafo.</p>
+
+<p>A seguinte fórmula foi comprovada por Kirchhoff em 1847.</p>
+
+<h2>Teorema da árvore matricial de Kirchhoff</h2>
+
+<p>Seja $A$ a matriz de adjacência do grafo: $A_{u,v}$ é o número de arestas entre $u$ e $v$.
+Seja $D$ o grau da matriz do grafo: uma matriz diagonal com $D_{u,u}$ sendo o grau do vértice $u$ (incluindo arestas múltiplas e "loops" - arestas que conectam o vértice $u$ com ele mesmo).</p>
+
+<p>A matriz laplaciana(laplacian matrix) do grafo é definida como $L = D - A$.
+De acordo com o teorema de Kirchhoff, todos os cofatores dessa matriz são iguais entre si e são iguais ao número de árvores geradoras do grafo. O cofator $(i,j)$ de uma matriz é o produto de $(-1)^{i + j}$ com o determinante da matriz que você obtém após remover a $i$-ésima linha e a $j$-ésima coluna.
+Assim, você pode, por exemplo, excluir a última linha e a última coluna da matriz $L$, e o valor absoluto do determinante da matriz resultante fornecerá o número de árvores geradoras.</p>
+
+<p>O determinante da matriz pode ser encontrado em $O(N^3)$ usando o <a href="https://cp-algorithms-brasil.com/Algebra/gaussdeterminante.html">método de Gauss</a>.</p>
+
+<p>A prova desse teorema é bastante difícil e não é apresentada aqui; para obter um resumo da prova e variações do teorema para grafos sem arestas múltiplas e para grafos direcionados, consulte a <a href="https://en.wikipedia.org/wiki/Kirchhoff%27s_theorem">Wikipedia</a> para referências.</p>
+
+<h2>Relação com as leis de circuito de Kirchhoff</h2>
+
+<p>O teorema da árvore matricial de Kirchhoff e as leis de Kirchhoff para circuitos elétricos estão relacionadas. É possível mostrar (usando a lei de Ohm e a primeira lei de Kirchhoff) que a resistência $R_{ij}$ entre dois pontos $i$ e $j$ do circuito será</p>
+
+<p>$$R_{ij} = \frac{ \left| L^{(i,j)} \right| }{ | L^j | }.$$</p>
+
+<p>Aqui a matriz matriz $L$ é obtida a partir da matriz de resistências inversas $A$ ($A_{i,j}$ é a inversa da resistência do condutor entre os pontos $i$ e $j$) usando o procedimento descrito no teorema da árvore matricial de Kirchhoff.
+$T^j$ é a matriz com linha e coluna $j$ removida, $T^{(i,j)}$ é a matriz com duas linhas e duas colunas $i$ e $j$ removidas.</p>
+
+<p>O teorema de Kirchhoff atribui a esta fórmula um significado geométrico.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/STARROAD">CODECHEF: Roads in Stars</a></li>
+<li><a href="http://www.spoj.com/problems/KPMAZE/">SPOJ: Maze</a></li>
+<li><a href="https://www.codechef.com/problems/CSTREE">CODECHEF: Complement Spanning Trees</a></li>
+</ul>
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
