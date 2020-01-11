@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore Geradora Mínima: Kruskal com DSU - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Árvore Geradora Mínima: Kruskal com Disjoint Set Union</h1>
+
+<p>Para uma explicação do problema do MST e do algoritmo de Kruskal, consulte primeiro o artigo sobre o <a href="https://cp-algorithms-brasil.com/grafos/kruskal.html">algoritmo de Kruskal</a>.</p>
+
+<p>Neste artigo, consideraremos a estrutura de dados "<a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html">Disjoint Set Union</a>" para implementar o algoritmo de Kruskal, o que permitirá que o algoritmo atinja a complexidade de tempo $O(M \log N)$.</p>
+
+<h2>Descrição</h2>
+
+<p>Assim como na versão simples do algoritmo de Kruskal, ordenamos todas as arestas do grafo em ordem não decrescente de pesos. Em seguida, cada vértice é colocado em sua própria árvore (ou seja, seu conjunto) por meio de chamadas da função <code>make_set</code> - serão necessários um total de $O(N)$.
+ e para cada aresta determinamos se as extremidades pertencem a árvores diferentes (com duas chamadas <code>find_set</code> com $O(1)$ cada).
+Finalmente, precisamos realizar a união das duas árvores (sets), na qual a função do DSU <code>union_sets</code> será chamada - também em $O(1)$.
+Portanto, obtemos a complexidade do tempo total de $O(M \log N + N + M)$ = $O(M \log N)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação do algoritmo de Kruskal com "<em>union by rank</em>".</p>
+
+<pre><code class="cpp">vector&lt;int&gt; parent, rank;
+
+void make_set(int v) {
+    parent[v] = v;
+    rank[v] = 0;
+}
+
+int find_set(int v) {
+    if (v == parent[v])
+        return v;
+    return parent[v] = find_set(parent[v]);
+}
+
+void union_sets(int a, int b) {
+    a = find_set(a);
+    b = find_set(b);
+    if (a != b) {
+        if (rank[a] &lt; rank[b])
+            swap(a, b);
+        parent[b] = a;
+        if (rank[a] == rank[b])
+            rank[a]++;
+    }
+}
+
+struct Edge {
+    int u, v, weight;
+    bool operator&lt;(Edge const&amp; other) {
+        return weight &lt; other.weight;
+    }
+};
+
+int n;
+vector&lt;Edge&gt; edges;
+
+int cost = 0;
+vector&lt;Edge&gt; result;
+parent.resize(n);
+rank.resize(n);
+for (int i = 0; i &lt; n; i++)
+    make_set(i);
+
+sort(edges.begin(), edges.end());
+
+for (Edge e : edges) {
+    if (find_set(e.u) != find_set(e.v)) {
+        cost += e.weight;
+        result.push_back(e);
+        union_sets(e.u, e.v);
+    }
+}
+</code></pre>
+
+<p>Nota: como a MST conterá exatamente $N-1$ arestas, podemos interromper o loop "for" quando encontrarmos essa quantidade.</p>
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
