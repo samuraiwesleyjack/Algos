@@ -40,7 +40,7 @@ A árvore geradora com o menor peso é chamada de árvore geradora mínima.</p>
 <p>Qualquer árvore geradora necessariamente conterá $n-1$ arestas.</p>
 
 <p>Esse problema aparece naturalmente em muitos problemas.
-Por exemplo, no seguinte problema: existem $n$ cidades e, para cada par de cidades, temos o custo de construir uma estrada entre elas (ou podemos saber que é "fisicamente" impossível construir uma estrada entre elas).
+Por exemplo: existem $n$ cidades e, para cada par de cidades, temos o custo de construir uma estrada entre elas (ou podemos saber que é "fisicamente" impossível construir uma estrada entre elas).
 Temos que construir estradas, para que possamos ir de cada cidade a outra cidade, e o custo para a construção de todas as estradas deve ser mínimo.</p>
 
 <h2>Algoritmo de Prim</h2>
@@ -211,8 +211,10 @@ void prim() {
 <code>min_e[v]</code> armazenará o peso da menor aresta do vértice <code>v</code> para um vértice já selecionado (novamente na forma de um par de peso e alvo/destino). Além disso, a queue <code>q</code> é preenchida com todos os vértices ainda não selecionados na ordem crescente de peso <code>min_e</code>.
 O algoritmo executa <code>n</code> etapas, em cada uma seleciona o vértice <code>v</code> com o menor peso <code>min_e</code> (extraindo-o do início da queue) e, em seguida, examina todas as arestas desse vértice e atualiza os valores em <code>min_e</code> (durante uma atualização precisamos remover a antiga aresta da queue <code>q</code> e colocar a nova aresta).</p>
 
-
-   
+<h3>Problemas</h3>
+<ul>			
+<li><a href="https://www.hackerrank.com/challenges/torque-and-development/problem">Hackerrank: Roads and Libraries</a></li>
+</ul>	
 
 
 
