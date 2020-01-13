@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ciclo Negativo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Encontrando um ciclo negativo no grafo</h1>
+
+<p>Você recebe um grafo direcionado e com pesos: $G$ com $N$ vértices e $M$ arestas. Encontre nele qualquer ciclo de peso negativo, se esse ciclo existir.</p>
+
+<p>É conveniente usar algoritmos diferentes para resolver essas duas variações do problema; portanto, discutiremos os dois aqui.</p>
+
+<h2>Algoritmo de Bellman-Ford</h2>
+
+<p>O algoritmo de Bellman-Ford permite verificar se existe um ciclo de peso negativo no grafo e, se existir, é possível encontrar um desses ciclos.</p>
+
+<p>Os detalhes do algoritmo estão descritos no artigo sobre o algoritmo de <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">Bellman-Ford</a>.
+Aqui descreveremos apenas sua aplicação para esse problema.</p>
+
+<p>Faça $N$ iterações do algoritmo de Bellman-Ford. Se não houve alterações na última iteração, não há ciclo de peso negativo no grafo. Caso contrário, pegue um vértice cuja distância mudou até ele e vá através de seus ancestrais até encontrar um ciclo. Este ciclo será o ciclo desejado de peso negativo.</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp">struct Edge {
+    int a, b, cost;
+};
+
+int n, m;
+vector&lt;Edge&gt; edges;
+const int INF = 1000000000;
+
+void solve()
+{
+    vector&lt;int&gt; d(n);
+    vector&lt;int&gt; p(n, -1);
+    int x;
+    for (int i = 0; i &lt; n; ++i) {
+        x = -1;
+        for (Edge e : edges) {
+            if (d[e.a] + e.cost &lt; d[e.b]) {
+                d[e.b] = d[e.a] + e.cost;
+                p[e.b] = e.a;
+                x = e.b;
+            }
+        }
+    }
+
+    if (x == -1) {
+        cout &lt;&lt; "Sem ciclo negativo.";
+    } else {
+        for (int i = 0; i &lt; n; ++i)
+            x = p[x];
+
+        vector&lt;int&gt; cycle;
+        for (int v = x;; v = p[v]) {
+            cycle.push_back(v);
+            if (v == x &amp;&amp; cycle.size() &gt; 1)
+                break;
+        }
+        reverse(cycle.begin(), cycle.end());
+
+        cout &lt;&lt; "Ciclo negativo: ";
+        for (int v : cycle)
+            cout &lt;&lt; v &lt;&lt; ' ';
+        cout &lt;&lt; endl;
+    }
+}
+</code></pre>
+
+<h2>Algoritmo de Floyd-Warshall</h2>
+
+<p>O algoritmo de Floyd-Warshall permite resolver a segunda variação do problema - encontrando todos os pares de vértices $(i, j)$ que não possuem um caminho mais curto entre eles (ou seja, existe um caminho de peso arbitrariamente pequeno).</p>
+
+<p>Novamente, os detalhes podem ser encontrados no artigo de <a href="https://cp-algorithms-brasil.com/grafos/floyd.html">Floyd-Warshall</a>, e aqui descrevemos apenas sua aplicação.</p>
+
+<p>Execute o algoritmo Floyd-Warshall no grafo. Inicialmente $d[v][v] = 0$ para cada $v$.
+Porém, após a execução do algoritmo, $d[v][v]$ será menor que $0$ se houver um caminho de comprimento negativo de $v$ a $v$.
+Podemos usar isso para encontrar também todos os pares de vértices que não possuem um caminho mais curto entre eles. Nós iteramos sobre todos os pares de vértices $(i, j)$ e, para cada par, verificamos se eles têm um caminho mais curto entre eles. Para fazer isso, tente todas as possibilidades de um vértice intermediário $t$.
+$(i, j)$ não possui um caminho mais curto, se um dos vértices intermediários $t$ tiver $d[t][t] &lt; 0$ (ou seja: $t$ faz parte de um ciclo de peso negativo) , $t$ pode ser alcançado de $i$ e   $j$ pode ser alcançado de $t$.
+Então, o caminho de $i$ para $j$ pode ter um peso arbitrariamente pequeno. Vamos denotar isso como <code>-INF</code>.</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp">for (int i = 0; i &lt; n; ++i) {
+    for (int j = 0; j &lt; n; ++j) {
+        for (int t = 0; t &lt; n; ++t) {
+            if (d[i][t] &lt; INF &amp;&amp; d[t][t] &lt; 0 &amp;&amp; d[t][j] &lt; INF)
+                d[i][j] = - INF; 
+        }
+    }
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=499">UVA: Wormholes</a></li>
+<li><a href="http://www.spoj.com/problems/UCV2013B/">SPOJ: Alice in Amsterdam, I mean Wonderland</a></li>
+<li><a href="http://www.spoj.com/problems/JHNSN/">SPOJ: Johnsons Algorithm</a></li>
+</ul>
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
