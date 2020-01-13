@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Acíclico / Ciclo - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Checando se um grafo é acíclico e encontrando um ciclo em $O(M)$</h1>
+
+<p>Considere um grafo direcionado ou não direcionado, sem loops e arestas múltiplas. Temos que verificar se é acíclico e, se não for, encontrar algum ciclo.</p>
+
+<p>Podemos resolver esse problema usando uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> em $O(M)$ onde $M$ é o número de arestas.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Executaremos uma série de DFS's no grafo. Inicialmente todos os vértices são brancos (0). Em cada vértice não visitado (branco) iniciamos a DFS, marcar com cinza (1) enquanto entra no vértice e marcar com preto (2) na saída dele. Se a DFS se mover para um vértice cinza, encontramos um ciclo! (se o grafo não for direcionado, a aresta para o parente não será considerada). O próprio ciclo pode ser reconstruído usando a array de parentes.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação para um grafo direcionado.</p>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; adj;
+vector&lt;char&gt; color;
+vector&lt;int&gt; parent;
+int cycle_start, cycle_end;
+
+bool dfs(int v) {
+    color[v] = 1;
+    for (int u : adj[v]) {
+        if (color[u] == 0) {
+            parent[u] = v;
+            if (dfs(u))
+                return true;
+        } else if (color[u] == 1) {
+            cycle_end = v;
+            cycle_start = u;
+            return true;
+        }
+    }
+    color[v] = 2;
+    return false;
+}
+
+void find_cycle() {
+    color.assign(n, 0);
+    parent.assign(n, -1);
+    cycle_start = -1;
+
+    for (int v = 0; v &lt; n; v++) {
+        if (color[v] == 0 &amp;&amp; dfs(v))
+            break;
+    }
+
+    if (cycle_start == -1) {
+        cout &lt;&lt; "Acyclic" &lt;&lt; endl;
+    } else {
+        vector&lt;int&gt; cycle;
+        cycle.push_back(cycle_start);
+        for (int v = cycle_end; v != cycle_start; v = parent[v])
+            cycle.push_back(v);
+        cycle.push_back(cycle_start);
+        reverse(cycle.begin(), cycle.end());
+
+        cout &lt;&lt; "Cycle found: ";
+        for (int v : cycle)
+            cout &lt;&lt; v &lt;&lt; " ";
+        cout &lt;&lt; endl;
+    }
+}
+</code></pre>
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
