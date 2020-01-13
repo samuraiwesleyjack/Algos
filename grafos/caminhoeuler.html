@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Caminho Euleriano - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Localizando o Caminho Euleriano em $O(M)$</h1>
+
+<p>Um caminho euleriano é um caminho em um grafo que passa por todas as suas arestas exatamente uma vez. Um ciclo euleriano é um caminho euleriano que é um ciclo.</p>
+
+<p>O problema é encontrar o caminho euleriano em um grafo <strong>não direcionado com loops e arestas múltiplas</strong>.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Primeiro, podemos verificar se existe um caminho euleriano. Um ciclo euleriano existe se e somente se os graus de todos os vértices forem pares. E existe um caminho euleriano se, e somente se, o número de vértices com graus ímpares for dois (ou zero, no caso da existência de um ciclo euleriano). Além disso, é claro, o grafo deve estar suficientemente conectado (ou seja, se você remover todos os vértices isolados dele, deverá obter um grafo conectado).</p>
+
+<p>Para encontrar o caminho euleriano / ciclo euleriano, podemos usar a seguinte estratégia: encontramos todos os ciclos simples e os combinamos em um - esse será o ciclo euleriano. Se o grafo for tal que o caminho euleriano não seja um ciclo, adicione a aresta faltando, localize o ciclo euleriano e remova a aresta extra.</p>
+
+<p>Procurar todos os ciclos e combiná-los pode ser feito com um procedimento recursivo simples:</p>
+
+<pre><code class="nohighlight">procedure FindEulerPath(V)
+  1. itere sobre todas as arestas saindo do vértice V;
+       remova essa aresta do grafo,
+       e chame FindEulerPath da segunda extremidade dessa arestas;
+  2. add vértice V na resposta.  
+</code></pre>
+
+<p>A complexidade desse algoritmo é linear em relação ao número de arestas.</p>
+
+<p>Mas podemos escrever o mesmo algoritmo em uma versão não recursiva:</p>
+
+<pre><code class="nohighlight">stack St;
+colocar vértice inicial no St;
+até que St esteja vazia
+  V é o valor no topo da St;
+  if degree(V) = 0, então
+    adicione V para a resposta;
+    remova V do topo da St;
+  caso contrário
+    encontre qualquer aresta saindo de V;
+    remova ela do grafo;
+    coloque a segunda extremidade dessa aresta em St;
+</code></pre>
+
+<p>É fácil verificar a equivalência dessas duas formas do algoritmo. No entanto, a segunda forma é mais rápida e o código será muito mais.</p>
+
+<h2>O problema do Dominó</h2>
+
+<p>Damos aqui um problema clássico do ciclo euleriano - o problema do dominó.</p>
+
+<p>Existem $N$ dominós, como é conhecido, nas duas extremidades do Domino um número é escrito (geralmente de 1 a 6, mas no nosso caso isso não é importante). Você deseja colocar todos os dominós em uma fileira para que os números em quaisquer dois dominós adjacentes, escritos no lado comum, coincidam. Os dominós podem virar.</p>
+
+<p>Reformule o problema. Deixe que os números escritos na parte inferior sejam os vértices do grafo e os dominós sejam as arestas (cada dominó com números $(a,b)$ são as arestas $(a,b)$ e $(b, a)$). Então, nosso problema é reduzido ao problema de encontrar o caminho euleriano no grafo.</p>
+
+<h2>Implementação</h2>
+
+<p>O programa abaixo procura e imprime um loop ou caminho euleriano em um grafo ou imprime $-1$ se não existir.</p>
+
+<p>Primeiro, o programa verifica o grau de vértices: se não houver vértices com um grau ímpar, o grafo terá um ciclo de Euler, se houver $2$ vértices com um grau ímpar, então no grafo haverá apenas o caminho Euleriano (mas não um ciclo de Euler), se houver mais de $2$ desses vértices, no grafo não haverá ciclo de Euler ou caminho de Euler. Para encontrar o caminho de Euler (não um ciclo), faça o seguinte: se $V1$ e $V2$ são dois vértices de grau ímpar, então apenas adicione uma aresta $(V1, V2)$, no grafo resultante encontramos o Ciclo de Euler (ele obviamente existirá) e então remova a aresta "fictícia" $(V1, V2)$ da resposta.
+Procuraremos o ciclo de Euler exatamente como descrito acima (versão não recursiva) e, ao mesmo tempo, no final deste algoritmo, verificaremos se o grafo estava conectado ou não (se o grafo não estava conectado, então no No final do algoritmo, algumas arestas permanecerão no grafo e, neste caso, precisamos imprimir $−1$). Por fim, o programa leva em consideração que pode haver vértices isolados no grafo.</p>
+
+<p>Observe que usamos uma matriz de adjacência nesse problema. Além disso, essa implementação lida com a localização do próximo caminho com força bruta, o que exige que a iteração seja repetida repetidamente na linha completa da matriz. Uma maneira melhor seria armazenar o grafo como uma lista de adjacência e remover as arestas em $O(1)$ e marcar as arestas invertidas em uma lista separada. Dessa forma, podemos alcançar um algoritmo $O(N)$.</p>
+
+<pre><code class="cpp">int main() {
+    int n;
+    vector&lt;vector&lt;int&gt;&gt; g(n, vector&lt;int&gt;(n));
+    // lendo o grafo na matriz de adjacência
+
+    vector&lt;int&gt; deg(n);
+    for (int i = 0; i &lt; n; ++i) {
+        for (int j = 0; j &lt; n; ++j)
+            deg[i] += g[i][j];
+    }
+
+    int first = 0;
+    while (!deg[first])
+        ++first;
+
+    int v1 = -1, v2 = -1;
+    bool bad = false;
+    for (int i = 0; i &lt; n; ++i) {
+        if (deg[i] &amp; 1) {
+            if (v1 == -1)
+                v1 = i;
+            else if (v2 == -1)
+                v2 = i;
+            else
+                bad = true;
+        }
+    }
+
+    if (v1 != -1)
+        ++g[v1][v2], ++g[v2][v1];
+
+    stack&lt;int&gt; st;
+    st.push(first);
+    vector&lt;int&gt; res;
+    while (!st.empty()) {
+        int v = st.top();
+        int i;
+        for (i = 0; i &lt; n; ++i)
+            if (g[v][i])
+                break;
+        if (i == n) {
+            res.push_back(v);
+            st.pop();
+        } else {
+            --g[v][i];
+            --g[i][v];
+            st.push(i);
+        }
+    }
+
+    if (v1 != -1) {
+        for (size_t i = 0; i + 1 &lt; res.size(); ++i) {
+            if ((res[i] == v1 &amp;&amp; res[i + 1] == v2) ||
+                (res[i] == v2 &amp;&amp; res[i + 1] == v1)) {
+                vector&lt;int&gt; res2;
+                for (size_t j = i + 1; j &lt; res.size(); ++j)
+                    res2.push_back(res[j]);
+                for (size_t j = 1; j &lt;= i; ++j)
+                    res2.push_back(res[j]);
+                res = res2;
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i &lt; n; ++i) {
+        for (int j = 0; j &lt; n; ++j) {
+            if (g[i][j])
+                bad = true;
+        }
+    }
+
+    if (bad) {
+        cout &lt;&lt; -1;
+    } else {
+        for (int x : res)
+            cout &lt;&lt; x &lt;&lt; " ";
+    }
+}
+</code></pre>
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
