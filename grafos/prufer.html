@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Código Prüfer - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Código Prüfer</h1>
+
+<p>Neste artigo, veremos o chamado <strong>código Prüfer</strong> (ou <a href="https://en.wikipedia.org/wiki/Pr%C3%BCfer_sequence">sequência Prüfer</a>), que é uma maneira de codificar uma árvore rotulada em uma sequência de números de uma maneira única.</p>
+
+<p>Com a ajuda do código Prüfer, provaremos a <strong>fórmula de Cayley</strong> (que especifica o número de árvores geradoras em um grafo completo). Também mostramos a solução para o problema de contar o número de maneiras de adicionar arestas a um grafo para torná-lo conexo/conectado.</p>
+
+<p><strong>Nota</strong>: não consideraremos árvores que consistem em um único vértice - este é um caso especial em que várias declarações se "chocam".</p>
+
+<h2>Código Prüfer</h2>
+
+<p>O código Prüfer é uma maneira de codificar uma árvore rotulada com $n$ vértices usando uma sequência de $n - 2$ inteiros no intervalo $[0; n-1]$.
+Essa codificação também atua como uma <strong>bijeção</strong> entre todas as árvores geradoras de um grafo completo e das sequências numéricas.</p>
+
+<p>Embora o uso do código Prüfer para armazenar e operar em árvores seja impraticável devido à especificação da representação, os códigos Prüfer são usados ​​com frequência principalmente na solução de problemas combinatórios.</p>
+
+<p>O inventor - <strong>Heinz Prüfer</strong> - propôs esse código em 1918 como uma prova da fórmula de Cayley.</p>
+
+<h3>Construindo o código Prüfer para uma determinada árvore</h3>
+
+<p>O código do Prüfer é construído da seguinte maneira. Repetiremos o seguinte procedimento $n - 2$ vezes:
+selecionamos a folha da árvore com o menor número, removemos da árvore e escrevemos o número do vértice que estava conectado a ela. Após $n - 2$ iterações restarão apenas $2$ vértices, e então o algoritmo termina.</p>
+
+<p>Assim, o código de Prüfer para uma determinada árvore é uma sequência de $n - 2$ números, onde cada número é o número do vértice conectado, ou seja, esse número está no intervalo $[0, n-1]$.</p>
+<p>O algoritmo para calcular o código Prüfer pode ser implementado facilmente com a complexidade de tempo $O(n \log n)$, simplesmente usando uma estrutura de dados para extrair o mínimo (por exemplo: <code>set</code> ou <code>priority_queue</code> no C++), que contém uma lista de todos as folhas atuais.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; adj;
+
+vector&lt;int&gt; pruefer_code() {
+    int n = adj.size();
+    set&lt;int&gt; leafs;
+    vector&lt;int&gt; degree(n);
+    vector&lt;bool&gt; killed(n, false);
+    for (int i = 0; i &lt; n; i++) {
+        degree[i] = adj[i].size();
+        if (degree[i] == 1)
+            leafs.insert(i);
+    }
+
+    vector&lt;int&gt; code(n - 2);
+    for (int i = 0; i &lt; n - 2; i++) {
+        int leaf = *leafs.begin();
+        leafs.erase(leafs.begin());
+        killed[leaf] = true;
+
+        int v;
+        for (int u : adj[leaf]) {
+            if (!killed[u])
+                v = u;
+        }
+
+        code[i] = v;
+        if (--degree[v] == 1)
+            leafs.insert(v);
+    }
+
+    return code;
+}
+</code></pre>
+
+<p>No entanto, a construção também pode ser implementada em tempo linear. Essa abordagem é descrita na próxima seção.</p>
+
+<h3>Construindo o código Prüfer para uma determinada árvore em tempo linear</h3>
+
+<p>A essência do algoritmo é usar um ponteiro em movimento que sempre apontará para o vértice atual da folha que queremos remover.</p>
+
+<p>À primeira vista, isso parece impossível, porque durante o processo de construção do código de Prüfer, o número de folhas pode aumentar e diminuir. No entanto, após uma análise mais detalhada, isso não é verdade. O número de folhas não aumenta. Ou o número diminui em um (removemos um vértice folha e não obtemos um novo) ou permanece o mesmo (removemos um vértice folha e obtemos outro).
+No primeiro caso, não há outra maneira senão procurar pelo próximo menor vértice folha.
+se podemos continuar usando o vértice que se tornou um novo vértice folha ou se precisamos procurar o próximo menor vértice folha. E muitas vezes podemos continuar com o novo vértice folha.</p>
+
+<p>Para fazer isso, usaremos uma variável $\text{ptr}$, que indicará que no conjunto de vértices entre $0$ e $\text{ptr}$ há no máximo um vértice folha, ou seja, o atual. Todos os outros vértices nesse intervalo já foram removidos da árvore ou ainda têm mais de um vértice adjacente. Ao mesmo tempo, dizemos que ainda não removemos nenhum vértice folha maior que $\text{ptr}$ ainda.</p>
+
+<p>Essa variável já é muito útil no primeiro caso. Após remover o nó folha atual, sabemos que não pode haver um nó folha entre $0$ e $\text{ptr}$, portanto, podemos iniciar a pesquisa do próximo diretamente em $\text{ptr} + 1$, e não precisamos iniciar a pesquisa novamente no vértice $0$.
+E no segundo caso, podemos distinguir ainda mais dois casos: ou o vértice folha recém adquirido é menor que $\text{ptr}$, então esse deve ser o próximo vértice folha, pois sabemos que não existem outros vértices menores que $\text{ptr}$; ou o vértice folha recém adquirido é maior.
+Mas então, também sabemos que ele deve ser maior que $\text{ptr}$, e podemos iniciar a pesquisa novamente em $\text{ptr} + 1$.</p>
+
+<p>Embora possamos ter que executar várias pesquisas lineares para o próximo vértice folha, o ponteiro $\text{ptr}$ apenas aumenta e, portanto, a complexidade do tempo no total é de $O(n)$.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; adj;
+vector&lt;int&gt; parent;
+
+void dfs(int v) {
+    for (int u : adj[v]) {
+        if (u != parent[v]) {
+            parent[u] = v;
+            dfs(u);
+        }
+    }
+}
+
+vector&lt;int&gt; pruefer_code() {
+    int n = adj.size();
+    parent.resize(n);
+    parent[n-1] = -1;
+    dfs(n-1);
+
+    int ptr = -1;
+    vector&lt;int&gt; degree(n);
+    for (int i = 0; i &lt; n; i++) {
+        degree[i] = adj[i].size();
+        if (degree[i] == 1 &amp;&amp; ptr == -1)
+            ptr = i;
+    }
+
+    vector&lt;int&gt; code(n - 2);
+    int leaf = ptr;
+    for (int i = 0; i &lt; n - 2; i++) {
+        int next = parent[leaf];
+        code[i] = next;
+        if (--degree[next] == 1 &amp;&amp; next &lt; ptr) {
+            leaf = next;
+        } else {
+            ptr++;
+            while (degree[ptr] != 1)
+                ptr++;
+            leaf = ptr;
+        }
+    }
+
+    return code;
+}
+</code></pre>
+
+<p>No código, encontramos primeiro para cada <code>parent[i]</code> seu ancestral, ou seja, o ancestral que esse vértice terá depois que o removermos da árvore. Podemos encontrar esse ancestral enraizando a árvore no vértice $n-1$.
+Isso é possível porque o vértice $n-1$ nunca será removido da árvore. Também calculamos o grau para cada vértice.
+<code>ptr</code> é o ponteiro que indica o tamanho mínimo dos vértices folhas restantes (exceto o do atual).
+Atribuiremos o vértice folha atual com <code>next</code>, se este também for um vértice folha e for menor que <code>ptr</code>, ou iniciaremos uma pesquisa linear pelo menor vértice folha aumentando o ponteiro.</p>
+
+<p>Pode-se ver que esse código possui a complexidade $O(n)$.</p>
+
+<h3>Propriedades do código Prüfer</h3>
+
+<ul>
+<li>Após a construção do código de Prüfer, dois vértices permanecerão. Um deles é o vértice mais alto $n-1$, mas nada mais pode ser dito sobre o outro.</li>
+<li>Cada vértice aparece no código de Prüfer exatamente um número fixo de vezes - seu grau menos um. Isso pode ser verificado facilmente, pois o grau ficará menor toda vez que gravarmos seu rótulo no código e o removeremos assim que o grau for $1$.
+Para os dois vértices restantes, esse fato também é verdadeiro.</li>
+</ul>
+
+<h3>Restaurando a árvore usando o código Prüfer</h3>
+
+<p>Para restaurar a árvore, basta focar apenas na propriedade discutida na última seção. Já sabemos o grau de todos os vértices na árvore desejada. Portanto, podemos encontrar todos os vértices folhas, e também a primeira folha que foi removida na primeira etapa (ela deve ser a menor). Esse vértice folha foi conectado ao vértice correspondente ao número na primeira célula do código Prüfer.</p>
+
+<p>Assim, encontramos a primeira aresta removida quando o código do Prüfer foi gerado. Podemos adicionar essa aresta à resposta e reduzir os graus nas duas extremidades da aresta.</p>
+
+<p>Repetiremos esta operação até usarmos todos os números do código de Prüfer: procuramos o vértice mínimo com grau igual a $1$, conectamos ele ao próximo vértice do código de Prüfer e reduzimos o grau.</p>
+
+<p>No final, só temos dois vértices com grau igual a $1$. Estes são os vértices que não foram removidos pelo processo do código Prüfer. Nós os conectamos para obter a última borda da árvore. Um deles sempre será o vértice $n-1$.</p>
+
+<p>Esse algoritmo pode ser implementado em $O(n \log n)$: usamos uma estrutura de dados que suporta a extração do mínimo (por exemplo: <code>set&lt;&gt;</code> ou <code>priority_queue&lt;&gt;</code> no C++) para armazenar todos os vértices folhas.</p>
+
+<p>A implementação a seguir retorna a lista de arestas correspondentes à árvore.</p>
+
+<pre><code class="cpp">vector&lt;pair&lt;int, int&gt;&gt; pruefer_decode(vector&lt;int&gt; const&amp; code) {
+    int n = code.size() + 2;
+    vector&lt;int&gt; degree(n, 1);
+    for (int i : code)
+        degree[i]++;
+
+    set&lt;int&gt; leaves;
+    for (int i = 0; i &lt; n; i++) {
+        if (degree[i] == 1)
+            leaves.insert(i);
+    }
+
+    vector&lt;pair&lt;int, int&gt;&gt; edges;
+    for (int v : code) {
+        int leaf = *leaves.begin();
+        leaves.erase(leaves.begin());
+
+        edges.emplace_back(leaf, v);
+        if (--degree[v] == 1)
+            leaves.insert(v);
+    }
+    edges.emplace_back(*leaves.begin(), n-1);
+    return edges;
+}
+</code></pre>
+
+<h3>Restaurando a árvore usando o código Prüfer em tempo linear</h3>
+
+<p>Para obter a árvore em tempo linear, podemos aplicar a mesma técnica usada para obter o código de Prüfer em tempo linear.</p>
+
+<p>Não precisamos de uma estrutura de dados para extrair o mínimo. Em vez disso, podemos notar que, depois de processar a aresta atual, apenas um vértice se torna uma folha. Portanto, podemos continuar com esse vértice ou encontrar um menor com uma pesquisa linear movendo um ponteiro.</p>
+
+<pre><code class="cpp">vector&lt;pair&lt;int, int&gt;&gt; pruefer_decode(vector&lt;int&gt; const&amp; code) {
+    int n = code.size() + 2;
+    vector&lt;int&gt; degree(n, 1);
+    for (int i : code)
+        degree[i]++;
+
+    int ptr = 0;
+    while (degree[ptr] != 1)
+        ptr++;
+    int leaf = ptr;
+
+    vector&lt;pair&lt;int, int&gt;&gt; edges;
+    for (int v : code) {
+        edges.emplace_back(leaf, v);
+        if (--degree[v] == 1 &amp;&amp; v &lt; ptr) {
+            leaf = v;
+        } else {
+            ptr++;
+            while (degree[ptr] != 1)
+                ptr++;
+            leaf = ptr;
+        }
+    }
+    edges.emplace_back(leaf, n-1);
+    return edges;
+}
+</code></pre>
+
+<h3>Bijeção entre árvores e códigos Prüfer</h3>
+
+<p>Para cada árvore existe um código Prüfer correspondente a ela. E para cada código do Prüfer, podemos restaurar a árvore original.</p>
+
+<p>Segue-se que também todo código Prüfer (ou seja, uma sequência de $n-2$ números no intervalo $[0; n - 1]$) corresponde a uma árvore.</p>
+
+<p>ortanto, todas as árvores e todos os códigos de Prüfer formam uma bijeção (uma correspondência individual ou de um para o outro.</p>
+
+<h2>Fórmula de Cayley</h2>
+
+<p>A fórmula de Cayley afirma que o número de árvores geradoras em um grafo "rotulado" completo (com $n$ vértices) é igual a:
+$$n^{n-2}$$
+Existem várias provas para essa fórmula. Usando o conceito de código Prüfer podemos encontrar essa afirmação.</p>
+
+<p>De fato, qualquer código Prüfer com $n-2$ números do intervalo $[0; n-1]$ corresponde a alguma árvore com $n$ vértices.
+Portanto, teremos $n^{n-2}$ diferentes códigos Prüfer.
+Como cada uma dessas árvores é uma árvore geradora de um grafo completo com $n$ vértices, o número dessas árvores geradoras também é $n^{n-2}$.</p>
+
+<h2>Número de maneiras de tornar um grafo conexo</h2>
+
+<p>O conceito dos códigos Prüfer é ainda mais poderoso, pois eles permitem criar muito mais fórmulas gerais do que a fórmula de Cayley.</p>
+
+<p>este problema, temos um grafo com $n$ vértices e $m$ arestas.
+O grafo atual contém $k$ componentes.
+Queremos calcular o número de maneiras de adicionar $k-1$ arestas para que o grafo fique conectado (obviamente $k-1$ é o número mínimo necessário para conectar o grafo/tornar o grafo conexo).</p>
+
+<p>Vamos derivar uma fórmula para resolver este problema.</p>
+
+<p>Usamos $s_1, \dots, s_k$ para os tamanhos dos componentes conectados no grafo. Não podemos adicionar arestas dentro de um componente conectado. Portanto, esse problema é muito semelhante à pesquisa pelo número de árvores geradoras de um grafo completo com $k$ vértices.
+A única diferença é que cada vértice tem realmente o tamanho $s_i$: cada aresta conectando o vértice $i$, na verdade multiplica a resposta por $s_i$.</p>
+
+<p>Portanto, para calcular o número de maneiras possíveis, é importante contar com que frequência cada um dos $k$ vértices é usado na árvore de conexão. Para obter uma fórmula para o problema, é necessário somar a resposta em todos os graus possíveis.</p>
+
+<p>Seja $d_1, \dots, d_k$ os graus dos vértices na árvore após conectar os vértices. A soma dos graus é o dobro do número de arestas:
+$$\sum_{i=1}^k d_i = 2k - 2$$
+Se o vértice $i$ tem grau $d_i$, então aparece $d_i - 1$ vezes no código Prüfer.
+O código do Prüfer para uma árvore com $k$ vértices tem tamanho $k-2$.
+Portanto, o número de maneiras de escolher um código com $k-2$ números em que o número $i$ apareça exatamente $d_i - 1$ vezes é igual ao <strong>coeficiente multinomial</strong>
+$$\binom{k-2}{d_1-1, d_2-1, \dots, d_k-1} = \frac{(k-2)!}{(d_1-1)! (d_2-1)! \cdots (d_k-1)!}.$$
+O fato de que cada aresta adjacente ao vértice $i$ multiplica a resposta por $s_i$ e assumindo que os graus dos vértices são $d_1, \dots, d_k$:
+$$s_1^{d_1} \cdot s_2^{d_2} \cdots s_k^{d_k} \cdot \binom{k-2}{d_1-1, d_2-1, \dots, d_k-1}$$
+Para obter a resposta final, precisamos somar isso para todas as formas possíveis de escolher os graus:
+$$\sum_{\substack{d_i \ge 1 &#92;&#92; \sum_{i=1}^k d_i = 2k -2}} s_1^{d_1} \cdot s_2^{d_2} \cdots s_k^{d_k} \cdot \binom{k-2}{d_1-1, d_2-1, \dots, d_k-1}$$</p>
+
+<p>Isso parece uma resposta realmente horrível, no entanto, podemos usar o teorema multinomial , que diz:
+$$(x_1 + \dots + x_m)^p = \sum_{\substack{c_i \ge 0 &#92;&#92; \sum_{i=1}^m c_i = p}} x_1^{c_1} \cdot x_2^{c_2} \cdots x_m^{c_m} \cdot \binom{p}{c_1, c_2, \dots c_m}$$
+Para usá-lo, basta substituir $e_i = d_i - 1$:
+$$\sum_{\substack{e_i \ge 0 &#92;&#92; \sum_{i=1}^k e_i = k - 2}} s_1^{e_1+1} \cdot s_2^{e_2+1} \cdots s_k^{e_k+1} \cdot \binom{k-2}{e_1, e_2, \dots, e_k}$$
+Após aplicar o teorema multinomial, obtemos a resposta para o problema:
+$$s_1 \cdot s_2 \cdots s_k \cdot (s_1 + s_2 + \dots + s_k)^{k-2} = s_1 \cdot s_2 \cdots s_k \cdot n^{k-2}$$
+Por "acidente", esta fórmula também vale para $k = 1$.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=20&amp;page=show_problem&amp;problem=1784">UVA #10843 - Anne's game</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1069">Timus #1069 - Prufer Code</a></li>
+<li><a href="http://codeforces.com/contest/156/problem/D">Codeforces - Clues</a></li>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=10774&amp;rd=14146">Topcoder - TheCitiesAndRoadsDivTwo</a></li>
+</ul>
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
