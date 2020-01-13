@@ -74,7 +74,7 @@ void find_cycle() {
     }
 
     if (cycle_start == -1) {
-        cout &lt;&lt; "Acyclic" &lt;&lt; endl;
+        cout &lt;&lt; "Acíclico" &lt;&lt; endl;
     } else {
         vector&lt;int&gt; cycle;
         cycle.push_back(cycle_start);
@@ -83,7 +83,7 @@ void find_cycle() {
         cycle.push_back(cycle_start);
         reverse(cycle.begin(), cycle.end());
 
-        cout &lt;&lt; "Cycle found: ";
+        cout &lt;&lt; "Ciclo: ";
         for (int v : cycle)
             cout &lt;&lt; v &lt;&lt; " ";
         cout &lt;&lt; endl;
