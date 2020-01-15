@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo máximo: push-relabel - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo máximo: algoritmo Push-relabel</h1>
+<em>label = rótulo, push = empurrar</em>
+<p>O algoritmo <em>push-relabel</em> (também conhecido como <em>preflow-push</em>) é um algoritmo para calcular o fluxo máximo de uma rede de fluxo.
+A definição exata do problema que queremos resolver pode ser encontrada no artigo - <a href="https://cp-algorithms-brasil.com/grafos/fluxo.html">Fluxo máximo: Ford-Fulkerson e Edmonds-Karp</a>.</p>
+
+<p>Neste artigo, consideraremos a solução do problema puxando um pré-fluxo pela rede, que será executada em $O(V^4)$, ou mais precisamente em tempo $O(V^2 E)$.
+O algoritmo foi projetado por Andrew Goldberg e Robert Tarjan em 1985.</p>
+
+<h2>Definições</h2>
+
+<p>Durante o algoritmo, teremos que lidar com um <strong>pré-fluxo</strong> ou seja, uma função $f$ que é semelhante à função de fluxo, mas não satisfaz necessariamente a restrição de conservação de fluxo. Para isso, apenas as restrições
+$$0 \le f(e) \le c(e)$$
+e
+$$\sum_{(v, u) \in E} f((v, u)) \ge \sum_{(u, v) \in E} f((u, v))$$
+devem ser válidas.</p>
+
+<p>Portanto, é possível que algum vértice receba mais fluxo do que distribui. Dizemos que esse vértice tem algum excesso de fluxo e definimos sua quantidade com a <em>função de excesso</em> $x(u) =\sum_{(v, u) \in E} f((v, u)) - \sum_{(u, v) \in E} f((u, v))$.</p>
+
+<p>Da mesma forma que com a função de fluxo, podemos definir as capacidades residuais e o grafo residual com a função de pré-fluxo.</p>
+
+<p>O algoritmo começará com um pré-fluxo inicial (alguns vértices terão excesso de fluxo) e, durante a execução, o pré-fluxo será tratado e modificado. Dando alguns detalhes, o algoritmo selecionará um vértice com excesso e empurrará o excesso para os vértices vizinhos. Isso será repetido até que todos os vértices, exceto a fonte e o coletor(vértices source $s$ e <em>sink</em> $t$), estejam livres de excesso. É fácil ver que um pré-fluxo sem excesso é um fluxo válido. Isso faz com que o algoritmo termine com um fluxo real.</p>
+
+<p>Ainda existem dois problemas no qual temos que lidar. Primeiro, como garantimos que isso realmente termina? E segundo, como garantimos que isso realmente nos dará um fluxo máximo, e não apenas um fluxo aleatório?</p>
+
+<p>Para resolver esses problemas, precisamos da ajuda de outra função, as funções que servem para rotular $h$, também chamadas de funções de altura, que atribui a cada vértice um número inteiro. Chamamos uma rotulagem de válida, se $h(s) = |V|$, $h(t) = 0$, e $h(u) \le h(v) + 1$ se houver uma aresta $(u, v)$ no grafo residual - ou seja, a aresta $(u, v)$ tem uma capacidade positiva no grafo residual. Em outras palavras, se é possível aumentar o fluxo de $u$ a $v$, assim, a altura de $v$ pode ser no máximo uma vez menor que a altura de $u$, mas pode ser igual ou até maior.</p>
+
+<p>É importante observar que, se existe uma função de rotulagem válida, não existe um <em>augmenting path</em> de $s$ a $t$ no grafo residual.
+Porque esse caminho terá um comprimento de no máximo $|V| - 1$ arestas, e cada aresta pode diminuir a altura em no máximo por um, o que é impossível se a primeira altura for $h(s) = |V|$ e a última altura for $h(t) = 0$.</p>
+
+<p>Usando esta função de rotulagem, podemos declarar a estratégia do algoritmo push-relabel.
+Começamos com um pré-fluxo válido e uma função de rotulagem válida. Em cada etapa, empurramos algum excesso entre os vértices e atualizamos os rótulos dos vértices.
+Temos que garantir que, após cada etapa, que o pré-fluxo e a rotulagem ainda sejam válidos.
+Se o algoritmo determinar então que o pré-fluxo é um fluxo válido e como também temos uma rotulagem válida, não existe um caminho entre $s$ e $t$ no grafo residual, o que significa que o fluxo é realmente um fluxo máximo (essa parte é bem confusa, é importante tentar problemas relacionados).</p>
+
+<p>Se compararmos o algoritmo de Ford-Fulkerson com o algoritmo push-relabel, parece que os algoritmos são duais um do outro.
+O algoritmo Ford-Fulkerson mantém um fluxo válido o tempo todo e o aprimora até que não exista mais um caminho <em>augmenting path</em>, enquanto no algoritmo push-re-label não existe um <em>augmenting path</em> em nenhum momento, e melhoraremos o pré-fluxo até que seja um fluxo válido.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Primeiro, precisamos inicializar o grafo com uma função válida de pré-fluxo e rotulagem.</p>
+
+<p>Usar o pré-fluxo vazio - como é feito no algoritmo Ford-Fulkerson - não é possível, porque haverá um "augmenting path" e isso implica que não existe uma rotulagem válida.
+Portanto, inicializaremos cada aresta saindo de $s$ com sua capacidade máxima: $f((s, u)) = c((s, u))$.
+E todas as outras arestas com zero. Nesse caso, existe uma rotulagem válida, ou seja $h(s) = |V|$ para o vértice fonte e $h(u) = 0$ para todos os outros.</p>
+
+<p>Agora vamos descrever as duas operações com mais detalhes.</p>
+
+<p>Com a operação <code>push</code> tentamos empurrar o excesso de fluxo de um vértice $u$ para um vértice vizinho $v$.
+Temos uma regra: só podemos empurrar o fluxo de $u$ para $v$ se $h(u) = h(v) + 1$.
+Em termos leigos, o excesso de fluxo deve fluir para baixo, mas de uma forma não muito "brusca". É claro que só podemos "empurrar" $\min(x(u), c((u, v)) - f((u, v)))$ fluxo.</p>
+
+<p>Se um vértice tem excesso, mas não é possível empurrar o excesso para nenhum vértice adjacente, precisamos aumentar a altura desse vértice. Chamamos essa operação de <code>relabel</code>.
+Vamos aumentá-lo o máximo possível, mantendo a validade da rotulagem.</p>
+
+<p>Para recapitular, o algoritmo em poucas palavras é:
+Inicializamos um pré-fluxo válido e uma rotulagem válida.
+Enquanto possamos executar as operações <code>push</code> ou <code>relabel</code>, nós continuamos a realizar elas.
+Depois, o pré-fluxo é na verdade um fluxo e nós o retornamos.</p>
+
+<h2>Complexidade</h2>
+
+<p>É fácil mostrar que o rótulo máximo de um vértice é $2|V| - 1$.
+Nesse ponto, todo o excesso restante pode e será enviado de volta à fonte. Isso fornece no máximo $O(V^2)$ operações de rotulagem.</p>
+
+<p>Também pode ser demonstrado que haverá no máximo $O(V E)$ "empurrões saturados" (um impulso em que a capacidade total da aresta é usada) e no máximo $O(V^2 E)$ não-saturados (um empurrão em que a capacidade de uma aresta não é totalmente utilizada).
+Se escolhermos uma estrutura de dados que nos permita encontrar o próximo vértice com excesso em $O(1)$, a complexidade total do algoritmo é $O(V^2 E)$.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">const int inf = 1000000000;
+
+int n;
+vector&lt;vector&lt;int&gt;&gt; capacity, flow;
+vector&lt;int&gt; height, excess, seen;
+queue&lt;int&gt; excess_vertices;
+
+void push(int u, int v)
+{
+    int d = min(excess[u], capacity[u][v] - flow[u][v]);
+    flow[u][v] += d;
+    flow[v][u] -= d;
+    excess[u] -= d;
+    excess[v] += d;
+    if (d &amp;&amp; excess[v] == d)
+        excess_vertices.push(v);
+}
+
+void relabel(int u)
+{
+    int d = inf;
+    for (int i = 0; i &lt; n; i++) {
+        if (capacity[u][i] - flow[u][i] &gt; 0)
+            d = min(d, height[i]);
+    }
+    if (d &lt; inf)
+        height[u] = d + 1;
+}
+
+void discharge(int u)
+{
+    while (excess[u] &gt; 0) {
+        if (seen[u] &lt; n) {
+            int v = seen[u];
+            if (capacity[u][v] - flow[u][v] &gt; 0 &amp;&amp; height[u] &gt; height[v])
+                push(u, v);
+            else 
+                seen[u]++;
+        } else {
+            relabel(u);
+            seen[u] = 0;
+        }
+    }
+}
+
+int max_flow()
+{
+    height.assign(n, 0);
+    height[0] = n;
+    flow.assign(n, vector&lt;int&gt;(n, 0));
+    excess.assign(n, 0);
+    excess[0] = inf;
+    for (int i = 1; i &lt; n; i++)
+        push(0, i);
+    seen.assign(n, 0);
+
+    while (!excess_vertices.empty()) {
+        int u = excess_vertices.front();
+        excess_vertices.pop();
+        if (u != 0 &amp;&amp; u != n - 1)
+            discharge(u);
+    }
+
+    int max_flow = 0;
+    for (int i = 0; i &lt; n; i++)
+        max_flow += flow[0][i];
+    return max_flow;
+}
+</code></pre>
+
+<p>Aqui usamos a queue <code>excess_vertices</code> para armazenar todos os vértices que atualmente têm excesso.
+Dessa forma, podemos escolher o próximo vértice para uma operação <em>push</em> ou <em>re-label</em> em tempo constante.</p>
+
+<p>E para garantir que não gastemos muito tempo localizando o vértice adjacente para o qual podemos enviar o excesso de fluxo, usamos uma estrutura de dados chamada <strong>current-arc</strong>.
+Basicamente, iteraremos sobre as arestas em uma ordem circular e sempre armazenaremos a última aresta que usamos.
+Dessa forma, para um determinado valor de rotulagem, alternaremos a aresta atual apenas $O(n)$ vezes.
+E como a re-rotulagem já leva tempo $O(n)$, não pioramos a complexidade.</p>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
