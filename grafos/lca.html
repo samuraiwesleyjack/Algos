@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Menor Ancestral Comum - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Menor Ancestral Comum - $O(\sqrt{N})$ e $O(\log N)$ com $O(N)$ de pré-processamento</h1>
+
+<p>Dada uma árvore $G$ e consultas da forma $(v_1, v_2)$, para cada consulta/query você precisa encontrar o menor ancestral comum ou seja, um vértice $v$ que se encontra no caminho da raiz para $v_1$ e no caminho da raiz para $v_2$, e o vértice deve ser o mais baixo. Em outras palavras, o vértice desejado $v$ é o ancestral mais baixo de $v_1$ e $v_2$. O menor ancestral comum deles está no caminho mais curto de $v_1$ e $v_2$. Além disso, se $v_1$ é o ancestral de $v_2$, $v_1$ é o menor ancestral comum.</p>
+
+<h3>A idéia do algoritmo</h3>
+
+<p>Antes de responder às queries, precisamos <strong>pré-processar</strong> a árvore. 
+Fazemos uma travessia com a <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> a partir da raiz e criamos uma lista $\text{euler}$ que armazena a ordem dos vértices que visitamos (um vértice é adicionado à lista quando o visitamos pela primeira vez e após o retorno da travessia da DFS para os vértices filhos).
+Isso também é chamado de <em>tour de Euler</em> pela árvore.
+É claro que o tamanho desta lista será $O(N)$.
+Também precisamos criar uma array $\text{first}[0..N-1]$ que armazene para cada vértice $i$ sua primeira ocorrência em $\text{euler}$.
+Ou seja, a primeira posição em $\text{euler}$ na qual $\text{euler}[\text{first}[i]] = i$.
+Além disso, usando a DFS, podemos encontrar a altura de cada nó (distância da raiz até ele) e armazená-lo na array $\text{height}[0..N-1]$.</p>
+
+<p>Então, como podemos responder as consultas usando o <em>tour de Euler</em> e as duas arrays?
+Suponha que a consulta seja um par de $v_1$ e $v_2$.
+Considere os vértices que visitamos no <em>tour de Euler</em> entre a primeira visita de $v_1$ e a primeira visita de $v_2$.
+O $\text{LCA}(v_1, v_2)$ é o vértice com a menor altura nesse caminho.
+Já vimos que o LCA deve fazer parte do caminho mais curto entre $v_1$ e $v_2$.
+Claramente, também deve ser o vértice com a menor altura. E no tour de Euler, usamos essencialmente o caminho mais curto, exceto que também visitamos todas as subárvores que encontramos no caminho. Mas todos os vértices nessas subárvores são mais baixos na árvore que o LCA e, portanto, têm uma altura maior. Portanto, o $\text{LCA}(v_1, v_2)$ pode ser determinado unicamente encontrando o vértice com a menor altura no tour de Euler entre $\text{first}(v_1)$ e $\text{first}(v_2)$.</p>
+
+<p>Vamos ilustrar essa ideia. Considere o grafo a seguir e o tour de Euler com as alturas correspondentes:
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/LCA_Euler.png" alt="LCA_Euler_Tour" /></center>
+$$\begin{array}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\text{Vertices:}   &amp; 1 &amp; 2 &amp; 5 &amp; 2 &amp; 6 &amp; 2 &amp; 1 &amp; 3 &amp; 1 &amp; 4 &amp; 7 &amp; 4 &amp; 1 &#92;&#92; \hline
+\text{Heights:} &amp; 1 &amp; 2 &amp; 3 &amp; 2 &amp; 3 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &amp; 2 &amp; 3 &amp; 2 &amp; 1 &#92;&#92; \hline
+\end{array}$$</p>
+
+<p>O tour começando no vértice $6$ e terminando no $4$, visitamos os vértices $[6, 2, 1, 3, 1, 4]$.
+Entre esses vértices, o vértice $1$ tem a menor altura, portanto $\text{LCA(6, 4) = 1}$.</p>
+
+<p>Para recapitular: para responder a uma consulta, precisamos apenas encontrar o vértice com a <strong>menor altura</strong> na array $\text{euler}$ no intervalo de $\text{first}[v_1]$ para $\text{first}[v_2]$.
+Assim, <strong>o problema do LCA é reduzido ao problema do RMQ</strong> (encontrando o mínimo em um intervalo).</p>
+
+<p>Usando <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/Sqrt.html">Sqrt-Decomposition</a>, é possível obter uma solução respondendo a cada consulta em $O(\sqrt{N})$ com pré-processamento em tempo $O(N)$.</p>
+
+<p>Usando uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">Árvore Segmentária</a> você pode responder a cada consulta em $O(\log N)$ com pré-processamento em tempo $O(N)$.</p>
+
+<h3>Implementação</h3>
+
+<p>Uma Árvore Segmentária é usada na implementação do algoritmo do LCA abaixo.</p>
+
+<pre><code class="cpp">struct LCA {
+    vector&lt;int&gt; height, euler, first, segtree;
+    vector&lt;bool&gt; visited;
+    int n;
+
+    LCA(vector&lt;vector&lt;int&gt;&gt; &amp;adj, int root = 0) {
+        n = adj.size();
+        height.resize(n);
+        first.resize(n);
+        euler.reserve(n * 2);
+        visited.assign(n, false);
+        dfs(adj, root);
+        int m = euler.size();
+        segtree.resize(m * 4);
+        build(1, 0, m - 1);
+    }
+
+    void dfs(vector&lt;vector&lt;int&gt;&gt; &amp;adj, int node, int h = 0) {
+        visited[node] = true;
+        height[node] = h;
+        first[node] = euler.size();
+        euler.push_back(node);
+        for (auto to : adj[node]) {
+            if (!visited[to]) {
+                dfs(adj, to, h + 1);
+                euler.push_back(node);
+            }
+        }
+    }
+
+    void build(int node, int b, int e) {
+        if (b == e) {
+            segtree[node] = euler[b];
+        } else {
+            int mid = (b + e) / 2;
+            build(node &lt;&lt; 1, b, mid);
+            build(node &lt;&lt; 1 | 1, mid + 1, e);
+            int l = segtree[node &lt;&lt; 1], r = segtree[node &lt;&lt; 1 | 1];
+            segtree[node] = (height[l] &lt; height[r]) ? l : r;
+        }
+    }
+
+    int query(int node, int b, int e, int L, int R) {
+        if (b &gt; R || e &lt; L)
+            return -1;
+        if (b &gt;= L &amp;&amp; e &lt;= R)
+            return segtree[node];
+        int mid = (b + e) &gt;&gt; 1;
+
+        int left = query(node &lt;&lt; 1, b, mid, L, R);
+        int right = query(node &lt;&lt; 1 | 1, mid + 1, e, L, R);
+        if (left == -1) return right;
+        if (right == -1) return left;
+        return height[left] &lt; height[right] ? left : right;
+    }
+
+    int lca(int u, int v) {
+        int left = first[u], right = first[v];
+        if (left &gt; right)
+            swap(left, right);
+        return query(1, 0, euler.size() - 1, left, right);
+    }
+};
+
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/LCA/">SPOJ: LCA</a></li>
+<li><a href="http://www.spoj.com/problems/DISQUERY/">SPOJ: DISQUERY</a></li>
+<li><a href="http://acm.timus.ru/problem.aspx?space=1&amp;num=1471">TIMUS: 1471. Distance in the Tree</a></li>
+<li><a href="http://codeforces.com/problemset/problem/472/D">CODEFORCES: Design Tutorial: Inverse the Problem</a></li>
+<li><a href="https://www.codechef.com/problems/TALCA">CODECHEF: Lowest Common Ancestor</a></li>
+<li><a href="http://www.spoj.com/problems/LCASQ/">SPOJ - Lowest Common Ancestor</a></li>
+<li><a href="http://www.spoj.com/problems/ADAORANG/">SPOJ - Ada and Orange Tree</a></li>
+<li><a href="https://devskill.com/CodingProblems/ViewProblem/141">DevSkills - Motoku</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=4384">UVA 12655 - Trucks</a></li>
+<li><a href="https://www.codechef.com/problems/PSHTTR">Codechef - Pishty and Tree</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=441&amp;page=show_problem&amp;problem=3978">UVA - 12533 - Joining Couples</a></li>
+<li><a href="https://www.codechef.com/problems/CLOSEFAR">Codechef - So close yet So Far</a></li>
+<li><a href="http://codeforces.com/contest/733/problem/F">Codeforces - Drivers Dissatisfaction</a></li>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=2339">UVA 11354 - Bond</a></li>
+<li><a href="http://www.spoj.com/problems/QTREE2/">SPOJ - Querry on a tree II</a></li>
+<li><a href="http://codeforces.com/contest/828/problem/F">Codeforces - Best Edge Wiegth</a></li>
+<li><a href="http://codeforces.com/contest/832/problem/D">Codeforces - Misha, Grisha and Underground</a></li>
+<li><a href="http://www.spoj.com/problems/NTICKETS/">SPOJ - Nlogonian Tickets</a></li>
+<li><a href="http://codeforces.com/contest/855/problem/D">Codeforces - Rowena Rawenclaws Diadem</a></li>
+</ul>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
