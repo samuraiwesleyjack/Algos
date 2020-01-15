@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Menor Ancestral Comum - Binary Lifting - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Menor Ancestral Comum - Binary Lifting</h1>
+
+<p>Deixe $G$ ser uma árvore.
+Para cada consulta da forma <code>(u, v)</code> queremos encontrar o menor ancestral comum dos nós <code>u</code> e <code>v</code>, ou seja, queremos encontrar um nó <code>w</code> que se encontra no caminho de <code>u</code> para o nó raiz e que se encontra no caminho de <code>v</code> para o nó raiz e, se houver vários nós, escolheremos o que estiver mais distante do nó raiz. Em outras palavras, o nó desejado <code>w</code> é o menor ancestral de <code>u</code> e <code>v</code>.
+Em particular, se <code>u</code> for um ancestral de <code>v</code>, então <code>u</code> é o menor ancestral comum.</p>
+
+<p>O algoritmo descrito neste artigo precisará de $O(N \log N)$ para pré-processar a árvore e, em seguida $O(\log N)$ para cada consulta de LCA(menor ancestral comum).</p>
+
+<h2>Algoritmo</h2>
+
+<p>Para cada nó pré-calculamos seu ancestral acima dele, seu ancestral dois nós acima, seu ancestral quatro nós acima, etc. Vamos armazená-los na array <code>up</code>, ou seja, <code>up[i][j]</code> é o <code>2^j</code>-ésimo ancestral acima do nó <code>i</code> com <code>i=1...N</code>, <code>j=0...ceil(log(N))</code>.
+Essas informações nos permitem pular de qualquer nó para qualquer ancestral acima dele em tempo $O(\log N)$.
+Podemos calcular essa array usando uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> pela árvore.</p>
+
+<p>Para cada nó, também lembraremos a hora da primeira visita desse nó (ou seja, a hora em que a DFS descobre o nó) e a hora em que o deixamos (ou seja, depois de visitarmos todos os filhos e sair da função da DFS). Podemos usar essas informações para determinar em tempo constante se um nó é um ancestral de outro nó.</p>
+
+<p>Suponha que agora recebemos uma consulta <code>(u, v)</code>.
+Podemos verificar imediatamente se um nó é o ancestral do outro. Nesse caso, este nó já é o LCA. Se <code>u</code> não for o ancestral de <code>v</code>, e <code>v</code> não for o ancestral de <code>u</code>, "escalamos" os ancestrais de <code>u</code> até encontrarmos o nó mais alto (ou seja, o mais próximo da raiz), que não é um ancestral de <code>v</code> (ou seja, um nó <code>x</code>, de modo que <code>x</code> não é um ancestral de <code>v</code>, mas <code>up[x][0]</code> é).
+Podemos encontrar esse nó <code>x</code> em $O(\log N)$ usando a array <code>up</code>.</p>
+
+<p>Vamos descrever esse processo com mais detalhes. Seja <code>L = ceil(log(N))</code>.
+Suponha primeiro que <code>i = L</code>.
+Se <code>up[u][i]</code> não é um ancestral de <code>v</code>, então podemos definir <code>u = up[u][i]</code> e decrementar <code>i</code>.
+Se <code>up[u][i]</code> for um ancestral, então apenas decrementamos <code>i</code>.
+Depois de fazer isso para todos os não-negativos <code>i</code>, o nó <code>u</code> será o nó desejado - ou seja, <code>u</code> ainda não é um ancestral de <code>v</code>, mas <code>up[u][0]</code> será.</p>
+
+<p>Agora, obviamente, a resposta para o LCA será <code>up[u][0]</code> - ou seja, o menor nó entre os ancestrais do nó <code>u</code>, que também é um ancestral de <code>v</code>.</p>
+
+<p>Portanto, responder a uma consulta de LCA irá iterar <code>i</code> de <code>ceil(log(N))</code> até <code>0</code> e irá verificar em cada iteração se um nó é o ancestral do outro. Consequentemente, cada consulta poderá ser respondida em $O(\log N)$.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int n, l;
+vector&lt;vector&lt;int&gt;&gt; adj;
+
+int timer;
+vector&lt;int&gt; tin, tout;
+vector&lt;vector&lt;int&gt;&gt; up;
+
+void dfs(int v, int p)
+{
+    tin[v] = ++timer;
+    up[v][0] = p;
+    for (int i = 1; i &lt;= l; ++i)
+        up[v][i] = up[up[v][i-1]][i-1];
+
+    for (int u : adj[v]) {
+        if (u != p)
+            dfs(u, v);
+    }
+
+    tout[v] = ++timer;
+}
+
+bool is_ancestor(int u, int v)
+{
+    return tin[u] &lt;= tin[v] &amp;&amp; tout[u] &gt;= tout[v];
+}
+
+int lca(int u, int v)
+{
+    if (is_ancestor(u, v))
+        return u;
+    if (is_ancestor(v, u))
+        return v;
+    for (int i = l; i &gt;= 0; --i) {
+        if (!is_ancestor(up[u][i], v))
+            u = up[u][i];
+    }
+    return up[u][0];
+}
+
+void preprocess(int root) {
+    tin.resize(n);
+    tout.resize(n);
+    timer = 0;
+    l = ceil(log2(n));
+    up.assign(n, vector&lt;int&gt;(l + 1));
+    dfs(root, root);
+}
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
