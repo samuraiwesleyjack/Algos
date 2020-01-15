@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Menor Ancestral Comum: Farach-Colton e Bender - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Menor Ancestral Comum - Farach-Colton e Bender</h1>
+
+<p>Deixe $G$ ser uma árvore.
+Para cada consulta da forma $(u, v)$ queremos encontrar o menor ancestral comum dos nós $u$ e $v$, ou seja, queremos encontrar um nó $w$ que se encontra no caminho de $u$ para o nó raiz e que se encontra no caminho de $v$ para o nó raiz e, se houver vários nós, escolheremos o que estiver mais distante do nó raiz. Em outras palavras, o nó desejado $w$ é o menor ancestral de $u$ e $v$.
+Em particular, se $u$ for um ancestral de $v$, então $u$ é o menor ancestral comum.</p>
+
+<p>O algoritmo que será descrito neste artigo foi desenvolvido por Farach-Colton e Bender. É assintoticamente otimizado.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Usamos a redução clássica do problema do LCA para o do RMQ.
+Atravessamos todos os nós da árvore com uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> e mantemos uma array com todos os nós visitados e as alturas desses nós. 
+O LCA de dois nós $u$ e $v$ é o nó entre as ocorrências de $u$ e $v$ no <em>tour</em>, que tem a menor altura.</p>
+
+<p>Na figura a seguir, é possível ver um possível <em>tour de Euler</em> de um grafo e, na lista abaixo, os nós visitados e suas alturas.</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/LCA_Euler.png" alt="LCA_Euler_Tour" /></center>
+$$\begin{array}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\text{Nós:}   &amp; 1 &amp; 2 &amp; 5 &amp; 2 &amp; 6 &amp; 2 &amp; 1 &amp; 3 &amp; 1 &amp; 4 &amp; 7 &amp; 4 &amp; 1 &#92;&#92; \hline
+\text{Alturas:} &amp; 1 &amp; 2 &amp; 3 &amp; 2 &amp; 3 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &amp; 2 &amp; 3 &amp; 2 &amp; 1 &#92;&#92; \hline
+\end{array}$$</p>
+
+<p>Você pode ler mais sobre essa redução no artigo <a href="https://cp-algorithms-brasil.com/grafos/lca.html">Menor Ancestral Comum</a>.
+Nesse artigo, o mínimo de um intervalo foi encontrado por "sqrt-decomposition" em $O(\sqrt{N})$ ou em $O(\log N)$ usando uma Árvore Segmentária.
+Neste artigo, veremos como podemos resolver as consultas de intervalo mínimo(<em>RMQ</em>) em $O(1)$, enquanto ainda gastamos apenas $O(N)$ para pré-processamento.</p>
+
+<p>Observe que o problema da RMQ reduzido é muito específico:
+quaisquer dois elementos adjacentes na matriz diferem exatamente por um (uma vez que os elementos da array nada mais são do que as alturas dos nós visitados na ordem da travessia, e nós vamos para um descendente, nesse caso o próximo elemento é um maior ou então, retornamos ao ancestral, nesse caso, o próximo elemento será um menor). O algoritmo de Farach-Colton e Bender descreve uma solução exatamente para esse problema específico da RMQ.</p>
+
+<p>Vamos definir $A$ como a array na qual queremos executar as consultas de intervalo mínimo. E $N$ será o tamanho de $A$.</p>
+
+<p>Existe uma estrutura de dados que podemos usar para resolver o problema do RMQ com pré-processamento $O(N \log N)$ e $O(1)$ para cada consulta: <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/sparsetable.html">Sparse Table</a>.
+Criamos uma tabela $T$ em que cada elemento $T[i][j]$ é igual ao mínimo de $A$ no intervalo $[i, i + 2^j - 1]$.
+Claramente, $0 \leq j \leq \lceil \log N \rceil$, e, portanto, o tamanho da Sparse Table será $O(N \log N)$.
+Você pode criar a tabela em $O(N \log N)$ notando que: $T[i][j] = \min(T[i][j-1], T[i+2^{j-1}][j-1])$.</p>
+
+<p>Como podemos responder a uma consulta RMQ em $O(1)$ usando essa estrutura de dados? Seja a consulta recebida: $[l,r]$, e a resposta é $\min(T[l][\text{sz}], T[r-2^{\text{sz}}+1][\text{sz}])$, onde $\text{sz}$ é o maior expoente em que $2^{\text{sz}}$ não seja maior que o comprimento do intervalo $r-l+1$. 
+De fato, podemos pegar o intervalo $[l, r]$ e cobrir dois segmentos de comprimento $2^{\text{sz}}$ - um começando em $l$ e o outro terminando em $r$.
+Esses segmentos se sobrepõem, mas isso não interfere em nosso cálculo. Para realmente atingir a complexidade de tempo $O(1)$ por consulta, precisamos conhecer os valores de $\text{sz}$ para todos os comprimentos possíveis de $1$ até $N$.
+Isso pode ser pré-computado</p>
+
+<p>Agora queremos melhorar a complexidade do pré-processamento para $O(N)$.</p>
+
+<p>Dividimos a array $A$ em blocos de tamanho $K = 0.5 \log N$ com $\log$ sendo o logaritmo de base 2. Para cada bloco, calculamos o elemento mínimo e os armazenamos em uma array $B$.
+$B$ tem tamanho $\frac{N}{K}$.
+Construímos uma sparse table da array $B$.
+O tamanho e a complexidade do tempo serão:
+$$\frac{N}{K}\log\left(\frac{N}{K}\right) = \frac{2N}{\log(N)} \log\left(\frac{2N}{\log(N)}\right) =$$
+$$= \frac{2N}{\log(N)} \left(1 + \log\left(\frac{N}{\log(N)}\right)\right) \leq \frac{2N}{\log(N)} + 2N = O(N)$$</p>
+
+<p>Agora só precisamos aprender a responder rapidamente às consultas de intervalo mínimo em cada bloco. De fato, se a consulta de intervalo mínimo recebido for $[l,r]$ e $l$ e $r$ estiverem em blocos diferentes, a resposta será o mínimo dos três valores a seguir:
+o mínimo do sufixo do bloco de $l$ começando em $l$, o mínimo do prefixo do bloco de $r$ terminando em $r$, e o mínimo dos blocos entre eles. O mínimo dos blocos intermediários pode ser respondido em $O(1)$ usando a <em>Sparse Table</em>.
+Portanto, isso nos deixa apenas com as consultas de intervalo mínimo dentro dos blocos.</p>
+
+<p>Aqui vamos explorar a propriedade da array.
+Lembre-se de que os valores na array - que são apenas valores de alturas na árvore - sempre diferem em um.
+Se removermos o primeiro elemento de um bloco e subtraí-lo de todos os outros itens do bloco, cada bloco poderá ser identificado por uma sequência de comprimento $K - 1$ consistindo do número $+1$ e $-1$.
+Como esses blocos são muito pequenos, existem apenas algumas sequências diferentes que podem ocorrer. O número de sequências possíveis é:
+$$2^{K-1} = 2^{0.5 \log(N) - 1} = 0.5 \left(2^{\log(N)}\right)^{0.5} = 0.5 \sqrt{N}$$</p>
+
+<p>Portanto, o número de blocos diferentes é $O(\sqrt{N})$, e, portanto, podemos pré-calcular os resultados de consultas de intervalo mínimo dentro de todos os blocos diferentes em $O(\sqrt{N} K^2) = O(\sqrt{N} \log^2(N)) = O(N)$.
+Para a implementação, podemos caracterizar um bloco com uma máscara de bits de comprimento $K-1$ (que caberá em um int padrão) e armazenar o índice do mínimo em uma array $\text{block}[\text{mask}][l][r]$ de tamanho $O(\sqrt{N} \log^2(N))$.</p>
+
+<p>Assim, poderemos pré-calcular consultas de intervalo mínimo em cada bloco, bem como consultas de intervalo mínimo sobre um intervalo de blocos, tudo em $O(N)$.
+Com essas pré-computações, podemos responder a cada consulta em $O(1)$, usando no máximo quatro valores pré-computados: o mínimo do bloco contendo <code>l</code>, o mínimo do bloco contendo <code>r</code>, e os dois mínimos dos segmentos sobrepostos dos blocos entre eles.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; adj;
+
+int block_size, block_cnt;
+vector&lt;int&gt; first_visit;
+vector&lt;int&gt; euler_tour;
+vector&lt;int&gt; height;
+vector&lt;int&gt; log_2;
+vector&lt;vector&lt;int&gt;&gt; st;
+vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; blocks;
+vector&lt;int&gt; block_mask;
+
+void dfs(int v, int p, int h) {
+    first_visit[v] = euler_tour.size();
+    euler_tour.push_back(v);
+    height[v] = h;
+
+    for (int u : adj[v]) {
+        if (u == p)
+            continue;
+        dfs(u, v, h + 1);
+        euler_tour.push_back(v);
+    }
+}
+
+int min_by_h(int i, int j) {
+    return height[euler_tour[i]] &lt; height[euler_tour[j]] ? i : j;
+}
+
+void precompute_lca(int root) {
+    // pegar o tour de euler &amp; os índices das primeiras ocorrências
+    first_visit.assign(n, -1);
+    height.assign(n, 0);
+    euler_tour.reserve(2 * n);
+    dfs(root, -1, 0);
+
+    // precomputar todos os valores de log
+    int m = euler_tour.size();
+    log_2.reserve(m + 1);
+    log_2.push_back(-1);
+    for (int i = 1; i &lt;= m; i++)
+        log_2.push_back(log_2[i / 2] + 1);
+
+    block_size = max(1, log_2[m] / 2);
+    block_cnt = (m + block_size - 1) / block_size;
+
+    // precomputar o mínimo de cada bloco e construir a sparse table
+    st.assign(block_cnt, vector&lt;int&gt;(log_2[block_cnt] + 1));
+    for (int i = 0, j = 0, b = 0; i &lt; m; i++, j++) {
+        if (j == block_size)
+            j = 0, b++;
+        if (j == 0 || min_by_h(i, st[b][0]) == i)
+            st[b][0] = i;
+    }
+    for (int l = 1; l &lt;= log_2[block_cnt]; l++) {
+        for (int i = 0; i &lt; block_cnt; i++) {
+            int ni = i + (1 &lt;&lt; (l - 1));
+            if (ni &gt;= block_cnt)
+                st[i][l] = st[i][l-1];
+            else
+                st[i][l] = min_by_h(st[i][l-1], st[ni][l-1]);
+        }
+    }
+
+    // precomputar a mask(máscara de bits) para cada bloco
+    block_mask.assign(block_cnt, 0);
+    for (int i = 0, j = 0, b = 0; i &lt; m; i++, j++) {
+        if (j == block_size)
+            j = 0, b++;
+        if (j &gt; 0 &amp;&amp; (i &gt;= m || min_by_h(i - 1, i) == i - 1))
+            block_mask[b] += 1 &lt;&lt; (j - 1);
+    }
+
+    // precomputar RMQ para cada bloco único
+    int possibilities = 1 &lt;&lt; (block_size - 1);
+    blocks.resize(possibilities);
+    for (int b = 0; b &lt; block_cnt; b++) {
+        int mask = block_mask[b];
+        if (!blocks[mask].empty())
+            continue;
+        blocks[mask].assign(block_size, vector&lt;int&gt;(block_size));
+        for (int l = 0; l &lt; block_size; l++) {
+            blocks[mask][l][l] = l;
+            for (int r = l + 1; r &lt; block_size; r++) {
+                blocks[mask][l][r] = blocks[mask][l][r - 1];
+                if (b * block_size + r &lt; m)
+                    blocks[mask][l][r] = min_by_h(b * block_size + blocks[mask][l][r], 
+                            b * block_size + r) - b * block_size;
+            }
+        }
+    }
+}
+
+int lca_in_block(int b, int l, int r) {
+    return blocks[block_mask[b]][l][r] + b * block_size;
+}
+
+int lca(int v, int u) {
+    int l = first_visit[v];
+    int r = first_visit[u];
+    if (l &gt; r)
+        swap(l, r);
+    int bl = l / block_size;
+    int br = r / block_size;
+    if (bl == br)
+        return euler_tour[lca_in_block(bl, l % block_size, r % block_size)];
+    int ans1 = lca_in_block(bl, l % block_size, block_size - 1);
+    int ans2 = lca_in_block(br, 0, r % block_size);
+    int ans = min_by_h(ans1, ans2);
+    if (bl + 1 &lt; br) {
+        int l = log_2[br - bl - 1];
+        int ans3 = st[bl+1][l];
+        int ans4 = st[br - (1 &lt;&lt; l)][l];
+        ans = min_by_h(ans, min_by_h(ans3, ans4));
+    }
+    return euler_tour[ans];
+}
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
