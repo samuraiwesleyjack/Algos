@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Menor Ancestral Comum: - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Resolva uma RMQ (consulta de intervalo mínimo) encontrando o LCA (menor ancestral comum)</h1>
+
+<p>Seja uma array <code>A[0..N-1]</code>.
+Para cada consulta <code>[L, R]</code> queremos encontrar o mínimo na array <code>A</code> começando na posição <code>L</code> e terminando na posição <code>R</code>.
+Assumiremos que a array <code>A</code> não muda no processo, ou seja, este artigo descreve uma solução para o problema estático de uma RMQ.</p>
+
+<p>Aqui está uma descrição de uma solução assintoticamente ideal. Ele se destaca de outras soluções para o problema da RMQ, uma vez que é muito diferente delas: reduz o problema da RMQ ao problema do LCA e, em seguida, usa o algoritmo de <a href="https://cp-algorithms-brasil.com/grafos/lca3.html">Farach-Colton e Bender</a>, que reduz o problema do LCA para um problema específico de uma RMQ.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Construímos uma <strong>árvore Cartesiana</strong> da array <code>A</code>.
+Uma árvore Cartesiana de uma array <code>A</code> é uma árvore binária com a propriedade <em>min-heap</em> (o valor do nó parente deve ser menor ou igual ao valor de seus filhos) de modo que a travessia em ordem da árvore visita os nós na mesma ordem em que eles estão na array <code>A</code>.</p>
+
+<p>Em outras palavras, uma árvore cartesiana é uma estrutura de dados recursiva.
+A array <code>A</code> será particionada em 3 partes: o prefixo da array até o mínimo, o mínimo e o sufixo restante. A raiz da árvore será um nó correspondente ao elemento mínimo da array <code>A</code>, a subárvore esquerda será a árvore cartesiana do prefixo e a subárvore direita será a árvore cartesiana do sufixo.</p>
+
+<p>Na imagem a seguir, você pode ver uma array de tamanho 10 e a árvore cartesiana correspondente.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/CartesianTree.png" alt="Image of Cartesian Tree" /></center></p>
+
+<p>A <em>consulta de intervalo mínimo</em> <code>[l, r]</code> é equivalente à <em>consulta do menor ancestral comum</em> <code>[l', r']</code>, onde <code>l'</code> é o nó correspondente ao elemento <code>A[l]</code> e <code>r'</code> o nó correspondente ao elemento <code>A[r]</code>.
+De fato, o nó correspondente ao menor elemento do intervalo deve ser um ancestral de todos os nós do intervalo, portanto, também de <code>l'</code> e <code>r'</code>.
+Isso segue automaticamente a partir da propriedade min-heap.
+E também deve ser o menor ancestral, caso contrário, <code>l'</code> e <code>r'</code> estariam ambos na subárvore esquerda ou na direita, o que gera uma contradição, pois, nesse caso, o mínimo nem estaria no intervalo.</p>
+
+<p>Na imagem a seguir, você pode ver as consultas de LCA para as consultas de RMQ <code>[1, 3]</code> e <code>[5, 9]</code>.
+Na primeira consulta, o LCA dos nós <code>A[1]</code> e <code>A[3]</code> é o nó correspondente a <code>A[2]</code> que tem o valor 2, e na segunda consulta, o LCA de <code>A[5]</code> e <code>A[9]</code> é o nó correspondente a <code>A[8]</code> que possui o valor 3.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/CartesianTreeLCA.png" alt="LCA queries in the Cartesian Tree" /></center></p>
+
+<p>Essa árvore pode ser construída em $O(N)$ e o algoritmo de Farach-Colton e Bender pode pré-processar a árvore em $O(N)$ e encontrar o LCA em $O(1)$.</p>
+
+<h2>Construção de uma árvore Cartesiana</h2>
+
+<p>Vamos construir a árvore cartesiana adicionando os elementos um após o outro. Em cada etapa, mantemos uma árvore cartesiana válida de todos os elementos processados. É fácil ver que a adição de um elemento <code>s[i]</code> só pode alterar os nós no caminho mais à direita - começando na raiz e repetidamente indo pelo filho direito - da árvore.
+A subárvore do nó com o menor, mas maior ou igual a <code>s[i]</code>, valor se torna a subárvore esquerda de <code>s[i]</code>, e a árvore com raiz <code>s[i]</code> se tornará a nova subárvore direita do nó com o maior, mas menor que <code>s[i]</code>, valor.</p>
+
+<p>Isso pode ser implementado usando um stack para armazenar os índices dos nós mais à direita.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; parent(n, -1);
+stack&lt;int&gt; s;
+for (int i = 0; i &lt; n; i++) {
+    int last = -1;
+    while (!s.empty() &amp;&amp; A[s.top()] &gt;= A[i]) {
+        last = s.top();
+        s.pop();
+    }
+    if (!s.empty())
+        parent[i] = s.top();
+    if (last &gt;= 0)
+        parent[last] = i;
+    s.push(i);
+}
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
