@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo máximo: Ford-Fulkerson e Edmonds-Karp - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo máximo: Ford-Fulkerson e Edmonds-Karp</h1>
+
+<p>O algoritmo de Edmonds-Karp é uma implementação do método de Ford-Fulkerson para calcular um fluxo máximo em uma rede de fluxo.</p>
+
+<h2>Rede de fluxo</h2>
+
+<p>Primeiro, vamos definir o que é uma <strong>rede de fluxo</strong>, um <strong>fluxo</strong> e um <strong>fluxo máximo</strong>.</p>
+
+<p>Uma <strong>rede</strong> é um grafo direcionado $G$, com vértices - $V$ e arestas - $E$, combinado com uma função $c$, que atribui a cada aresta $e \in E$ um valor inteiro não negativo, a <strong>capacidade</strong> de $e$.
+Essa rede é chamada de <strong>rede de fluxo</strong>, se adicionalmente rotularmos dois vértices, um como fonte(<em>source</em>) e outro como coletor/pia(<em>sink</em>).</p>
+
+<p>Um <strong>fluxo</strong> em uma rede de fluxo é uma função $f$, que novamente atribui a cada aresta $e$ um valor inteiro não negativo, ou seja, um fluxo. A função deve atender às duas condições a seguir:</p>
+
+<p>O fluxo de uma aresta não pode exceder a capacidade.
+$$f(e) \le c(e)$$</p>
+
+<p>E a soma do fluxo de entrada de um vértice $u$ deve ser igual à soma do fluxo de saída de $u$ exceto nos vértices fonte e coletor(source e sink).
+
+$$\sum_{(v, u) \in E} f((v, u)) = \sum_{(u, v) \in E} f((u, v))$$
+O vértice fonte $s$ possui apenas um fluxo de saída e o vértice coletor $t$ possui apenas um fluxo de entrada.</p>
+
+<p>É fácil ver que a seguinte equação é válida:
+$$\sum_{(s, u) \in E} f((s, u)) = \sum_{(u, t) \in E} f((u, t))$$</p>
+
+<p>Uma boa analogia para uma rede de fluxo é a seguinte visualização:
+representamos arestas como tubulações/canos de água, a capacidade de uma aresta é a quantidade máxima de água que pode fluir, por segundo, através do tubo, e o fluxo de uma aresta é a quantidade de água que atualmente flui, por segundo, através do tubo.
+Isso motiva a primeira condição de fluxo. Não pode fluir mais água através de um tubo do que sua capacidade permite.
+Os vértices agem como junções, onde a água sai de alguns tubos e se distribui de algum modo para os outros tubos.
+Isso também motiva a segunda condição de fluxo. Em cada junção, toda a água recebida deve ser distribuída para os outros tubos.
+Não pode magicamente desaparecer ou aparecer. 
+A fonte $s$ é a origem de toda a água, e a água só pode drenar na pia(<em>sink</em>) $t$.</p>
+
+<p>A imagem a seguir mostra uma rede de fluxo. O primeiro valor de cada aresta representa o fluxo, que é inicialmente 0, e o segundo valor representa a capacidade.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow1.png" alt="Flow network" /></center></p>
+
+<p>O valor de um fluxo de uma rede é a soma de todos os fluxos que são produzidos na fonte $s$, ou equivalente dos fluxos que são consumidos no coletor $t$.
+Um <strong>fluxo máximo</strong> é um fluxo com o maior valor possível. Encontrar esse fluxo máximo de uma rede de fluxo é o problema que queremos resolver.</p>
+
+<p>Na visualização com canos de água, o problema pode ser formulado da seguinte maneira: quanta água podemos empurrar através dos canos da fonte até a pia.</p>
+
+<p>A imagem a seguir mostra o fluxo máximo na rede de fluxo.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow9.png" alt="Maximal flow" /></center></p>
+
+<h2>Método de Ford-Fulkerson</h2>
+
+<p>Vamos definir mais uma coisa. Uma <em>capacidade residual</em> de uma aresta direcionada é a capacidade menos o fluxo.
+Deve-se notar que, se houver um fluxo ao longo de alguma aresta direcionada $(u, v)$, a aresta reversa tem capacidade $0$ e podemos definir o fluxo como $f((v, u)) = -f((u, v))$.
+Isso também define a capacidade residual para todas as arestas invertidas. De todas essas arestas, podemos criar uma <em>rede residual</em>, que é apenas uma rede com os mesmos vértices e as mesmas arestas, mas usamos as capacidades residuais como capacidades.</p>
+
+<p>O método Ford-Fulkerson funciona da seguinte maneira. Primeiro, definimos o fluxo de cada aresta para zero. Em seguida, procuramos por um caminho simples com capacidades positivas(<strong>augmenting path</strong>) de $s$ até $t$.
+Um <em>augmenting path</em> é um caminho simples(sem ciclos) no grafo residual, ou seja, ao longo das arestas cuja capacidade residual é positiva. Se esse caminho for encontrado, podemos adicionar e aumentar o fluxo ao longo dessas arestas. Continuamos buscando por <em>augmenting paths</em> e aumentando o fluxo. Uma vez que não existe mais esse caminho, o fluxo é máximo.</p>
+
+<p>Vamos especificar com mais detalhes o que significa aumentar o fluxo ao longo de um <em>augmenting path</em>.
+Seja $C$ a menor capacidade residual das arestas no caminho. Em seguida, aumentamos o fluxo da seguinte maneira: atualizamos $f((u, v)) ~\text{+=}~ C$ e $f((v, u)) ~\text{-=}~ C$ para toda aresta $(u, v)$ no caminho.</p>
+
+<p>Aqui está um exemplo para demonstrar o método. Usamos a mesma rede de fluxo como acima. Inicialmente, começamos com um fluxo de 0.</p>
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow1.png" alt="Flow network" /></center></p>
+
+<p>Podemos encontrar o caminho $s - A - B - t$ com as capacidades residuais 7, 5 e 8. Seu mínimo é 5, portanto, podemos aumentar o fluxo ao longo desse caminho em 5. Isso gera um fluxo de 5 para a rede.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow2.png" alt="First path" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow3.png" alt="Network after first path" /></center></p>
+
+<p>Novamente, procuramos um caminho <em>augmenting path</em>, desta vez encontramos $s - D - A - C - t$ com as capacidades residuais 4, 3, 3 e 5. Portanto, podemos aumentar o fluxo em 3 e obter um fluxo de 8 para a rede.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow4.png" alt="Second path" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow5.png" alt="Network after second path" /></center></p>
+
+<p>Desta vez, encontramos o caminho $s - D - C - B - t$ com as capacidades residuais 1, 2, 3 e 3, e aumentamos em 1.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow6.png" alt="Third path" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow7.png" alt="Network after third path" /></center></p>
+
+<p>Desta vez, encontramos o caminho $s - A - D - C - t$ com as capacidades residuais 2, 3, 1 e 2. Podemos aumentar em 1. Mas esse caminho é muito interessante. Ele inclui a aresta reversa $(A, D)$.
+Na rede de fluxo original, não temos permissão para enviar nenhum fluxo de $A$ a $D$.
+Mas como já temos um fluxo de 3 de $D$ a $A$ this is possible.
+isso é possível. A intuição é: em vez de enviar um fluxo de 3 de $D$ a $A$, enviamos apenas 2 e compensamos isso enviando um fluxo adicional de 1 de $s$ a $A$, o que nos permite enviar um fluxo adicional de 1 ao longo do caminho $D - C - t$.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow8.png" alt="Fourth path" /> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Flow9.png" alt="Network after fourth path" /></center></p>
+
+<p>Agora é impossível encontrar um <em>augmenting path</em> entre $s$ e $t$, portanto esse fluxo de $10$ é o máximo possível. Nós encontramos o fluxo máximo.</p>
+
+<p>Deve-se notar que o método Ford-Fulkerson não especifica um método para encontrar o "<em>augmenting path</em>".
+As abordagens possíveis são usar uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> ou <a href="https://cp-algorithms-brasil.com/grafos/BFS.html">BFS</a> que funcionam em $O(E)$.
+Se todas as capacidades da rede são números inteiros, então, para cada <em>augmenting path</em> o fluxo da rede aumenta em pelo menos 1 (pelo teorema do Fluxo Integral).
+Portanto, a complexidade do Ford-Fulkerson é $O(E F)$, onde $F$ é o fluxo máximo da rede. No caso de capacidades racionais, o algoritmo também será encerrado, mas a complexidade não é limitada. No caso de capacidades irracionais, o algoritmo pode nunca terminar e nem convergir para o fluxo máximo.</p>
+
+<h2>Algoritmo de Edmonds-Karp</h2>
+
+<p>O algoritmo Edmonds-Karp é apenas uma implementação do método Ford-Fulkerson que usa a <a href="https://cp-algorithms-brasil.com/grafos/BFS.html">BFS</a> para encontrar os "<em>augmenting paths</em>".
+O algoritmo foi publicado pela primeira vez por Yefim Dinitz em 1970 e posteriormente publicado independentemente por Jack Edmonds e Richard Karp em 1972.</p>
+
+<p>A complexidade pode ser dada independentemente do fluxo máximo. O algoritmo é executado em $O(V E^2)$, mesmo para capacidades irracionais. A intuição é que toda vez que encontrarmos um augmenting path uma das arestas ficará saturada, e a distância da aresta a $s$ será maior, se aparecer mais tarde novamente em um augmenting path.
+E o comprimento de um caminho simples é limitado por $V$.</p>
+
+<h3>Implementação</h3>
+
+<p>A matriz <code>capacity</code> armazena a capacidade para cada par de vértices.
+<code>adj</code> é a lista de adjacência do <strong>grafo não direcionado</strong>, já que também precisamos usar o inverso das arestas direcionadas quando procuramos por <em>augmenting paths</em>.</p>
+
+<p>A função <code>maxflow</code> retornará o valor do fluxo máximo. Durante o algoritmo, a matriz <code>capacity</code> armazenará a capacidade residual da rede. O valor do fluxo em cada aresta não será realmente armazenado, mas é fácil estender a implementação - usando uma matriz adicional - para também armazenar o fluxo e retorná-lo.</p>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; capacity;
+vector&lt;vector&lt;int&gt;&gt; adj;
+
+int bfs(int s, int t, vector&lt;int&gt;&amp; parent) {
+    fill(parent.begin(), parent.end(), -1);
+    parent[s] = -2;
+    queue&lt;pair&lt;int, int&gt;&gt; q;
+    q.push({s, INF});
+
+    while (!q.empty()) {
+        int cur = q.front().first;
+        int flow = q.front().second;
+        q.pop();
+
+        for (int next : adj[cur]) {
+            if (parent[next] == -1 &amp;&amp; capacity[cur][next]) {
+                parent[next] = cur;
+                int new_flow = min(flow, capacity[cur][next]);
+                if (next == t)
+                    return new_flow;
+                q.push({next, new_flow});
+            }
+        }
+    }
+
+    return 0;
+}
+
+int maxflow(int s, int t) {
+    int flow = 0;
+    vector&lt;int&gt; parent(n);
+    int new_flow;
+
+    while (new_flow = bfs(s, t, parent)) {
+        flow += new_flow;
+        int cur = t;
+        while (cur != s) {
+            int prev = parent[cur];
+            capacity[prev][cur] -= new_flow;
+            capacity[cur][prev] += new_flow;
+            cur = prev;
+        }
+    }
+
+    return flow;
+}
+</code></pre>
+
+<h2>Teorema do Fluxo Integral</h2>
+
+<p>O teorema simplesmente diz que, se todas as capacidades da rede forem inteiras, também o fluxo em cada aresta será inteiro no fluxo máximo.</p>
+
+<h2>Teorema <em>Max-flow min-cut</em></h2>
+<em>cut - corte</em>
+<p>Um <strong>$s$-$t$-cut</strong> é uma partição dos vértices de uma rede de fluxo em dois conjuntos, de modo que um conjunto inclua a origem $s$ e o outro inclua a "pia"(sink) $t$.
+A capacidade de um corte de $s$ e $t$ ($s$-$t$-cut) é definida como a soma das capacidades das arestas do lado da fonte para o lado da pia.</p>
+
+<p>Obviamente, não podemos enviar mais fluxo de $s$ a $t$ do que a capacidade de qualquer $s$-$t$-cut.
+Portanto, o fluxo máximo é limitado pela capacidade mínima de corte.</p>
+
+<p>O teorema <em>max-flow min-cut</em> vai ainda mais longe. Ele diz que a capacidade do fluxo máximo deve ser igual à capacidade do corte mínimo.</p>
+
+<p>Na imagem a seguir, você pode ver o corte mínimo da rede de fluxo que usamos anteriormente. Isso mostra que a capacidade do corte $&#92;{s, A, D&#92;}$ e $&#92;{B, C, t&#92;}$ é $5 + 3 + 2 = 10$, que é igual ao fluxo máximo encontrado. Outros cortes terão uma capacidade maior, como a capacidade entre $&#92;{s, A&#92;}$ e $&#92;{B, C, D, t&#92;}$: $4 + 3 + 5 = 12$.
+<center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/Cut.png" alt="Minimum cut" /></center></p>
+
+<p>Um corte mínimo pode ser encontrado após a realização de um cálculo do fluxo máximo usando o método de Ford-Fulkerson.
+Um possível corte mínimo é o seguinte: o conjunto de todos os vértices que podem ser alcançados a partir de $s$ no grafo residual (usando arestas com capacidade residual positiva) e o conjunto de todos os outros vértices. Essa partição pode ser encontrada usando uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> começando da fonte $s$.</p>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
