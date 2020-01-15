@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Menor Ancestral Comum: Tarjan - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Menor Ancestral Comum: algoritmo de Tarjan</h1>
+
+<p>Temos uma árvore $G$ com $n$ nós e temos $m$ consultas $(u, v)$.
+Para cada consulta $(u, v)$ queremos encontrar o menor ancestral comum dos vértices $u$ e $v$.</p>
+
+<p>Neste artigo, resolveremos o problema off-line, ou seja, assumimos que todas as consultas são conhecidas antecipadamente e, portanto, respondemos às consultas na ordem que desejar. O algoritmo a seguir permite responder a todas as $m$ consultas em $O(n + m)$, ou seja, para um $m$ suficientemente grande em $O(1)$ por cada consulta.</p>
+
+<h2>Algoritmo</h2>
+
+<p>O algoritmo recebeu o nome de Robert Tarjan, que o descobriu em 1979 e também fez muitas outras contribuições para a estrutura de dados: <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html">Disjoint Set Union</a>, que será muito usada nesse algoritmo.</p>
+
+<p>O algoritmo responde a todas as consultas com uma travessia da <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> da árvore.
+Ou seja, uma consulta $(u, v)$ é respondida no nó $u$, se o nó $v$ já tiver sido visitado anteriormente ou vice-versa.</p>
+
+<p>Então, vamos supor que estamos atualmente no nó $v$, já fizemos chamadas recursivas da DFS e também já visitamos o segundo nó $u$ da consulta $(u, v)$.
+Vamos aprender como encontrar o LCA desses dois nós.</p>
+
+<p>Observe que $\text{LCA}(u, v)$ é o nó $v$ ou um de seus ancestrais. Portanto, precisamos encontrar o nó mais baixo entre os ancestrais de $v$ (incluindo $v$), para o qual o nó $u$ é um descendente. Observe também que, para um $v$ fixo os nós visitados da árvore se dividem em um conjunto de conjuntos disjuntos(<em>disjoint sets</em>). 
+Cada ancestral $p$ do nó $v$ possui seu próprio conjunto contendo esse nó e todas as subárvores com raízes nos filhos que não fazem parte do caminho entre $v$ e a raiz da árvore.
+O conjunto que contém o nó $u$ determina o $\text{LCA}(u, v)$:
+o LCA é o representante do conjunto, ou seja, o nó que fica no caminho entre $v$ e a raiz do árvore.</p>
+
+<p>Só precisamos aprender a manter com eficiência todos esses conjuntos. Para esse fim, aplicamos a estrutura de dados DSU. Para poder aplicar <em>Union by Rank</em>, armazenamos o representante real (o valor no caminho entre $v$ e a raiz da árvore) de cada conjunto na array <code>ancestor</code>.</p>
+
+<p>Vamos discutir a implementação do DFS. Vamos supor que estamos atualmente visitando o nó $v$.
+Colocamos o nó em um novo conjunto no DSU, <code>ancestor[v] = v</code>.
+Como sempre, processamos todos os filhos de $v$.
+Para isso, primeiro devemos chamar recursivamente a DFS nesse nó e, em seguida, adicionar esse nó com toda a sua subárvore ao conjunto de $v$.
+Isso pode ser feito com a função <code>union_sets</code> e a seguinte definição: <code>ancestor[find_set(v)] = v</code> (isso é necessário, porque <code>union_sets</code> pode alterar o representante do conjunto).</p>
+
+<p>Finalmente, depois de processar todos os filhos, podemos responder a todas as consultas da forma $(u, v)$, em que $u$ já foi visitado. A resposta para a consulta, ou seja, o LCA de $u$ e $v$, será o nó <code>ancestor[find_set(u)]</code>.
+Uma consulta será respondida apenas uma vez.</p>
+
+<p>Vamos determinar a complexidade do tempo desse algoritmo. Em primeiro lugar, temos $O(n)$ por causa da DFS.
+Em segundo lugar, temos as chamadas da função <code>union_sets</code> que acontece $n$ vezes, resultando também em $O(n)$.
+E em terceiro lugar, temos as chamadas de <code>find_set</code> para cada consulta, o que nos dá $O(m)$.
+Portanto, no total, a complexidade do tempo é $O(n + m)$, o que significa que, para $m$'s suficientemente grandes, isso corresponde a $O(1)$ para responder a uma consulta.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação desse algoritmo. A implementação do DSU não foi incluída, pois pode ser usada sem modificações.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; adj;
+vector&lt;vector&lt;int&gt;&gt; queries;
+vector&lt;int&gt; ancestor;
+vector&lt;bool&gt; visited;
+
+void dfs(int v)
+{
+    visited[v] = true;
+    ancestor[v] = v;
+    for (int u : adj[v]) {
+        if (!visited[u]) {
+            dfs(u);
+            union_sets(v, u);
+            ancestor[find_set(v)] = v;
+        }
+    }
+    for (int other_node : queries[v]) {
+        if (visited[other_node])
+            cout &lt;&lt; "LCA of " &lt;&lt; v &lt;&lt; " and " &lt;&lt; other_node
+                 &lt;&lt; " is " &lt;&lt; ancestor[find_set(other_node)] &lt;&lt; ".\n";
+    }
+}
+
+void compute_LCAs() {
+    // inicializa n, adj e DSU
+    // for (cada query (u, v)) {
+    //    queries[u].push_back(v);
+    //    queries[v].push_back(u);
+    // }
+
+    ancestor.resize(n);
+    visited.assign(n, false);
+    dfs(0);
+}
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
