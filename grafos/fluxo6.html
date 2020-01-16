@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxos com demandas - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxos com demandas</h1>
+
+<p>Em uma rede de fluxo normal, o fluxo de uma aresta é limitado apenas pela capacidade $c(e)$ de cima e por 0 de baixo. Neste artigo, discutiremos as redes de fluxo, onde adicionalmente exigimos que o fluxo de cada aresta tenha uma certa quantidade, ou seja, limitamos o fluxo a partir de baixo por uma função de demanda $d(e)$:
+$$ d(e) \le f(e) \le c(e)$$
+Portanto, cada próxima aresta tem um valor de fluxo mínimo, que temos que passar ao longo da aresta.</p>
+
+<p>Essa é uma generalização do problema de fluxo normal, pois se definirmos $d(e) = 0$ para todas as arestas $e$ isso nos dará uma rede de fluxo normal. Observe que na rede de fluxo normal é extremamente trivial encontrar um fluxo válido, definindo $f(e) = 0$ já é válido. No entanto, se o fluxo de cada aresta precisar atender a uma demanda, encontrar um fluxo válido de repente já é bastante complicado.</p>
+
+<p>Vamos considerar dois problemas:</p>
+
+<ol>
+<li>encontrar um fluxo arbitrário que satisfaça todas as restrições</li>
+<li>encontrar um fluxo mínimo que satisfaça todas as restrições</li>
+</ol>
+
+<h2>Encontrando um fluxo arbitrário</h2>
+
+<p>ós fazemos as seguintes alterações na rede. Adicionamos uma nova fonte $s'$ e um novo coletor(<em>sink</em>) $t'$, uma nova aresta da fonte $s'$ a todos os outros vértices e uma nova aresta para cada vértice ao coletor $t'$, e uma aresta de $t$ a $s$.
+Além disso, definimos uma nova função de capacidade $c'$ como:</p>
+
+<ul>
+<li>$c'((s', v)) = \sum_{u \in V} d((u, v))$ para cada aresta $(s', v)$.</li>
+<li>$c'((v, t')) = \sum_{w \in V} d((v, w))$ para cada aresta $(v, t')$.</li>
+<li>$c'((u, v)) = c((u, v)) - d((u, v))$ para cada aresta $(u, v)$ na rede de fluxos antiga.</li>
+<li>$c'((t, s)) = \infty$</li>
+</ul>
+
+<p>Se a nova rede tiver um fluxo saturado (um fluxo em que cada aresta que sai de $s'$ seja completamente preenchida, o que é equivalente a todas as arestas que chegam em $t'$ sejam também completamente preenchidas), então, a rede com demandas terá um fluxo válido, e o fluxo atual poderá ser reconstruído a partir da nova rede. 
+Caso contrário, não existe um fluxo que satisfaça todas as condições. Como um fluxo de saturação deve ser um fluxo máximo, ele pode ser encontrado por qualquer algoritmo de fluxo máximo, como o <a href="https://cp-algorithms-brasil.com/grafos/fluxo.html">algoritmo de Edmonds-Karp</a> ou o <a href="https://cp-algorithms-brasil.com/grafos/fluxo2.html">método Push-relabel</a>.</p>
+
+<p>A correção dessas transformações é mais difícil de entender. Podemos pensar da seguinte maneira: Cada aresta $e = (u, v)$ com $d(e) > 0$ é originalmente substituída por duas arestas: uma com capacidade $d(i)$, e a outra com $c(i) - d(i)$.
+Queremos encontrar um fluxo que sature a primeira aresta (ou seja, o fluxo ao longo dessa aresta deve ser igual à sua capacidade). A segunda aresta é menos importante - o fluxo ao longo dela pode ser qualquer coisa, assumindo que não exceda sua capacidade. Considere cada aresta que precisa ser saturada e executamos a seguinte operação: selecionamos a aresta da nova fonte $s'$ até o seu final $v$, selecionamos a aresta do seu início $u$ até o novo coletor $t'$, removemos a aresta propriamente dita e, do coletor(sink) antigo $t$ para a fonte antiga $s$ selecionamos uma aresta de capacidade infinita.
+Com essas ações, simulamos o fato de que essa aresta está saturada - de $v$ haverá um fluxo adicional $d(e)$ saindo (simulamos com uma nova fonte que fornece a quantidade certa de fluxo para $v$), e $u$ também empurrará um fluxo adicional $d(e)$ (mas ao invés de ir ao longo da aresta antiga, esse fluxo irá diretamente para o novo coletor $t'$).
+Um fluxo com valor $d(e)$, que originalmente fluía ao longo do caminho $s - \dots - u - v - \dots t$ agora pode seguir o novo caminho $s' - v - \dots - t - s - \dots - u - t'$.
+A única coisa que foi simplificada na definição da nova rede é que, se o procedimento criar arestas múltiplas entre o mesmo par de vértices, elas serão combinadas em uma única aresta com a capacidade total.</p>
+
+<h2>Fluxo mínimo</h2>
+
+<p>Observe que ao longo da aresta $(t, s)$ (do coletor antigo para a fonte antiga) com a capacidade $\infty$ flui todo o fluxo da rede antiga correspondente. Ou seja, a capacidade dessa aresta afeta o valor do fluxo da rede antiga. Ao fornecer a essa aresta uma capacidade suficientemente grande (ou seja, $\infty$), o fluxo da rede antiga é ilimitado. Ao limitar essa aresta por capacidades menores, o valor do fluxo diminuirá. No entanto, se limitarmos essa aresta por um valor muito pequeno, a rede não terá uma solução saturada; por exemplo, a solução correspondente para a rede original não atenderá à demanda das arestas. Obviamente, aqui pode-se usar uma <em>busca binária</em> para encontrar o valor mais baixo com o qual todas as restrições ainda são atendidas. Isso fornece o fluxo mínimo da rede original.</p>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
