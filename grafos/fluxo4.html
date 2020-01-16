@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo máximo: Dinic - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo máximo - algoritmo de Dinic</h1>
+
+<p>O algoritmo de Dinic resolve o problema do fluxo máximo em $O(V^2E)$. O problema do fluxo máximo é definido neste artigo: <a href="https://cp-algorithms-brasil.com/grafos/fluxo.html">Fluxo máximo - Ford-Fulkerson e Edmonds-Karp</a>. Este algoritmo foi descoberto por Yefim Dinitz em 1970.</p>
+
+<h2>Definições</h2>
+
+<p>Uma <strong>rede residual</strong> $G^R$ de uma rede $G$ é uma rede que contém duas arestas para cada aresta $(v, u)\in G$:<br></p>
+
+<ul>
+<li>$(v, u)$ com capacidade $c_{vu}^R = c_{vu} - f_{vu}$</li>
+<li>$(u, v)$ com capacidade $c_{uv}^R = f_{vu}$</li>
+</ul>
+
+<p>Um <strong>fluxo de bloqueio</strong> de alguma rede é um fluxo em que todos os caminhos de $s$ a $t$ contêm pelo menos uma aresta saturada por esse fluxo. Observe que um fluxo de bloqueio não é necessariamente máximo.</p>
+
+<p>Uma <strong>rede em camadas</strong> de uma rede $G$ é uma rede construída da seguinte maneira. Primeiramente, para cada vértice $v$ calculamos o $level[v]$ - o caminho mais curto (sem pesos) de $s$ para esse vértice usando apenas arestas com capacidade positiva. Então, mantemos apenas as arestas $(v, u)$ para as quais $level[v] + 1 = level[u]$. Essa rede é acíclica.</p>
+
+<h2>Algoritmo</h2>
+
+<p>O algoritmo consiste em várias fases. Em cada fase, construímos a rede em camadas da rede residual de $G$. Em seguida, encontramos um fluxo de bloqueio arbitrário na rede em camadas e o adicionamos ao fluxo atual.</p>
+
+<h2>Prova</h2>
+
+<p>Vamos mostrar que, se o algoritmo terminar, ele encontrará o fluxo máximo.</p>
+
+<p>Se o algoritmo terminasse, não seria possível encontrar um fluxo de bloqueio na rede em camadas. Isso significa que a rede em camadas não possui nenhum caminho de $s$ a $t$. Consequentemente, isso significa que a rede residual não possui um caminho de $s$ a $t$. Finalmente, isso irá significar que o fluxo é máximo.</p>
+
+<h2>Número de fases</h2>
+
+<p>O algoritmo termina em menos de $V$ fases. Para provar isso, precisamos primeiro provar dois lemas.</p>
+
+<p><strong>Lema 1.</strong> As distâncias a partir de $s$ a cada vértice não diminuem após cada iteração, ou seja $level_{i+1}[v] \ge level_i[v]$.</p>
+
+<p>Prova. Fixe uma fase $i$ e um vértice $v$. Considere qualquer caminho mais curto $P$ de $s$ a $v$ em $G_{i+1}^R$. O comprimento de $P$ é igual a $level_{i+1}[v]$. Note que $G_{i+1}^R$ só pode conter arestas de $G_i^R$ e <em>back edges</em>(arestas de retorno) para arestas de $G_i^R$. Se $P$ não tiver arestas de retorno para $G_i^R$, então $level_{i+1}[v] \ge level_i[v]$ porque $P$ também é um caminho em $G_i^R$. Agora, suponha que $P$ tenha pelo menos uma aresta de retorno. Seja a primeira dessas arestas: $(u, w)$. Assim, $level_{i+1}[u] \ge level_i[u]$ (por causa do primeiro caso). A aresta $(u, w)$ não pertence a $G_i^R$, então a aresta $(w, u)$ foi afetada pelo fluxo de bloqueio na iteração anterior. Isso significa que $level_i[u] = level_i[w] + 1$. Também: $level_{i+1}[w] = level_{i+1}[u] + 1$. A partir dessas duas equações e $level_{i+1}[u] \ge level_i[u]$ obtemos $level_{i+1}[w] \ge level_i[w] + 2$. Agora podemos usar a mesma idéia para o resto do caminho.</p>
+
+<p><strong>Lema 2.</strong> $level_{i+1}[t] > level_i[t]$</p>
+
+<p>Prova. Do lema anterior, $level_{i+1}[t] \ge level_i[t]$. Suponha que $level_{i+1}[t] = level_i[t]$. Note que $G_{i+1}^R$ só pode conter arestas de $G_i^R$ e arestas de retorno para arestas de $G_i^R$. Isso significa que existe um caminho mais curto em $G_i^R$ que não foi bloqueado pelo fluxo de bloqueio, isso é uma contradição.</p>
+
+<p>Desses dois lemas, concluímos que há menos de $V$ fases porque $level[t]$ aumenta, mas não pode ser maior que $V - 1$.</p>
+
+<h2>Localizando fluxo de bloqueio</h2>
+
+<p>Para encontrar o fluxo de bloqueio em cada iteração, podemos simplesmente tentar empurrar o fluxo com a DFS a partir de $s$ a $t$ na rede em camadas enquanto ele pode ser empurrado. Para fazer isso mais rapidamente, precisamos remover as arestas que não podem mais ser usadas para empurrar. Para fazer isso, podemos manter um ponteiro em cada vértice que aponta para a próxima aresta que pode ser usada. Cada ponteiro pode ser movido no máximo $E$ vezes, assim, cada fase funciona em $O(VE)$.</p>
+
+<h2>Complexidade</h2>
+
+<p>Como há menos de $V$ fases, a complexidade total é de $O(V^2E)$.</p>
+
+<h2>Redes de unidades</h2>
+
+<p>Uma <strong>rede de unidade</strong> é uma rede na qual todas as arestas têm capacidade unitária e, para qualquer vértice, exceto $s$ e $t$ a aresta de entrada ou de saída é única. Esse é exatamente o caso da rede que construímos para resolver o problema máximo de correspondência com os fluxos.</p>
+
+<p>Nas redes de unidades, o algoritmo do Dinic funciona em $O(E\sqrt{V})$. Vamos provar isso.</p>
+
+<p>Primeiro, cada fase agora funciona em $O(E)$ porque cada aresta será considerada no máximo uma vez.</p>
+
+<p>Segundo, suponha que já existam $\sqrt{V}$ fases. Então, todos os <em>augmenting paths</em> de tamanho $\le\sqrt{V}$ foram encontrados. Seja $f$ o fluxo atual, $f'$ seja o fluxo máximo. Considere a diferença entre eles $f' - f$. É um fluxo em $G^R$ de valor $|f'| - |f|$ e em cada aresta será $0$ ou $1$. Pode ser decomposto em $|f'| - |f|$ caminhos de $s$ a $t$ e possivelmente ciclos. Como a rede é unitária, eles não podem ter vértices comuns; portanto, o número total de vértices é $\ge (|f'| - |f|)\sqrt{V}$, mas também é $\le V$, assim, nas outras $\sqrt{V}$ iterações definitivamente encontraremos o fluxo máximo.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct FlowEdge {
+    int v, u;
+    long long cap, flow = 0;
+    FlowEdge(int v, int u, long long cap) : v(v), u(u), cap(cap) {}
+};
+
+struct Dinic {
+    const long long flow_inf = 1e18;
+    vector&lt;FlowEdge&gt; edges;
+    vector&lt;vector&lt;int&gt;&gt; adj;
+    int n, m = 0;
+    int s, t;
+    vector&lt;int&gt; level, ptr;
+    queue&lt;int&gt; q;
+
+    Dinic(int n, int s, int t) : n(n), s(s), t(t) {
+        adj.resize(n);
+        level.resize(n);
+        ptr.resize(n);
+    }
+
+    void add_edge(int v, int u, long long cap) {
+        edges.emplace_back(v, u, cap);
+        edges.emplace_back(u, v, 0);
+        adj[v].push_back(m);
+        adj[u].push_back(m + 1);
+        m += 2;
+    }
+
+    bool bfs() {
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int id : adj[v]) {
+                if (edges[id].cap - edges[id].flow &lt; 1)
+                    continue;
+                if (level[edges[id].u] != -1)
+                    continue;
+                level[edges[id].u] = level[v] + 1;
+                q.push(edges[id].u);
+            }
+        }
+        return level[t] != -1;
+    }
+
+    long long dfs(int v, long long pushed) {
+        if (pushed == 0)
+            return 0;
+        if (v == t)
+            return pushed;
+        for (int&amp; cid = ptr[v]; cid &lt; (int)adj[v].size(); cid++) {
+            int id = adj[v][cid];
+            int u = edges[id].u;
+            if (level[v] + 1 != level[u] || edges[id].cap - edges[id].flow &lt; 1)
+                continue;
+            long long tr = dfs(u, min(pushed, edges[id].cap - edges[id].flow));
+            if (tr == 0)
+                continue;
+            edges[id].flow += tr;
+            edges[id ^ 1].flow -= tr;
+            return tr;
+        }
+        return 0;
+    }
+
+    long long flow() {
+        long long f = 0;
+        while (true) {
+            fill(level.begin(), level.end(), -1);
+            level[s] = 0;
+            q.push(s);
+            if (!bfs())
+                break;
+            fill(ptr.begin(), ptr.end(), 0);
+            while (long long pushed = dfs(s, flow_inf)) {
+                f += pushed;
+            }
+        }
+        return f;
+    }
+};
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
