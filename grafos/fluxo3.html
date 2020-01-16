@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo máximo: push-relabel aprimorado - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo máximo - push-relabel aprimorado</h1>
+
+<p>Modificaremos o método <a href="https://cp-algorithms-brasil.com/grafos/fluxo2.html">push-relabel</a> para obter um melhor tempo de execução.</p>
+
+<h2>Descrição</h2>
+
+<p>A modificação é extremamente simples: no artigo anterior, escolhemos um vértice com excesso de fluxo sem nenhuma regra específica.
+Mas acontece que, se sempre escolhermos os vértices com a <strong>maior altura</strong>, e aplicarmos as operações "<em>push</em>" e "<em>relabel</em>" neles, a complexidade se tornará melhor.
+Além disso, para selecionar os vértices com a maior altura, na verdade não precisamos de nenhuma estrutura de dados, simplesmente armazenamos os vértices com a maior altura em uma lista e recalculamos a lista quando todos eles forem processados (assim, vértices com alturas mais baixas já serão adicionados à lista), ou sempre que um novo vértice com excesso e uma altura maior aparecer (depois de rotular novamente um vértice).</p>
+
+<p>Apesar da simplicidade, essa modificação reduz muito a complexidade. Para ser preciso, a complexidade do algoritmo resultante é $O(V E + V^2 \sqrt{E})$, que no pior caso é $O(V^3)$.</p>
+
+<p>Essa modificação foi proposta por Cheriyan e Maheshwari em 1989.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">const int inf = 1000000000;
+
+int n;
+vector&lt;vector&lt;int&gt;&gt; capacity, flow;
+vector&lt;int&gt; height, excess;
+
+void push(int u, int v)
+{
+    int d = min(excess[u], capacity[u][v] - flow[u][v]);
+    flow[u][v] += d;
+    flow[v][u] -= d;
+    excess[u] -= d;
+    excess[v] += d;
+}
+
+void relabel(int u)
+{
+    int d = inf;
+    for (int i = 0; i &lt; n; i++) {
+        if (capacity[u][i] - flow[u][i] &gt; 0)
+            d = min(d, height[i]);
+    }
+    if (d &lt; inf)
+        height[u] = d + 1;
+}
+
+vector&lt;int&gt; find_max_height_vertices(int s, int t) {
+    vector&lt;int&gt; max_height;
+    for (int i = 0; i &lt; n; i++) {
+        if (i != s &amp;&amp; i != t &amp;&amp; excess[i] &gt; 0) {
+            if (!max_height.empty() &amp;&amp; height[i] &gt; height[max_height[0]])
+                max_height.clear();
+            if (max_height.empty() || height[i] == height[max_height[0]])
+                max_height.push_back(i);
+        }
+    }
+    return max_height;
+}
+
+int max_flow(int s, int t)
+{
+    height.assign(n, 0);
+    height[s] = n;
+    flow.assign(n, vector&lt;int&gt;(n, 0));
+    excess.assign(n, 0);
+    excess[s] = inf;
+    for (int i = 0; i &lt; n; i++) {
+        if (i != s)
+            push(s, i);
+    }
+
+    vector&lt;int&gt; current;
+    while (!(current = find_max_height_vertices(s, t)).empty()) {
+        for (int i : current) {
+            bool pushed = false;
+            for (int j = 0; j &lt; n &amp;&amp; excess[i]; j++) {
+                if (capacity[i][j] - flow[i][j] &gt; 0 &amp;&amp; height[i] == height[j] + 1) {
+                    push(i, j);
+                    pushed = true;
+                }
+            }
+            if (!pushed) {
+                relabel(i);
+                break;
+            }
+        }
+    }
+
+    int max_flow = 0;
+    for (int i = 0; i &lt; n; i++)
+        max_flow += flow[0][i];
+    return max_flow;
+}
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
