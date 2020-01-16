@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo máximo: Malhotra, Pramodh-Kumar e Maheshwari - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo máximo - algoritmo de Malhotra, Pramodh-Kumar e Maheshwari</h1>
+
+<p>O algoritmo "MPM" (Malhotra, Pramodh-Kumar and Maheshwari) resolve o problema de fluxo máximo em $O(V^3)$. Esse algoritmo é semelhante ao <a href="https://cp-algorithms-brasil.com/grafos/fluxo4.html">algoritmo de Dinic</a>.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Como o algoritmo de Dinic, o MPM é executado em fases, durante cada fase encontramos o fluxo de bloqueio na rede em camadas da rede residual de $G$.
+A principal diferença do de Dinic é como encontramos o fluxo de bloqueio. Considere a rede em camadas $L$.
+Para cada nó, definimos seu <em>potencial interno</em> e <em>potencial externo</em> como:</p>
+
+<p>$$\begin{align}
+p_{in}(v) &amp;= \sum\limits_{(u, v)\in L}(c(u, v) - f(u, v)) &#92;&#92;
+p_{out}(v) &amp;= \sum\limits_{(v, u)\in L}(c(v, u) - f(v, u))
+\end{align}$$</p>
+
+<p>Também definimos $p_{in}(s) = p_{out}(t) = \infty$.
+Fornecidos $p_{in}$ e $p_{out}$ definimos o potencial como $p(v) = min(p_{in}(v), p_{out}(v))$.
+Chamamos um nó $r$ de <em>nó de referência</em> se $p(r) = min&#92;{p(v)&#92;}$.
+Considere um nó de referência $r$.
+Afirmamos que o fluxo pode ser aumentado em $p(r)$ de forma que $p(r)$ se torne $0$.
+É verdade porque $L$ é acíclico, então podemos empurrar o fluxo para fora de $r$ pelas arestas de saída e atingirá $t$ porque cada nó tem um potencial externo suficiente para empurrar o fluxo para fora quando chegar a ele.
+Da mesma forma, podemos extrair o fluxo de $s$.
+A construção do fluxo de bloqueio é baseada neste fato. Em cada iteração, encontramos um nó de referência e puxamos o fluxo de $s$ para $t$ por meio de $r$.
+Este processo pode ser simulado por uma BFS.
+Todos os arcos completamente saturados podem ser excluídos de $L$ pois não serão usados ​​posteriormente nesta fase. Da mesma forma, todos os nós diferentes de $s$ e $t$ em arcos de saída ou de entrada podem ser excluídos.</p>
+
+<p>Cada fase funciona em $O(V^2)$ porque há no máximo $V$ iterações (porque pelo menos o nó de referência escolhido foi excluído) e, em cada iteração, excluímos todas as arestas pelas quais passamos, exceto no máximo $V$.
+Resumindo, obtemos $O(V^2 + E) = O(V^2)$.
+Como há menos de $V$ fases, o algoritmo trabalha em $O(V^3)$.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">struct MPM{
+    struct FlowEdge{
+        int v, u;
+        long long cap, flow;
+        FlowEdge(){}
+        FlowEdge(int _v, int _u, long long _cap, long long _flow)
+            : v(_v), u(_u), cap(_cap), flow(_flow){}
+        FlowEdge(int _v, int _u, long long _cap)
+            : v(_v), u(_u), cap(_cap), flow(0ll){}
+    };
+    const long long flow_inf = 1e18;
+    vector&lt;FlowEdge&gt; edges;
+    vector&lt;char&gt; alive;
+    vector&lt;long long&gt; pin, pout;
+    vector&lt;list&lt;int&gt; &gt; in, out;
+    vector&lt;vector&lt;int&gt; &gt; adj;
+    vector&lt;long long&gt; ex;
+    int n, m = 0;
+    int s, t;
+    vector&lt;int&gt; level;
+    vector&lt;int&gt; q;
+    int qh, qt;
+    void resize(int _n){
+        n = _n;
+        ex.resize(n);
+        q.resize(n);
+        pin.resize(n);
+        pout.resize(n);
+        adj.resize(n);
+        level.resize(n);
+        in.resize(n);
+        out.resize(n);
+    }
+    MPM(){}
+    MPM(int _n, int _s, int _t){resize(_n); s = _s; t = _t;}
+    void add_edge(int v, int u, long long cap){
+        edges.push_back(FlowEdge(v, u, cap));
+        edges.push_back(FlowEdge(u, v, 0));
+        adj[v].push_back(m);
+        adj[u].push_back(m + 1);
+        m += 2;
+    }
+    bool bfs(){
+        while(qh &lt; qt){
+            int v = q[qh++];
+            for(int id : adj[v]){
+                if(edges[id].cap - edges[id].flow &lt; 1)continue;
+                if(level[edges[id].u] != -1)continue;
+                level[edges[id].u] = level[v] + 1;
+                q[qt++] = edges[id].u;
+            }
+        }
+        return level[t] != -1;
+    }
+    long long pot(int v){
+        return min(pin[v], pout[v]);
+    }
+    void remove_node(int v){
+        for(int i : in[v]){
+            int u = edges[i].v;
+            auto it = find(out[u].begin(), out[u].end(), i);
+            out[u].erase(it);
+            pout[u] -= edges[i].cap - edges[i].flow;
+        }
+        for(int i : out[v]){
+            int u = edges[i].u;
+            auto it = find(in[u].begin(), in[u].end(), i);
+            in[u].erase(it);
+            pin[u] -= edges[i].cap - edges[i].flow;
+        }
+    }
+    void push(int from, int to, long long f, bool forw){
+        qh = qt = 0;
+        ex.assign(n, 0);
+        ex[from] = f;
+        q[qt++] = from;
+        while(qh &lt; qt){
+            int v = q[qh++];
+            if(v == to)
+                break;
+            long long must = ex[v];
+            auto it = forw ? out[v].begin() : in[v].begin();
+            while(true){
+                int u = forw ? edges[*it].u : edges[*it].v;
+                long long pushed = min(must, edges[*it].cap - edges[*it].flow);
+                if(pushed == 0)break;
+                if(forw){
+                    pout[v] -= pushed;
+                    pin[u] -= pushed;
+                }
+                else{
+                    pin[v] -= pushed;
+                    pout[u] -= pushed;
+                }
+                if(ex[u] == 0)
+                    q[qt++] = u;
+                ex[u] += pushed;
+                edges[*it].flow += pushed;
+                edges[(*it)^1].flow -= pushed;
+                must -= pushed;
+                if(edges[*it].cap - edges[*it].flow == 0){
+                    auto jt = it;
+                    ++jt;
+                    if(forw){
+                        in[u].erase(find(in[u].begin(), in[u].end(), *it));
+                        out[v].erase(it);
+                    }
+                    else{
+                        out[u].erase(find(out[u].begin(), out[u].end(), *it));
+                        in[v].erase(it);
+                    }
+                    it = jt;
+                }
+                else break;
+                if(!must)break;
+            }
+        }
+    }
+    long long flow(){
+        long long ans = 0;
+        while(true){
+            pin.assign(n, 0);
+            pout.assign(n, 0);
+            level.assign(n, -1);
+            alive.assign(n, true);
+            level[s] = 0;
+            qh = 0; qt = 1;
+            q[0] = s;
+            if(!bfs())
+                break;
+            for(int i = 0; i &lt; n; i++){
+                out[i].clear();
+                in[i].clear();
+            }
+            for(int i = 0; i &lt; m; i++){
+                if(edges[i].cap - edges[i].flow == 0)
+                    continue;
+                int v = edges[i].v, u = edges[i].u;
+                if(level[v] + 1 == level[u] &amp;&amp; (level[u] &lt; level[t] || u == t)){
+                    in[u].push_back(i);
+                    out[v].push_back(i);
+                    pin[u] += edges[i].cap - edges[i].flow;
+                    pout[v] += edges[i].cap - edges[i].flow;
+                }
+            }
+            pin[s] = pout[t] = flow_inf;
+            while(true){
+                int v = -1;
+                for(int i = 0; i &lt; n; i++){
+                    if(!alive[i])continue;
+                    if(v == -1 || pot(i) &lt; pot(v))
+                        v = i;
+                }
+                if(v == -1)
+                    break;
+                if(pot(v) == 0){
+                    alive[v] = false;
+                    remove_node(v);
+                    continue;
+                }
+                long long f = pot(v);
+                ans += f;
+                push(v, s, f, false);
+                push(v, t, f, true);
+                alive[v] = false;
+                remove_node(v);
+            }
+        }
+        return ans;
+    }
+};
+</code></pre>
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
