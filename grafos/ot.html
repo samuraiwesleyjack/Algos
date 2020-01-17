@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ordenação Topológica - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Ordenação Topológica</h1>
+
+<p>Seja um grafo direcionado com $n$ vértices e $m$ arestas. Você precisa numerar os vértices para que cada aresta seja direcionada de um vértice com um número menor atribuído a um vértice com um número maior.</p>
+
+<p>Em outras palavras, você deseja encontrar uma permutação dos vértices (<em>ordem topológica</em>) que corresponde à ordem definida por todas as arestas do grafo.</p>
+
+<p>A ordem topológica pode não ser única (por exemplo, se o grafo estiver vazio; ou se existirem três vértices $a$, $b$ e $c$ para os quais existem caminhos de $a$ para $b$ e de $a$ para $c$, mas não caminhos de $b$ a $c$ ou de $c$ a $b$).</p>
+
+<p>A ordem topológica pode não existir se o grafo contiver ciclos (porque há uma contradição: existe um caminho de $a$ para $b$ e vice-versa).</p>
+
+<p>Um problema comum em que a ordenação topológica ocorre é o seguinte. Existem $n$ variáveis com valores desconhecidos. Para algumas variáveis, sabemos que uma delas é menor que a outra. Você deve verificar se essas restrições são contraditórias e, se não, gerar as variáveis ​​em ordem crescente (se várias respostas forem possíveis, gerar uma delas). É fácil perceber que esse é exatamente o problema de encontrar a ordem topológica de um grafo com $n$ vértices.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Para resolver esse problema, usaremos uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>.</p>
+
+<p>Vamos supor que o grafo seja acíclico, ou seja, existe uma solução. O que a DFS faz? Quando iniciado a partir de algum vértice $v$, ele tenta executar todas as arestas saindo de $v$. Ela falha ao percorrer as arestas pelas quais as extremidades opostas foram visitadas anteriormente, e percorre as demais arestas começando a partir das extremidades.</p>
+
+<p>Assim, no momento em que a chamada $dfs(v)$ termina, todos os vértices que podem ser acessados ​​a partir de $v$, diretamente (através de uma aresta) ou indiretamente, já foram visitados pela busca. Portanto, se no momento da saída de $dfs(v)$ adicionarmos o vértice $v$ ao início de uma determinada lista, no final, essa lista armazenará uma ordem topológica de todos os vértices.</p>
+
+<p>Essas explicações também podem ser apresentadas em termos dos tempos de saída da rotina da DFS. O tempo de saída do vértice $v$ é o momento em que $dfs(v)$ terminou de ser executada (os tempos podem ser numerados de $1$ a $n$). É fácil entender que o tempo de saída de qualquer vértice $v$ é sempre maior que o tempo de saída de qualquer vértice acessível a partir dele (desde que eles sejam visitados antes da chamada $dfs(v)$ ou durante ela). Assim, a ordem topológica desejada é ordenar os vértices em ordem decrescente dos seus tempos de saída.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação que assume que o grafo é acíclico, ou seja, a ordem topológica desejada existe. Se necessário, você pode facilmente verificar se o grafo é acíclico, conforme descrito no artigo sobre a <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>.</p>
+
+
+<pre><code class="cpp">int n; // número de vértices
+vector&lt;vector&lt;int&gt;&gt; adj; // lista de adjacência do grafo
+vector&lt;bool&gt; visited;
+vector&lt;int&gt; ans;
+
+void dfs(int v) {
+    visited[v] = true;
+    for (int u : adj[v]) {
+        if (!visited[u])
+            dfs(u);
+    }
+    ans.push_back(v);
+}
+
+void topological_sort() {
+    visited.assign(n, false);
+    ans.clear();
+    for (int i = 0; i &lt; n; ++i) {
+        if (!visited[i])
+            dfs(i);
+    }
+    reverse(ans.begin(), ans.end());
+}
+</code></pre>
+
+<p>A principal função da solução é <code>topological_sort</code>, que inicializa as variáveis da ​​DFS e executa a DFS; a resposta é recebida no vetor <code>ans</code>.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/TOPOSORT/">SPOJ TOPOSORT "Topological Sorting" [difficulty: easy]</a></li>
+<li><a href="https://z5h64q92x9.net/proxy_u/ru-en.en/uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=1246">UVA #10305 "Ordering Tasks" [difficulty: easy]</a></li>
+<li><a href="https://z5h64q92x9.net/proxy_u/ru-en.en/uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=60">UVA #124 "Following Orders" [difficulty: easy]</a></li>
+<li><a href="https://z5h64q92x9.net/proxy_u/ru-en.en/uva.onlinejudge.org/index.php?option=onlinejudge&amp;page=show_problem&amp;problem=136">UVA #200 "Rare Order" [difficulty: easy]</a></li>
+<li><a href="http://codeforces.com/problemset/problem/510/C">Codeforces 510C "Fox and Names" [difficulty: easy]</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
