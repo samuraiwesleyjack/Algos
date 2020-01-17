@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxos com demandas - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Fluxo de custo mínimo - algoritmo sucessivo de caminho mais curto</h1>
+
+<p>Dada uma rede, $G$ consistindo de $n$ vértices e $m$ arestas.
+Para cada aresta ( arestas orientadas, mas veja abaixo), a capacidade (um número inteiro não negativo) e o custo por unidade de fluxo ao longo dessa aresta (algum número inteiro) são fornecidos. Além disso, a fonte $s$ e o coletor $t$ (vértices <em>source, sink</em>) são marcados.</p>
+
+<p>Para um determinado valor $K$, temos que encontrar um fluxo dessa quantidade e, dentre todos os fluxos dessa quantidade, temos que escolher o fluxo com o menor custo. Essa tarefa é chamada de problema do <strong>fluxo de custo mínimo</strong>.</p>
+
+<p>Às vezes, a tarefa é apresentada de maneira um pouco diferente: você deseja encontrar o fluxo máximo e, dentre todos os fluxos máximos, queremos encontrar o que tem o menor custo.</p>
+
+<p>Ambos os problemas podem ser resolvidos efetivamente com o algoritmo de caminhos mais curtos sucessivos.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Este algoritmo é muito semelhante ao de <a href="https://cp-algorithms-brasil.com/grafos/fluxo.html">Edmonds-Karp</a> para calcular o fluxo máximo.</p>
+
+<h3>Caso mais simples</h3>
+
+<p>Primeiro, consideramos apenas o caso mais simples, onde o grafo é orientado, e existe no máximo uma aresta entre qualquer par de vértices (por exemplo, se $(i, j)$ é uma aresta no grafo, então $(j, i)$ não poderá ser uma).</p>
+
+<p>Seja $U_{i j}$ a capacidade de uma aresta $(i, j)$ se essa aresta existir. E seja $C_{i j}$ o custo por unidade de fluxo ao longo dessa aresta $(i, j)$.
+E finalmente, $F_{i, j}$ será o fluxo ao longo da aresta $(i, j)$.
+Inicialmente, todos os valores de fluxo são zero.</p>
+
+<p>Modificamos a rede da seguinte maneira: para cada aresta $(i, j)$ adicionamos a aresta reversa $(j, i)$ à rede com a capacidade $U_{j i} = 0$ e com o custo $C_{j i} = -C_{i j}$.
+Como, de acordo com nossas restrições, a aresta $(j, i)$ não estava na rede antes, ainda temos uma rede que não é um <em>multigrafo</em> (grafo com arestas múltiplas). Além disso, sempre manteremos a condição $F_{j i} = -F_{i j}$ válida durante as etapas do algoritmo.</p>
+
+<p>Definimos a <strong>rede residual</strong>(<em>residual network</em>) para algum fluxo fixo $F$ como a seguir (assim como no algoritmo Ford-Fulkerson): a rede residual contém apenas arestas não saturadas (ou seja, arestas nas quais $F_{i j} &lt; U_{i j}$), e a capacidade residual de cada uma dessas arestas é $R_{i j} = U_{i j} - F_{i j}$.</p>
+
+<p>Agora podemos falar sobre os algoritmos para calcular o fluxo de custo mínimo. A cada iteração do algoritmo, encontramos o caminho mais curto no grafo residual de $s$ a $t$.
+Ao contrário do algoritmo de Edmonds-Karp, procuramos o caminho mais curto em termos do custo do caminho, em vez do número de arestas. Se não houver mais um caminho, o algoritmo será encerrado e o fluxo $F$ será o desejado. Se um caminho foi encontrado, aumentamos o fluxo ao longo dele o máximo possível (ou seja, encontramos a capacidade residual mínima $R$ do caminho, e aumentamos o fluxo por ela e reduzimos as arestas de retorno(<em>back edges</em>) na mesma quantidade). 
+Se, em algum momento, o fluxo atingir o valor $K$, interromperemos o algoritmo ( na última iteração do algoritmo é necessário aumentar o fluxo apenas em uma certa quantidade para que o valor final do fluxo não ultrapasse $K$).</p>
+
+<p>Se definirmos $K$ to infinity, no infinito, o algoritmo encontrará o fluxo máximo de custo mínimo. Portanto, ambas as variações do problema podem ser resolvidas pelo mesmo algoritmo.</p>
+
+<h3>Grafos não direcionados / multigrafos</h3>
+
+<p>O caso de um grafo não direcionado ou de uma multigrafo não difere conceitualmente do algoritmo acima. O algoritmo também funcionará nesses grafos. No entanto, torna-se um pouco mais difícil implementá-lo.</p>
+
+<p>Uma aresta não direcionada $(i, j)$ é na verdade igual a duas arestas orientadas $(i, j)$ e $(j, i)$ com a mesma capacidade e valores.
+Como o algoritmo de fluxo de custo mínimo descrito acima gera uma back edge(aresta de retorno) para cada aresta direcionada, ele divide a aresta não direcionada em $4$ arestas direcionadas, e, na verdade, obtemos um multigrafo.</p>
+
+<p>Como lidamos com arestas múltiplas ? Primeiro, o fluxo para cada uma das arestas múltiplas deve ser mantido separadamente. Em segundo lugar, ao procurar o caminho mais curto, é necessário levar em consideração que é importante saber qual das arestas múltiplas é usada no caminho. 
+Assim, em vez da usual array de ancestrais devemos adicionalmente armazenar o número da aresta da qual viemos junto com o ancestral.
+Em terceiro lugar, à medida que o fluxo aumenta ao longo de uma certa aresta, é necessário reduzir o fluxo ao longo da aresta de retorno.
+Como temos arestas múltiplas, precisamos armazenar o número da aresta para a aresta invertida de cada aresta.</p>
+
+<p>Não há outras obstruções com grafos não direcionados ou multigrafos.</p>
+
+<h3>Complexidade</h3>
+
+<p>Analogamente à análise do algoritmo de Edmonds-Karp, obtemos a seguinte estimativa:
+$O(n m) \cdot T(n, m)$, onde $T(n, m)$ é o tempo necessário para encontrar o caminho mais curto em um grafo com $n$ vértices e $m$ arestas.</p>
+
+<p>Se essa pesquisa for feita com o <a href="https://cp-algorithms-brasil.com/grafos/Dijkstra.html">algoritmo de Dijkstra</a>, a complexidade do algoritmo de custo mínimo se tornaria $O(n^3 m)$.
+No entanto, lidamos com arestas com custo negativo. Portanto, Dijkstra não é aplicável, pelo menos ele não pode ser modificado.</p>
+
+<p>Em vez disso, podemos usar o <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">algoritmo de Bellman-Ford</a>. Com ele, a complexidade se torna $O(n^2 m^2)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está uma implementação usando o <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">algoritmo SPFA</a> para o caso mais simples.</p>
+
+<pre><code class="cpp">struct Edge
+{
+    int from, to, capacity, cost;
+};
+
+vector&lt;vector&lt;int&gt;&gt; adj, cost, capacity;
+
+const int INF = 1e9;
+
+void shortest_paths(int n, int v0, vector&lt;int&gt;&amp; d, vector&lt;int&gt;&amp; p) {
+    d.assign(n, INF);
+    d[v0] = 0;
+    vector&lt;bool&gt; inq(n, false);
+    queue&lt;int&gt; q;
+    q.push(v0);
+    p.assign(n, -1);
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        inq[u] = false;
+        for (int v : adj[u]) {
+            if (capacity[u][v] &gt; 0 &amp;&amp; d[v] &gt; d[u] + cost[u][v]) {
+                d[v] = d[u] + cost[u][v];
+                p[v] = u;
+                if (!inq[v]) {
+                    inq[v] = true;
+                    q.push(v);
+                }
+            }
+        }
+    }
+}
+
+int min_cost_flow(int N, vector&lt;Edge&gt; edges, int K, int s, int t) {
+    adj.assign(N, vector&lt;int&gt;());
+    cost.assign(N, vector&lt;int&gt;(N, 0));
+    capacity.assign(N, vector&lt;int&gt;(N, 0));
+    for (Edge e : edges) {
+        adj[e.from].push_back(e.to);
+        adj[e.to].push_back(e.from);
+        cost[e.from][e.to] = e.cost;
+        cost[e.to][e.from] = -e.cost;
+        capacity[e.from][e.to] = e.capacity;
+    }
+
+    int flow = 0;
+    int cost = 0;
+    vector&lt;int&gt; d, p;
+    while (flow &lt; K) {
+        shortest_paths(N, s, d, p);
+        if (d[t] == INF)
+            break;
+
+        // encontrar fluxo máximo no caminho
+        int f = K - flow;
+        int cur = t;
+        while (cur != s) {
+            f = min(f, capacity[p[cur]][cur]);
+            cur = p[cur];
+        }
+
+        // aplicar fluxo
+        flow += f;
+        cost += f * d[t];
+        cur = t;
+        while (cur != s) {
+            capacity[p[cur]][cur] -= f;
+            capacity[cur][p[cur]] += f;
+            cur = p[cur];
+        }
+    }
+
+    if (flow &lt; K)
+        return -1;
+    else
+        return cost;
+}
+</code></pre>
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
