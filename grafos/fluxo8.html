@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Fluxo de custo mínimo: solução de problema - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Solução usando o fluxo de custo-mínimo</h1>
+
+<p>O problema possui duas instruções equivalentes:</p>
+
+<ul>
+<li>Dada uma matriz quadrada $A[1..N, 1..N]$, você precisa selecionar $N$ elementos nela para que exatamente um elemento seja selecionado em cada linha e coluna e a soma dos valores desses elementos é o menor.</li>
+<li>Existem $N$ pedidos e $N$ máquinas. O custo de fabricação em cada máquina é conhecido para cada pedido. Somente um pedido pode ser executado em cada máquina. É necessário atribuir todos os pedidos às máquinas para que o custo total seja minimizado.</li>
+</ul>
+
+<p>Aqui, consideraremos a solução do problema com base no algoritmo para encontrar o <a href="https://cp-algorithms-brasil.com/grafos/fluxo7.html">fluxo de custo mínimo</a>, resolvendo o problema em $\mathcal{O}(N^5)$.</p>
+
+<h2>Descrição</h2>
+
+<p>Vamos construir uma rede bipartida: existe uma fonte $S$, um coletor $T$, na primeira parte existem $N$ vértices (correspondentes as linhas da matriz ou pedidos), na segunda também existem $N$ vértices (correspondentes às colunas da matriz ou máquinas). Entre cada vértice $i$ do primeiro conjunto e cada vértice $j$ do segundo conjunto, traçamos uma aresta com a largura 1 e custo $A_{ij}$. Da fonte $S$ traçamos arestas para todos os vértices $i$ do primeiro conjunto com largura 1 e custo 0. Traçamos uma aresta com largura 1 e custo 0 de cada vértice do segundo conjunto $j$ para o coletor $T$.</p>
+
+<p>Encontramos na rede resultante o fluxo máximo do custo mínimo. O valor do fluxo será $N$. Em seguida, para cada vértice $i$ do primeiro segmento, há exatamente um vértice $j$ do segundo segmento, de modo que o fluxo $F_{ij}$ = 1. Finalmente, essa é uma correspondência individual entre os vértices do primeiro segmento e os vértices da segunda parte, que é a solução para o problema (como o fluxo encontrado tem um custo mínimo, a soma dos custos das arestas selecionadas será a mais baixa possível, que é o critério de otimização).</p>
+
+<p>A complexidade dessa solução do problema depende do algoritmo pelo qual a busca pelo fluxo máximo do custo mínimo é realizada. A complexidade será $\mathcal{O}(N^5)$ usando <a href="https://cp-algorithms-brasil.com/grafos/Dijkstra.html">Dijkstra</a> ou $\mathcal{O}(N^6)$ usando <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">Bellman-Ford</a>.</p>
+
+<h2>Implementação</h2>
+
+<p>A implementação fornecida aqui é longa, provavelmente pode ser significativamente reduzida. Ela usa o algoritmo <a href="https://cp-algorithms-brasil.com/grafos/bellmanford.html">SPFA</a> para encontrar os caminhos mais curtos.</p>
+
+<pre><code class="cpp">const int INF = 1000 * 1000 * 1000;
+
+vector&lt;int&gt; assignment(vector&lt;vector&lt;int&gt;&gt; a) {
+    int n = a.size();
+    int m = n * 2 + 2;
+    vector&lt;vector&lt;int&gt;&gt; f(m, vector&lt;int&gt;(m));
+    int s = m - 2, t = m - 1;
+    int cost = 0;
+    while (true) {
+        vector&lt;int&gt; dist(m, INF);
+        vector&lt;int&gt; p(m);
+        vector&lt;bool&gt; inq(m, false);
+        queue&lt;int&gt; q;
+        dist[s] = 0;
+        p[s] = -1;
+        q.push_back(s);
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            inq[v] = false;
+            if (v == s) {
+                for (int i = 0; i &lt; n; ++i) {
+                    if (f[s][i] == 0) {
+                        dist[i] = 0;
+                        p[i] = s;
+                        inq[i] = true;
+                        q.push(i);
+                    }
+                }
+            } else {
+                if (v &lt; n) {
+                    for (int j = n; j &lt; n + n; ++j) {
+                        if (f[v][j] &lt; 1 &amp;&amp; dist[j] &gt; dist[v] + a[v][j - n]) {
+                            dist[j] = dist[v] + a[v][j - n];
+                            p[j] = v;
+                            if (!inq[j]) {
+                                q.push(j);
+                                inq[j] = true;
+                            }
+                        }
+                    }
+                } else {
+                    for (int j = 0; j &lt; n; ++j) {
+                        if (f[v][j] &lt; 0 &amp;&amp; dist[j] &gt; dist[v] - a[j][v - n]) {
+                            dist[j] = dist[v] - a[j][v - n];
+                            p[j] = v;
+                            if (!inq[j]) {
+                                q.push(j);
+                                inq[j] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        int curcost = INF;
+        for (int i = n; i &lt; n + n; ++i) {
+            if (f[i][t] == 0 &amp;&amp; dist[i] &lt; curcost) {
+                curcost = dist[i];
+                p[t] = i;
+            }
+        }
+        if (curcost == INF)
+            break;
+        cost += curcost;
+        for (int cur = t; cur != -1; cur = p[cur]) {
+            int prev = p[cur];
+            if (prev != -1)
+                f[cur][prev] = -(f[prev][cur] = 1);
+        }
+    }
+
+    vector&lt;int&gt; answer(n);
+    for (int i = 0; i &lt; n; ++i) {
+        for (int j = 0; j &lt; n; ++j) {
+            if (f[i][j + n] == 1)
+                answer[i] = j;
+        }
+    }
+    return answer;
+}
+</code></pre>
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
