@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Conectividade Aresta / Vértice - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Conectividade Aresta / Vértice</h1>
+
+<h2>Definição</h2>
+
+<p>Dado um grafo não direcionado $G$ com $n$ vértices e $m$ arestas.
+Tanto a conectividade da aresta quanto a conectividade do vértice são características que descrevem o grafo.</p>
+
+<h3>Conectividade de aresta</h3>
+
+<p>A conectividade de aresta $\lambda$ do grafo $G$ é o número mínimo de arestas que precisam ser excluídas, de modo que o grafo $G$ seja desconectado.</p>
+
+<p>Por exemplo, um grafo já desconectado tem uma conectividade de aresta de $0$, um grafo conectado com pelo menos uma ponte tem uma conectividade de aresta de $1$, e um grafo conectado sem pontes tem uma conectividade de aresta de pelo menos $2$.</p>
+
+<p>Dizemos que um conjunto $S$ de arestas separa os vértices $s$ e $t$, se, após remover todas as arestas em $S$ do grafo $G$, os vértices $s$ e $t$ terminam em diferentes <em>componentes conectados</em>.</p>
+
+<p>A conectividade de aresta de um grafo é igual ao tamanho mínimo de um conjunto que separa dois vértices $s$ e $t$, obtidos entre todos os pares possíveis $(s, t)$.</p>
+
+<h3>Conectividade de vértice</h3>
+
+<p>A conectividade de vértice $\kappa$ do grafo $G$ é o número mínimo de vértices que precisam ser excluídos, de modo que o grafo $G$ seja desconectado.</p>
+
+<p>Por exemplo, um grafo já desconectado tem a conectividade de vértice $0$, e um grafo conectado com um <em>ponto de articulação</em> tem a conectividade de vértice $1$.
+Definimos que um grafo completo possui uma conectividade de vértice $n-1$.
+Para todos os outros grafos, a conectividade do vértice não excede $n-2$, porque você pode encontrar um par de vértices que não estão conectados por uma aresta e remover todos os outros $n-2$ vértices.</p>
+
+<p>Dizemos que um conjunto $T$ de vértices separam os vértices $s$ e $t$, se, após remover todos os vértices em $T$ do grafo $G$, os vértices terminam em diferentes componentes conectados.</p>
+
+<p>A conectividade de vértice de um grafo é igual ao tamanho mínimo de um conjunto que separa dois vértices $s$ e $t$, obtidos entre todos os pares possíveis $(s, t)$.</p>
+
+<h2>Propriedades</h2>
+
+<h3>As desigualdades de Whitney</h3>
+
+<p>As desigualdades de Whitney (1932) fornecem uma relação entre a conectividade de aresta $\lambda$, a conectividade de vértice $\kappa$ e o menor grau dos vértices $\delta$:
+$$\kappa \le \lambda \le \delta$$</p>
+
+<p>Intuitivamente, se tivermos um conjunto de arestas de tamanho $\lambda$ que desconectam o grafo, podemos escolher cada um dos pontos de extremidade, e criar um conjunto de vértices que também desconectam o grafo. E este conjunto terá tamanho $\le \lambda$.</p>
+
+<p>E se escolhermos o vértice e o grau mínimo $\delta$, e removermos todas as arestas conectadas a ele, também terminaremos com um grafo desconectado. Portanto, a segunda desigualdade $\lambda \le \delta$.</p>
+
+<p>É interessante notar que as desigualdades de Whitney não podem ser melhoradas: ou seja, para qualquer triplo de números que satisfaça essa desigualdade, existe pelo menos um grafo correspondente. Um desses grafos pode ser construído da seguinte maneira: ele irá consistir de $2(\delta + 1)$ vértices, os primeiros $\delta + 1$ vértices formam uma "panelinha" (todos os pares de vértices são conectados por uma aresta), e os segundos $\delta + 1$ vértices formam uma segunda panelinha.
+Além disso, conectamos as duas panelinhas com $\lambda$ arestas, de forma que são usados $\lambda$ vértices diferentes no primeiro grupo, e apenas $\kappa$ vértices no segundo.
+O grafo resultante terá as três características.</p>
+
+<h3>O teorema de Ford-Fulkerson</h3>
+
+<p>O teorema de Ford-Fulkerson implica que o maior número de caminhos disjuntos de arestas conectando dois vértices é igual ao menor número de arestas separando esses vértices.</p>
+
+<h2>Computando os valores</h2>
+
+<h3>Conectividade de aresta usando o fluxo máximo</h3>
+
+<p>Este método é baseado no teorema de Ford-Fulkerson.</p>
+
+<p>Nós iteramos sobre todos os pares de vértices $(s, t)$ e, entre cada par, encontramos o maior número de caminhos disjuntos entre eles.
+Esse valor pode ser encontrado usando um algoritmo de fluxo máximo: usamos $s$ como fonte, $t$ como coletor e atribuímos a cada aresta uma capacidade de $1$.
+Então o fluxo máximo é o número de caminhos disjuntos.</p>
+
+<p>A complexidade do algoritmo usando <a href="https://cp-algorithms-brasil.com/grafos/fluxo.html">Edmonds-Karp</a> é $O(V^2 V E^2) = O(V^3 E^2)$. 
+Mas devemos observar que isso inclui um fator oculto, uma vez que é praticamente impossível criar um grafo de modo que o algoritmo de fluxo máximo seja lento para todas as fontes e coletores/sinks. Especialmente, o algoritmo será executado muito rápido para grafos aleatórios.</p>
+
+<h3>Algoritmo especial para conectividade de aresta</h3>
+
+<p>A tarefa de encontrar a conectividade de aresta é igual a tarefa de encontrar o corte mínimo global.</p>
+
+<p>Algoritmos especiais foram desenvolvidos para esta tarefa. Um deles é o algoritmo de Stoer-Wagner, que funciona em tempo $O(V^3)$ ou $O(V E)$.</p>
+
+<h3>Conectividade de vértice</h3>
+
+<p>Novamente, iteramos sobre todos os pares de vértices $s$ e $t$, e para cada par encontramos o número mínimo de vértices que separam $s$ e $t$.</p>
+
+<p>Ao fazer isso, podemos aplicar a mesma abordagem de fluxo máximo, conforme descrito nas seções anteriores.</p>
+
+<p>Dividimos cada vértice $x$ com $x \neq s$ e $x \neq t$ em dois vértices: $x_1$ e $x_2$.
+Conectamos esses dois vértices com uma aresta direcionada $(x_1, x_2)$ com a capacidade $1$, e substituímos todas as arestas $(u, v)$ pelas duas arestas direcionadas $(u_2, v_1)$ e $(v_2, u_1)$, ambos com capacidade de 1.
+Na construção, o valor do fluxo máximo será igual ao número mínimo de vértices necessários para separar $s$ e $t$.</p>
+
+<p>Essa abordagem tem a mesma complexidade que a abordagem de fluxo para encontrar a conectividade de aresta.</p>
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
