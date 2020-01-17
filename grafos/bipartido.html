@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Grafo Bipartido - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Grafo Bipartido</h1>
+
+<p>Um grafo bipartido é um grafo cujos vértices podem ser divididos em dois conjuntos disjuntos, de modo que cada aresta conecta dois vértices de conjuntos diferentes (ou seja, não há arestas que conectem vértices do mesmo conjunto). Esses conjuntos são geralmente chamados de lados.</p>
+
+<p>É fornecido um grafo não direcionado. Verifique se é bipartido e, se for, printe seus lados.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Existe um teorema que afirma que um grafo é bipartido se e somente se todos os seus ciclos tiverem comprimento par. No entanto, na prática, é mais conveniente usar uma formulação diferente da definição: um grafo é bipartido se, e somente se, tiver uma dupla-coloração( <em>graph two-colorable</em>, vértices da mesma cor nunca serão adjacentes ao longo de uma aresta).</p>
+
+<p>Vamos usar uma série de <a href="https://cp-algorithms-brasil.com/grafos/BFS.html">BFS</a>'s, começando por cada vértice que ainda não foi visitado. Em cada pesquisa, atribua o vértice a partir do qual começamos ao lado 1. Cada vez que visitamos um vizinho ainda não visitado de um vértice atribuído a um lado, atribuímos ele ao outro lado. Quando tentamos ir a um vizinho de um vértice atribuído a um lado que já foi visitado, verificamos se ele foi atribuído ao outro lado; se foi atribuído ao mesmo lado, concluímos que o grafo não é bipartido. Depois de visitar todos os vértices e atribuí-los com sucesso aos seus lados, sabemos que o grafo é bipartido e assim teremos construído sua partição.</p>
+
+<h2>Implementação</h2>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; adj;
+
+vector&lt;int&gt; side(n, -1);
+bool is_bipartite = true;
+queue&lt;int&gt; q;
+for (int st = 0; st &lt; n; ++st) {
+    if (side[st] == -1) {
+        q.push(st);
+        side[st] = 0;
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int u : adj[v]) {
+                if (side[u] == -1) {
+                    side[u] = side[v] ^ 1
+                    q.push(u);
+                } else {
+                    is_bipartite &amp;= side[u] != side[v];
+                }
+            }
+        }
+    }
+}
+
+cout &lt;&lt; (is_bipartite ? "YES" : "NO") &lt;&lt; endl;
+</code></pre>
+
+<h3>Problemas:</h3>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/BUGLIFE/">SPOJ - BUGLIFE</a></li>
+<li><a href="https://codeforces.com/contest/1144/problem/F">Codeforces - grafo Without Long Directed Paths</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
