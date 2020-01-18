@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Boolean satisfiability problem - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>2 - SAT</h1>
+
+<p>SAT ("Boolean satisfiability problem": <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">wiki¹</a> e <a href="https://pt.wikipedia.org/wiki/Problema_de_satisfatibilidade_booliana">wiki²</a>) é o problema de atribuir valores booleanos a variáveis ​​para satisfazer uma determinada fórmula booleana. A fórmula booleana geralmente será dada em CNF ("conjunctive normal form"), que é uma conjunção de várias cláusulas, em que cada cláusula é uma disjunção de literais (variáveis ​​ou negação de variáveis). 2-SAT (2-satisfiability) é uma restrição do problema SAT, no 2-SAT toda cláusula tem exatamente dois literais. Aqui está um exemplo de um problema 2-SAT.
+Encontre uma atribuição de $a, b ou c$ de modo que a seguinte fórmula seja verdadeira:</p>
+
+<p>$$(a \lor \lnot b) \land (\lnot a \lor b) \land (\lnot a \lor \lnot b) \land (a \lor \lnot c)$$</p>
+
+<p>SAT é um <a href="https://en.wikipedia.org/wiki/NP-completeness">NP-completo</a>, não há uma solução eficiente conhecida para resolver ele.
+No entanto, o 2SAT pode ser resolvido com eficiência em $O(n + m)$, onde $n$ é o número de variáveis ​​e $m$ é o número de cláusulas.</p>
+
+<h2>Algoritmo:</h2>
+
+<p>Primeiro, precisamos converter o problema para uma forma diferente, a chamada forma normal implicativa. Observe que a expressão $a \lor b$ é equivalente a   $\lnot a \Rightarrow b \land \lnot b \Rightarrow a$   (se uma das duas variáveis ​​for falsa, a outra deverá ser verdadeira).</p>
+
+<p>Agora construímos um grafo direcionado dessas implicações: para cada variável $x$ haverá dois vértices $v_x$ e $v_{\lnot x}$.
+As arestas corresponderão às implicações.</p>
+
+<p>Vejamos o exemplo no formato 2-CNF:</p>
+
+<p>$$(a \lor \lnot b) \land (\lnot a \lor b) \land (\lnot a \lor \lnot b) \land (a \lor \lnot c)$$</p>
+
+<p>O grafo orientado conterá os seguintes vértices e arestas:</p>
+
+<p>$$\begin{array}{cccc}
+\lnot a \Rightarrow \lnot b &amp; a \Rightarrow b &amp; a \Rightarrow \lnot b &amp; \lnot a \Rightarrow \lnot c&#92;&#92;
+b \Rightarrow a &amp; \lnot b \Rightarrow \lnot a &amp; b \Rightarrow \lnot a &amp; c \Rightarrow a&#92;&#92;
+\end{array}$$</p>
+
+<p>Você pode ver o grafo de implicações na imagem a seguir:</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/2SAT.png" alt="&quot;Implication Graph of 2-SAT example&quot;" /></center></p>
+
+<p>Vale a pena prestar atenção à propriedade do grafo de implicação:
+se houver uma aresta $a \Rightarrow b$, também haverá uma aresta $\lnot b \Rightarrow \lnot a$.</p>
+
+<p>Observe também que, se $x$ for alcançável a partir de $\lnot x$, e $\lnot x$ é alcançável por $x$, então o problema não tem solução. Qualquer que seja o valor que escolhermos para a variável $x$, ela sempre terminará em contradição - se $x$ for atribuído como $\text{true}$ então a implicação nos dirá que $\lnot x$ também deve ser $\text{true}$ e vice-versa.
+Acontece que essa condição não é apenas necessária, mas também suficiente. Vamos provar isso em alguns parágrafos abaixo. Lembre-se primeiro, se um vértice for alcançável a partir de um segundo e o segundo for alcançável a partir do primeiro, esses dois vértices estarão no mesmo componente fortemente conectado. Portanto, podemos formular o critério para a existência de uma solução da seguinte maneira:</p>
+
+<p>Para que esse problema "2-SAT" tenha uma solução, é necessário e suficiente que, para qualquer variável $x$, os vértices $x$ e $\lnot x$ estejam em diferentes componentes fortemente conectados da forte conexão do grafo de implicação.</p>
+
+<p>Este critério pode ser verificado em $O(n + m)$ encontrando todos os <em>componentes fortemente conectados</em>.</p>
+
+<p>A imagem a seguir mostra todos os componentes fortemente conectados para o exemplo. Como podemos verificar com facilidade, nenhum dos quatro componentes contém um vértice $x$ e sua negação $\lnot x$, portanto, o exemplo tem uma solução. Aprenderemos nos próximos parágrafos como calcular uma atribuição válida, mas apenas para fins de demonstração a solução: $a = \text{false}$, $b = \text{false}$, $c = \text{false}$ é fornecida.</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/2SAT_SCC.png" alt="&quot;Strongly Connected Components of the 2-SAT example&quot;" /></center></p>
+
+<p>Agora construímos o algoritmo para encontrar a solução do problema 2-SAT na suposição de que a solução existe.</p>
+
+<p>Observe que, apesar da solução existir, pode acontecer que $\lnot x$ seja alcançável a partir de $x$ no grafo de implicações, ou que (mas não simultaneamente) $x$ seja alcançável de $\lnot x$.
+Nesse caso, a escolha de $\text{true}$ ou $\text{false}$ para $x$ levará a uma contradição, enquanto a escolha do outro não. Vamos ver como escolher um valor, para que não geremos uma contradição.</p>
+
+<p>Ordenamos os componentes fortemente conectados em ordem topológica (por exemplo, $\text{comp}[v] \le \text{comp}[u]$ se houver um caminho de $v$ a $u$) e deixe $\text{comp}[v]$ denotar o índice do componente fortemente conectado ao qual o vértice $v$ pertence.
+Assim, se $\text{comp}[x] &lt; \text{comp}[\lnot x]$ atribuímos $x$ como $\text{false}$ ou, caso contrário, $\text{true}$.</p>
+
+<p>Vamos provar que, com essa atribuição das variáveis, não chegamos a uma contradição. Suponha que $x$ é definido como $\text{true}$.
+O outro caso pode ser provado de maneira semelhante.</p>
+
+<p>Primeiro, provamos que o vértice $x$ não pode alcançar o vértice $\lnot x$.
+Como atribuímos $\text{true}$ é necessário que o índice do componente fortemente conectado de $x$ seja maior que o índice do componente de $\lnot x$.
+Isso significa que $\lnot x$ está localizado à esquerda do componente que contém $x$, e o vértice posterior não pode alcançar o primeiro.</p>
+
+<p>Em segundo lugar, provamos que não existe uma variável $y$, de modo que os vértices $y$ e $\lnot y$ sejam acessíveis a partir de $x$ no grafo de implicações.
+Isso causaria uma contradição, porque $x = \text{true}$ acaba implicando que $y = \text{true}$ e $\lnot y = \text{true}$.
+Vamos provar isso por contradição. Suponha que $y$ e $\lnot y$ são ambos alcançáveis por $x$, e pela propriedade do grafo de implicação, $\lnot x$ é alcançável por ambos $y$ e $\lnot y$.
+Por transitividade, isso resulta que $\lnot x$ é alcançável por $x$, o que contradiz a suposição.</p>
+
+<p>Portanto, construímos um algoritmo que encontra os valores exigidos das variáveis ​​sob a suposição de que, para qualquer variável $x$, os vértices $x$ e $\lnot x$ estão em diferentes componentes fortemente conectados.
+Conseqüentemente, provamos simultaneamente o critério acima para a existência de uma solução.</p>
+
+<h2>Implementação:</h2>
+
+<p>Agora podemos implementar o algoritmo inteiro. Primeiro, construímos o grafo de implicações e encontramos todos os componentes fortemente conectados.
+Isso pode ser realizado com o algoritmo de Kosaraju em tempo $O(n + m)$.
+Na segunda travessia do grafo, o algoritmo de Kosaraju visita os componentes fortemente conectados em ordem topológica; portanto, é possível calcular $\text{comp}[v]$ para cada vértice $v$.</p>
+
+<p>Depois disso, podemos escolher a atribuição de $x$ comparando $\text{comp}[x]$ e $\text{comp}[\lnot x]$. 
+Se $\text{comp}[x] = \text{comp}[\lnot x]$, retornaremos $\text{false}$ para indicar que não existe uma atribuição válida que satisfaça o problema do 2-SAT.</p>
+
+<p>Abaixo está a implementação da solução do problema 2-SAT para o grafo de implicação construído $g$, e o grafo transposto $g^{\intercal}$ (em que a direção de cada aresta é invertida). No grafo, os vértices com índices $2k$ e $2k+1$ são os dois vértices correspondentes à variável $k$, com $2k+1$ correspondendo à variável negada.</p>
+
+<pre><code class="cpp">int n;
+vector&lt;vector&lt;int&gt;&gt; g, gt;
+vector&lt;bool&gt; used;
+vector&lt;int&gt; order, comp;
+vector&lt;bool&gt; assignment;
+
+void dfs1(int v) {
+    used[v] = true;
+    for (int u : g[v]) {
+        if (!used[u])
+            dfs1(u);
+    }
+    order.push_back(v);
+}
+
+void dfs2(int v, int cl) {
+    comp[v] = cl;
+    for (int u : gt[v]) {
+        if (comp[u] == -1)
+            dfs2(u, cl);
+    }
+}
+
+bool solve_2SAT() {
+    used.assign(n, false);
+    for (int i = 0; i &lt; n; ++i) {
+        if (!used[i])
+            dfs1(i);
+    }
+
+    comp.assign(n, -1);
+    for (int i = 0, j = 0; i &lt; n; ++i) {
+        int v = order[n - i - 1];
+        if (comp[v] == -1)
+            dfs2(v, j++);
+    }
+
+    assignment.assign(n / 2, false);
+    for (int i = 0; i &lt; n; i += 2) {
+        if (comp[i] == comp[i + 1])
+            return false;
+        assignment[i / 2] = comp[i] &gt; comp[i + 1];
+    }
+    return true;
+}
+</code></pre>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;page=show_problem&amp;problem=3081">UVA: Rectangles</a></li>
+<li><a href="http://codeforces.com/contest/776/problem/D">Codeforces: The Door Problem</a></li>
+<li><a href="https://codeforces.com/problemset/problem/1215/F">Codeforces : Radio Stations</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
