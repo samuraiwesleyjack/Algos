@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Coloração de arestas em uma árvore - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Colorir as arestas de uma árvore</h1>
+
+<p>Esta é uma tarefa bastante comum. Dada uma árvore $G$ com $N$ vértices. Existem dois tipos de consultas: a primeira é colorir uma aresta, a segunda é o número de arestas coloridas entre dois vértices.</p>
+
+<p>Aqui, descreveremos uma solução bastante simples (usando uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a>) que responderá a cada consulta em $O(\log N)$.
+A etapa de pré-processamento levará $O(N)$.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Primeiro, precisamos encontrar o <a href="https://cp-algorithms-brasil.com/grafos/lca.html">LCA</a>(<em>menor ancestral comum</em>) para reduzir cada consulta do segundo tipo(o número de arestas coloridas entre dois vértices) $(i,j)$ em duas consultas: $(l,i)$ e $(l,j)$; onde $l$ é o LCA de $i$ e $j$.
+A resposta da consulta $(i,j)$ será a soma das duas subconsultas. Ambas as consultas têm uma estrutura especial, o primeiro vértice é um ancestral do segundo. No restante do artigo, falaremos apenas sobre esse tipo especial de consulta.</p>
+
+<p>Começaremos descrevendo a etapa de pré-processamento.
+Execute uma DFS a partir da raiz da árvore e registre o <em>tour de Euler</em> dessa DFS (cada vértice é adicionado à lista quando a pesquisa o visita primeiro e toda vez que retornamos de um de seus filhos). A mesma técnica pode ser usada no pré-processamento do LCA.</p>
+
+<p>Essa lista conterá cada aresta (no sentido de que se $i$ e $j$ forem as extremidades das arestas, haverá um local na lista em que $i$ e $j$ são vizinhos na lista), e aparece exatamente duas vezes: na direção direta (de $i$ a $j$, onde o vértice $i$ está mais próximo da raiz que o vértice $j$) e na direção oposta (de $j$ a $i$).</p>
+
+<p>Vamos construir duas listas para essas arestas. A primeiro armazena a cor de todas as arestas na direção direta, e a segunda a cor de todas as arestas na direção oposta.
+Usaremos $1$ se a aresta for colorida, e $0$ caso contrário.
+Sobre essas duas listas construiremos para cada uma, uma árvore de segmentos (para a <em>soma</em>), vamos chamá-las de $T1$ e $T2$.</p>
+
+<p>Vamos responder a uma consulta da forma "$(i,j)$", onde $i$ é o ancestral de $j$.
+<strong>Precisamos determinar quantas arestas são pintadas/coloridas no caminho entre $i$ e $j$</strong>.
+Vamos encontrar $i$ e $j$ no tour de Euler pela primeira vez, sejam as posições $p$ e $q$ (isso pode ser feito em $O(1)$ se calcularmos essas posições com antecedência durante pré-processamento).
+Assim, a resposta para a consulta é a soma $T1[p..q-1]$ menos a soma $T2[p..q-1]$.</p>
+
+<p>Considere o segmento $[p;q]$ no tour de Euler.
+Ele contém todas as arestas que precisamos do caminho de $i$ a $j$, mas também contém um conjunto de arestas que se encontram em outros caminhos de $i$.
+No entanto, há uma grande diferença entre as arestas que precisamos e as demais: as arestas que precisamos serão listadas apenas uma vez na direção direta, e todas as outras arestas aparecerão duas vezes: nas duas direções(direta e oposta). 
+Assim, a diferença $T1[p..q-1] - T2[p..q-1]$ nos dará a resposta correta ("menos um" é necessário porque, caso contrário, capturaremos uma aresta extra saindo do vértice $j$).
+A consulta de soma na árvore de segmentos é executada em $O(\log N)$.</p>
+
+<p>Responder o primeiro tipo de consulta (colorir uma aresta) é ainda mais fácil - precisamos apenas atualizar $T1$ e $T2$, ou seja, realizar uma única atualização do elemento que corresponde à nossa aresta (encontrar a aresta na lista, novamente, é possível em $O(1)$, se você executar esta pesquisa durante o pré-processamento).
+Uma única modificação na árvore de segmentos é realizada em $O(\log N)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está a implementação completa da solução, incluindo a computação do LCA:</p>
+
+<pre><code class="cpp">const int INF = 1000 * 1000 * 1000;
+
+typedef vector&lt;vector&lt;int&gt;&gt; graph;
+
+vector&lt;int&gt; dfs_list;
+vector&lt;int&gt; edges_list;
+vector&lt;int&gt; h;
+
+void dfs(int v, const graph&amp; g, const graph&amp; edge_ids, int cur_h = 1) {
+    h[v] = cur_h;
+    dfs_list.push_back(v);
+    for (size_t i = 0; i &lt; g[v].size(); ++i) {
+        if (h[g[v][i]] == -1) {
+            edges_list.push_back(edge_ids[v][i]);
+            dfs(g[v][i], g, edge_ids, cur_h + 1);
+            edges_list.push_back(edge_ids[v][i]);
+            dfs_list.push_back(v);
+        }
+    }
+}
+
+vector&lt;int&gt; lca_tree;
+vector&lt;int&gt; first;
+
+void lca_tree_build(int i, int l, int r) {
+    if (l == r) {
+        lca_tree[i] = dfs_list[l];
+    } else {
+        int m = (l + r) &gt;&gt; 1;
+        lca_tree_build(i + i, l, m);
+        lca_tree_build(i + i + 1, m + 1, r);
+        int lt = lca_tree[i + i], rt = lca_tree[i + i + 1];
+        lca_tree[i] = h[lt] &lt; h[rt] ? lt : rt;
+    }
+}
+
+void lca_prepare(int n) {
+    lca_tree.assign(dfs_list.size() * 8, -1);
+    lca_tree_build(1, 0, (int)dfs_list.size() - 1);
+
+    first.assign(n, -1);
+    for (int i = 0; i &lt; (int)dfs_list.size(); ++i) {
+        int v = dfs_list[i];
+        if (first[v] == -1)
+            first[v] = i;
+    }
+}
+
+int lca_tree_query(int i, int tl, int tr, int l, int r) {
+    if (tl == l &amp;&amp; tr == r)
+        return lca_tree[i];
+    int m = (tl + tr) &gt;&gt; 1;
+    if (r &lt;= m)
+        return lca_tree_query(i + i, tl, m, l, r);
+    if (l &gt; m)
+        return lca_tree_query(i + i + 1, m + 1, tr, l, r);
+    int lt = lca_tree_query(i + i, tl, m, l, m);
+    int rt = lca_tree_query(i + i + 1, m + 1, tr, m + 1, r);
+    return h[lt] &lt; h[rt] ? lt : rt;
+}
+
+int lca(int a, int b) {
+    if (first[a] &gt; first[b])
+        swap(a, b);
+    return lca_tree_query(1, 0, (int)dfs_list.size() - 1, first[a], first[b]);
+}
+
+vector&lt;int&gt; first1, first2;
+vector&lt;char&gt; edge_used;
+vector&lt;int&gt; tree1, tree2;
+
+void query_prepare(int n) {
+    first1.resize(n - 1, -1);
+    first2.resize(n - 1, -1);
+    for (int i = 0; i &lt; (int)edges_list.size(); ++i) {
+        int j = edges_list[i];
+        if (first1[j] == -1)
+            first1[j] = i;
+        else
+            first2[j] = i;
+    }
+
+    edge_used.resize(n - 1);
+    tree1.resize(edges_list.size() * 8);
+    tree2.resize(edges_list.size() * 8);
+}
+
+void sum_tree_update(vector&lt;int&gt;&amp; tree, int i, int l, int r, int j, int delta) {
+    tree[i] += delta;
+    if (l &lt; r) {
+        int m = (l + r) &gt;&gt; 1;
+        if (j &lt;= m)
+            sum_tree_update(tree, i + i, l, m, j, delta);
+        else
+            sum_tree_update(tree, i + i + 1, m + 1, r, j, delta);
+    }
+}
+
+int sum_tree_query(const vector&lt;int&gt;&amp; tree, int i, int tl, int tr, int l, int r) {
+    if (l &gt; r || tl &gt; tr)
+        return 0;
+    if (tl == l &amp;&amp; tr == r)
+        return tree[i];
+    int m = (tl + tr) &gt;&gt; 1;
+    if (r &lt;= m)
+        return sum_tree_query(tree, i + i, tl, m, l, r);
+    if (l &gt; m)
+        return sum_tree_query(tree, i + i + 1, m + 1, tr, l, r);
+    return sum_tree_query(tree, i + i, tl, m, l, m) +
+           sum_tree_query(tree, i + i + 1, m + 1, tr, m + 1, r);
+}
+
+int query(int v1, int v2) {
+    return sum_tree_query(tree1, 1, 0, (int)edges_list.size() - 1, first[v1], first[v2] - 1) -
+           sum_tree_query(tree2, 1, 0, (int)edges_list.size() - 1, first[v1], first[v2] - 1);
+}
+
+int main() {
+    // lendo o grafo
+    int n;
+    scanf("%d", &amp;n);
+    graph g(n), edge_ids(n);
+    for (int i = 0; i &lt; n - 1; ++i) {
+        int v1, v2;
+        scanf("%d%d", &amp;v1, &amp;v2);
+        --v1, --v2;
+        g[v1].push_back(v2);
+        g[v2].push_back(v1);
+        edge_ids[v1].push_back(i);
+        edge_ids[v2].push_back(i);
+    }
+
+    h.assign(n, -1);
+    dfs(0, g, edge_ids);
+    lca_prepare(n);
+    query_prepare(n);
+
+    for (;;) {
+        if () {
+            // pedido para colorir aresta x;
+            // if start = true, então a aresta é colorida, caso contrário a coloração/pintura
+            // é removida
+            edge_used[x] = start;
+            sum_tree_update(tree1, 1, 0, (int)edges_list.size() - 1, first1[x],
+                            start ? 1 : -1);
+            sum_tree_update(tree2, 1, 0, (int)edges_list.size() - 1, first2[x],
+                            start ? 1 : -1);
+        } else {
+            // consulta o número de arestas coloridas no caminho entre v1 e v2
+            int l = lca(v1, v2);
+            int result = query(l, v1) + query(l, v2);
+            // resultado - a resposta para o pedido
+        }
+    }
+}
+</code></pre>
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
