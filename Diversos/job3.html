@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trabalhos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Cronograma ideal de trabalhos com deadlines e durações</h1>
+
+<p>Suponhamos que tenhamos um conjunto de trabalhos e estamos cientes do prazo/deadline de cada trabalho e de sua duração. A execução de um trabalho não pode ser interrompida antes do final. É necessário criar um cronograma para realizar o maior número de tarefas.</p>
+
+<h2>Resolução</h2>
+
+<p>O algoritmo da solução é <strong>greedy</strong>. Vamos ordenar todos os trabalhos de acordo com seus prazos e examiná-los em ordem decrescente. Além disso, vamos criar uma queue $q$, na qual gradualmente colocaremos os trabalhos e extrairemos o trabalho com o menor tempo de execução (por exemplo, podemos usar set ou priority_queue). Inicialmente, $q$ está vazia.</p>
+
+<p>Suponha que estamos analisando o $i$-ésimo trabalho. Primeiro de tudo, vamos colocar em $q$. Vamos considerar o período entre a deadline do $i$-ésimo trabalho e a deadline do $i-1$-ésimo trabalho. Esse é o segmento de algum comprimento $T$. Extrairemos os trabalhos de $q$ (na ordem crescente de duração) e os executaremos até que todo o segmento $T$ seja preenchido. Importante: se a qualquer momento o trabalho extraído puder ser executado apenas parcialmente até que o segmento $T$ for preenchido, então, executamos esse trabalho parcialmente o máximo possível, ou seja, durante o período de $T$, e colocamos a parte restante de um trabalho de volta em $q$.</p>
+
+<p>Na conclusão do algoritmo, escolheremos a solução ideal (ou, pelo menos, uma das várias soluções). O tempo de execução do algoritmo é $O(n \log n)$.</p>
+
+<h2>Implementação</h2>
+
+<p>A função a seguir pega um vetor de trabalhos (que consiste em uma deadline, uma duração, e o índice do trabalho) e calcula um vetor que contém todos os índices dos trabalhos usados ​​na programação ideal. 
+Observe que ainda é necessário ordenar esses trabalhos pelas deadlines, se for necessário anotar esse plano explicitamente.</p>
+
+<pre><code class="cpp">struct Job {
+    int deadline, duration, idx;
+
+    bool operator&lt;(Job o) const {
+        return deadline &lt; o.deadline;
+    }
+};
+
+vector&lt;int&gt; compute_schedule(vector&lt;Job&gt; jobs) {
+    sort(jobs.begin(), jobs.end());
+
+    set&lt;pair&lt;int,int&gt;&gt; s;
+    vector&lt;int&gt; schedule;
+    for (int i = jobs.size()-1; i &gt;= 0; i--) {
+        int t = jobs[i].deadline - (i ? jobs[i-1].deadline : 0);
+        s.insert(make_pair(jobs[i].duration, jobs[i].idx));
+        while (t &amp;&amp; !s.empty()) {
+            auto it = s.begin();
+            if (it-&gt;first &lt;= t) {
+                t -= it-&gt;first;
+                schedule.push_back(it-&gt;second);
+            } else {
+                s.insert(make_pair(it-&gt;first - t, it-&gt;second));
+                t = 0;
+            }
+            s.erase(it);
+        }
+    }
+    return schedule;
+}
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
