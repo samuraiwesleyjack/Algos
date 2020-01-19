@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Games - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Jogos em grafos arbitrários</h1>
+
+<p>Deixe um jogo ser jogado por dois jogadores em um grafo arbitrário $G$.
+Ou seja, o estado atual do jogo é um certo vértice. Os jogadores realizam movimentos por turnos e passam do vértice atual para um vértice adjacente usando uma aresta de conexão. Dependendo do jogo, a pessoa que não puder se mover perderá ou vencerá o jogo.</p>
+
+<p>Consideramos o caso mais geral, o caso de um grafo(arbitrário) direcionado com ciclos. É nossa tarefa determinar, dado um estado inicial, quem vencerá o jogo se ambos os jogadores jogarem com estratégias ideais ou se o resultado do jogo será um empate.</p>
+
+<p>Vamos resolver esse problema com muita eficiência. Encontraremos a solução para todos os possíveis vértices iniciais do grafo em tempo linear em relação ao número de arestas: $O(m)$.</p>
+
+<h2>Descrição do algoritmo</h2>
+
+<p>Vamos chamar um vértice de vértice vencedor, se o jogador que iniciar neste estado vencer o jogo, se jogar da melhor maneira possível (independentemente do turno do outro jogador). Da mesma forma, chamaremos um vértice de vértice perdedor, se o jogador que iniciar nesse vértice perder o jogo, se o oponente jogar da melhor maneira.</p>
+
+<p>Para alguns dos vértices do grafo, já sabemos com antecedência se eles são vértices vencedores ou perdedores: ou seja, todos os vértices que não têm arestas de saída.</p>
+
+<p>Também temos as seguintes <strong>regras</strong>:</p>
+
+<ul>
+<li>se um vértice tem uma aresta de saída que leva a um vértice perdedor, o próprio vértice é um vértice vencedor.</li>
+<li>se todas as arestas de saída de um determinado vértice levam a vértices vencedores, o próprio vértice é um vértice perdedor.</li>
+<li>se em algum momento ainda houver vértices indefinidos, e nenhum deles se encaixar na primeira ou na segunda regra, cada um desses vértices, quando usado como vértice inicial, levará a um <strong>empate</strong> se os dois jogadores jogarem da melhor maneira.</li>
+</ul>
+
+<p>Assim, podemos definir um algoritmo que é executado em $O(n m)$ imediatamente.
+Analisamos todos os vértices e tentamos aplicar a primeira ou a segunda regra e repetimos.</p>
+
+<p>No entanto, podemos acelerar esse procedimento e reduzir a complexidade para $O(m)$.</p>
+
+<p>Analisaremos todos os vértices, para os quais sabemos inicialmente se eles são estados vencedores ou perdedores.
+Para cada um deles, iniciamos uma <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a>.
+Essa DFS retornará pelas arestas invertidas.
+Primeiro de tudo, ela não entrará em vértices que já estão definidos como vértices vencedores ou perdedores.
+E posteriormente, se a pesquisa passar de um vértice perdedor para um vértice indefinido, marcamos ele(indefinido) como vértice vencedor e continuamos a DFS usando esse novo vértice.
+Se passarmos de um vértice vencedor para um vértice indefinido, devemos verificar se todas as arestas deste levam a vértices vencedores. Podemos realizar esse teste em $O(1)$ armazenando o número de arestas que levam a um vértice vencedor para cada vértice. Portanto, se passarmos de um vértice vencedor para um indefinido, aumentamos o contador e verificamos se esse número é igual ao número de arestas de saída. Se for esse o caso, podemos marcar esse vértice como um vértice perdedor e continuar a DFS nesse vértice. Caso contrário, ainda não sabemos se esse vértice é um vértice vencedor ou perdedor e, portanto, não faz sentido continuar a DFS usando ele.</p>
+
+<p>No total, visitamos todos os vértices vencedores e perdedores exatamente uma vez (vértices indefinidos não são visitados) e passamos por cada aresta também no máximo uma vez. Portanto, a complexidade é $O(m)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui está a implementação dessa DFS. Assumimos que a variável <code>adj_rev</code> armazena a lista de adjacência do grafo na forma <strong>reversa</strong>, ou seja, em vez de armazenar a aresta $(i, j)$ do grafo, ela armazena: $(j, i)$.
+Também para cada vértice, assumimos que o grau de saída já foi calculado.</p>
+
+<pre><code class="cpp">vector&lt;vector&lt;int&gt;&gt; adj_rev;
+
+vector&lt;bool&gt; winning;
+vector&lt;bool&gt; losing;
+vector&lt;bool&gt; visited;
+vector&lt;int&gt; degree;
+
+void dfs(int v) {
+    visited[v] = true;
+    for (int u : adj_rev[v]) {
+        if (!visited[u]) {
+            if (losing[v])
+                winning[u] = true;
+            else if (--degree[u] == 0)
+                losing[u] = true;
+            else
+                continue;
+            dfs(u);
+        }
+    }
+}
+</code></pre>
+
+<h2>Exemplo: "Policial e ladrão"</h2>
+
+<p>Aqui está um exemplo concreto desse jogo.</p>
+
+<p>Há um tabuleiro(ou <em>grid</em>) $m \times n$.
+Algumas das células não podem ser entradas. As coordenadas iniciais do policial e do ladrão são conhecidas. Uma das células é a saída. Se o policial e o ladrão estiverem localizados na mesma célula a qualquer momento, o policial vence.
+Se o ladrão estiver na cela de saída (sem o policial também estar na cela), o ladrão vence. O policial pode andar em todas as 8 direções, o ladrão apenas em 4 (ao longo do eixo de coordenadas). O policial e o ladrão revezam-se em turnos de movimento. No entanto, eles também podem pular um turno, se quiserem. A primeira jogada é feita pelo policial.</p>
+
+<p>Vamos agora <strong>construir o grafo</strong>.
+Para isso, devemos formalizar as regras do jogo. O estado atual do jogo é determinado pelas coordenadas do policial $P$, pelas coordenadas do ladrão $T$, e também por quem é a vez, vamos chamar essa variável de $P_{\text{turno}}$ (o que é verdade(<em>true</em>) quando é a vez do policial). Portanto, um vértice do grafo é determinado pelo triplo $(P, T, P_{\text{turno}})$
+O grafo então pode ser facilmente construído, simplesmente seguindo as regras do jogo.</p>
+
+<p>Em seguida, precisamos determinar quais vértices estão ganhando e quais estão perdendo inicialmente. Há um ponto sutil aqui. Os vértices vencedores / perdedores dependem, além das coordenadas, também de $P_{\text{turno}}$ - de quem é o turno de jogada.
+Se for a vez do policial, o vértice é um vértice vencedor, se as coordenadas do policial e do ladrão coincidirem, e o vértice é um perdedor se não for um vencedor e o ladrão estiver no vértice de saída.
+Se for a vez do ladrão, então um vértice é um vértice perdedor se as coordenadas dos dois jogadores coincidirem e, é um vértice vencedor se não for um perdedor e o ladrão está no vértice de saída.</p>
+
+<p>O único ponto antes da implementação é que você precisa decidir se deseja criar o grafo <strong>explicitamente</strong> ou apenas construí-lo <strong>dinamicamente</strong>(durante as jogadas).
+Por um lado, criar o grafo explicitamente será muito mais fácil e há menos chances de cometer erros. Por outro lado, aumentará a quantidade de código e o tempo de execução será mais lento do que se você criar o grafo dinamicamente.</p>
+
+<p>A implementação a seguir construirá o grafo explicitamente:</p>
+
+<pre><code class="cpp">struct State {
+    int P, T;
+    bool Pstep;
+};
+
+vector&lt;State&gt; adj_rev[100][100][2]; // [P][T][Pstep]
+bool winning[100][100][2];
+bool losing[100][100][2];
+bool visited[100][100][2];
+int degree[100][100][2];
+
+void dfs(State v) {
+    visited[v.P][v.T][v.Pstep] = true;
+    for (State u : adj_rev[v.P][v.T][v.Pstep]) {
+        if (!visited[u.P][u.T][u.Pstep]) {
+            if (losing[v.P][v.T][v.Pstep])
+                winning[u.P][u.T][u.Pstep] = true;
+            else if (--degree[u.P][u.T][u.Pstep] == 0)
+                losing[u.P][u.T][u.Pstep] = true;
+            else
+                continue;
+            dfs(u);
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+    vector&lt;string&gt; a(n);
+    for (int i = 0; i &lt; n; i++)
+        cin &gt;&gt; a[i];
+
+    for (int P = 0; P &lt; n*m; P++) {
+        for (int T = 0; T &lt; n*m; T++) {
+            for (int Pstep = 0; Pstep &lt;= 1; Pstep++) {
+                int Px = P/m, Py = P%m, Tx = T/m, Ty = T%m;
+                if (a[Px][Py]=='*' || a[Tx][Ty]=='*')
+                    continue;
+
+                bool&amp; win = winning[P][T][Pstep];
+                bool&amp; lose = losing[P][T][Pstep];
+                if (Pstep) {
+                    win = Px==Tx &amp;&amp; Py==Ty;
+                    lose = !win &amp;&amp; a[Tx][Ty] == 'E';
+                } else {
+                    lose = Px==Tx &amp;&amp; Py==Ty;
+                    win = !lose &amp;&amp; a[Tx][Ty] == 'E';
+                }
+                if (win || lose)
+                    continue;
+
+                State st = {P,T,!Pstep};
+                adj_rev[P][T][Pstep].push_back(st);
+                st.Pstep = Pstep;
+                degree[P][T][Pstep]++;
+                     
+                const int dx[] = {-1, 0, 1, 0, -1, -1, 1, 1};   //movimentação pelo grid / grafo
+                const int dy[] = {0, 1, 0, -1, -1, 1, -1, 1};  
+                for (int d = 0; d &lt; (Pstep ? 8 : 4); d++) {
+                    int PPx = Px, PPy = Py, TTx = Tx, TTy = Ty;
+                    if (Pstep) {
+                        PPx += dx[d];
+                        PPy += dy[d];
+                    } else {
+                        TTx += dx[d];
+                        TTy += dy[d];
+                    }
+
+                    if (PPx &gt;= 0 &amp;&amp; PPx &lt; n &amp;&amp; PPy &gt;= 0 &amp;&amp; PPy &lt; m &amp;&amp; a[PPx][PPy] != '*' &amp;&amp;
+                        TTx &gt;= 0 &amp;&amp; TTx &lt; n &amp;&amp; TTy &gt;= 0 &amp;&amp; TTy &lt; m &amp;&amp; a[TTx][TTy] != '*')
+                    {
+                        adj_rev[PPx*m+PPy][TTx*m+TTy][!Pstep].push_back(st);
+                        ++degree[P][T][Pstep];
+                    }
+                }
+            }
+        }
+    }
+
+    for (int P = 0; P &lt; n*m; P++) {
+        for (int T = 0; T &lt; n*m; T++) {
+            for (int Pstep = 0; Pstep &lt;= 1; Pstep++) {
+                if ((winning[P][T][Pstep] || losing[P][T][Pstep]) &amp;&amp; !visited[P][T][Pstep])
+                    dfs({P, T, (bool)Pstep});
+            }
+        }
+    }
+
+    int P_st, T_st;
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 0; j &lt; m; j++) {
+            if (a[i][j] == 'P')
+                P_st = i*m+j;
+            else if (a[i][j] == 'T')
+                T_st = i*m+j;
+        }
+    }
+
+    if (winning[P_st][T_st][true]) {
+        cout &lt;&lt; "Policial pegou o ladrão"  &lt;&lt; endl;
+    } else if (losing[P_st][T_st][true]) {
+        cout &lt;&lt; "Ladrão escapa" &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Empate" &lt;&lt; endl;
+    }
+}
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
