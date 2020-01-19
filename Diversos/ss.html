@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Maior subsequência crescente - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Maior subsequência crescente</h1>
+
+<p>Seja uma array com $n$ números: $a[0 \dots n-1]$.
+A tarefa é encontrar a subsequência mais longa e estritamente crescente em $a$.</p>
+
+<p>Formalmente, procuramos a sequência mais longa de índices $i_1, \dots i_k$ de modo que
+$$i_1 &lt; i_2 &lt; \dots &lt; i_k,&#92;&#92;
+a[i_1] &lt; a[i_2] &lt; \dots &lt; a[i_k]$$</p>
+
+<p>Neste artigo, discutimos vários algoritmos para resolver esta tarefa. Também discutiremos alguns outros problemas, que podem ser reduzidos a esse problema.</p>
+
+<h2>Solução em $O(n^2)$ com programação dinâmica</h2>
+
+<p>A programação dinâmica (<em>Dynamic programming - dp</em>) é uma técnica muito geral que permite resolver uma enorme classe de problemas. Aqui aplicamos a técnica para nossa tarefa específica.</p>
+
+<p>Primeiro, procuraremos apenas o <strong>tamanho</strong> da subsequência crescente mais longa e então aprenderemos a como restaurar a própria subsequência.</p>
+
+<h3>Encontrando o tamanho</h3>
+
+<p>Para realizar essa tarefa, definimos uma array $d[0 \dots n-1]$, onde $d[i]$ é o comprimento da subsequência crescente mais longa que termina no elemento de índice $i$.
+Computaremos essa array gradualmente: primeiro $d[0]$, então $d[1]$, e assim por diante.
+Depois que essa array é calculada, a resposta para o problema será o valor máximo na array $d[]$.</p>
+
+<p>Então deixe o índice atual ser $i$.
+Ou seja, queremos calcular o valor $d[i]$ e todos os valores anteriores $d[0], \dots, d[i-1]$ já são conhecidos. Assim, existem duas opções:</p>
+
+<ul>
+<li>$d[i] = 1$: a subsequência necessária consiste apenas no elemento $a[i]$.</li>
+<li>$d[i] > 1$: então, na subsequência requerida, existe outro número antes do número $a[i]$.
+Vamos nos concentrar nesse número: pode ser qualquer elemento $a[j]$ com $j = 0 \dots i-1$ e $a[j] &lt; a[i]$.
+Dessa forma, podemos calcular $d[i]$ usando a seguinte fórmula: se fixarmos o índice $j$, a subsequência crescente mais longa que terminará nos dois elementos $a[j]$ e $a[i]$ terá o comprimento $d[j] + 1$.
+Todos esses valores $d[j]$ já são conhecidos, portanto, podemos calcular diretamente  $d[i]$ com:
+$$d[i] = \max_{\substack{j = 0 \dots i-1 &#92;&#92; a[j] &lt; a[i]}} \left(d[j] + 1\right)$$</li>
+</ul>
+
+<p>Se combinarmos esses dois casos, obteremos a resposta final para $d[i]$:</p>
+
+<p>$$d[i] = \max\left(1, \max_{\substack{j = 0 \dots i-1 &#92;&#92; a[j] &lt; a[i]}} \left(d[j] + 1\right)\right)$$</p>
+
+<h3>Implementação</h3>
+
+<p>Aqui está uma implementação do algoritmo descrito acima, que calcula o comprimento da subsequência crescente mais longa.</p>
+
+<pre><code class="cpp">int lis(vector&lt;int&gt; const&amp; a) {
+    int n = a.size();
+    vector&lt;int&gt; d(n, 1);
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (a[j] &lt; a[i])
+                d[i] = max(d[i], d[j] + 1);
+        }
+    }
+
+    int ans = d[0];
+    for (int i = 1; i &lt; n; i++) {
+        ans = max(ans, d[i]);
+    }
+    return ans;
+}
+</code></pre>
+
+<h3>Restaurando a subsequência</h3>
+
+<p>Até agora, aprendemos apenas como encontrar o comprimento da subsequência, mas não como encontrar a própria subsequência.</p>
+
+<p>Para poder restaurar a subsequência, geramos uma array auxiliar adicional $p[0 \dots n-1]$ que calcularemos junto com a array $d[]$.
+$p[i]$ será o índice $j$ do segundo último elemento na subsequência crescente mais longa que termina em $i$.
+Em outras palavras, o índice $p[i]$ é o mesmo índice $j$ no qual o valor mais alto $d[i]$ foi obtido. Essa array auxiliar $p[]$ aponta em certo sentido para os ancestrais.</p>
+
+<p>Então, para derivar a subsequência, apenas começamos no índice $i$ com o máximo $d[i]$, e seguimos os ancestrais até deduzirmos toda a subsequência, ou seja, até atingirmos o elemento com $d[i] = 1$.</p>
+
+<h3>Implementação da restauração</h3>
+
+<p>Vamos mudar um pouco o código das seções anteriores. Vamos calcular a array $p[]$ juntamente com $d[]$, e depois calcularemos a subsequência.</p>
+
+<p>Por conveniência, designamos originalmente os ancestrais com $p[i] = -1$.
+Para elementos com $d[i] = 1$, o valor dos ancestrais permanecerá $-1$, o que será um pouco mais conveniente para restaurar a subsequência.</p>
+
+<pre><code class="cpp">vector&lt;int&gt; lis(vector&lt;int&gt; const&amp; a) {
+    int n = a.size();
+    vector&lt;int&gt; d(n, 1), p(n, -1);
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (a[j] &lt; a[i] &amp;&amp; d[i] &lt; d[j] + 1) {
+                d[i] = d[j] + 1;
+                p[i] = j;
+            }
+        }
+    }
+
+    int ans = d[0], pos = 0;
+    for (int i = 1; i &lt; n; i++) {
+        if (d[i] &gt; ans) {
+            ans = d[i];
+            pos = i;
+        }
+    }
+
+    vector&lt;int&gt; subseq;
+    while (pos != -1) {
+        subseq.push_back(a[pos]);
+        pos = p[pos];
+    }
+    reverse(subseq.begin(), subseq.end());
+    return subseq;
+}
+</code></pre>
+
+<h3>Maneira alternativa de restaurar a subsequência</h3>
+
+<p>Também é possível restaurar a subsequência sem a array auxiliar $p[]$.
+Podemos simplesmente recalcular o valor atual de $d[i]$ e também ver como o máximo foi alcançado.</p>
+
+<p>Esse método leva a um código um pouco mais longo, mas, em troca, economizamos um pouco de memória.</p>
+
+<h2>Solução em $O(n \log n)$ com programação dinâmica e binary search</h2>
+
+<p>Para obter uma solução mais rápida para o problema, construímos uma solução de programação dinâmica diferente que é executada em $O(n^2)$, e, posteriormente, melhoramos para $O(n \log n)$.</p>
+
+<p>Usaremos a array de programação dinâmica $d[0 \dots n]$.
+Desta vez, $d[i]$ será o elemento no qual uma subsequência de comprimento $i$ termina. Se houver várias dessas sequências, pegamos a que termina no menor elemento.</p>
+
+<p>Inicialmente assumimos $d[0] = -\infty$ e para todos os outros elementos $d[i] = \infty$.</p>
+
+<p>Novamente, processaremos gradualmente os números, primeiro $a[0]$, então $a[1]$, etc, e em cada etapa manteremos a array $d[]$ para que ela esteja atualizada.</p>
+
+<p>Depois de processar todos os elementos de $a[]$ o comprimento da subsequência desejada é o maior $l$, com $d[l] &lt; \infty$.</p>
+
+<pre><code class="cpp">int lis(vector&lt;int&gt; const&amp; a) {
+    int n = a.size();
+    const int INF = 1e9;
+    vector&lt;int&gt; d(n+1, INF);
+    d[0] = -INF;
+
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 1; j &lt;= n; j++) {
+            if (d[j-1] &lt; a[i] &amp;&amp; a[i] &lt; d[j])
+                d[j] = a[i];
+        }
+    }
+
+    int ans = 0;
+    for (int i = 0; i &lt;= n; i++) {
+        if (d[i] &lt; INF)
+            ans = i;
+    }
+    return ans;
+}
+</code></pre>
+
+<p>Agora fazemos duas observações importantes.</p>
+
+<p>A array $d$ sempre será ordenada: 
+$d[i-1] \le d[i]$, para todo $i = 1 \dots n$.
+E também o elemento $a[i]$ somente atualizará no máximo um valor $d[j]$.</p>
+
+<p>Assim, podemos encontrar esse elemento na array $d[]$ usando <em>binary search</em> em $O(\log n)$.
+De fato, estamos simplesmente procurando na array $d[]$ pelo primeiro número estritamente maior que $a[i]$, e tentamos atualizar esse elemento da mesma maneira que na implementação acima.</p>
+
+<h3>Implementação</h3>
+
+<pre><code class="cpp">int lis(vector&lt;int&gt; const&amp; a) {
+    int n = a.size();
+    const int INF = 1e9;
+    vector&lt;int&gt; d(n+1, INF);
+    d[0] = -INF;
+
+    for (int i = 0; i &lt; n; i++) {
+        int j = upper_bound(d.begin(), d.end(), a[i]) - d.begin();
+        if (d[j-1] &lt; a[i] &amp;&amp; a[i] &lt; d[j])
+            d[j] = a[i];
+    }
+
+    int ans = 0;
+    for (int i = 0; i &lt;= n; i++) {
+        if (d[i] &lt; INF)
+            ans = i;
+    }
+    return ans;
+}
+</code></pre>
+
+<h3>Restaurando a subsequência</h3>
+
+<p>Também é possível restaurar a subsequência usando essa abordagem. Desta vez, temos que manter duas arrays auxiliares.
+Uma que nos diz os índices dos elementos em $d[]$.
+E, novamente, temos que criar uma array de "ancestrais" $p[]$.
+$p[i]$ será o índice do elemento anterior para a subsequência ideal que termina no elemento $i$.</p>
+
+<p>É fácil manter essas duas arrays no curso da iteração sobre a array $a[]$ juntamente com o computação de $d[]$.
+E, no final, não é difícil restaurar a subsequência desejada usando essas arrays.</p>
+
+<h2>Solução em $O(n \log n)$ com estruturas de dados</h2>
+
+<p>Em vez do método acima, para calcular a subsequência crescente mais longa em $O(n \log n)$ também podemos resolver o problema de uma maneira diferente: usando algumas estruturas de dados simples.</p>
+
+<p>Vamos voltar ao primeiro método. Lembre-se de que $d[i]$ é o valor $d[j] + 1$, com $j &lt; i$ e $a[j] &lt; a[i]$.</p>
+
+<p>Portanto, se definirmos uma array adicional $t[]$ de modo que
+$$t[a[i]] = d[i],$$
+então, o problema de calcular o valor $d[i]$ será equivalente a encontrar o valor máximo em um prefixo da array $t[]$:
+$$d[i] = \max\left(t[0 \dots a[i] - 1] + 1\right)$$</p>
+
+<p>O problema de encontrar o máximo de um prefixo de uma array, é um problema padrão que pode ser resolvido por muitas estruturas de dados diferentes. Por exemplo, podemos usar uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a> ou a <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/BIT.html">árvore de Fenwick</a>.</p>
+
+<p>Este método tem obviamente algumas deficiências: em termos de extensão e complexidade da implementação, essa abordagem será pior que o método que utiliza a busca binária. Além disso, se os números de entrada $a[i]$ forem especialmente grandes, teremos que usar alguns truques, como comprimir os números (ou seja, renumerá-los de $0$ até $n-1$), ou usar uma árvore segmentária implícita (gerar apenas os segmentos da árvore que são importantes). Caso contrário, o consumo de memória será muito alto.</p>
+
+<p>Por outro lado, esse método também tem algumas vantagens: com esse método, você não precisa pensar em nenhuma propriedade complicada na solução de programação dinâmica. E essa abordagem nos permite generalizar o problema.</p>
+
+<h2>Tarefas relacionadas</h2>
+
+<p>Aqui estão vários problemas que estão intimamente relacionados ao problema de encontrar a subsequência crescente mais longa.</p>
+
+<h3>Subseqüência não decrescente mais longa</h3>
+
+<p>Na verdade, é quase o mesmo problema. Somente agora é permitido usar números idênticos na subsequência.</p>
+
+<p>A solução é essencialmente também quase a mesma. Nós apenas temos que alterar os sinais de desigualdade e fazer uma pequena modificação na busca binária.</p>
+
+<h3>Número de subsequências crescentes mais longas</h3>
+
+<p>Podemos usar o primeiro método discutido, a versão em $O(n^2)$ ou a versão usando estruturas de dados. Apenas precisamos armazenar adicionalmente de quantas maneiras podemos obter subsequências crescentes mais longas, terminando nos valores $d[i]$.</p>
+
+<p>O número de maneiras de formar as subsequências crescentes mais longas que terminam em $a[i]$ é a soma de todas as maneiras para todas as subsequências crescentes mais longas que terminam em $j$, onde $d[j]$ é máximo.
+Podem existir múltiplos desses $j$'s, portanto, precisamos somar todos eles.</p>
+
+<p>Usando uma árvore de segmentos, essa abordagem também pode ser implementada em $O(n \log n)$.</p>
+
+<p>Não é possível usar a abordagem de busca binária para esta tarefa.</p>
+
+<h3>Menor número de subsequências não crescentes que cobrem uma sequência</h3>
+
+<p>Para uma array com $n$ números $a[0 \dots n - 1]$ temos que colorir os números com o menor número de cores, para que cada cor forme uma subsequência não crescente(se isso fizer sentido).</p>
+
+<p>Para resolver isso, notamos que o número mínimo de cores necessárias é igual ao comprimento da subsequência crescente mais longa.</p>
+
+<p><strong>Prova</strong>:
+Precisamos provar a <strong>dualidade</strong> desses dois problemas.</p>
+
+<p>Vamos denotar por $x$ o comprimento da subsequência crescente mais longa e por $y$ o menor número de subsequências não crescentes que formam uma cobertura. Precisamos provar que $x = y$.</p>
+
+<p>É claro que $y &lt; x$ não é possível, porque se tivermos $x$ elementos estritamente crescentes, então dois elementos não poderão fazer parte da mesma subsequência não crescente. Portanto, temos $y \ge x$.</p>
+
+<p>Agora mostramos que $y > x$ não é possível por contradição. Suponha que $y > x$.
+Em seguida, consideramos qualquer conjunto ideal de $y$ subsequências sem aumento.
+Transformamos isso em um conjunto da seguinte maneira: desde que existam duas subsequências, de modo que a primeira comece antes da segunda e a primeira sequência inicie com um número maior ou igual ao segundo, então deslocamos esse número inicial e anexamos ele ao início da segunda.
+Após um número finito de etapas, temos $y$ subsequências, e seus números iniciais formarão uma subsequência crescente de comprimento $y$.
+Como assumimos que $y > x$ chegamos a uma contradição.</p>
+
+<p>Assim, segue-se que $y = x$.</p>
+
+<p><strong>Restaurando as sequências</strong>:
+A partição desejada da sequência em subsequências pode ser feita com um método guloso(greedy).
+Ou seja, vá da esquerda para a direita e atribua o número atual ou a subsequência que termina com o número mínimo que é maior ou igual ao atual.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=5922&amp;rd=8075">Topcoder - IntegerSequence</a></li>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=3937&amp;rd=6532">Topcoder - AutoMarket</a></li>
+<li><a href="http://codeforces.com/contest/76/problem/F">Codeforces - Tourist</a></li>
+<li><a href="http://codeforces.com/problemset/problem/10/D">Codeforces - LCIS</a></li>
+<li><a href="http://www.spoj.com/problems/SUPPER/">SPOJ - SUPPER</a></li>
+<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=2967&amp;rd=5881">Topcoder - BridgeArrangement</a></li>
+<li><a href="http://codeforces.com/problemsets/acmsguru/problem/99999/521">ACMSGURU - "North-East"</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
