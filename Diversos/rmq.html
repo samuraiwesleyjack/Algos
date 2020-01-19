@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Range Minimum Query - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Consultas de Intervalo Mínimo (<em>Range Minimum Query</em>)</h1>
+<em>RMQ</em>
+<p>Você recebe uma array $A[1..N]$.
+Você deve responder às consultas da forma $(L, R)$, que solicitam encontrar o elemento mínimo na array $A$ entre as posições $L$ e $R$.</p>
+
+<p>RMQ podem aparecer em problemas diretamente ou podem ser aplicadas em outras tarefas, por exemplo, o problema do <a href="https://cp-algorithms-brasil.com/grafos/lca.html">Menor Ancestral Comum</a>.</p>
+
+<h2>Solução</h2>
+
+<p>Existem várias abordagens e estruturas de dados possíveis que você pode usar para resolver a tarefa da RMQ.</p>
+
+<p>As que são explicadas neste site estão listadas abaixo.</p>
+
+<p>Primeiro, as abordagens que permitem modificações na array enquanto respondemos consultas.</p>
+
+<ul>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/Sqrt.html">Sqrt-decomposition</a> - responde a cada consulta em $O(\sqrt{N})$, pré-processamento feito em $O(N)$.
+Prós: uma estrutura de dados muito simples. Contras: pior complexidade.</li>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">Árvore Segmentária</a> - responde a cada consulta em $O(\log N)$, pré-processamento feito em $O(N)$.
+Prós: boa complexidade de tempo. Contras: maior quantidade de código em comparação com as outras estruturas de dados.</li>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/BIT.html">Árvore de Fenwick</a> - responde a cada consulta em $O(\log N)$, pré-processamento feito em $O(N \log N)$.
+Prós: o código mais curto, boa complexidade de tempo. Contras: A árvore Fenwick pode ser usada apenas para consultas com $L = 1$, portanto não é aplicável a muitos problemas.</li>
+</ul>
+
+<p>E aqui estão as abordagens que funcionam apenas em arrays estáticas, ou seja, não é possível alterar um valor na array sem recalcular a estrutura de dados completamente.</p>
+
+<ul>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/sparsetable.html">Sparse Table</a> - responde a cada consulta em $O(1)$, pré-processamento feito em $O(N \log N)$.
+Prós: estrutura de dados simples, excelente complexidade de tempo.</li>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/sqrtree.html">Sqrt Tree</a> - responde consultas em $O(1)$, pré-processamento feito em $O(N \log \log N)$. Prós: rápido. Contras: Complicado para implementar.</li>
+<li><a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/DSU.html">Disjoint Set Union / Truque de Arpa</a> - responde consultas em $O(1)$, pré-processamento em $O(n)$. Prós: curto, rápido. Contras: funciona apenas se todas as consultas forem conhecidas antecipadamente, ou seja, suporta apenas o processamento off-line das consultas.</li>
+<li><a href="https://cp-algorithms-brasil.com/grafos/lca4.html">Árvore Cartesiana</a> e <a href="https://cp-algorithms-brasil.com/grafos/lca3.html">algoritmo de Farach-Colton e Bender</a> - responde consultas em $O(1)$, pré-processamento em $O(n)$. Prós: complexidade ideal. Contras: grande quantidade de código.</li>
+</ul>
+
+<p>Nota: O pré-processamento é o processamento preliminar da array fornecida, criando uma estrutura de dados correspondente para ela.</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="http://www.spoj.com/problems/RMQSQ/">SPOJ: Range Minimum Query</a></li>
+<li><a href="https://www.codechef.com/problems/FRMQ">CODECHEF: Chef And Array</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
