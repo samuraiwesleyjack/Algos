@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>A árvore de Stern-Brocot e as sequências de Farey - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>A árvore de Stern-Brocot e as sequências de Farey</h1>
+
+<h2>Árvore de Stern-Brocot</h2>
+
+<p>A árvore Stern-Brocot é uma construção elegante para representar o conjunto de todas as frações positivas. Foi descoberta independentemente pelo matemático alemão Moritz Stern em 1858 e pelo relojoeiro(<em>artesão que fabrica ou repara relógios</em>) francês Achille Brocot em 1861. No entanto, algumas fontes atribuem a descoberta ao antigo matemático grego Eratóstenes.</p>
+
+<p>A construção começa na iteração inicial com as duas frações</p>
+
+<p>$$
+    \frac{0}{1}, \frac{1}{0}
+$$</p>
+
+<p>onde deve-se notar que a segunda quantidade não é estritamente uma fração, mas pode ser interpretada como uma fração irredutível que representa o infinito.</p>
+
+<p>A cada iteração subsequente, considere todas as frações adjacentes $\frac{a}{b}$ e $\frac{c}{d}$ e insira a <a href="https://en.wikipedia.org/wiki/Mediant_(mathematics)">mediant</a> $\frac{a+c}{b+d}$ entre elas.</p>
+
+<p>As primeiras iterações:</p>
+
+<p>$$
+    \begin{array}{c}
+    \dfrac{0}{1}, \dfrac{1}{1}, \dfrac{1}{0} &#92;&#92;&#92;&#92;
+    \dfrac{0}{1}, \dfrac{1}{2}, \dfrac{1}{1}, \dfrac{2}{1}, \dfrac{1}{0} &#92;&#92;&#92;&#92;
+    \dfrac{0}{1}, \dfrac{1}{3}, \dfrac{1}{2}, \dfrac{2}{3}, \dfrac{1}{1}, \dfrac{3}{2}, \dfrac{2}{1}, \dfrac{3}{1}, \dfrac{1}{0}
+    \end{array}
+$$</p>
+
+<p>Continuar esse processo até o infinito abrange <em>todas</em> as frações positivas. Além disso, todas as frações serão <em>únicas</em> e <em>irredutíveis</em> . Finalmente, as frações também aparecerão em ordem crescente.</p>
+
+<p>Antes de provar essas propriedades, vamos mostrar uma visualização da árvore de Stern-Brocot, em vez da representação da lista. Cada fração da árvore tem dois filhos. Cada criança é a <em>mediant</em> do ancestral mais próximo à esquerda e do ancestral mais próximo à direita.</p>
+
+<p><center><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/SternBrocotTree.svg/1024px-SternBrocotTree.svg.png" alt="Stern-Brocot tree" /></center></p>
+
+<h2>Provas</h2>
+
+<p>Observamos que a <em>mediant</em> de duas frações está sempre entre as frações</p>
+
+<p>$$
+    \frac{a}{b} \le \frac{a+c}{b+d} \le \frac{c}{d}
+$$</p>
+
+<p>dado que</p>
+
+<p>$$
+    \frac{a}{b} \le \frac{c}{d}.
+$$</p>
+
+<p>As duas desigualdades podem ser facilmente mostradas reescrevendo as frações com denominadores comuns.</p>
+
+<p>À medida que a ordem aumenta na iteração inicial, ela será mantida a cada iteração subsequente.</p>
+
+<p><strong>Irredutibilidade.</strong> Para provar isso, mostraremos que, para quaisquer duas frações adjacentes $\frac{a}{b}$ e $\frac{c}{d}$ temos:</p>
+
+<p>$$
+    bc - ad = 1.
+$$</p>
+<em>nota: gcd = mdc</em>
+<p>Lembre-se de que uma equação diofantina com duas variáveis $ax+by=c$ tem uma solução se $c$ for um múltiplo de $\gcd(a,b)$. No nosso caso, isso implica que $\gcd(a,b) = \gcd(c,d) = 1$, que é o que queremos mostrar.</p>
+
+<p>Claramente na iteração inicial $bc - ad = 1$. O que resta a ser mostrado é que os mediants retêm essa propriedade.</p>
+
+<p>Suponha que nossas duas frações adjacentes mantenham $bc - ad = 1$, depois que a mediant for adicionada à lista</p>
+
+<p>$$
+    \frac{a}{b}, \frac{a+c}{b+d}, \frac{c}{d}
+$$</p>
+
+<p>as novas expressões se tornam</p>
+
+<p>$$\begin{align}
+    b(a+c) - a(b+d) &amp;= 1 &#92;&#92;
+    c(b+d) - d(a+c) &amp;= 1
+\end{align}$$</p>
+
+<p>que, usando $bc-ad=1$, pode ser facilmente mostrado como verdadeiro.</p>
+
+<p>A partir disso, vemos que a propriedade é sempre mantida e, portanto, todas as frações são irredutíveis.</p>
+
+<p><strong>A presença de todas as frações.</strong> Essa prova está intimamente relacionada à localização de uma fração na árvore de Stern-Brocot. Na primeira propriedade, temos que a subárvore esquerda de uma fração contém apenas frações menores que a fração parente, e a subárvore direita contém apenas frações maiores que a fração parente. Isso significa que podemos procurar uma fração percorrendo a árvore a partir da raiz, indo para a esquerda se o alvo for menor que a fração e indo para a direita se o alvo for maior.</p>
+
+<p>Escolha uma fração alvo arbitrária positiva $\frac{x}{y}$. Obviamente, está entre $\frac{0}{1}$ e $\frac{1}{0}$, portanto, a única maneira de a fração não estar na árvore é se for necessário um número infinito de etapas para obter ela.</p>
+
+<p>Se for esse o caso, teríamos em todas as iterações:</p>
+
+<p>$$
+    \frac{a}{b} \lt \frac{x}{y} \lt \frac{c}{d}
+$$</p>
+
+<p>que (usando o fato de um número inteiro $z \gt 0 \iff z \ge 1$) pode ser reescrito como</p>
+
+<p>$$
+\begin{align}
+    bx - ay &amp;\ge 1 &#92;&#92;
+    cy - dx &amp;\ge 1.
+\end{align}
+$$</p>
+
+<p>Agora multiplique a primeira desigualdade por $c+d$ e a segunda por $a+b$ e adicione-as para obter</p>
+
+<p>$$
+    (c+d)(bx - ay) + (a+b)(cy - dx) \ge a+b+c+d.
+$$</p>
+
+<p>Expandindo isso e usando a propriedade mostrada anteriormente $bc-ad=1$, obtemos</p>
+
+<p>$$
+    x+y \ge a+b+c+d.
+$$</p>
+
+<p>E, considerando que a cada iteração, pelo menos um entre $a,b,c e d$ aumentará, o processo de busca pela fração não conterá mais que $x+y$ iterações. Isso contradiz a suposição de que o caminho para $\frac{x}{y}$ era infinito e, portanto, $\frac{x}{y}$ deve fazer parte da árvore.</p>
+
+<h2>Algoritmo de Construção de Árvore</h2>
+
+<p>Para construir qualquer subárvore da árvore Stern-Brocot, basta conhecer o ancestral esquerdo e direito. No primeiro nível, os ancestrais esquerdo e direito são $\frac{0}{1}$ e $\frac{1}{0}$. Usando isso, calculamos a <em>mediant</em> e avançamos um nível mais fundo, com a <em>mediant</em> substituindo o ancestral direito na subárvore esquerda e vice-versa.</p>
+
+<p>Este pseudocódigo tenta construir a árvore infinita inteira:</p>
+
+<pre><code class="cpp">void build(int a = 0, int b = 1, int c = 1, int d = 0, int level = 1) {
+    int x = a + c, y = b + d;
+
+    ... gera a fração atual x/y no nível atual da árvore
+
+    build(a, b, x, y, level + 1);
+    build(x, y, c, d, level + 1);
+}
+</code></pre>
+
+<h2>Algoritmo de pesquisa de frações</h2>
+
+<p>O algoritmo de pesquisa já foi descrito na prova de que todas as frações aparecem na árvore, mas vamos repeti-lo aqui. O algoritmo é um algoritmo de pesquisa binária. Inicialmente, estamos na raiz da árvore e comparamos nossa fração alvo com a fração atual. Se são iguais, terminamos e paramos o processo. Se nosso alvo for menor, passamos para o filho esquerdo, caso contrário, passamos para o filho direito.</p>
+
+<p>Aqui está uma implementação que retorna o caminho para uma determinada fração $\frac{x}{y}$ como uma sequência de caracteres <code>'L'</code> e <code>'R'</code>(esquerda-direita), significando passagem para o filho esquerdo e direito. Essa sequência de caracteres define exclusivamente todas as frações positivas e é chamada de sistema numérico de Stern-Brocot.</p>
+
+<pre><code class="cpp">string find(int x, int y, int a = 0, int b = 1, int c = 1, int d = 0) {
+    int m = a + c, n = b + d;
+    if (x == m &amp;&amp; y == n)
+        return "";
+    if (x*n &lt; y*m)
+        return 'L' + find(x, y, a, b, m, n);
+    else
+        return 'R' + find(x, y, m, n, c, d);
+}
+</code></pre>
+
+<p>Os números irracionais no sistema numérico de Stern-Brocot correspondem a sequências infinitas de caracteres. Ao longo do caminho sem fim em direção ao número irracional, o algoritmo encontrará frações reduzidas com denominadores gradualmente crescentes que fornecem aproximações cada vez melhores do número irracional. Assim, usando um prefixo da sequência infinita, é possível obter aproximações com a precisão desejada. <strong>Essa aplicação é importante na produção de relógios, o que explica por que a árvore foi descoberta nesse domínio</strong>.</p>
+
+<h2>Sequência de Farey</h2>
+
+<p>A sequência de Farey de ordem $n$ é a sequência ordenada de frações entre $0$ e $1$ cujos denominadores não excedem $n$.</p>
+
+<p>As sequências têm o nome do geólogo inglês John Farey, que em 1816 conjeturou que qualquer fração de uma sequência de Farey é a <a href="https://en.wikipedia.org/wiki/Mediant_(mathematics)">mediant</a> de seus vizinhos. Isso foi comprovado algum tempo depois por Cauchy, mas independente de ambos, o matemático Haros chegou quase à mesma conclusão em 1802.</p>
+
+<p>As seqüências do Farey têm muitas propriedades interessantes por conta própria, mas a conexão com a árvore Stern-Brocot é a mais óbvia. De fato, as seqüências do Farey podem ser obtidas "aparando os galhos" da árvore.</p>
+
+<p>Do algoritmo para construção da árvore Stern-Brocot, obtemos um algoritmo para as seqüências do Farey. Começando com a lista de frações $\frac{0}{1}, \frac{1}{0}$. A cada iteração subsequente, é inserido a <em>mediant</em> apenas se o denominador não exceder $n$. Em algum momento, a lista deixará de ser alterada e a sequência do Farey desejada será encontrada.</p>
+
+<h3>Comprimento de uma sequência de Farey</h3>
+
+<p>Uma sequência de Farey de ordem $n$ contém todos os elementos da sequência de Farey de ordem $n-1$ bem como todas as frações irredutíveis com o denominador $n$, mas o último é apenas o <em>totiente</em> $\varphi(n)$. Portanto, o comprimento $L_n$ da sequência de Farey de ordem $n$ é</p>
+
+<p>$$
+    L_n = L_{n-1} + \varphi(n)
+$$</p>
+
+<p>ou equivalentemente, revelando a recursão, obtemos</p>
+
+<p>$$
+    L_n = 1 + \sum_{k=1}^n \varphi(k).
+$$</p>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
