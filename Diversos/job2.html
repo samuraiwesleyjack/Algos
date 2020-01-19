@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trabalhos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Agendando trabalhos em duas máquinas</h1>
+
+<p>Esta tarefa consiste em encontrar uma programação ideal para $n$ trabalhos em duas máquinas. Cada item deve ser processado primeiro na primeira máquina e depois na segunda. O $i$-ésimo trabalho leva um tempo $a_i$ na primeira máquina e um tempo $b_i$ na segunda máquina. Cada máquina pode processar apenas um trabalho por vez.</p>
+
+<p>Queremos encontrar a ordem ideal dos trabalhos, para que o tempo final de processamento seja o mínimo possível.</p>
+
+<p>Essa solução discutida aqui é chamada de regra de Johnson (nomeada após S. M. Johnson).</p>
+
+<p>Vale ressaltar que a tarefa se torna <em>NP-completa</em>, se tivermos mais de duas máquinas.</p>
+
+<h2>Construção do algoritmo</h2>
+
+<p>Observe primeiro que podemos assumir que a ordem dos trabalhos para a primeira e a segunda máquina deve coincidir. De fato, como os trabalhos para a segunda máquina ficam disponíveis após processá-los na primeira, e se houver vários trabalhos disponíveis para a segunda máquina, o tempo de processamento será igual à soma de seus $b_i$, independentemente de ordem. Portanto, é apenas vantajoso enviar os trabalhos para a segunda máquina na mesma ordem em que foram enviados para a primeira máquina.</p>
+
+<p>Considere a ordem dos trabalhos, que coincide com a ordem de entrada(input) $1, 2, \dots, n$.</p>
+
+<p>Denotamos por $x_i$ o tempo ocioso da segunda máquina imediatamente antes de processar $i$.
+Nosso objetivo é minimizar o tempo ocioso total:
+$$F(x) = \sum x_i ~ \rightarrow \min$$</p>
+
+<p>Para o primeiro trabalho, temos $x_1 = a_1$.
+Para o segundo trabalho, como ele é enviado para a máquina no momento $a_1 + a_2$, e a segunda máquina é liberada em $x_1 + b_1$, temos $x_2 = \max\left((a_1 + a_2) - (x_1 + b_1), 0\right)$.
+No geral, obtemos a equação:
+$$x_k = \max\left(\sum_{i=1}^k a_i - \sum_{i=1}^{k-1} b_i - \sum_{i=1}^{k-1} x_i, 0 \right)$$</p>
+
+<p>Agora podemos calcular o <strong>tempo ocioso total</strong> $F(x)$.
+Alega-se que ele possui o formato
+$$F(x) = \max_{k=1 \dots n} K_i,$$
+onde
+$$K_i = \sum_{i=1}^k a_i - \sum_{i=1}^{k-1} b_i.$$
+Isso pode ser verificado usando indução.</p>
+
+<p>Agora usamos o <strong>método da permutação</strong>:
+trocaremos dois trabalhos vizinhos $j$ e $j+1$ e veremos como isso mudará o tempo ocioso total.</p>
+
+<p>Pela forma da expressão $K_i$, fica claro que apenas $K_j$ e $K_{j+1}$ mudam, denotamos seus novos valores com $K_j'$ e $K_{j+1}'$.</p>
+
+<p>Se essa alteração nos trabalhos $j$ e $j+1$ aumentou o tempo total ocioso, esse deve ser o caso:
+$$\max(K_j, K_{j+1}) \le \max(K_j', K_{j+1}')$$
+(Alternar dois trabalhos também pode não ter impacto. A condição acima é apenas suficiente, mas não necessária)</p>
+
+<p>Depois de remover $\sum_{i=1}^{j+1} a_i - \sum_{i=1}^{j-1} b_i$ de ambos os lados da desigualdade, obtemos:
+$$\max(-a_{j+1}, -b_j) \le \max(-b_{j+1}, -a_j)$$
+E depois de se livrar dos sinais negativos:
+$$\min(a_j, b_{j+1}) \le \min(b_j, a_{j+1})$$</p>
+
+<p>Assim, obtivemos um <strong>comparador</strong>:
+ao ordenar os trabalhos por ele, obtemos uma ordem ótima dos trabalhos, na qual não é possível alternar dois trabalhos com uma melhoria do tempo final, ou seja, não podemos mais melhorar o tempo, portanto, a ordem é ideal.</p>
+
+<p>No entanto, você pode simplificar ainda mais a classificação, se observar o comparador de um ângulo diferente. O comparador pode ser interpretado da seguinte maneira: se tivermos quatro vezes $(a_j, a_{j+1}, b_j, b_{j+1})$, e o mínimo deles for um tempo correspondente ao da primeira máquina, o trabalho correspondente deve ser feito primeiro.
+Se o tempo mínimo for um tempo da segunda máquina, deverá ser feito posteriormente.
+Assim, podemos ordenar os trabalhos por $\min(a_i, b_i)$, e, se o tempo de processamento do trabalho atual na primeira máquina for menor que o tempo de processamento na segunda máquina, esse trabalho deverá ser feito antes de todos os trabalhos restantes, e, caso contrário, depois de todas as tarefas restantes.</p>
+
+<p>De uma maneira ou de outra, acontece que, pela regra de Johnson, podemos resolver o problema ordenando os trabalhos e, assim, receber uma complexidade de tempo de $O(n \log n)$.</p>
+
+<h2>Implementação</h2>
+
+<p>Aqui, implementamos a segunda variação do algoritmo descrito.</p>
+
+<pre><code class="cpp">struct Job {
+    int a, b, idx;
+
+    bool operator&lt;(Job o) const {
+        return min(a, b) &lt; min(o.a, o.b);
+    }
+};
+
+vector&lt;Job&gt; johnsons_rule(vector&lt;Job&gt; trabalhos) {
+    sort(trabalhos.begin(), trabalhos.end());
+    vector&lt;Job&gt; a, b;
+    for (Job j : trabalhos) {
+        if (j.a &lt; j.b)
+            a.push_back(j);
+        else
+            b.push_back(j);
+    }
+    a.insert(a.end(), b.rbegin(), b.rend());
+    return a;
+}
+
+pair&lt;int, int&gt; finish_times(vector&lt;Job&gt; const&amp; trabalhos) {
+    int t1 = 0, t2 = 0;
+    for (Job j : trabalhos) {
+        t1 += j.a;
+        t2 = max(t2, t1) + j.b;
+    }
+    return make_pair(t1, t2);
+}
+</code></pre>
+
+<p>Todas as informações sobre cada trabalho são armazenadas em struct.
+A primeira função ordena todos os trabalhos e calcula a programação(cronograma) ideal. A segunda função calcula os tempos de término de ambas as máquinas, conforme um cronograma.</p>
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
