@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Subarray com a máxima/mínima soma - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Subarray com a máxima/mínima soma</h1>
+
+<p>Aqui, consideramos o problema de encontrar uma subarray com a soma máxima, bem como algumas de suas variações (incluindo o algoritmo para resolver esse problema online).</p>
+
+<h2>Declaração</h2>
+
+<p>Seja uma array de números $a[1 \ldots n]$. É necessário encontrar uma subarray $a[l \ldots r]$ com a soma máxima:</p>
+
+<p>$$ \max_{ 1 \le l \le r \le n } \sum_{i=l}^{r} a[i].$$</p>
+
+<p>Por exemplo, se todos os números inteiros na array $a[]$ fossem não negativos, a resposta seria a própria array.
+No entanto, a solução não é trivial quando a array pode conter números positivos e negativos.</p>
+
+<p>O problema de encontrar a subarray <strong>mínima</strong> é essencialmente o mesmo, você só precisa alterar os sinais de todos os números.</p>
+
+<h2>Algoritmo</h2>
+
+<p>Aqui consideramos um algoritmo quase óbvio. (A seguir, veremos outro algoritmo, que é um pouco mais difícil de criar/pensar, mas sua implementação é ainda mais curta)</p>
+
+<h3>Descrição</h3>
+
+<p>O algoritmo é bem simples.</p>
+
+<p>Introduzimos por conveniência a <strong>notação</strong>: $s[i] = \sum_{j=1}^{i} a[j]$. Ou seja, a array $s[i]$ é uma array de somas parciais da array $a[]$. Além disso, definimos $s[0] = 0$.</p>
+
+<p>Vamos agora iterar sobre o índice $r = 1 \ldots n$, e aprender como encontrar rapidamente o $l$ ideal, para cada valor atual $r$, no qual a soma máxima é alcançada na subarray $[l, r]$.</p>
+
+<p>Formalmente, isso significa que, para o $r$ atual, precisamos encontrar um $l$ (não excedendo $r$), para que o valor de $s[r] - s[l-1]$ seja máximo. Após uma transformação trivial, podemos ver que precisamos encontrar na array $s[]$ um mínimo no segmento $[0, r-1]$.</p>
+
+<p>A partir daqui, obtemos imediatamente uma solução: simplesmente armazenamos onde o mínimo atual está na array $s[]$. Usando esse mínimo, encontramos o índice ideal atual $l$ em $O(1)$, e, ao mover do índice atual $r$ para o próximo, simplesmente atualizamos esse mínimo.</p>
+
+<p>Obviamente, esse algoritmo funciona em $O(n)$ e é assintoticamente ideal.</p>
+
+<h3>Implementação</h3>
+
+<p>Para implementá-lo, não precisamos armazenar explicitamente uma array de somas parciais $s[]$ — precisaremos apenas do elemento atual dela.</p>
+
+<p>Primeiro, fornecemos uma solução que encontra uma resposta numérica simples sem encontrar os índices do segmento desejado:</p>
+
+<pre><code class="cpp">int ans = a[0], sum = 0, min_sum = 0;
+
+for (int r = 0; r &lt; n; ++r) {
+    sum += a[r];
+    ans = max(ans, sum - min_sum);
+    min_sum = min(min_sum, sum);
+}
+</code></pre>
+
+<p>Agora, fornecemos uma versão completa da solução, que também encontra os limites do segmento desejado:</p>
+
+<pre><code class="cpp">int ans = a[0], ans_l = 0, ans_r = 0;
+int sum = 0, min_sum = 0, min_pos = -1;
+
+for (int r = 0; r &lt; n; ++r) {
+    sum += a[r];
+    int cur = sum - min_sum;
+    if (cur &gt; ans) {
+        ans = cur;
+        ans_l = min_pos + 1;
+        ans_r = r;
+    }
+    if (sum &lt; min_sum) {
+        min_sum = sum;
+        min_pos = r;
+    }
+}
+</code></pre>
+
+<h2>Algoritmo</h2>
+
+<p>Aqui consideramos um algoritmo diferente. É um pouco mais difícil de entender, mas é mais elegante do que o descrito acima, e sua implementação é um pouco mais curta. Este algoritmo foi proposto por Jay Kadane em 1984.</p>
+
+<h3>Descrição</h3>
+
+<p>O algoritmo em si é o seguinte. Vamos percorrer a array e acumular a soma parcial atual em alguma variável $s$. Se em algum momento $s$ for negativo, apenas atribuímos $s=0$. Argumenta-se que o máximo de todos os valores aos quais a variável $s$ é atribuída durante o algoritmo será a resposta para o problema.</p>
+
+<p><strong>Prova:</strong></p>
+
+<p>Considere o primeiro índice quando a soma de $s$ se tornar negativa. Isso significa que, começando com uma soma parcial zero, obteremos eventualmente, uma soma parcial negativa - portanto, todo esse prefixo da array, assim como qualquer sufixo, possui uma soma negativa. Portanto, essa subarray nunca contribui para a soma parcial de qualquer subarray do qual é um prefixo e pode ser simplesmente eliminado.</p>
+
+<p>No entanto, isso não é suficiente para provar o algoritmo. No algoritmo, na verdade estamos limitados a encontrar a resposta apenas para os segmentos que começam imediatamente após, apenas, nos locais em que $s&lt;0$ aconteceu.</p>
+
+<p>Mas, de fato, considere um segmento arbitrário  $[l,r]$, e $l$ não está em uma posição tão "crítica" (ou seja, $l > p+1$, em que $p$ é a última dessas posições, em que $s&lt;0$). Como a última posição crítica é estritamente anterior à de $l-1$, acontece que, a soma de $a[p+1 \ldots l-1]$ é não negativa. Isso significa que, movendo $l$ para a posição $p+1$, aumentaremos a resposta ou, em casos extremos, não a alteraremos.</p>
+
+<p>De uma forma ou de outra, acontece que, ao procurar uma resposta, você pode limitar-se a apenas segmentos que começam imediatamente após as posições em que $s&lt;0$ aparecem. Isso prova que o algoritmo está correto.</p>
+
+<h3>Implementação</h3>
+
+<p>Como no primeiro algoritmo, fornecemos antes uma implementação simplificada que procura apenas uma resposta numérica sem encontrar os limites do segmento desejado:</p>
+
+<pre><code class="cpp">int ans = a[0], sum = 0;
+
+for (int r = 0; r &lt; n; ++r) {
+    sum += a[r];
+    ans = max(ans, sum);
+    sum = max(sum, 0);
+}
+</code></pre>
+
+<p>Uma solução completa, mantendo os índices dos limites do segmento correspondente:</p>
+
+<pre><code class="cpp">int ans = a[0], ans_l = 0, ans_r = 0;
+int sum = 0, minus_pos = -1;
+
+for (int r = 0; r &lt; n; ++r) {
+    sum += a[r];
+    if (sum &gt; ans) {
+        ans = sum;
+        ans_l = minus_pos + 1;
+        ans_r = r;
+    }
+    if (sum &lt; 0) {
+        sum = 0;
+        minus_pos = r;
+    }
+}
+</code></pre>
+
+<h2>Tarefas relacionadas</h2>
+
+<h3>Localizando a subarray máxima/mínima com restrições</h3>
+
+<p>Se a condição do problema impuser restrições adicionais ao segmento necessário $[l,r]$ (por exemplo, que o comprimento $r-l+1$ do segmento deva estar dentro dos limites especificados), é provável que o algoritmo descrito seja facilmente generalizado para esses casos - de qualquer maneira, o problema ainda será encontrar o mínimo na array $s[]$ com as restrições adicionais.</p>
+
+<h3>Procurar a submatriz máxima / mínima</h3>
+
+<p>O problema descrito neste artigo é naturalmente generalizado para grandes dimensões. Por exemplo, em um caso bidimensional, ele se transforma em uma pesquisa para essa submatriz $[l_1 \ldots r_1; l_2 \ldots r_2]$ de uma determinada matriz, que possui a soma máxima de números.</p>
+
+<p>Usando a solução para o caso unidimensional, é fácil obter uma solução em $O(n^3)$ para o caso de duas dimensões: iteramos sobre todos os valores possíveis de $l_1$ e $r_1$, e calculamos as somas de $l_1$ a $r_1$ em cada linha da matriz. Agora temos o problema unidimensional de encontrar os índices $l_2$ e $r_2$ nessa array, que já podem ser resolvidos em tempo linear.</p>
+
+<p>Algoritmos mais rápidos para resolver esse problema são conhecidos, mas não muito mais rápidos que $O(n^3)$, e são muito complexos (tão complexos que muitos deles são inferiores ao algoritmo trivial para todas as restrições razoáveis ​​pela constante oculta). Atualmente, o algoritmo mais conhecido funciona em tempo $O\left(n^3 \frac{ \log^3 \log n }{ \log^2 n} \right)$ (T. Chan 2007 "More algorithms for all-pairs shortest paths in weighted graphs")</p>
+
+<p>Esse algoritmo por Chan, assim como muitos outros resultados nessa área, descreve de fato uma multiplicação rápida de matrizes (onde multiplicação de matrizes significa multiplicação modificada: o mínimo é usado em vez de adição e a adição é usada em vez de multiplicação). O problema de encontrar a submatriz com a maior soma pode ser reduzido ao problema de encontrar os caminhos mais curtos entre todos os pares de vértices, e esse problema, por sua vez, pode ser reduzido a essa multiplicação de matrizes.</p>
+
+<h3>Procure uma subarray com uma média máxima/mínima</h3>
+
+<p>Esse problema está em encontrar um segmento $a[l,r]$, de modo que o valor médio seja máximo:</p>
+
+<p>$$ \max_{l \le r} \frac{ 1 }{ r-l+1 } \sum_{i=l}^{r} a[i].$$</p>
+
+<p>Obviamente, se nenhuma outra condição for imposta ao segmento $[l,r]$, então a solução sempre será um segmento de comprimento $1$ no elemento máximo da array. 
+O problema só faz sentido se houver restrições adicionais (por exemplo, o comprimento do segmento desejado é delimitado abaixo).</p>
+
+<p>Nesse caso, aplicamos a <strong>técnica padrão</strong> ao trabalhar com os problemas do valor médio: selecionaremos o valor médio máximo desejado com uma <strong>binary search</strong>.</p>
+
+<p>Para fazer isso, precisamos aprender a resolver o seguinte subproblema: dado o número $x$, e precisamos verificar se existe uma subarray da array $a[]$ (satisfazendo todas as restrições adicionais do problema ), em que o valor médio é maior que $x$.</p>
+
+<p>Para resolver esse subproblema, subtraia $x$ de cada elemento da array $a[]$. Então nosso subproblema se transforma neste: se há ou não somas positivas de subarrays nessa array. E já sabemos como resolver esse problema.</p>
+
+<p>Assim, obtivemos a solução com um comportamento assintótico $O(T(n) \log W)$, em que $W$ é a precisão necessária, $T(n)$ é o tempo de resolver a subtarefa para uma array de tamanho $n$ (que pode variar dependendo das restrições adicionais específicas impostas).</p>
+
+<h3>Resolvendo o problema online</h3>
+
+<p>A condição do problema é a seguinte: dada uma array de $n$ números e um número $L$. Existem consultas $(l,r)$, e, em resposta a cada consulta, é necessário encontrar uma subarray do segmento $[l,r]$ de tamanho não inferior a $L$ com a máximo possível média aritmética.</p>
+
+<p>O algoritmo para resolver esse problema é bastante complexo. KADR (Yaroslav Tverdokhleb) descreveu seu algoritmo no <a href="http://e-maxx.ru/forum/viewtopic.php?id=410">fórum Russo</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
