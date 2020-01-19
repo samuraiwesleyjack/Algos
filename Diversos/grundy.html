@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Teorema de Sprague-Grundy, Nim - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Teorema de Sprague-Grundy, Nim</h1>
+
+<h2>Introdução</h2>
+
+<p>Este teorema descreve o chamado <strong>jogo imparcial</strong> para dois jogadores, ou seja, aquele em que os movimentos disponíveis e a vitória / derrota dependem apenas do estado do jogo. Em outras palavras, a única diferença entre os dois jogadores é que um deles se move primeiro.</p>
+
+<p>Além disso, assumimos que o jogo possui <strong>informações perfeitas</strong>, ou seja, nenhuma informação está oculta dos jogadores (eles conhecem as regras e os possíveis movimentos).</p>
+
+<p>Supõe-se que o jogo seja <strong>finito</strong>, ou seja, após um certo número de jogadas, um dos jogadores terminará em uma posição perdedora - da qual não poderá se mover para outra posição. Por outro lado, o jogador que configurou esta posição para o oponente vence. Compreensivelmente, não há empates neste jogo.</p>
+
+<p>Esses jogos podem ser completamente descritos por um <em>grafo direcionado acíclico</em>: os vértices são estados do jogo e as arestas são transições (movimentos).
+Um vértice sem arestas de saída é um vértice perdedor (um jogador que deve fazer um movimento a partir desse vértice perde).</p>
+
+<p>Como não há empates, podemos classificar todos os estados do jogo como <strong>vencedor</strong> ou <strong>perdedor</strong>.
+Os estados vencedores são aqueles dos quais existe uma jogada que causa a inevitável derrota do outro jogador, mesmo com sua melhor resposta. Estados perdedores são aqueles dos quais todos os movimentos levam a estados vencedores para o outro jogador. Resumindo, um estado está vencendo se houver pelo menos uma transição para um estado perdedor e está perdendo se não houver pelo menos uma transição para um estado perdedor.</p>
+
+<p>Nossa tarefa é classificar os estados de um determinado jogo.</p>
+
+<p>A teoria desses jogos foi desenvolvida independentemente por Roland Sprague em 1935 e Patrick Michael Grundy em 1939.</p>
+<em><a href="https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem">wiki</a>¹, <a href="http://web.mit.edu/sp.268/www/nim.pdf">artigo</a>²</em>
+
+<h2>Nim</h2>
+
+<p>Este jogo obedece às restrições descritas acima. Além disso, qualquer jogo imparcial para dois jogadores com informações perfeitas pode ser reduzido ao jogo de Nim. O estudo deste jogo nos permitirá resolver todos os outros jogos semelhantes, mais sobre isso mais tarde.</p>
+
+<p>Historicamente, este jogo era popular nos tempos antigos. Sua origem provavelmente está na China - ou pelo menos o jogo Jianshizi é muito parecido. Na Europa, as primeiras referências a ele são do século XVI. O nome foi dado por Charles Bouton, que em 1901 publicou uma análise completa deste jogo.</p>
+
+<h3>Descrição do jogo</h3>
+
+<p>Existem várias pilhas, cada uma com várias pedras. Em um movimento, um jogador pode pegar qualquer número positivo de pedras de qualquer pilha e jogá-las fora. Um jogador perde se não puder fazer um movimento, o que acontece quando todas as pilhas estão vazias.</p>
+
+<p>O estado do jogo é descrito por um <em>multiset</em> de números inteiros positivos. Um movimento consiste em diminuir estritamente um número inteiro escolhido (se ele se torna zero, é removido do conjunto).</p>
+
+<h3>Solução</h3>
+
+<p>A solução de Charles L. Bouton é semelhante da seguinte forma:</p>
+
+<p><strong>Teorema</strong>:
+O jogador atual tem uma estratégia vencedora se, e somente se, o <strong>xor-sum</strong> dos tamanhos das pilhas for diferente de zero.
+O <strong>xor-sum</strong> de uma sequência $a$ será: $a_1 \oplus a_2 \oplus \ldots \oplus  a_n$, em que $\oplus$ é o <em>bitwise exclusive or</em>.</p>
+
+<p><strong>Prova.</strong>
+A "chave" da prova é a presença de uma <strong>estratégia simétrica para o oponente</strong>.
+Mostramos que, uma vez em uma posição com a xor-sum igual a zero, o jogador não poderá torná-lo diferente de zero a longo prazo - se fizer a transição para uma posição com uma soma-xor diferente de zero, o oponente sempre terá um movimento retornando o xor-sum de volta a zero.</p>
+
+<p>Vamos provar o teorema por indução matemática.</p>
+
+<p>Para um Nim vazio (onde todas as pilhas estão vazias, ou seja, o multiset está vazio), a xor-sum é zero e o teorema é verdadeiro.</p>
+
+<p>Agora, suponha que estejamos em um estado não vazio. Usando a suposição de indução (e a aciclicidade do jogo), assumimos que o teorema é comprovado para todos os estados alcançáveis ​​a partir do atual.</p>
+
+<p>Então a prova se divide em duas partes: se para a posição atual a  <em>xor-sum</em> $s = 0$, temos que provar que esse estado está perdendo, ou seja, todos os estados alcançáveis ​​possuem <em>xor-sum</em> $t \neq 0$.
+Se $s \neq 0$, temos que provar que há uma mudança que leva a um estado com $t = 0$.</p>
+
+<ul>
+<li>Seja $s = 0$ e vamos considerar qualquer jogada. Esse movimento reduz o tamanho de uma pilha $x$ para um tamanho $y$.
+Usando propriedades elementares de $\oplus$, teremos</li>
+</ul>
+
+<p>$$t = s \oplus x \oplus y = 0 \oplus x \oplus y = x \oplus y$$</p>
+
+<p>Como $y &lt; x$, $y \oplus x$ não pode ser zero, então $t \neq 0$.
+Isso significa que qualquer estado alcançável é vencedor (pelo pressuposto da indução), então estamos em uma posição perdedora.</p>
+
+<ul>
+<li>Seja $s \neq 0$.
+Considere a representação binária do número $s$.
+Seja $d$ o número do bit diferente de zero e com o maior valor.
+Nosso movimento será em uma pilha cujo número do tamanho em bits $d$ é definido (ele deve existir, caso contrário, o bit não seria definido(set) em $s$).
+Reduziremos seu tamanho de $x$ para $y = x \oplus s$.
+Todos os bits em posições maiores que $d$ em $x$ e $y$ correspondem e o bit $d$ é definido(setado, set) em $x$ mas não em $y$.
+Portanto, $y &lt; x$, é tudo o que precisamos para um movimento ser legal. Agora temos:
+</li>
+</ul>
+
+<p>$$ t = s \oplus x \oplus y = s \oplus x \oplus (s \oplus x) = 0$$</p>
+
+<p>Isso significa que encontramos um estado alcançável e perdedor (pelo pressuposto da indução) e o estado atual está vencendo.</p>
+
+<p><strong>Corolário.</strong>
+Qualquer estado de Nim pode ser substituído por um estado equivalente, desde que o xor-sum não seja alterado. Além disso, ao analisar um Nim com várias pilhas, podemos substituí-lo por uma única pilha de tamanho $s$.</p>
+
+<h2>A equivalência de jogos imparciais e Nim (teorema de Sprague-Grundy)</h2>
+
+<p>Agora veremos como encontrar, para qualquer estado de jogo imparcial, um estado correspondente de Nim.</p>
+
+<h3>Lema sobre Nim</h3>
+
+<p>Consideramos a seguinte modificação no Nim: também permitimos <strong>adicionar pedras a uma pilha escolhida</strong>.
+As regras exatas sobre como e quando o aumento é permitido <strong>não nos interessam</strong>, no entanto, as regras devem manter nosso jogo <strong>acíclico</strong>. Nas seções posteriores, exemplos de jogos são considerados.</p>
+
+<p><strong>Lema.</strong>
+As adições em Nim não muda a maneira como os estados vencedores e perdedores são determinados. Em outras palavras, os aumentos são inúteis e não precisamos usá-los em uma estratégia vencedora.</p>
+
+<p><strong>Prova.</strong>
+Suponha que um jogador tenha adicionado pedras a uma pilha. Então seu oponente pode simplesmente desfazer sua jogada - diminuir o número de volta ao valor anterior. Como o jogo é acíclico, mais cedo ou mais tarde o jogador atual não poderá usar um movimento de aumento e precisará executar o movimento do Nim usual.</p>
+
+<h3>Teorema de Sprague-Grundy</h3>
+
+<p>Vamos considerar um estado $v$ de um jogo imparcial para dois jogadores e deixar que $v_i$ sejam os estados acessíveis (em que $i \in &#123; 1, 2, \dots, k &#125; , k \ge 0$).
+Para esse estado, podemos atribuir um jogo totalmente equivalente ao de Nim com uma pilha de tamanho $x$.
+O número $x$ é chamado de "valor Grundy" ou "valor nim" do estado $v$.</p>
+
+<p>Além disso, esse número pode ser encontrado da seguinte maneira recursiva:</p>
+
+<p>$$ x = \text{mex} &#123; x_1, \ldots, x_k &#125;, $$</p>
+
+<p>em que $x_i$ é o valor Grundy para o estado $v_i$ e a função $\text{mex}$ (<em>minimum excludant</em>) é o menor número inteiro não negativo não encontrado no conjunto fornecido.</p>
+
+<p>Vendo o jogo como um grafo, podemos calcular gradualmente os valores Grundy a partir de vértices sem arestas de saída. O valor de Grundy igual a zero significa que um estado é perdedor.</p>
+
+<p><strong>Prova.</strong>
+Usaremos uma prova por indução.</p>
+
+<p>Para vértices sem movimento, o valor $x$ é o $\text{mex}$ de um conjunto vazio, o que é zero.
+Isso está correto, pois um Nim vazio está perdendo.</p>
+
+<p>Agora considere qualquer outro vértice $v$.
+Por indução, assumimos que os valores $x_i$ correspondentes aos seus vértices alcançáveis ​​já estão calculados.</p>
+
+<p>Seja $p = \text{mex} &#123; x_1, \ldots, x_k &#125;$.
+Então sabemos que para qualquer número inteiro $i \in [0, p)$ existe um vértice alcançável com o valor Grundy $i$.
+Isso significa que $v$ é <strong>equivalente a um estado do jogo de Nim com adições e com uma pilha de tamanho $p$</strong>.
+Nesse jogo, temos transições para pilhas de todos os tamanhos menores que $p$ e, possivelmente, transições para pilhas com tamanhos maiores que $p$.
+Portanto, $p$ é realmente o valor Grundy desejado para o estado atualmente considerado.</p>
+
+<h2>Aplicação do teorema</h2>
+
+<p>Por fim, descrevemos um algoritmo para determinar o resultado de vitória / perda de um jogo, aplicável a qualquer jogo imparcial para dois jogadores.</p>
+
+<p>Para calcular o valor Grundy de um determinado estado, você precisa:</p>
+
+<ul>
+<li><p>Obtenha todas as transições possíveis desse estado</p></li>
+<li><p>Cada transição pode levar a uma soma de jogos independentes (um jogo no caso degenerado). Calcule o valor Grundy para cada jogo independente e faça uma xor-sum para eles.
+Claro que o xor não faz nada se houver apenas um jogo.</p></li>
+<li><p>Depois de calcularmos os valores Grundy para cada transição, encontramos o valor do estado como o $\text{mex}$ desses números.</p></li>
+<li><p>Se o valor for zero, o estado atual está perdendo, caso contrário, está ganhando.</p></li>
+</ul>
+
+<p>Em comparação com a seção anterior, levamos em conta o fato de que pode haver transições para jogos combinados. Nós os consideramos um Nim com tamanhos de pilha iguais aos valores Grundy dos jogos independentes. Nós podemos fazer a xor-sum para eles assim como em um Nim usual, de acordo com o teorema de Bouton.</p>
+
+<h2>Padrões em valores Grundy</h2>
+
+<p>Muitas vezes, ao resolver tarefas específicas usando valores Grundy, pode ser benéfico estudar a tabela de valores em busca de padrões.</p>
+
+<p>Em muitos jogos, o que pode parecer bastante difícil para a análise teórica, os valores de Grundy acabam sendo periódicos ou de uma forma facilmente compreensível. Na esmagadora maioria dos casos, o padrão observado acaba sendo verdadeiro e pode ser provado por indução, se desejado.</p>
+
+<p>No entanto, os valores de Grundy estão longe de sempre conter tais regularidades e, mesmo para alguns jogos muito simples, o problema de perguntar se essas regularidades ainda existem estão em aberto (por exemplo: "Grundy's game").</p>
+
+<h2>Exemplos de jogos</h2>
+
+<h3>Crosses-crosses</h3>
+
+<p><strong>Regras.</strong>
+Considere uma faixa quadriculada de tamanho $1 \times n$. Em um movimento, o jogador deve colocar uma cruz, mas é proibido colocar duas cruzes próximas umas das outras (nas células adjacentes). Como sempre, o jogador sem uma jogada válida perde.</p>
+
+<p><strong>Solução.</strong>
+Quando um jogador coloca uma cruz em qualquer célula, podemos pensar na faixa sendo dividida em duas partes independentes: à esquerda da cruz e à direita dela. Nesse caso, a célula com uma cruz, assim como seus vizinhos esquerdo e direito, são destruídos - nada mais pode ser colocado neles. Portanto, se numerarmos as células de $1$ a $n$ e então colocar a cruz na posição $1 &lt; i &lt; n$ quebra a tira em duas tiras de comprimento $i-2$ e $n-i-1$ ou seja, vamos para o soma dos jogos $i-2$ e $n-i-1$.
+Para o caso da aresta da cruz sendo marcado na posição $1$ ou $n$, vamos para o jogo $n-2$.</p>
+
+<p>Assim, o valor de Grundy $g(n)$ tem a forma:</p>
+
+<p>$$g(n) = \text{mex} \Bigl( &#123; g(n-2) &#125; \cup &#123;g(i-2) \oplus g(n-i-1) \mid 2 \leq i \leq n-1&#125; \Bigr) .$$</p>
+
+<p>Portanto, temos uma solução em $O(n^2)$.</p>
+
+<p>De fato, $g(n)$ tem um período de comprimento 34 começando com $n=52$.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
