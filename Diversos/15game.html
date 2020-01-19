@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>15 Puzzle Game - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>15 Puzzle Game: Existência da Solução</h1>
+
+<p>Este jogo é jogado em um tabuleiro $4 \times 4$. Neste tabuleiro, existem $15$ peças numeradas de 1 a 15. Uma célula é deixada vazia (indicada por 0). Você precisa colocar o tabuleiro na posição apresentada abaixo movendo repetidamente uma das peças para o espaço livre:</p>
+
+<p>$$\begin{matrix} 1 &amp; 2 &amp; 3 &amp; 4 &#92;&#92; 5 &amp; 6 &amp; 7 &amp; 8 &#92;&#92; 9 &amp; 10 &amp; 11 &amp; 12 &#92;&#92; 13 &amp; 14 &amp; 15 &amp; 0 \end{matrix}$$</p>
+
+<p>O jogo "15 Puzzle" foi criado por Noyes Chapman em 1880.</p>
+
+<h2>Existência da solução</h2>
+
+<p>Vamos considerar este problema: dada uma posição no tabuleiro, determine se existe uma sequência de movimentos que leva a uma solução.</p>
+
+<p>Suponha que tenhamos alguma posição no tabuleiro:</p>
+
+<p>$$\begin{matrix} a_1 &amp; a_2 &amp; a_3 &amp; a_4 &#92;&#92; a_5 &amp; a_6 &amp; a_7 &amp; a_8 &#92;&#92; a_9 &amp; a_{10} &amp; a_{11} &amp; a_{12} &#92;&#92; a_{13} &amp; a_{14} &amp; a_{15} &amp; a_{16} \end{matrix}$$</p>
+
+<p>onde um dos elementos é igual a zero e indica uma célula vazia $a_z  = 0$</p>
+
+<p>Vamos considerar a permutação:</p>
+
+<p>$$a_1 a_2 ... a_{z-1} a_{z+1} ... a_{15} a_{16}$$</p>
+
+<p>ou seja, a permutação de números correspondentes à posição no quadro sem um elemento zero</p>
+
+<p>Seja $N$ o número de inversões nessa permutação (ou seja, o número de tais elementos $a_i$ e $a_j$  em que $i &lt; j$, mas $a_i  > a_j$).</p>
+
+<p>Suponha que $K$ seja um índice de uma linha onde o elemento vazio está localizado (ou seja, usando nossa convenção, $K = (z - 1) \div \ 4 + 1$).</p>
+
+<p>Assim, <strong>a solução existe se $N + K$ for par</strong>.</p>
+
+<h2>Implementação</h2>
+
+<p>O algoritmo acima pode ser ilustrado com o seguinte código:</p>
+
+<pre><code class="cpp">int a[16];
+for (int i=0; i&lt;16; ++i)
+    cin &gt;&gt; a[i];
+
+int inv = 0;
+for (int i=0; i&lt;16; ++i)
+    if (a[i])
+        for (int j=0; j&lt;i; ++j)
+            if (a[j] &gt; a[i])
+                ++inv;
+for (int i=0; i&lt;16; ++i)
+    if (a[i] == 0)
+        inv += 1 + i / 4;
+
+puts ((inv &amp; 1) ? "No Solution" : "Solution Exists");
+</code></pre>
+
+<h2>Prova</h2>
+
+<p>Em 1879, Johnson provou que, se $N + K$ é ímpar, a solução não existe e, no mesmo ano, Story provou que todas as posições em que $N + K$ é par têm uma solução.</p>
+
+<p>No entanto, todas essas provas eram bastante complexas.</p>
+
+<p>Em 1999, Archer propôs uma prova muito mais simples (você pode fazer o download do artigo dele <a href="http://www.cs.cmu.edu/afs/cs/academic/class/15859-f01/www/notes/15-puzzle.pdf">aqui</a>).</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.hackerrank.com/challenges/n-puzzle">Hackerrank - N-puzzle</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
