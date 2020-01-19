@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Josephus Problem - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Problema de Josephus</h1>
+
+<h2>Declaração</h2>
+
+<p>Recebemos os números naturais $n$ e $k$.
+Todos os números naturais de $1$ a $n$ são escritos em um círculo. Primeiro, conte o $k$-ésimo número a partir do primeiro e exclua-o. Em seguida, os $k$ números são contados a partir do próximo e o $k$-ésimo é removido novamente e assim por diante. O processo para quando um número permanece. É necessário encontrar o último número.</p>
+
+<p>Esta tarefa foi definida por Flavius ​​Josephus no século I (embora em uma formulação um pouco mais restrita: para $k = 2$).</p>
+
+<p>Esse problema pode ser resolvido modelando o procedimento. A modelagem de força bruta funcionará em $O(n^{2})$. Usando uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a>, podemos melhorá-la para $O(n \log n)$.
+Queremos algo ainda melhor.</p>
+
+<h2>Modelando uma solução $O(n)$</h2>
+
+<p>Vamos tentar encontrar um padrão que expresse a resposta para o problema $J_{n, k}$ através da solução dos problemas anteriores.</p>
+
+<p>Usando a modelagem de força bruta, podemos construir uma tabela de valores, por exemplo, o seguinte:</p>
+
+<p>$$\begin{array}{ccccccccccc}
+n\setminus k &amp; 1 &amp; 2 &amp; 3 &amp; 4 &amp; 5 &amp; 6 &amp; 7 &amp; 8 &amp; 9 &amp; 10 &#92;&#92;
+1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &#92;&#92;
+2 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &amp; 2 &amp; 1 &#92;&#92;
+3 &amp; 3 &amp; 3 &amp; 2 &amp; 2 &amp; 1 &amp; 1 &amp; 3 &amp; 3 &amp; 2 &amp; 2 &#92;&#92;
+4 &amp; 4 &amp; 1 &amp; 1 &amp; 2 &amp; 2 &amp; 3 &amp; 2 &amp; 3 &amp; 3 &amp; 4 &#92;&#92;
+5 &amp; 5 &amp; 3 &amp; 4 &amp; 1 &amp; 2 &amp; 4 &amp; 4 &amp; 1 &amp; 2 &amp; 4 &#92;&#92;
+6 &amp; 6 &amp; 5 &amp; 1 &amp; 5 &amp; 1 &amp; 4 &amp; 5 &amp; 3 &amp; 5 &amp; 2 &#92;&#92;
+7 &amp; 7 &amp; 7 &amp; 4 &amp; 2 &amp; 6 &amp; 3 &amp; 5 &amp; 4 &amp; 7 &amp; 5 &#92;&#92;
+8 &amp; 8 &amp; 1 &amp; 7 &amp; 6 &amp; 3 &amp; 1 &amp; 4 &amp; 4 &amp; 8 &amp; 7 &#92;&#92;
+9 &amp; 9 &amp; 3 &amp; 1 &amp; 1 &amp; 8 &amp; 7 &amp; 2 &amp; 3 &amp; 8 &amp; 8 &#92;&#92;
+10 &amp; 10 &amp; 5 &amp; 4 &amp; 5 &amp; 3 &amp; 3 &amp; 9 &amp; 1 &amp; 7 &amp; 8 &#92;&#92;
+\end{array}$$</p>
+
+<p>E aqui podemos ver claramente o seguinte padrão:</p>
+
+<p>$$J_ {n, k} = (J _ {(n-1), k} + k - 1) \ \bmod n + 1 $$
+$$J_ {1, k} = 1 $$</p>
+
+<p>Aqui, a indexação 1 cria uma fórmula um pouco confusa; se numerar as posições de 0, é possível obter uma fórmula muito mais elegante(top-notch):</p>
+
+<p>$$J_ {n, k} = (J _ {(n-1), k} + k) \ \bmod n$$</p>
+
+<p>Então, encontramos uma solução para o problema de Josephus, trabalhando com $O(n)$ operações.</p>
+
+<h2>Implementação</h2>
+
+<p>Implementação <strong>recursiva</strong> simples (1-indexing)</p>
+
+<pre><code class="cpp">int josephus(int n, int k) {
+    return n &gt; 1 ? (joseph(n-1, k) + k - 1) % n + 1 : 1;
+}
+</code></pre>
+
+<p><strong>Não-recursiva</strong> :</p>
+
+<pre><code class="cpp">int josephus(int n, int k) {
+    int res = 0;
+    for (int i = 1; i &lt;= n; ++i)
+      res = (res + k) % i;
+    return res + 1;
+}
+</code></pre>
+
+<p>Essa fórmula também pode ser encontrada analiticamente. Novamente, aqui assumimos a indexação 0. Depois de excluir o primeiro número, temos os $n-1$ números restantes.
+Quando repetimos o procedimento, começaremos com o número que originalmente tinha o índice $k \bmod m$.
+$J_{(n-1), k}$ seria a resposta para o círculo restante se começássemos a contar com 0, mas como na verdade começamos com $k$ temos $J_ {n, k} = (J _ {(n-1), k} + k) \ \bmod n$.</p>
+
+<h2>Modelando uma solução $O(k \log n)$</h2>
+
+<p>Fara $k$'s relativamente pequenos, podemos encontrar uma solução melhor do que a solução recursiva acima em $O(n)$.
+Se $k$ é muito menor que $n$, podemos excluir vários números ($\lfloor \frac{n}{k} \rfloor$) em uma execução sem repetir o loop. Depois, temos $n - \lfloor \frac{n}{k} \rfloor$ números restantes, e começamos com o $(\lfloor \frac{n}{k} \rfloor \cdot n)$-ésimo número.
+Então, temos que mudar por esse tanto.
+Podemos notar que $\lfloor \frac{n}{k} \rfloor \cdot n$ é simplesmente $n \bmod k$.
+E como removemos todo $k$-ésimo número, precisamos adicionar o número de números que removemos antes do índice resultante.</p>
+
+<p>Além disso, precisamos lidar com o caso quando $n$ se torna menor que $k$. Nesse caso, a otimização acima causaria um loop infinito.</p>
+
+<p><strong>Implementação</strong>:</p>
+
+<pre><code class="cpp">int josephus(int n, int k) {
+    if (n == 1)
+        return 0;
+    if (k == 1)
+        return n-1;
+    if (k &gt; n)
+        return (joseph(n-1, k) + k) % n;
+    int cnt = n / k;
+    int res = joseph(n - cnt, k);
+    res -= n % k;
+    if (res &lt; 0)
+        res += n;
+    else
+        res += res / (k - 1);
+    return res;
+}
+</code></pre>
+
+<p>Vamos estimar a <strong>complexidade</strong> desse algoritmo. Observe imediatamente que o caso $n &lt; k$ é analisado pela solução antiga, que funcionará nesse caso por $O(k)$. Agora considere o próprio algoritmo. De fato, após cada iteração, em vez de $n$ números, ficamos com $n \left( 1 - \frac{1}{k} \right)$ números, portanto, o número total de iterações $x$ do algoritmo pode ser encontrado aproximadamente a partir da seguinte equação:</p>
+
+<p>$$ n \left(1 - \frac{1}{k} \right) ^ x = 1, $$</p>
+
+<p>tomando logaritmo de ambos os lados, obtemos:</p>
+
+<p>$$\ln n + x \ln \left(1 - \frac{1}{k} \right) = 0,$$ 
+$$x = - \frac{\ln n}{\ln \left(1 - \frac{1}{k} \right)},$$</p>
+
+<p>usando a decomposição do logaritmo em séries de Taylor, obtemos uma estimativa aproximada:</p>
+
+<p>$$x \approx k \ln n$$</p>
+
+<p>Assim, a complexidade do algoritmo é $O (k \log n)$.</p>
+
+<h2>Solução analítica para $k = 2$</h2>
+
+<p>Nesse caso em particular (no qual essa tarefa foi definida por Josephus Flavius), o problema é resolvido com muito mais facilidade.</p>
+
+<p>No caso de um $n$ par, obtemos que todos os números pares serão riscados e, em seguida, haverá um problema restando para $\frac{n}{2}$, e a resposta para $n$ será obtida pela resposta usando $\frac{n}{2}$ multiplicando por dois e subtraindo um (trocando a posição):</p>
+
+<p>$$ J_{2n, 2} = 2 J_{n, 2} - 1 $$</p>
+
+<p>Da mesma forma, no caso de um $n$ , ímpar, todos os números pares serão riscados, e então o primeiro número, e permanecerá o problema para $\frac{n-1}{2}$, e, levando em consideração a mudança de posições, obtemos a segunda fórmula:</p>
+
+<p>$$J_{2n+1,2} = 2 J_{n, 2} + 1 $$</p>
+
+<p>Podemos usar essa dependência recorrente diretamente em nossa implementação. Esse padrão pode ser traduzido para outra forma: $J_{n, 2}$ representa uma sequência de todos os números ímpares, "reiniciando" a partir de um, sempre que $n$ for uma potência de dois. Isso pode ser escrito como uma fórmula única:</p>
+
+<p>$$J_{n, 2} = 1 + 2 \left(n-2^{\lfloor \log_2 n \rfloor} \right)$$</p>
+
+<h2>Solução analítica para $k > 2$</h2>
+
+<p>Apesar da forma simples do problema e de um grande número de artigos sobre esse e outros problemas relacionados, ainda não foi encontrada uma representação analítica simples da solução do problema de Josephus. Para pequenos $k$, derivam-se algumas fórmulas, mas aparentemente todas são difíceis de aplicar na prática (por exemplo, consulte Halbeisen, Hungerbuhler "The Josephus Problem" e Odlyzko, Wilf "Functional iteration and the Josephus problem").</p>
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
