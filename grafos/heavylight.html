@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Heavy-light decomposition - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Heavy-light decomposition</h1>
+
+<p><strong>Heavy-light decomposition</strong> é uma técnica generalizada que nos permite resolver efetivamente muitos problemas que se resumem a <strong>consultas</strong> <em>(queries)</em><strong> em uma árvore</strong>.</p>
+
+<h2>Descrição</h2>
+
+<p>Seja $G$ uma árvore de $n$ vértices, com uma raiz arbitrária.</p>
+
+<p>A essência dessa decomposição na árvore é <strong>dividir a árvore em vários caminhos</strong> para que possamos alcançar o vértice raiz de qualquer $v$ percorrendo no máximo $\log n$ caminhos. Além disso, nenhum desses caminhos devem sofrer interseções uns com os outros.</p>
+
+<p>É claro que se encontrarmos essa decomposição para qualquer árvore, ela nos permitirá reduzir determinadas consultas únicas da forma: <em>“calcular algo no caminho de $a$ a $b$”</em> para várias consultas do tipo <em>”calcular algo no segmento $[l;r]$ do $k^{ésimo}$ caminho”</em>.</p>
+
+<h3>Construção do algoritmo</h3>
+
+<p>Calculamos para cada vértice $v$ o tamanho de sua subárvore $s(v)$, ou seja, o número de vértices na subárvore do vértice $v$ incluindo ele mesmo.</p>
+
+<p>Em seguida, considere todas as arestas que levam aos filhos de um vértice $v$. Dizemos que uma aresta é  "<strong>heavy</strong>" se levar a um vértice $c$ de modo que:</p>
+
+<p>$$
+s(c) \ge \frac{s(v)}{2} \iff \text{edge }(v, c)\text{ is heavy}
+$$</p>
+
+<p>Todas as outras arestas são definidas como "<strong>light</strong>".</p>
+<em>heavy = pesadas light = leves</em>
+<p>No máximo uma aresta heavy pode vir de um vértice de baixo, pois caso contrário o vértice $v$ teria pelo menos dois filhos de tamanho $\ge \frac{s(v)}{2}$, e, portanto, o tamanho da subárvore de $v$ seria muito grande, $s(v) \ge 1 + 2 \frac{s(v)}{2} > s(v)$, o que leva a uma contradição.</p>
+
+<p>Agora vamos decompor a árvore em caminhos disjuntos. Considere todos os vértices dos quais nenhuma aresta heavy venha de baixo. Subiremos de cada um desses vértices até chegarmos à raiz da árvore ou atravessaremos uma aresta light. Como resultado, obteremos vários caminhos compostos por zeros ou mais arestas heavy adicionados. O caminho que tem um fim na raiz é uma exceção e não terá uma aresta leve(<em>light</em>). Esses serão chamados de <strong>heavy paths</strong> - esses são os caminhos desejados da <em>heavy-light decomposition</em>.</p>
+
+<h3>Prova</h3>
+
+<p>Primeiro, observamos que os "heavy paths" obtidos pelo algoritmo serão disjuntos. De fato, se dois desses caminhos têm uma aresta comum, isso implica que há duas arestas "heavy" saindo de um vértice, o que é impossível.</p>
+
+<p>Em segundo lugar, mostraremos que, descendo da raiz da árvore para um vértice arbitrário, mudaremos não mais que $\log n$ "heavy paths" ao longo do caminho. Mover para baixo uma light edge reduz o tamanho da subárvore atual na metade ou até menor que isso:</p>
+
+<p>$$
+s(c) &lt; \frac{s(v)}{2} \iff \text{edge }(v, c)\text{ is light}
+$$</p>
+
+<p>Assim, podemos percorrer no máximo $\log n$ light edges antes que o tamanho da subárvore se reduza a um.</p>
+
+<p>Como podemos passar de um <em>heavy path</em> para outro apenas por uma <em>light edge</em> (cada heavy path, exceto o que começa na raiz, tem uma light edge), não podemos alterar os heavy paths mais do que $\log n$ vezes ao longo do caminho da raiz para qualquer vértice.</p>
+
+<p>A imagem a seguir ilustra a decomposição de uma árvore de amostra. As heavy edges("arestas pesadas": vamos definir dessa maneira aqui) são mais espessas do que as light edges("arestas leves/finas"). Os heavy paths("caminhos pesados") são marcados por limites pontilhados.</p>
+
+<p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/hld.png" alt="Image of HLD" /></center></p>
+
+<h2>Problemas</h2>
+
+<p>o resolver problemas, às vezes é mais conveniente considerar a <em>heavy-light decomposition</em> como um conjunto de caminhos de vértices disjuntos (em vez de caminhos de arestas disjuntas). Para fazer isso, basta excluir a última aresta de cada heavy path, se for uma light edge - nenhuma propriedade será violada; agora cada vértice pertence exatamente a um heavy path.</p>
+
+<p>Abaixo, veremos algumas tarefas típicas que podem ser resolvidas com a ajuda da <em>heavy-light decomposition</em>.</p>
+
+<p>Separadamente, vale a pena prestar atenção ao problema da soma dos números em um caminho, pois esse é um exemplo de um problema que pode ser resolvido por técnicas mais simples.</p>
+
+<h3>Valor máximo no caminho entre dois vértices</h3>
+
+<p>Dada uma árvore, cada vértice recebe um valor. Existem consultas da forma $(a, b)$, em que $a$ e $b$ são dois vértices na árvore e é necessário encontrar o valor máximo no caminho entre os vértices $a$ e $b$.</p>
+
+<p>Construímos antecipadamente uma <em>heavy-light decomposition</em> da árvore. Sobre cada <em>heavy path</em> construiremos uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a>, que permitirá procurar um vértice com o valor máximo atribuído no segmento especificado do específico heavy path, em $\mathcal{O}(\log n)$.  Embora o número de heavy paths na heavy-light decomposition possa alcançar $n - 1$, o tamanho total de todos os caminhos é limitado por $\mathcal{O}(n)$, portanto, o tamanho total das árvores de segmento também será linear.</p>
+
+<p>Para responder a uma consulta $(a, b)$, encontramos o <a href="https://en.wikipedia.org/wiki/Lowest_common_ancestor">menor ancestral comum</a> de $a$ e $b$, definido como $l$, por qualquer método preferido. Agora a tarefa foi reduzida para duas consultas $(a, l)$ e $(b, l)$, para cada uma das quais podemos fazer o seguinte: encontrar o <em>heavy path</em> em que o vértice inferior se encontra, faça uma consulta nesse caminho, vá para o topo desse caminho, determine novamente em que heavy path estamos e faça uma consulta nele, e assim por diante, até chegarmos ao caminho que contém $l$.</p>
+
+<p>Deve-se ter cuidado com o caso quando, por exemplo, $a$ e $l$ estiverem no mesmo <em>heavy path</em> - a consulta máxima nesse caminho deve ser feita não em nenhum prefixo, mas na seção interna entre $a$ e $l$.</p>
+
+<p>Para responder às subconsultas $(a, l)$ e $(b, l)$ cada uma requer percorrer por $\mathcal{O}(\log n)$ <em>heavy paths</em> e, para cada caminho, é feita uma consulta máxima em alguma seção de o caminho, que novamente requer $\mathcal{O}(\log n)$ operações na árvore de segmentos. Portanto, uma consulta $(a, b)$ leva tempo $\mathcal{O}(\log^2 n)$.</p>
+
+<p>Se você calcular e armazenar adicionalmente o máximo de todos os prefixos para cada <em>heavy path</em>, então teremos uma solução $\mathcal{O}(\log n)$ porque todas as consultas máximas estarão nos prefixos, exceto quando atingirmos o ancestral $l$.</p>
+
+<h3>Soma dos números no caminho entre dois vértices</h3>
+
+<p>Dada uma árvore, cada vértice recebe um valor. Existem consultas da forma $(a, b)$, em que $a$ e $b$ são dois vértices na árvore e é necessário encontrar a soma dos valores no caminho entre os vértices $a$ e $b$. É possível uma variante dessa tarefa, onde adicionalmente existem operações de atualização que alteram o número atribuído a um ou mais vértices(veja "<a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a>" e problemas relacionados).</p>
+
+<p>Essa tarefa pode ser resolvida de maneira semelhante ao problema anterior de máximos, com a ajuda da heavy-light decomposition by construindo árvores de segmentos em heavy paths. Em vez disso, somas de prefixo podem ser usadas se não houver atualizações. No entanto, esse problema também pode ser resolvido por técnicas mais simples.</p>
+
+<p>Se não houver atualizações, é possível descobrir a soma no caminho entre dois vértices em paralelo com a pesquisa do LCA de dois vértices por <a href="https://cp-algorithms-brasil.com/grafos/lca2.html">binary lifting</a> — para isso, juntamente com os $2^k$-ésimos ancestrais de cada vértice também é necessário armazenar a soma nos caminhos até esses ancestrais durante o pré-processamento.</p>
+
+<p>Existe uma abordagem fundamentalmente diferente para esse problema - considerando o <a href="https://en.wikipedia.org/wiki/Euler_tour_technique">tour de Euler</a> pela árvore e criando uma árvore de segmentos nele. Esse algoritmo é considerado em um <a href="https://cp-algorithms-brasil.com/grafos/colora%C3%A7%C3%A3oarvore.html">artigo</a> com um problema semelhante. Novamente, se não houver atualizações, armazenar somas de prefixos é suficiente e uma árvore segmentária não é necessária.</p>
+
+<p>Ambos os métodos fornecem soluções relativamente simples, levando $\mathcal{O}(\log n)$ para uma consulta.</p>
+
+<h3>Recolorir as arestas de um caminho entre dois vértices</h3>
+
+<p>Dada uma árvore, cada aresta é inicialmente colorida em branco. Existem atualizações da forma $(a, b, c)$, em que $a$ e $b$ são dois vértices e $c$ é uma cor, o que instrui que todas as arestas no caminho de $a$ a $b$ devem ser recoloridas com a cor $c$. Após todas as recolorações, é necessário relatar quantas arestas de cada cor foram obtidas.</p>
+
+<p>Semelhante aos problemas acima, a solução é simplesmente aplicar uma <em>heavy-light decomposition</em> e criar uma <a href="https://cp-algorithms-brasil.com/Estruturas%20de%20dados/arvores/ST.html">árvore segmentária</a> sobre cada <em>heavy path</em>.</p>
+
+<p>Cada recoloração no caminho $(a, b)$ se transformará em duas atualizações $(a, l)$ e $(b, l)$, em que $l$ é o menor ancestral comum dos vértices $a$ e $b$.<br />
+$\mathcal{O}(\log n)$ por caminho para $\mathcal{O}(\log n)$ caminhos, leva a uma complexidade de $\mathcal{O}(\log^2 n)$ por atualização.</p>
+
+<h2>Implementação</h2>
+
+<p>Certas partes da abordagem discutida acima podem ser modificadas para facilitar a implementação sem perder a eficiência.</p>
+
+<ul>
+<li>A definição de uma <strong>heavy edge</strong> pode ser alterada para <strong>a aresta que leva à criança com a maior subárvore</strong>, com os vínculos quebrados arbitrariamente. Isso pode resultar no fato de algumas light edges serem convertidas em heavy edges, o que significa que alguns heavy paths serão combinados para formar um único caminho, mas todos os heavy paths ​​permanecerão separados ou disjuntos. Também é garantido que percorrer uma light edge reduz o tamanho da subárvore para metade ou menos.</li>
+<li>Em vez de construir uma árvore de segmentos sobre todos os <em>heavy paths</em>, uma única árvore de segmento pode ser usada com segmentos separados em cada heavy path.</li>
+<li>Foi mencionado que responder as consultas requer o cálculo do LCA. Embora o LCA possa ser calculado separadamente, também é possível integrar o cálculo do LCA no processamento das respostas das consultas.</li>
+</ul>
+
+<p>Para performar uma heavy-light decomposition:</p>
+
+<pre><code class="cpp">vector&lt;int&gt; parent, depth, heavy, head, pos;
+int cur_pos;
+
+int dfs(int v, vector&lt;vector&lt;int&gt;&gt; const&amp; adj) {
+    int size = 1;
+    int max_c_size = 0;
+    for (int c : adj[v]) {
+        if (c != parent[v]) {
+            parent[c] = v, depth[c] = depth[v] + 1;
+            int c_size = dfs(c, adj);
+            size += c_size;
+            if (c_size &gt; max_c_size)
+                max_c_size = c_size, heavy[v] = c;
+        }
+    }
+    return size;
+}
+
+int decompose(int v, int h, vector&lt;vector&lt;int&gt;&gt; const&amp; adj) {
+    head[v] = h, pos[v] = cur_pos++;
+    if (heavy[v] != -1)
+        decompose(heavy[v], h, adj);
+    for (int c : adj[v]) {
+        if (c != parent[v] &amp;&amp; c != heavy[v])
+            decompose(c, c, adj);
+    }
+}
+
+void init(vector&lt;vector&lt;int&gt;&gt; const&amp; adj) {
+    int n = adj.size();
+    parent = vector&lt;int&gt;(n);
+    depth = vector&lt;int&gt;(n);
+    heavy = vector&lt;int&gt;(n, -1);
+    head = vector&lt;int&gt;(n);
+    pos = vector&lt;int&gt;(n);
+    cur_pos = 0;
+
+    dfs(0, adj);
+    decompose(0, 0, adj);
+}
+</code></pre>
+
+<p>A lista de adjacência da árvore deve ser passada para a função <code>init</code>, e a decomposição é realizada assumindo o vértice <code>0</code> como raiz.</p>
+
+<p>A função <code>dfs</code> é usada para calcular <code>heavy[v]</code>, o vértice filho do outro lado final da heavy edge de <code>v</code>, para cada vértice <code>v</code>. Adicionalmente, a <code>dfs</code> também armazena o parente e a profundidade de cada vértice, o que será útil posteriormente durante as consultas.</p>
+
+<p>A função <code>decompose</code> atribui para cada vértice <code>v</code> os valores <code>head[v]</code> e <code>pos[v]</code>, que são, respectivamente, a frente do heavy path <code>v</code> e a posição de <code>v</code> na árvore de segmentos única que cobre todos os vértices.</p>
+
+<p>Para responder consultas sobre caminhos, por exemplo, a consulta máxima discutida, podemos fazer algo assim:</p>
+
+<pre><code class="cpp">int query(int a, int b) {
+    int res = 0;
+    for (; head[a] != head[b]; b = parent[head[b]]) {
+        if (depth[head[a]] &gt; depth[head[b]])
+            swap(a, b);
+        int cur_heavy_path_max = segment_tree_query(pos[head[b]], pos[b]);
+        res = max(res, cur_heavy_path_max);
+    }
+    if (depth[a] &gt; depth[b])
+        swap(a, b);
+    int last_heavy_path_max = segment_tree_query(pos[a], pos[b]);
+    res = max(res, last_heavy_path_max);
+    return res;
+}
+</code></pre>
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
