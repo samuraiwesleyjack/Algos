@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>K-ésima ordem - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>K-ésima ordem em O(N)</h1>
+
+<p>Dada uma array <strong>A</strong> de tamanho <strong>N</strong> e um número <strong>K</strong>. O desafio é encontrar o <strong>K</strong>-ésimo maior número na array, ou seja, <strong>K</strong>-ésima ordem de estatística.</p>
+
+<p>A idéia básica é usar a idéia do algoritmo <strong>quick sort</strong> (<a href="https://en.wikipedia.org/wiki/Quicksort">wiki¹</a>). Na verdade, o algoritmo é simples, é mais difícil provar que ele é executado em uma média de O(N), em contraste com o quick sort.</p>
+
+<h2>Implementação (não recursiva):</h2>
+
+<pre><code class="cpp">template &lt;class T&gt;
+T order_statistics (std::vector&lt;T&gt; a, unsigned n, unsigned k)
+{
+    using std::swap;
+    for (unsigned l=1, r=n; ; )
+    {
+        if (r &lt;= l+1)
+        {
+            // o tamanho da parte atual é 1 ou 2, assim fica fácil achar a resposta
+            if (r == l+1 &amp;&amp; a[r] &lt; a[l])
+                swap (a[l], a[r]);
+            return a[k];
+        }
+
+        // ordenando a[l], a[l+1], a[r]
+        unsigned mid = (l + r) &gt;&gt; 1;
+        swap (a[mid], a[l+1]);
+        if (a[l] &gt; a[r])
+            swap (a[l], a[r]);
+        if (a[l+1] &gt; a[r])
+            swap (a[l+1], a[r]);
+        if (a[l] &gt; a[l+1])
+            swap (a[l], a[l+1]);
+
+        // performando divisão
+        // a[l + 1] - mediana entre a[l], a[l + 1], a[r]
+        unsigned
+            i = l+1,
+            j = r;
+        const T
+            cur = a[l+1];
+        for (;;)
+        {
+            while (a[++i] &lt; cur) ;
+            while (a[--j] &gt; cur) ;
+            if (i &gt; j)
+                break;
+            swap (a[i], a[j]);
+        }
+
+        // inserindo a mediana
+        a[l+1] = a[j];
+        a[j] = cur;
+
+        // continuamos a trabalhar nessa parte, que deve conter o elemento desejado
+        if (j &gt;= k)
+            r = j-1;
+        if (j &lt;= k)
+            l = i;
+    }
+}
+</code></pre>
+
+<p><strong>Nota</strong>: na biblioteca padrão do C++, esse algoritmo já foi implementado - ele é chamado de <code>nth_element</code> (<em><a href="http://www.cplusplus.com/reference/algorithm/nth_element/">link</a></em>).</p>
+
+<h2>Problemas</h2>
+
+<ul>
+<li><a href="https://www.codechef.com/problems/CD1IT1">CODECHEF: Median</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
