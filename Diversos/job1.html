@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trabalhos - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="styles.css">
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body>
+		<a href="http://cp-algorithms-brasil.com">
+				<button> < </button>
+		</a>
+		<div id="c">
+		<h1>Agendando trabalhos em uma máquina</h1>
+
+<p>Esta tarefa consiste em encontrar uma programação ideal para $n$ trabalhos em uma única máquina, se o trabalho $i$ puder ser processada em tempo $t_i$, mas nos $t$ segundos que aguardam antes de processar o trabalho, uma penalidade de $f_i(t)$ deve ser paga.</p>
+
+<p>Assim, a tarefa pede para encontrar essa permutação de trabalhos, de modo que a penalidade total seja mínima. Se denotarmos por $\pi$ a permutação dos trabalhos ($\pi_1$ é o primeiro item processado, $\pi_2$ o segundo etc.), a penalidade total será igual a:
+$$F(\pi) = f_{\pi_1}(0) + f_{\pi_2}(t_{\pi_1}) + f_{\pi_3}(t_{\pi_1} + t_{\pi_2}) + \dots + f_{\pi_n}\left(\sum_{i=1}^{n-1} t_{\pi_i}\right)$$</p>
+
+<h2>Soluções para casos especiais</h2>
+
+<h3>Funções lineares de penalidade</h3>
+
+<p>Primeiro, resolveremos o problema no caso de todas as funções de penalidade $f_i(t)$ serem lineares, ou seja, terem a forma $f_i(t) = c_i \cdot t$, onde $c_i$ é um número não negativo. Observe que essas funções não têm um termo constante. Caso contrário, podemos resumir todos os termos constantes e resolver o problema sem eles.</p>
+
+<p>Vamos fixar uma permutação $\pi$, e tomar um índice $i = 1 \dots n-1$.
+Deixe a permutação $\pi'$ ser igual à permutação $\pi$ com os elementos $i$ e $i+1$ trocados.
+Vamos ver o quanto a penalidade mudou.
+$$F(\pi') - F(\pi) =$$
+É fácil ver que as mudanças ocorrem apenas no $i$-ésimo e $(i+1)$-ésimo somando:
+$$\begin{align}
+&amp;= c_{\pi_i'} \cdot \sum_{k = 1}^{i-1} t_{\pi_k'} + c_{\pi_{i+1}'} \cdot \sum_{k = 1}^i t_{\pi_k'} - c_{\pi_i} \cdot \sum_{k = 1}^{i-1} t_{\pi_k} - c_{\pi_{i+1}} \cdot \sum_{k = 1}^i t_{\pi_k} &#92;&#92;
+&amp;= c_{\pi_{i+1}} \cdot \sum_{k = 1}^{i-1} t_{\pi_k'} + c_{\pi_i} \cdot \sum_{k = 1}^i t_{\pi_k'} - c_{\pi_i} \cdot \sum_{k = 1}^{i-1} t_{\pi_k} - c_{\pi_{i+1}} \cdot \sum_{k = 1}^i t_{\pi_k} &#92;&#92;
+&amp;= c_{\pi_i} \cdot t_{\pi_{i+1}} - c_{\pi_{i+1}} \cdot t_{\pi_i}
+\end{align}$$</p>
+
+<p>É possível perceber que, se o cronograma/agendamento $\pi$ for ideal, qualquer alteração leva a um aumento da penalidade (ou a uma penalidade idêntica); portanto, para o cronograma ideal, podemos escrever a seguinte condição:
+$$c \cdot t_{\pi_{i+1}} - c_{\pi_{i+1}} \cdot t_{\pi_i} \ge 0 \quad \forall i = 1 \dots n-1$$
+E depois reorganizando, obtemos:
+$$\frac{c_{\pi_i}}{t_{\pi_i}} \ge \frac{c_{\pi_{i+1}}}{t_{\pi_{i+1}}} \quad \forall i = 1 \dots n-1$$</p>
+
+<p>Assim, obtemos o cronograma ideal simplesmente ordenando os trabalhos pela fração $\frac{c_i}{t_i}$ em ordem não crescente.</p>
+
+<p>Deve-se notar que construímos esse algoritmo pelo chamado "método de permutação": tentamos trocar dois elementos adjacentes, calculamos quanto a penalidade mudou e, em seguida, derivamos o algoritmo para encontrar o método ideal.</p>
+
+<h3>Função exponencial de penalidade</h3>
+
+<p>Deixe a função de penalidade ter esta forma:
+$$f_i(t) = c_i \cdot e^{\alpha \cdot t},$$
+em que todos os números $c_i$ não são negativos e a constante $\alpha$ é positiva.</p>
+
+<p>Ao aplicar o método da permutação, determinamos que os trabalhos devem ser ordenados em ordem não crescente do valor:
+$$v_i = \frac{1 - e^{\alpha \cdot t_i}}{c_i}$$</p>
+
+<h3>Função monótona idêntica de penalidade</h3>
+
+<p>Nesse caso, consideramos o caso em que todos os $f_i(t)$ são iguais e essa função é monótona ascendente.</p>
+
+<p>É óbvio que, nesse caso, a permutação ideal é ordenar os trabalhos(não crescente) pelo tempo de processamento $t_i$.</p>
+
+<h2>Teorema de Livshits-Kladov</h2>
+
+<p>O teorema de Livshits-Kladov estabelece que o método de permutação é aplicável apenas aos três casos mencionados acima, ou seja:</p>
+
+<ul>
+<li>Caso linear: $f_i(t) = c_i(t) + d_i$, em que $c_i$ são constantes não negativas,</li>
+<li>Caso exponencial: $f_i(t) = c_i \cdot e_{\alpha \cdot t} + d_i$, em que $c_i$ e $\alpha$ são constantes positivas,</li>
+<li>Caso idêntico: $f_i(t) = \phi(t)$, onde $\phi$ é uma função crescente monótona.</li>
+</ul>
+
+<p>Em todos os outros casos, o método não pode ser aplicado.</p>
+
+<p>O teorema é comprovado sob a suposição de que as funções de penalidade são suficientemente derivadas (as terceiras derivadas($y'''$) existem).</p>
+
+<p>Nos três casos, aplicamos o método da permutação, através do qual o cronograma ideal desejado pode ser encontrada por ordenações, portanto, em tempo $O(n \log n)$.</p>
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+
+
+			<div id="footer">
+            &copy; 2019-2020 traduzido por <a href="https://github.com/samuraiwesleyjack">http://github.com/samuraiwesleyjack</a>
+            </div>
+
+		</div>
+	</body>
+</html> 
