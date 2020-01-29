@@ -219,7 +219,7 @@ $$\begin{pmatrix}
 
 <p><strong>Problema:</strong> Dado um grafo direcionado, sem pesos e com $n$ vertices, descubra o número de caminhos de tamanho $k$ de qualquer vértice $u$ para qualquer outro vértice $v$.</p>
 
-<p><strong>Solução:</strong> Esse problema é considerado em mais detalhes em um <a href="https://cp-algorithms.com/graph/fixed_length_paths.html">outro artigo</a>. O algoritmo consiste em elevar a matriz de adjacência $M$ do grafo (uma matriz na qual $m_{ij} = 1$ se tiver uma aresta de $i$ para $j$, ou $0$ caso contrário) para o $k$-th índice. Agora $m_{ij}$ será o número de caminhos de comprimento $k$ de $i$ para $j$. O tempo de complexidade dessa solução é $O(n^3 \log k)$.</p>
+<p><strong>Solução:</strong> Esse problema é considerado em mais detalhes em um <a href="https://cp-algorithms-brasil.com/grafos/fixo.html">outro artigo</a>. O algoritmo consiste em elevar a matriz de adjacência $M$ do grafo (uma matriz na qual $m_{ij} = 1$ se tiver uma aresta de $i$ para $j$, ou $0$ caso contrário) para o $k$-th índice. Agora $m_{ij}$ será o número de caminhos de comprimento $k$ de $i$ para $j$. O tempo de complexidade dessa solução é $O(n^3 \log k)$.</p>
 
 <p><strong>Nota:</strong> Nesse mesmo artigo, outra variação desse problema é considerada: quando as arestas tem peso e é requerido encontrar o caminho com menor peso contendo exatamente $k$ arestas. Como mostrado nesse artigo, esse problema também é resolvido pela exponenciação da matriz de adjacência. A matriz teria o peso da aresta de $i$ para $j$, ou $\infty$ se não existir essa aresta.
 Em vez da operação usual de multiplicar duas matrizes, uma modificada deve ser usada:
