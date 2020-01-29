@@ -112,7 +112,7 @@ Apesar da complexidade das duas serem a mesma, essa abordagem será mais rápida
 
 <p><strong>Problema:</strong>
 Calcule $x^n \bmod m$.
-Essa é uma operação bem comum. Por exemplo, é usado para calcular a <a href="https://cp-algorithms.com/algebra/module-inverse.html">multiplicação modular inversa</a>.</p>
+Essa é uma operação bem comum. Por exemplo, é usado para calcular a <a href="https://cp-algorithms-brasil.com/Algebra/inversomod.html">multiplicação modular inversa</a>.</p>
 
 <p><strong>Solução:</strong>
 Como sabemos que o operador do módulo não interfere nas multiplicações ($a \cdot b \equiv (a \bmod m) \cdot (b \bmod m) \pmod m$), podemos usar diretamente o mesmo código e apenas substituir cada multiplicação por uma multiplicação modular:</p>
@@ -131,13 +131,13 @@ Como sabemos que o operador do módulo não interfere nas multiplicações ($a \
 </code></pre>
 
 <p><strong>Nota:</strong> Se $m$ é um número primo, podemos acelerar um pouco esse algoritmo calculando $x ^ {n \mod (m-1)}$ em vez de $x ^ n$.
-Isto vem diretamente do pequeno teorema de Fermat (<a href="https://cp-algorithms.com/algebra/module-inverse.html">" Fermat's little theorem "</a>).</p>
+Isto vem diretamente do pequeno teorema de Fermat (<a href="https://en.wikipedia.org/wiki/Fermat%27s_little_theorem"> Fermat's little theorem </a>).</p>
 
 <h3>Cálculo eficaz dos números de Fibonacci</h3>
 
 <p><strong>Problema:</strong> Calcule o $n$-th número de Fibonacci $F_n$.</p>
 
-<p><strong>Solução:</strong> Para mais detalhes, veja o artigo <a href="https://cp-algorithms.com/algebra/fibonacci-numbers.html">números de Fibonacci</a>.
+<p><strong>Solução:</strong> Para mais detalhes, veja o artigo <a href="https://cp-algorithms-brasil.com/Algebra/fibonacci.html">números de Fibonacci</a>.
 Iremos apenas apresentar uma visão geral do algoritmo.
 Para calcular o próximo número de Fibonacci, são necessários apenas os dois anteriores, como $F_n = F_{n-1} + F_{n-2}$.
 Nós podemos construir uma $2 \times 2$ matriz que descreve essa transformação:
