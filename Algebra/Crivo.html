@@ -102,7 +102,7 @@ Portanto, precisamos avaliar a próxima expressão:</p>
 
 <p>Você pode encontrar uma prova mais rigorosa (que fornece uma avaliação mais precisa) no livro de Hardy & Wright "Uma introdução à teoria dos números" (p. 349).</p>
 
-<h2>Diferentes otimizações do Crivo de Eratóstenes</h2>
+<h2>Diferentes otimizações</h2>
 
 <p>A maior fraqueza do algoritmo é que ele "percorre" a memória várias vezes, manipulando apenas elementos únicos. 
 Isso não é muito amigável ao cache.
@@ -115,7 +115,7 @@ E por causa disso, a constante que está oculta em $O(n \log \log n)$ é compara
 <p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
 <p>Os outros compostos depois da raiz de n já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo x, sendo 2 <= x <= sqrt(n)(arredondado para o inteiro menor mais próximo)); o restante dos primos depois da raiz de n não são selecionados e permanecem como verdadeiros na array.</p>
 <p><a href="https://www.quora.com/Why-do-we-first-find-the-prime-numbers-up-to-square-root-of-N-in-segmented-sieve">Prova</a></p>			
-<p><img src="img/crivo.jpg" alt="Sieve of Eratosthenes" /></p>			
+		
 <pre><code class="cpp">int n;
 vector&lt;char&gt; primo(n+1, true);
 primo[0] = primo[1] = false;
