@@ -49,7 +49,6 @@ s(c) \ge \frac{s(v)}{2} \iff \text{aresta }(v, c) \iff \text{ heavy}
 $$</p>
 
 <p>Todas as outras arestas são definidas como "<strong>light</strong>".</p>
-<em>heavy = pesadas light = leves</em>
 <p>No máximo uma aresta heavy pode vir de um vértice de baixo, pois caso contrário o vértice $v$ teria pelo menos dois filhos de tamanho $\ge \frac{s(v)}{2}$, e, portanto, o tamanho da subárvore de $v$ seria muito grande, $s(v) \ge 1 + 2 \frac{s(v)}{2} > s(v)$, o que leva a uma contradição.</p>
 
 <p>Agora vamos decompor a árvore em caminhos disjuntos. Considere todos os vértices dos quais nenhuma aresta heavy venha de baixo. Subiremos de cada um desses vértices até chegarmos à raiz da árvore ou atravessaremos uma aresta light. Como resultado, obteremos vários caminhos compostos por zeros ou mais arestas heavy adicionados. O caminho que tem um fim na raiz é uma exceção e não terá uma aresta leve(<em>light</em>). Esses serão chamados de <strong>heavy paths</strong> - esses são os caminhos desejados da <em>heavy-light decomposition</em>.</p>
