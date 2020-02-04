@@ -70,10 +70,10 @@ Já que $i^2$ pode facilmente causar um overflow no tipo <code>int</code>, a an�
 <h2>Análise assintótica</h2>
 
 <p>Vamos provar que o tempo de execução do algoritmo é $O(n \log \log n)$.
-O algoritmo executará operações $\frac{n}{p}$ para todo primo $p \le n$ no loop interno.
+O algoritmo executará $\frac{n}{p}$ operações para todo primo $p \le n$, no loop interno.
 Portanto, precisamos avaliar a próxima expressão:</p>
 
-<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac n p = n \cdot \sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac 1 p.$$</p>
+<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ primo}}} \frac n p = n \cdot \sum_{\substack{p \le n, &#92;\ p \text{ primo}}} \frac 1 p.$$</p>
 
 <p>Vamos lembrar dois fatos conhecidos.</p>
 
@@ -84,7 +84,7 @@ Portanto, precisamos avaliar a próxima expressão:</p>
 
 <p>Assim, podemos escrever a soma da seguinte maneira:</p>
 
-<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ prime}}} \frac 1 p \approx \frac 1 2 + \sum_{k = 2}^{\frac n {\ln n}} \frac 1 {k \ln k}.$$</p>
+<p>$$\sum_{\substack{p \le n, &#92;\ p \text{ primo}}} \frac 1 p \approx \frac 1 2 + \sum_{k = 2}^{\frac n {\ln n}} \frac 1 {k \ln k}.$$</p>
 
 <p>Aqui, extraímos o primeiro número primo 2 da soma, pois $k = 1$ na aproximação $k \ln k$ é $0$ e causa uma divisão por zero.</p>
 
@@ -98,7 +98,7 @@ Portanto, precisamos avaliar a próxima expressão:</p>
 
 <p>Agora, voltando à soma original, obteremos sua aproximação:</p>
 
-<p>$$\sum_{\substack{p \le n, &#92;\ p\ is\ prime}} \frac n p \approx n \ln \ln n + o(n).$$</p>
+<p>$$\sum_{\substack{p \le n, &#92;\ p\ é\ primo}} \frac n p \approx n \ln \ln n + o(n).$$</p>
 
 <p>Você pode encontrar uma prova mais rigorosa (que fornece uma avaliação mais precisa) no livro de Hardy & Wright "Uma introdução à teoria dos números" (p. 349).</p>
 
@@ -112,9 +112,8 @@ E por causa disso, a constante que está oculta em $O(n \log \log n)$ é compara
 
 <h3>Selecionando até a raíz</h3>
 
-<p>Obviamente, para encontrar todos os números primos até $n$, será suficiente apenas realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
-<p>Os outros compostos depois da raiz de n já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo x, sendo 2 <= x <= sqrt(n)(arredondado para o inteiro menor mais próximo)); o restante dos primos depois da raiz de n não são selecionados e permanecem como verdadeiros na array.</p>
-<p><a href="https://www.quora.com/Why-do-we-first-find-the-prime-numbers-up-to-square-root-of-N-in-segmented-sieve">Prova</a></p>			
+<p>Para encontrar todos os números primos até $n$, será suficiente realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
+<p>Os outros compostos depois da raiz de $n$ já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo x, sendo 2 <= x <= \sqrt(n)); o restante dos primos depois da raiz de $n$ não são selecionados e permanecem como verdadeiros na array.</p>		
 		
 <pre><code class="cpp">int n;
 vector&lt;char&gt; primo(n+1, true);
