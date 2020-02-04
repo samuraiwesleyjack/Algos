@@ -113,7 +113,7 @@ E por causa disso, a constante que está oculta em $O(n \log \log n)$ é compara
 <h3>Selecionando até a raíz</h3>
 
 <p>Para encontrar todos os números primos até $n$, será suficiente realizar as análises(iterações) apenas pelos números primos que não excedam a raiz de $n$.</p>
-<p>Os outros compostos depois da raiz de $n$ já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo $x$, sendo 2 \le x \le \sqrt{n}); o restante dos primos depois da raiz de $n$ não são selecionados e permanecem como verdadeiros na array.</p>		
+<p>Os outros compostos depois da raiz de $n$ já estarão selecionados como não-primos(através da seleção de divisíveis pelo primo $x$, sendo 2 \le x \le \sqrt n ); o restante dos primos depois da raiz de $n$ não são selecionados e permanecem como verdadeiros na array.</p>		
 		
 <pre><code class="cpp">int n;
 vector&lt;char&gt; primo(n+1, true);
