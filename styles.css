@@ -61,8 +61,9 @@ img:hover {
   box-shadow: 0 0 2px 1px rgba(0, 20, 20, 0.5);
 }
 
-
-
+.greyed {
+  color: dimgrey;
+}
 
 hr {
   clear: right;
