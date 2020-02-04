@@ -118,13 +118,13 @@
 			Entretanto em grafos esparsos(sparse graph), quando $m$ é bem menor que o número máximo de arestas $n^2$, o problema pode ser resolvido em complexidade $O(n \log n + m)$. O algoritmo e sua implementação podem ser encontrados <a href="./grafos/Dijkstrasparsegraph.html">Dijkstra em grafos esparsos</a>.</p>
 
 <pre><code class="cpp">const int INF = 1000000000;     
-vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;   //grafo como lista de adjacência, o pair armazena dois objetos 'pair<int,int>'
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; adj;   //grafo 
 
 void dijkstra(int s, vector&lt;int&gt; &amp; d, vector&lt;int&gt; &amp; p) {
     int n = adj.size();
     d.assign(n, INF);                 //array de distancias minimas
     p.assign(n, -1);                  //array de predecessores
-    vector&lt;bool&gt; u(n, false);   //array de marcados
+    vector&lt;bool&gt; u(n, false);   //marcados
 
     d[s] = 0;                        //distancia para o vertice inicial = 0
     for (int i = 0; i &lt; n; i++) {
