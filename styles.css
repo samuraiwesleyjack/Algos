@@ -69,5 +69,7 @@ hr {
   clear: right;
   background: dimgrey;
 }
-
+.thickheader {
+  height: 2px;
+}
 
