@@ -62,3 +62,11 @@ img:hover {
 }
 
 
+
+
+hr {
+  clear: right;
+  background: dimgrey;
+}
+
+
