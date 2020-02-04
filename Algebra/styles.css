@@ -23,6 +23,7 @@ h1,h2,h3,h4,h5,h6{
 #intro {
     font-size: 1.3em;
 }
+
 #c {
     width: 960px;
     margin: 10px auto;
@@ -59,4 +60,16 @@ img {
 
 img:hover {
   box-shadow: 0 0 2px 1px rgba(0, 20, 20, 0.5);
+}
+
+.greyed {
+  color: dimgrey;
+}
+
+hr {
+  clear: right;
+  background: dimgrey;
+}
+.thickheader {
+  height: 2px;
 }
