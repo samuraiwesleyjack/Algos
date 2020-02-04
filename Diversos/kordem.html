@@ -30,7 +30,7 @@
 
 <p>Dada uma array <strong>A</strong> de tamanho <strong>N</strong> e um número <strong>K</strong>. O desafio é encontrar o <strong>K</strong>-ésimo maior número na array, ou seja, <strong>K</strong>-ésima ordem de estatística.</p>
 
-<p>A idéia básica é usar a idéia do algoritmo <strong>quick sort</strong> (<a href="https://en.wikipedia.org/wiki/Quicksort">wiki¹</a>). Na verdade, o algoritmo é simples, é mais difícil provar que ele é executado em uma média de O(N), em contraste com o quick sort.</p>
+<p>A idéia básica é usar a idéia do algoritmo <strong>quick sort</strong> (<a href="https://en.wikipedia.org/wiki/Quicksort">wiki</a>). Na verdade, o algoritmo é simples, é mais difícil provar que ele é executado em uma média de O(N), em contraste com o quick sort.</p>
 
 <h2>Implementação (não recursiva):</h2>
 
@@ -42,7 +42,7 @@ T order_statistics (std::vector&lt;T&gt; a, unsigned n, unsigned k)
     {
         if (r &lt;= l+1)
         {
-            // o tamanho da parte atual é 1 ou 2, assim fica fácil achar a resposta
+            // o tamanho da parte atual é 1 ou 2
             if (r == l+1 &amp;&amp; a[r] &lt; a[l])
                 swap (a[l], a[r]);
             return a[k];
@@ -87,7 +87,7 @@ T order_statistics (std::vector&lt;T&gt; a, unsigned n, unsigned k)
 }
 </code></pre>
 
-<p><strong>Nota</strong>: na biblioteca padrão do C++, esse algoritmo já foi implementado - ele é chamado de <code>nth_element</code> (<em><a href="https://en.cppreference.com/w/cpp/algorithm/nth_element">link</a></em>).</p>
+<p><strong>Nota</strong>: na biblioteca padrão do C++, esse algoritmo já foi implementado - ele é chamado de <code>nth_element</code>(<em><a href="https://en.cppreference.com/w/cpp/algorithm/nth_element">link</a></em>).</p>
 
 <h2>Problemas</h2>
 
