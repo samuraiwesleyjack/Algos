@@ -45,7 +45,7 @@
 <p>Em seguida, considere todas as arestas que levam aos filhos de um vértice $v$. Dizemos que uma aresta é  "<strong>heavy</strong>" se levar a um vértice $c$ de modo que:</p>
 
 <p>$$
-s(c) \ge \frac{s(v)}{2} \iff \text{edge }(v, c)\text{ is heavy}
+s(c) \ge \frac{s(v)}{2} \iff \text{aresta }(v, c) \iff \text{ heavy}
 $$</p>
 
 <p>Todas as outras arestas são definidas como "<strong>light</strong>".</p>
@@ -61,10 +61,10 @@ $$</p>
 <p>Em segundo lugar, mostraremos que, descendo da raiz da árvore para um vértice arbitrário, mudaremos não mais que $\log n$ "heavy paths" ao longo do caminho. Mover para baixo uma light edge reduz o tamanho da subárvore atual na metade ou até menor que isso:</p>
 
 <p>$$
-s(c) &lt; \frac{s(v)}{2} \iff \text{edge }(v, c)\text{ is light}
+s(c) &lt; \frac{s(v)}{2} \iff \text{aresta }(v, c) \iff \text{ light}
 $$</p>
 
-<p>Assim, podemos percorrer no máximo $\log n$ light edges antes que o tamanho da subárvore se reduza a um.</p>
+<p>Assim, podemos percorrer no máximo $\log n$ <em>light edges</em> antes que o tamanho da subárvore se reduza a um.</p>
 
 <p>Como podemos passar de um <em>heavy path</em> para outro apenas por uma <em>light edge</em> (cada heavy path, exceto o que começa na raiz, tem uma light edge), não podemos alterar os heavy paths mais do que $\log n$ vezes ao longo do caminho da raiz para qualquer vértice.</p>
 
