@@ -498,9 +498,9 @@ void build(int a[], int node, int tl, int tr) {
 			Como a array pode conter um número repetido, a melhor opção é a estrutura de dados $\text{multiset}$.</p>
 
 			<p>A construção dessa árvore de segmentos é praticamente da mesma maneira que no problema anterior, só que agora precisamos combinar $\text{multiset}$s e listas não ordenadas.
-			Isso leva a um tempo de construção de $O(n \log^2 n)$ (em geral, mesclar duas <strong>Árvores rubro-negra(red-black trees)</strong> pode ser feito em tempo linear(linear time), mas o C ++ STL não garante essa complexidade de tempo).</p>
+			Isso leva a um tempo de construção de $O(n \log^2 n)$. (no geral, mesclar duas <strong>Árvores rubro-negra(red-black trees)</strong> pode ser feito em tempo linear, mas a STL do C ++ não garante essa complexidade de tempo).</p>
 
-			<p>A função $\text{query}$ também é quase equivalente, só que agora a função $\text{lower_bound}$ da função $\text{multiset}$ deve ser chamada em vez da ($\text{std::lower_bound}$ apenas funciona em tempo $O(\log n)$ se usado com iteradores de acesso aleatório).</p>
+			<p>A função $\text{query}$ também é quase equivalente, só que agora a função $\text{lower_bound}$ deve ser chamada em vez da função $\text{multiset}$ ($\text{std::lower_bound}$ apenas funciona em tempo $O(\log n)$ se usado com iteradores de acesso aleatório).</p>
 
 			<p>Finalmente, a solicitação de modificação(update).
             Para processá-lo, precisamos fazer a travessia da árvore e modificar todos $\text{multiset}$ dos segmentos correspondentes que contêm o elemento efetuado.
