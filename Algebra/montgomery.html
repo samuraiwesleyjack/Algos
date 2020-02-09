@@ -36,7 +36,7 @@ Uma multiplicação como $x y \bmod{n}$ é bastante lenta para computar com os a
 E a divisão é uma operação realmente "cara", especialmente com grandes números.</p>
 
 <p>A <strong>multiplicação(modular rápida) de Montgomery</strong> é um método que permite calcular essas multiplicações mais rapidamente.
-Em vez de dividir o produto e subtrair $n$ várias vezes, ele adiciona múltiplos de $n$ para cancelar os bits inferiores e então apenas descartar os bits inferiores.</p>
+Em vez de dividir o produto e subtrair $n$ várias vezes, ele adiciona múltiplos de $n$ para cancelar os bits inferiores e então apenas descartá-los.</p>
 
 <h2>Representação de Montgomery</h2>
 
@@ -44,7 +44,7 @@ Em vez de dividir o produto e subtrair $n$ várias vezes, ele adiciona múltiplo
 O algoritmo funciona apenas no <strong>espaço Montgomery</strong>.
 E precisamos transformar nossos números nesse espaço, antes que possamos começar a multiplicar.</p>
 
-<p>Para o espaço, precisamos de um número inteiro positivo $r \ge n$ coprimo de $n$, ou seja, $\gcd/mdc(n, r) = 1$.
+<p>Para o espaço, precisamos de um número inteiro positivo $r \ge n$ coprimo de $n$, ou seja, $\mdc(n, r) = 1$.
 Na prática, sempre escolhemos $r$ sendo $2^m$ para um número inteiro positivo $m$, uma vez que operações de multiplicações, divisões e módulo $r$ podem ser eficientemente implementadas usando operadores de shift e outros operadores que trabalham com bits(bitwise operators).
 $n$ será um número ímpar em praticamente todas as aplicações, pois não é difícil fatorar um número par.
 Portanto, toda potência de $2$ será coprimo com $n$.</p>
