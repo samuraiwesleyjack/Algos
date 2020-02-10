@@ -33,7 +33,7 @@
 
 <p>Dada uma árvore $G$ e consultas da forma $(v_1, v_2)$, para cada consulta/query você precisa encontrar o menor ancestral comum ou seja, um vértice $v$ que se encontra no caminho da raiz para $v_1$ e no caminho da raiz para $v_2$, e o vértice deve ser o mais baixo. Em outras palavras, o vértice desejado $v$ é o ancestral mais baixo de $v_1$ e $v_2$. O menor ancestral comum deles está no caminho mais curto de $v_1$ e $v_2$. Além disso, se $v_1$ é o ancestral de $v_2$, $v_1$ é o menor ancestral comum.</p>
 
-<h3>A idéia do algoritmo</h3>
+<h3>A ideia do algoritmo</h3>
 
 <p>Antes de responder às queries, precisamos <strong>pré-processar</strong> a árvore. 
 Fazemos uma travessia com a <a href="https://cp-algorithms-brasil.com/grafos/DFS.html">DFS</a> a partir da raiz e criamos uma lista $\text{euler}$ que armazena a ordem dos vértices que visitamos (um vértice é adicionado à lista quando o visitamos pela primeira vez e após o retorno da travessia da DFS para os vértices filhos).
