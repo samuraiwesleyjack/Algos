@@ -18,6 +18,7 @@
 		<meta name="author" content="Weslley Matheus">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 		<link rel="stylesheet" href="styles.css">
+		<script src="app.js"></script>
 		<base href="http://cp-algorithms-brasil.com"/>
 	</head>
 	<body>
@@ -27,12 +28,19 @@
 	  <p>O objetivo deste projeto é traduzir e tornar mais acessível os recursos <a href="http://e-maxx.ru/algo">http://e-maxx.ru/algo</a> e <a href="https://cp-algorithms.com">https://cp-algorithms.com</a>, 
 	   para ajudar pessoas fornecendo descrições de muitos algoritmos e estruturas de dados, especialmente populares no campo da programação competitiva.</p>                              
 	   <hr class="thickheader">
-	   <h2>Artigos</h2>
-	   
+	   <h2>Artigos</h2>                       
+
+	   <form class="form-inline">
+					<input id="myInput" class="form-control mr-sm-2" type="text" name="search" value="" onkeyup="myFunction()" placeholder='dijkstra, bfs, árvore... ' onfocus="this.placeholder = ''"
+                       onblur="this.placeholder ='dijkstra, bfs, árvore...'" aria-label="Search">
+		</form>
+       
+       <p></p>
+
 	   <h3>Algebra</h3>
 	   <ul>
 	   <li><strong>Fundamentos</strong>
-	   <ul>
+	   <ul id = "Fundamentos">
 	   <li><a href="./Algebra/expobin.html">Exponenciação Binária</a></li>  
 	   <li><a href="./Algebra/euclids.html">Algoritmo de Euclides (MDC/MMC)</a></li>	
 	   <li><a href="./Algebra/euclids2.html">Algoritmo de Euclides Estendido</a></li>
@@ -40,35 +48,35 @@
 	   <li><a href="./Algebra/fibonacci.html">Números de Fibonacci</a></li>
 	   </ul></li>
 	   <li><strong>Números Primos</strong>
-           <ul>
-           <li><a href="./Algebra/Crivo.html">Crivo de Eratóstenes</a></li>
+           <ul id = "Números Primos">
+       <li><a href="./Algebra/Crivo.html">Crivo de Eratóstenes</a></li>
 	   <li><a href="./Algebra/Crivo2.html">Crivo de Eratóstenes com Complexidade Linear</a></li>
 	   <li><a href="./Algebra/testesprimo.html">Testes de Primalidade</a></li>
 	   <li><a href="./Algebra/fat.html">Fatoração de Inteiros</a></li>	   
 	   </ul></li>
 	   <li><strong>Funções da Teoria dos Números</strong>
-	   <ul>
+	   <ul id = "Funções da Teoria dos Números">
 	   <li><a href="./Algebra/euler.html">Função totiente de Euler</a></li>
 	   <li><a href="./Algebra/divisores.html">Número de divisores / soma de divisores</a></li>	   
 	   </ul></li>
 	   <li><strong>Aritmética Modular</strong>
-	   <ul>
+	   <ul id = "Aritmética Modular">
 	   <li><a href="./Algebra/inversomod.html">Inverso Modular</a></li>
 	   <li><a href="./Algebra/congruencialinear.html">Equação de Congruência Linear</a></li>
 	   <li><a href="./Algebra/teoremachines.html">Teorema Chinês do Resto</a></li>
-           <li><a href="./Algebra/fatorialp.html">Fatorial módulo p</a></li>
+       <li><a href="./Algebra/fatorialp.html">Fatorial módulo p</a></li>
 	   <li><a href="./Algebra/log.html">Log Discreto</a></li>
 	   <li><a href="./Algebra/raizprimitiva.html">Raiz Primitiva</a></li>
 	   <li><a href="./Algebra/raizdiscreta.html">Raiz Discreta</a></li>
 	   <li><a href="./Algebra/montgomery.html">Multiplicação Modular</a></li>
 	   </ul></li>
 	   <li><strong>Sistemas Numéricos</strong>
-	   <ul>
+	   <ul id = "Sistemas Numéricos">
 	   <li><a href="./Algebra/ternario.html">Ternário balanceado</a></li>
 	   <li><a href="./Algebra/graycode.html">Código de Gray</a></li>
 	   </ul></li>
 	   <li><strong>Diversos</strong>
-	   <ul>
+	   <ul id = "Diversos">
 	   <li><a href="./Algebra/bitmask.html">Enumerando submasks de uma bitmask</a></li>
 	   <li><a href="./Algebra/bignum.html">Aritmética Bignum</a></li>
 	   <li><a href="./Algebra/fourier.html">Transformada rápida de Fourier</a></li>
@@ -79,22 +87,22 @@
 	   <h3>Estruturas de Dados</h3>
 	   <ul>
 	   <li><strong>Fundamentos</strong>
-	   <ul>
+	   <ul id = "Fundamentos2">
 	   <li><a href="./Estruturas de dados/queuestack.html">Mínimo stack/queue</a></li>
 	   <li><a href="./Estruturas de dados/sparsetable.html">Sparse table</a></li>
 	   </ul></li>
 	   <li><strong>Árvores</strong>
-	   <ul>
+	   <ul id = "Árvores">
 	   <li><a href="./Estruturas de dados/arvores/ST.html">Árvore Segmentária</a></li>
 	   <li><a href="./Estruturas de dados/arvores/DSU.html">Disjoint Set Union</a></li>
 	   <li><a href="./Estruturas de dados/arvores/BIT.html">Árvore de Fenwick / Árvore de Indexação Binária(BIT)</a></li>
-           <li><a href="./Estruturas de dados/arvores/Sqrt.html">Sqrt Decomposition</a></li>
+       <li><a href="./Estruturas de dados/arvores/Sqrt.html">Sqrt Decomposition</a></li>
 	   <li><a href="./Estruturas de dados/arvores/treap.html">Treap</a></li>
 	   <li><a href="./Estruturas de dados/arvores/sqrtree.html">Sqrt Tree</a></li>
 	   <li><a href="./Estruturas de dados/arvores/heeap.html">Heap aleatório</a></li>
 	   </ul></li>
 	   <li><strong>Avançado</strong>
-	   <ul>
+	   <ul id = "Avançado">
 	   <li><a href="./Estruturas de dados/delete.html">Deletando de uma estrutura de dados em O(T(n)log n)</a></li>
 	   </ul></li>
 	   </ul>
@@ -102,11 +110,11 @@
 	   <h3>Programação Dinâmica</h3>
 	   <ul>
 	   <li><strong>DP Otimizações</strong>
-	   <ul>
+	   <ul id = "DP Otimizações">
 	   <li><a href="./PD/dp.html">Dividir e Conquistar DP</a></li>
            </ul></li>
 	   <li><strong>Tarefas</strong>
-	   <ul>
+	   <ul id = "Tarefas">
 	   <li><a href="./PD/parquet.html">Problema "Parquet"</a></li>
            <li><a href="./PD/zeros.html">Maior submatriz de 0's</a></li>
 	   </ul></li>
@@ -118,7 +126,7 @@
            <ul>
            <li><strong>Fundamentos</strong>
 
-           <ul>
+           <ul id = "Fundamentos3">
 	   <li><a href="./strings/striing.html">String Hashing</a></li>
 	   <li><a href="./strings/rabin-karp.html">Rabin-Karp para correspondências de strings</a></li>
            <li><a href="./strings/prefixo.html">Função de Prefixos</a></li>
@@ -128,14 +136,14 @@
 	   </ul></li>
 	   <li><strong>Avançado</strong>
 
-           <ul>
+           <ul id = "Avançado2">
 	   <li><a href="./strings/suffixtree.html">Árvore de Sufixos</a></li>
 	   <li><a href="./strings/automato.html">Sufixo Autômato</a></li>
 	   <li><a href="./strings/lyndon.html">Fatoração de Lyndon</a></li>
 	   </ul></li>
 	   <li><strong>Tarefas</strong>
 
-	   <ul>
+	   <ul id = "Tarefas2">
 	   <li><a href="./strings/analise.html">Análise de Expressões</a></li>
 	   <li><a href="./strings/manacher.html">Algoritmo de Manacher - Encontrando todos os sub-palíndromos em O(N)</a></li>
 	   <li><a href="./strings/repeticoes.html">Encontrando repetições</a></li>
@@ -147,7 +155,7 @@
 	   <ul>
 	   <li><strong>Matrizes</strong>
 
-	   <ul>
+	   <ul id = "Matrizes">
 	   <li><a href="./Algebra/gausslinear.html">Gauss &amp; Sistema de Equações Lineares</a></li>
 	   <li><a href="./Algebra/gaussdeterminante.html">Gauss &amp; Determinante</a></li>
 	   <li><a href="./Algebra/krautdeterminante.html">Kraut &amp; Determinante</a></li>
@@ -160,14 +168,14 @@
 	   <ul>
 	   <li><strong>Fundamentos</strong>
 
-	   <ul>
+	   <ul id = "Fundamentos4">
 	   <li><a href="./combinatoria/divisorfatorial.html">Potência de um divisor fatorial</a></li>
 	   <li><a href="./combinatoria/binomial.html">Coeficientes Binomiais</a></li>
 	   <li><a href="./combinatoria/catalan.html">Números de Catalan</a></li>
 	   </ul></li>
 	   <li><strong>Técnica</strong>
 
-	   <ul>
+	   <ul id = "Técnica">
 	   <li><a href="./combinatoria/principio.html">Princípio da inclusão-exclusão</a></li>
 	   <li><a href="./combinatoria/burnside.html">Lema de Burnside / Teorema da enumeração de Pólya</a></li>
 	   <li><a href="./combinatoria/stars.html">Estrelas e barras</a></li>
@@ -175,7 +183,7 @@
 	   </ul></li>
 	   <li><strong>Tarefas</strong>
 
-	   <ul>
+	   <ul id = "Tarefas3">
 	   <li><a href="./combinatoria/xadrez.html">Colocando Bispos em um Tabuleiro de Xadrez</a></li>
 	   <li><a href="./combinatoria/colchetes.html">Sequência de colchetes balanceados</a></li>
 	   <li><a href="./combinatoria/grafosrot.html">Contando grafos rotulados</a></li>
@@ -187,13 +195,13 @@
 	   <ul>
 	   <li><strong>Procura</strong>
 
-	   <ul>
+	   <ul id = "Procura">
 	   <li><a href="./Algebra/ternaria.html">Busca ternária</a></li>
 	   <li><a href="./Algebra/newton.html">Método de Newton para encontrar raízes</a></li>
 	   </ul></li>
 	   <li><strong>Integração</strong>
 
-	   <ul>
+	   <ul id = "Integração">
 	   <li><a href="./Algebra/integral.html">Integral pela fórmula de Simpson</a></li>
 	   </ul></li>
 	   </ul>
@@ -203,7 +211,7 @@
 	   <ul>
 	   <li><strong>Operações elementares</strong>
 
-           <ul>
+           <ul id = "Operações elementares">
            <li><a href="./Geometria/geometria.html">Geometria</a></li>
            <li><a href="./Geometria/linha.html">Encontrando a equação de uma linha para um segmento</a></li>
            <li><a href="./Geometria/interseclinhas.html">Ponto de interseção de linhas</a></li>
@@ -216,7 +224,7 @@
            </ul></li>
            <li><strong>Polígonos</strong>
 
-           <ul>
+           <ul id = "Polígonos">
            <li><a href="./Geometria/triangulo.html">Área orientada de um triângulo</a></li>
            <li><a href="./Geometria/poligsimples.html">Área de um polígono simples</a></li>
            <li><a href="./Geometria/pontopolig.html">Checar se pontos pertencem ao polígono convexo em O(log N)</a></li>
@@ -224,18 +232,18 @@
            <li><a href="./Geometria/lattice.html">Lattice points em um polígono</a></li>
            </ul></li>	   
 	   <li><strong>Sweep Line</strong>
-	   <ul>
+	   <ul id = "Sweep Line">
 	   <li><a href="./Geometria/Sweep Line/segmentos.html">Par de segmentos que se cruzam</a></li>
 	   <li><a href="./Geometria/Sweep Line/Ponto.html">Localização de um ponto em O(log n)</a></li>
 	   </ul></li>
 	   <li><strong>Convex Hull</strong>
-           <ul>
+           <ul id = "Convex Hull">
 	   <li><a href="./Geometria/CH/Graham.html">Construção de um Convex Hull - Scan de Graham</a></li>
 	   <li><a href="./Geometria/CH/LiChao.html">Convex Hull e Árvore de Li Chao</a></li>
 	   </ul></li>
 	   <li><strong>Diversos</strong>
 
-           <ul>
+           <ul id = "Diversos2">
            <li><a href="./Geometria/nearestpair.html">Encontrando o par de pontos mais próximo</a></li>
            <li><a href="./Geometria/voronoideulaney.html">Triangulação de Delaunay e diagrama de Voronoi</a></li>
            </ul></li>
@@ -244,13 +252,13 @@
 	   <h3>Grafos</h3>
 	   <ul>
 	   <li><strong>Travessia em grafos</strong>
-	   <ul>
+	   <ul id = "Travessia">
 	   <li><a href="./grafos/BFS.html">Busca em largura - BFS</a></li>
 	   <li><a href="./grafos/DFS.html">Busca em profundidade - DFS</a></li>
 	   </ul></li>
 	   <li><strong>Componentes conectados, pontes, pontos de articulação</strong>
 
-           <ul>
+           <ul id = "Componentes">
            <li><a href="./grafos/cc.html">Componentes conectados</a></li>
            <li><a href="./grafos/pontes.html">Encontrando Pontes em O(N+M)</a></li>
            <li><a href="./grafos/pontesonline.html">Encontrando Pontes Online</a></li>
@@ -259,7 +267,7 @@
            <li><a href="./grafos/orientacao.html">Orientação forte</a></li>
            </ul></li> 
 	   <li><strong>Caminhos curtos de fonte única</strong>
-	   <ul>	   
+	   <ul id = "fonte única">	   
 	   <li><a href="./grafos/Dijkstra.html">Dijkstra - caminho mais curto de um vértice</a></li>
 	   <li><a href="./grafos/Dijkstrasparsegraph.html">Dijkstra - grafos esparsos</a></li>
 	   <li><a href="./grafos/bellmanford.html">Bellman Ford - caminho mais curto com pesos negativos</a></li>
@@ -268,14 +276,14 @@
            </ul></li>
 	   
 	   <li><strong>Caminhos curtos de todos os pares</strong>
-           <ul>
+           <ul id = "pares">
            <li><a href="./grafos/floyd.html">Floyd Warshall - encontrando todos os caminhos mais curtos</a></li>
            <li><a href="./grafos/fixo.html">Número de caminhos de comprimento fixo / caminhos mais curtos de comprimento fixo</a></li>
 	   </ul></li>
 		   
            <li><strong>Árvores geradoras</strong>
 
-           <ul>
+           <ul id = "Árvores geradoras">
            <li><a href="./grafos/mst.html">Árvore geradora mínima - algoritmo de Prim</a></li>
            <li><a href="./grafos/kruskal.html">Árvore geradora mínima - Kruskal</a></li>
            <li><a href="./grafos/kruskaldsu.html">Árvore geradora mínima - Kruskal com Disjoint Set Union</a></li>
@@ -285,23 +293,23 @@
            </ul></li>
            <li><strong>Ciclos</strong>
 
-           <ul>
+           <ul id = "Ciclos">
            <li><a href="./grafos/ciclosac.html">Checando se um grafo é acíclico e encontrando um ciclo em O(M)</a></li>
            <li><a href="./grafos/ciclonegativo.html">Encontrando um ciclo negativo</a></li>
            <li><a href="./grafos/caminhoeuler.html">Caminho Euleriano</a></li>
            </ul></li>
            <li><strong>Menor ancestral comum (LCA)</strong>
 
-           <ul>
+           <ul id = "LCA">
            <li><a href="./grafos/lca.html">Menor ancestral comum</a></li>
            <li><a href="./grafos/lca2.html">Menor ancestral comum - Binary Lifting</a></li>
            <li><a href="./grafos/lca3.html">Menor ancestral comum - Farach-Colton e algoritmo de Bender</a></li>
-           <li><a href="./grafos/lca4.html">Resolvendo uma RMQ encontrando um LCA</a></li>
+           <li><a href="./grafos/lca4.html">Resolvendo uma RMQ encontrando um menor ancestral comum(LCA)</a></li>
            <li><a href="./grafos/lca5.html">Menor ancestral comum - algoritmo de Tarjan (off-line) </a></li>
            </ul></li>
            <li><strong>Fluxos</strong>
 
-           <ul>
+           <ul id = "Fluxos">
            <li><a href="./grafos/fluxo.html">Fluxo máximo - Ford-Fulkerson e Edmonds-Karp</a></li>
            <li><a href="./grafos/fluxo2.html">Fluxo máximo - Push-relabel</a></li>
            <li><a href="./grafos/fluxo3.html">Fluxo máximo - Push-relabel otimizado</a></li>
@@ -313,12 +321,12 @@
            </ul></li>
            <li><strong>Correspondências</strong>
 
-           <ul>
+           <ul id = "Correspondências">
            <li><a href="./grafos/bipartido.html">Grafo Bipartido</a></li>
            </ul></li>
            <li><strong>Diversos</strong>
 
-           <ul>
+           <ul id = "Diversos3">
            <li><a href="./grafos/ot.html">Ordenação Topológica</a></li>
            <li><a href="./grafos/conectividade.html">Conectividade Aresta / Vértice</a></li>
            <li><a href="./grafos/coloraçãoarvore.html">Coloração de Árvore</a></li>
@@ -333,7 +341,7 @@
 	   <ul>
 	   <li><strong>Sequências</strong>
 
-	   <ul>
+	   <ul id = "Sequências">
 	   <li><a href="./Diversos/rmq.html">RMQ (Consulta de Intervalo Mínimo - menor elemento no intervalo)</a></li>
 	   <li><a href="./Diversos/ss.html">Subsequência crescente mais longa</a></li>
 	   <li><a href="./Diversos/s.html">Encontrando a subarray com a máxima/mínima soma</a></li>
@@ -341,20 +349,20 @@
 	   </ul></li>
 	   <li><strong>Teoria dos jogos</strong>
 
-	   <ul>
+	   <ul id = "jogos">
 	   <li><a href="./Diversos/games.html">Jogos em grafos arbitrários</a></li>
 	   <li><a href="./Diversos/grundy.html">Nim Teorema de Sprague-Grundy</a></li>
 	   </ul></li>
 	   <li><strong>Cronograma</strong>
 
-	   <ul>
+	   <ul id = "Cronograma">
 	   <li><a href="./Diversos/job1.html">Preparando trabalhos em uma máquina</a></li>
 	   <li><a href="./Diversos/job2.html">Preparando trabalhos em duas máquinas</a></li>
 	   <li><a href="./Diversos/job3.html">Preparação otimizada de trabalhos com deadlines e durações</a></li>
 	   </ul></li>
 	   <li><strong>Diversos</strong>
 
-	   <ul>
+	   <ul id = "Diversos4">
 	   <li><a href="./Diversos/josephus.html">Problema de Josephus</a></li>
 	   <li><a href="./Diversos/15game.html">"15 Puzzle Game": existência de uma solução</a></li>
 	   <li><a href="./Diversos/brocot.html">Árvore Stern-Brocot e sequências de Farey</a></li>
@@ -373,6 +381,8 @@
 	 </div>
 	
 	</div>
+
+	<script src="app.js"></script>
 
 	</body>
 </html>
