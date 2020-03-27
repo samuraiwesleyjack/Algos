@@ -62,3 +62,12 @@ hr {
 .thickheader {
   height: 2px;
 }
+
+.night{
+        background: #333335;
+        color : #d1cdd4;
+}
+.day{
+        background: white;
+        color: black;
+}
