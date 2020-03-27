@@ -2,7 +2,6 @@ body {
     font-family:"Segoe UI",Arial,sans-serif;
 	font-weight:400;
 	margin:10px 0
-    color: #333;
 }
 @media only screen and (min-width: 400px) {
     body {
