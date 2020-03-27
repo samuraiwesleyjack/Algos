@@ -1,4 +1,4 @@
-function myFunction(){
+function myFunction(){        /*searchbar*/
 	var input, filter, ul, li, a, i, j;
 	input = document.getElementById('myInput');
 	filter = input.value.toUpperCase();
@@ -19,7 +19,13 @@ function myFunction(){
 			}
 		}
    }
-   
-	
-
 }
+
+function day(){                     /*daynightmode*/
+            c.className='day';        
+            body.className='day';
+        }
+function night(){
+            c.className='night';
+            body.className='night';
+        }
