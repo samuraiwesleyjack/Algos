@@ -27,13 +27,13 @@
 		<div class="container">
 		<nav class="nav">
 		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
-			<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			    <button type="button" onclick="night()" class="btn btn-dark"><img src="img/night.png" length=20 width=20></button>
-			    <button type="button" onclick="day()"   class="btn btn-light"><img src="img/day.png" length=20 width=20></button>
-</div>
 		</nav>
 		</div>
 		<div id="c">
+		<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+		</div>
 		<h1>Fluxos com demandas</h1>
 
 <p>Em uma rede de fluxo normal, o fluxo de uma aresta é limitado apenas pela capacidade $c(e)$ de cima e por 0 de baixo. Neste artigo, discutiremos as redes de fluxo, onde adicionalmente exigimos que o fluxo de cada aresta tenha uma certa quantidade, ou seja, limitamos o fluxo a partir de baixo por uma função de demanda $d(e)$:
