@@ -27,13 +27,13 @@
 		<div class="container">
 		<nav class="nav">
 		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
-			<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			    <button type="button" onclick="night()" class="btn btn-dark"><img src="img/night.png" length=20 width=20></button>
-			    <button type="button" onclick="day()"   class="btn btn-light"><img src="img/day.png" length=20 width=20></button>
-</div>
 		</nav>
 		</div>
 		<div id="c">
+		<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+		</div>
 		<h1>2 - SAT</h1>
 
 <p>SAT ("Boolean satisfiability problem": <a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">wiki¹</a> e <a href="https://pt.wikipedia.org/wiki/Problema_de_satisfatibilidade_booliana">wiki²</a>) é o problema de atribuir valores booleanos a variáveis ​​para satisfazer uma determinada fórmula booleana. A fórmula booleana geralmente será dada em CNF ("conjunctive normal form"), que é uma conjunção de várias cláusulas, em que cada cláusula é uma disjunção de literais (variáveis ​​ou negação de variáveis). 2-SAT (2-satisfiability) é uma restrição do problema SAT, no 2-SAT toda cláusula tem exatamente dois literais. Aqui está um exemplo de um problema 2-SAT.
