@@ -79,3 +79,30 @@ label {
    padding:10px;
    cursor:pointer;
  }
+.fa-sun-o {
+   color:orange;
+   font-size:25px;
+   text-shadow:0px 0px 20px orange;
+   transform:translateX(25px);
+   transition:.3s;
+ }
+.fa-moon-o {
+   color:white;
+   font-size:25px;
+   text-shadow:0px 0px 20px white;
+   transform:translateX(0px);
+   opacity:0;
+   transition:.3s;
+ }
+ #switch-button:checked ~ label > .fa-sun-o{
+   opacity:0;
+   transform:translateX(0px);
+ }
+ #switch-button:checked ~ label > .fa-moon-o{
+   opacity:1;
+   transform:translateX(-25px);
+ }
+ #switch-button:checked ~ .content{
+   background:black;
+   color:white;
+ }
