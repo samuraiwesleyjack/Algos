@@ -72,3 +72,16 @@ hr {
         color: black;
 }
 
+.svg-membros {
+	width: 1em;
+	height: 1em;
+	font-size: 30px; 
+	opacity: 0.7;
+	transition: all 0.3s ease-in-out;
+}
+.svg-membros:hover {
+	opacity: 1;
+	transition: opacity 0.3s;
+	transform: scale(1.1);
+}
+
