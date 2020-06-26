@@ -86,8 +86,7 @@ hr {
   display: block;
   height: 26px;
   width: 60px;
-  background: white;
-  color: black;
+  background: #fff;
   border: 2px solid #96979c;
   border-radius: 15px;
   position: absolute;
@@ -99,8 +98,7 @@ hr {
   display: block;
   height: 20px;
   width: 20px;
-  background: #333335;
-  color : #d1cdd4;
+  background: #96979c;
   border: 2px solid #fff;
   border-radius: 50%;
   position: absolute;
@@ -109,16 +107,12 @@ hr {
   transition: all 0.4s ease-in;
 }
 .dark-mode-toggler input[type="checkbox"]:checked + label::before {
-  background: white;
-  color: black;
+  background: #000;
   border: 2px solid #fff;
 }
 .dark-mode-toggler input[type="checkbox"]:checked + label::after {
   left: -28px;
-	
-  background: #333335;
-  color : #d1cdd4;
-	
+  background: #000;
   border: 2px solid #fff;
   transition: all 0.4s ease-in;
 }
