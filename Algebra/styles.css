@@ -116,3 +116,11 @@ hr {
   border: 2px solid #fff;
   transition: all 0.4s ease-in;
 }
+
+body.dark-mode,
+body.dark-mode button,
+button.dark-mode,
+button.dark-mode button {
+  background: #333335;
+  color : #d1cdd4;
+}
