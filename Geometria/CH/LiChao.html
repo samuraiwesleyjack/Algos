@@ -27,13 +27,13 @@
 		<div class="container">
 		<nav class="nav">
 		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
-			<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			    <button type="button" onclick="night()" class="btn btn-dark"><img src="img/night.png" length=20 width=20></button>
-			    <button type="button" onclick="day()"   class="btn btn-light"><img src="img/day.png" length=20 width=20></button>
-</div>
 		</nav>
 		</div>
 		<div id="c">
+			<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+			</div>
 			<h1>Truque do Convex Hull e árvore de Li Chao</h1>
 
 <p>Considere o seguinte problema. Existem $n$ cidades. Você quer viajar da cidade $1$ para a cidade $n$ de carro. Para fazer isso, você precisa comprar gasolina. Sabe-se que um litro de gasolina custa $cost_k$ na $k^{th}$ cidade. Inicialmente, seu tanque de combustível está vazio e você gasta um litro de gasolina por quilômetro. As cidades estão localizadas na mesma linha em ordem crescente, com a $k^{th}$ cidade tendo coordenada $x_k$. Você também tem que pagar $pedagio_k$ para entrar na $k^{th}$ cidade. Sua tarefa é fazer a viagem com o menor custo possível. A solução pode ser calculada por meio de programação dinâmica (DP):</p>
