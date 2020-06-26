@@ -85,6 +85,7 @@ hr {
 	transform: scale(1.1);
 }
 
+
 .dark-mode-toggler {
   position: fixed;
   top: 5px;
@@ -131,4 +132,5 @@ hr {
   border: 2px solid #fff;
   transition: all 0.4s ease-in;
 }
+
 
