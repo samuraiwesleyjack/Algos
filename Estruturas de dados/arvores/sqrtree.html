@@ -27,13 +27,13 @@
 		<div class="container">
 		<nav class="nav">
 		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
-			<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			    <button type="button" onclick="night()" class="btn btn-dark"><img src="img/night.png" length=20 width=20></button>
-			    <button type="button" onclick="day()"   class="btn btn-light"><img src="img/day.png" length=20 width=20></button>
-</div>
 		</nav>
 		</div>
 		<div id="c">
+			<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+			</div>
 			<h1>Sqrt Tree</h1>
 
 <p>Seja uma array $a$ contendo $n$ elementos e a operação "$\circ$" que satisfaz a propriedade associativa: $(x \circ y) \circ z = x \circ (y \circ z)$ é verdadeiro para qualquer $x$, $y$, $z$.</p>
