@@ -70,6 +70,15 @@ hr {
         color: black;
 }
 
+body.dark-mode,
+body.dark-mode button,
+body.dark-mode .go-home,
+button.dark-mode,
+button.dark-mode button {
+  background: #000;
+  color: #fff;
+}
+
 .dark-mode-toggler {
   position: fixed;
   top: 5px;
@@ -115,12 +124,4 @@ hr {
   background: #000;
   border: 2px solid #fff;
   transition: all 0.4s ease-in;
-}
-
-body.dark-mode,
-body.dark-mode button,
-button.dark-mode,
-button.dark-mode button {
-  background: #333335;
-  color : #d1cdd4;
 }
