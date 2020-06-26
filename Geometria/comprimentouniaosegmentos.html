@@ -27,13 +27,13 @@
 		<div class="container">
 		<nav class="nav">
 		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
-			<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-			    <button type="button" onclick="night()" class="btn btn-dark"><img src="img/night.png" length=20 width=20></button>
-			    <button type="button" onclick="day()"   class="btn btn-light"><img src="img/day.png" length=20 width=20></button>
-</div>
 		</nav>
 		</div>
 		<div id="c">
+		   <div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+	           </div>
 		   <h1>Comprimento da união de segmentos</h1>
 
 <p>Dados $n$ segmentos em uma linha, cada um deles descrito por um par de coordenadas $(a_{i1}, a_{i2})$.
