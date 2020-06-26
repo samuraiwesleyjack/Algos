@@ -31,10 +31,10 @@
 		</nav>
 		</div>
 		<div id="c">
-			<label for="switch-button">
-			    <i class="fas fa-sun" type="button" onclick="day()"></i>
-                            <i class="fas fa-moon" type="button" onclick="night()"></i>
-			</label>
+			<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" aria-label="Toggler for Dark Mode"></label>
+			</div>
 			<h1>Exponenciação Binária</h1>
 
 <p>A exponenciação binária (ou exponenciação modular rápida) é um truque que permite calcular $a^n$ usando apenas $O(\log n)$ multiplicações (em vez de $O(n)$ multiplicações exigidas por uma abordagem mais forçada).</p>
