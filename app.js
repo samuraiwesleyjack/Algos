@@ -28,6 +28,7 @@ function day(){                     /*daynightmode*/
 function night(){
             c.className='night';
             body.className='night';
+	    svg.className='night-svg';
         }
 
 /* Dark Mode */
