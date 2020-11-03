@@ -1,6 +1,6 @@
 # CP Algoritmos
 
-The goal of this project is to translate to Portuguese and make the resources: http://e-maxx.ru/algo and https://cp-algorithms.com/, more accessible. They are descriptions of many algorithms and data structures especially popular in the field of competitive programming.
+The goal of this project is to translate http://e-maxx.ru/algo and https://cp-algorithms.com/ to Portuguese, and make these resources more accessible. They are descriptions of many algorithms and data structures especially popular in the field of competitive programming.
 
 [CP Algorithms](https://cp-algorithms.com/) - Articles in English
 
