@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Triangulação de Delaunay e diagrama de Voronoi - CP Algoritmos</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="CP Algoritmos, Algoritmos, cp algorithms brasil, CP Algoritmos, Data Structure, cp algorithms, Estrutura de dados, C++ e Algoritmos, CP Algorithms, cp algoritmos, cp algorithms">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+		<link rel="stylesheet" href="styles.css">
+		<script src="app.js"></script>
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body id="body">
+		<div class="container">
+		<nav class="nav">
+		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
+		</nav>
+		</div>
+		<div id="c">
+		   <div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+		   </div>
+
+		   <h1>Decomposição Vertical</h1>
+
+           <h2>Sumário</h2>
+           <p>A decomposição vertical é uma técnica poderosa usada em vários problemas de geometria. A ideia geral é "cortar" o plano em várias listras verticais e resolver o problema dessas listras independentemente. Vamos ilustrar a ideia com alguns exemplos.</p>
+
+           <h2>Área de união de triângulos</h2>
+           <p>Suponha que existam $n$ triângulos em um plano e devemos encontrar a área da união desses triângulos. O problema seria menos complicado se os triângulos não se cruzassem, então vamos nos livrar dessas interseções dividindo o plano em listras verticais: desenhando linhas verticais sobre todos os vértices e todos os pontos de intersecção dos lados dos diferentes triângulos. Talvez exista $O(n^2)$ tais linhas, assim obtemos $O(n^2)$ listras. Agora considere alguma listra vertical. Cada segmento não-vertical pode fazer uma intersecção da esquerda para a direita ou simplesmente não fazer uma intersecção.
+           Além disso, dois segmentos não se cruzam/fazem uma intersecção estritamente dentro da faixa/listra. Isso significa que a parte da união dos triângulos que fica dentro dessa faixa é composta por trapézios disjuntos com bases nas laterais da faixa/listra.
+           Esta propriedade nos permite calcular a área dentro de cada faixa com o seguinte algoritmo que checa essas linhas. Cada segmento que cruza a faixa é superior ou inferior, dependendo se o interior do triângulo correspondente está acima ou abaixo do segmento. Podemos visualizar cada segmento superior como um colchete de abertura e cada segmento inferior como um colchete de fechamento e decompor a faixa em trapézios, decompondo a sequência de colchetes em sequências de colchetes corretas menores. Este algoritmo requer $O(n^3\log n)$ de tempo de execução e $O(n^2)$ de memória.</p>
+
+           <h3>Otimização</h3>
+           <p>Em primeiro lugar, vamos reduzir o tempo de execução para $O(n^2\log n)$. Em vez de gerar trapézios para cada faixa, teremos um lado do triângulo (segment $s = (s_0, s_1)$) e encontraremos o conjunto de faixas onde este segmento é um lado de algum trapézio. Neste caso só temos que encontrar as listras onde o equilíbrio dos colchetes abaixo (ou acima, no caso de um segmento inferior) $s$ é zero. Isso significa que em vez de executar o escaneamento vertical para cada listra, podemos executar um escaneamento horizontal para todas as partes de outros segmentos que afetam o equilíbrio dos colchetes em relação a $s$.
+           Mostraremos como fazer isso para um segmento superior (o algoritmo para os segmentos inferiores é semelhante). Considere algum segmento não vertical $t = (t_0, t_1)$ e encontre a intersecção $[x_1, x_2]$ das projeções de $s$ e $t$ no $Ox$. Se esta interseção estiver vazia ou consistir de apenas um ponto, $t$ pode ser descartado desde que $s$ e $t$ não cruze o interior da mesma faixa. Caso contrário, considere a interseção $I$ de $s$ e $t$. Existirão três casos.</p>
+
+           <ol>
+           <li>$I = \varnothing$</li>
+           </ol>
+
+           <p>Nesse caso $t$ está acima ou abaixo de $s$ em $[x_1, x_2]$. Se $t$ estiver acima, não afeta se $s$ é um lado de algum trapézio ou não.
+           Se $t$ estiver abaixo de $s$, devemos adicionar $1$ ou $-1$ ao equilíbrio da sequência de colchetes para todas as faixas/listras em $[x_1, x_2]$, dependendo se $t$ estiver acima ou abaixo.</p>
+
+           <ol>
+           <li>$I$ consiste de um único ponto $p$</li>
+           </ol>
+
+           <p>Este caso pode ser reduzido ao anterior dividindo $[x_1, x_2]$ em $[x_1, p_x]$ e $[p_x, x_2]$.</p>
+
+           <ol>
+           <li>$I$ é algum segmento $l$</li>
+           </ol>
+
+           <p>Este caso significa que as partes de $s$ e $t$ para $x\in[x_1, x_2]$ coincidem. Se $t$ é inferior, $s$ claramente não é um lado de um trapézio.
+           Caso contrário, pode acontecer que ambos $s$ e $t$ pode ser considerado como um lado de algum trapézio. Para resolver essa ambiguidade, podemos decidir que apenas o segmento com o menor índice deve ser considerado como um lado (aqui supomos que os lados dos triângulos são enumerados de alguma forma). Então, se  $index(s) &lt; index(t)$, devemos ignorar esse caso,
+           caso contrário, devemos marcar que $s$ nunca poderá ser um lado em $[x_1, x_2]$ (isso pode ser feito, por exemplo, adicionando um evento correspondente com equilíbrio $-2$).</p>
+
+           <p>Aqui está uma representação gráfica dos três casos.</p>
+
+           <p><center><img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/triangle_union.png" alt="Visual" width="90%"></center></p>
+
+           <p>Finalmente, devemos comentar sobre adicionar $1$ ou $-1$ sobre todas as faixas/listras em $[x_1, x_2]$. Para cada adição de $w$ em $[x_1, x_2]$ podemos criar eventos $(x_1, w),\ (x_2, -w)$
+           e processar todos esses eventos com uma <strong>sweep line</strong>.</p>
+
+           <h3>Segunda Otimização</h3>
+
+           <p>Observe que, se aplicarmos a otimização anterior, não precisaremos mais encontrar todas as listras explicitamente. Isso reduz o consumo de memória para $O(n)$.</p>
+
+           <h2>Intersecção de polígonos convexos</h2>
+
+           <p>Outro uso da decomposição vertical é calcular a interseção de dois polígonos convexos em tempo linear. Suponha que o plano seja dividido em faixas verticais por linhas verticais passando por cada vértice de cada polígono. Então, se considerarmos um dos polígonos de entrada e alguma faixa, suas intersecções vão ser um trapézio, um triângulo ou um ponto. Portanto, podemos simplesmente cruzar essas formas para cada faixa vertical e mesclar essas interseções em um único polígono.</p>
+
+
+        <h2>Implementação</h2>
+
+        <p>Abaixo está um código que calcula a área da união de um conjunto de triângulos em $O(n^2\log n)$ de tempo de execução e $O(n)$ de memória.</p>
+
+        <pre><code class="cpp">typedef double dbl;
+
+const dbl eps = 1e-9;
+
+inline bool eq(dbl x, dbl y){
+    return fabs(x - y) &lt; eps;
+}
+
+inline bool lt(dbl x, dbl y){
+    return x &lt; y - eps;
+}
+
+inline bool gt(dbl x, dbl y){
+    return x &gt; y + eps;
+}
+
+inline bool le(dbl x, dbl y){
+    return x &lt; y + eps;
+}
+
+inline bool ge(dbl x, dbl y){
+    return x &gt; y - eps;
+}
+
+struct pt{
+    dbl x, y;
+    inline pt operator - (const pt &amp; p)const{
+        return pt{x - p.x, y - p.y};
+    }
+    inline pt operator + (const pt &amp; p)const{
+        return pt{x + p.x, y + p.y};
+    }
+    inline pt operator * (dbl a)const{
+        return pt{x * a, y * a};
+    }
+    inline dbl cross(const pt &amp; p)const{
+        return x * p.y - y * p.x;
+    }
+    inline dbl dot(const pt &amp; p)const{
+        return x * p.x + y * p.y;
+    }
+    inline bool operator == (const pt &amp; p)const{
+        return eq(x, p.x) &amp;&amp; eq(y, p.y);
+    }
+};
+
+struct Line{
+    pt p[2];
+    Line(){}
+    Line(pt a, pt b):p{a, b}{}
+    pt vec()const{
+        return p[1] - p[0];
+    }
+    pt&amp; operator [](size_t i){
+        return p[i];
+    }
+};
+
+inline bool lexComp(const pt &amp; l, const pt &amp; r){
+    if(fabs(l.x - r.x) &gt; eps){
+        return l.x &lt; r.x;
+    }
+    else return l.y &lt; r.y;
+}
+
+vector&lt;pt&gt; interSegSeg(Line l1, Line l2){
+    if(eq(l1.vec().cross(l2.vec()), 0)){
+        if(!eq(l1.vec().cross(l2[0] - l1[0]), 0))
+            return {};
+        if(!lexComp(l1[0], l1[1]))
+            swap(l1[0], l1[1]);
+        if(!lexComp(l2[0], l2[1]))
+            swap(l2[0], l2[1]);
+        pt l = lexComp(l1[0], l2[0]) ? l2[0] : l1[0];
+        pt r = lexComp(l1[1], l2[1]) ? l1[1] : l2[1];
+        if(l == r)
+            return {l};
+        else return lexComp(l, r) ? vector&lt;pt&gt;{l, r} : vector&lt;pt&gt;();
+    }
+    else{
+        dbl s = (l2[0] - l1[0]).cross(l2.vec()) / l1.vec().cross(l2.vec());
+        pt inter = l1[0] + l1.vec() * s;
+        if(ge(s, 0) &amp;&amp; le(s, 1) &amp;&amp; le((l2[0] - inter).dot(l2[1] - inter), 0))
+            return {inter};
+        else
+            return {};
+    }
+}
+inline char get_segtype(Line segment, pt other_point){
+    if(eq(segment[0].x, segment[1].x))
+        return 0;
+    if(!lexComp(segment[0], segment[1]))
+        swap(segment[0], segment[1]);
+    return (segment[1] - segment[0]).cross(other_point - segment[0]) &gt; 0 ? 1 : -1;
+}
+
+dbl union_area(vector&lt;tuple&lt;pt, pt, pt&gt; &gt; triangles){
+    vector&lt;Line&gt; segments(3 * triangles.size());
+    vector&lt;char&gt; segtype(segments.size());
+    for(size_t i = 0; i &lt; triangles.size(); i++){
+        pt a, b, c;
+        tie(a, b, c) = triangles[i];
+        segments[3 * i] = lexComp(a, b) ? Line(a, b) : Line(b, a);
+        segtype[3 * i] = get_segtype(segments[3 * i], c);
+        segments[3 * i + 1] = lexComp(b, c) ? Line(b, c) : Line(c, b);
+        segtype[3 * i + 1] = get_segtype(segments[3 * i + 1], a);
+        segments[3 * i + 2] = lexComp(c, a) ? Line(c, a) : Line(a, c);
+        segtype[3 * i + 2] = get_segtype(segments[3 * i + 2], b);
+    }
+    vector&lt;dbl&gt; k(segments.size()), b(segments.size());
+    for(size_t i = 0; i &lt; segments.size(); i++){
+        if(segtype[i]){
+            k[i] = (segments[i][1].y - segments[i][0].y) / (segments[i][1].x - segments[i][0].x);
+            b[i] = segments[i][0].y - k[i] * segments[i][0].x;
+        }
+    }
+    dbl ans = 0;
+    for(size_t i = 0; i &lt; segments.size(); i++){
+        if(!segtype[i])
+            continue;
+        dbl l = segments[i][0].x, r = segments[i][1].x;
+        vector&lt;pair&lt;dbl, int&gt; &gt; evts;
+        for(size_t j = 0; j &lt; segments.size(); j++){
+            if(!segtype[j] || i == j)
+                continue;
+            dbl l1 = segments[j][0].x, r1 = segments[j][1].x;
+            if(ge(l1, r) || ge(l, r1))
+                continue;
+            dbl common_l = max(l, l1), common_r = min(r, r1);
+            auto pts = interSegSeg(segments[i], segments[j]);
+            if(pts.empty()){
+                dbl yl1 = k[j] * common_l + b[j];
+                dbl yl = k[i] * common_l + b[i];
+                if(lt(yl1, yl) == (segtype[i] == 1)){
+                    int evt_type = -segtype[i] * segtype[j];
+                    evts.emplace_back(common_l, evt_type);
+                    evts.emplace_back(common_r, -evt_type);
+                }
+            }
+            else if(pts.size() == 1u){
+                dbl yl = k[i] * common_l + b[i], yl1 = k[j] * common_l + b[j];
+                int evt_type = -segtype[i] * segtype[j];
+                if(lt(yl1, yl) == (segtype[i] == 1)){
+                    evts.emplace_back(common_l, evt_type);
+                    evts.emplace_back(pts[0].x, -evt_type);
+                }
+                yl = k[i] * common_r + b[i], yl1 = k[j] * common_r + b[j];
+                if(lt(yl1, yl) == (segtype[i] == 1)){
+                    evts.emplace_back(pts[0].x, evt_type);
+                    evts.emplace_back(common_r, -evt_type);
+                }
+            }
+            else{
+                if(segtype[j] != segtype[i] || j &gt; i){
+                    evts.emplace_back(common_l, -2);
+                    evts.emplace_back(common_r, 2);
+                }
+            }
+        }
+        evts.emplace_back(l, 0);
+        sort(evts.begin(), evts.end());
+        size_t j = 0;
+        int balance = 0;
+        while(j &lt; evts.size()){
+            size_t ptr = j;
+            while(ptr &lt; evts.size() &amp;&amp; eq(evts[j].first, evts[ptr].first)){
+                balance += evts[ptr].second;
+                ++ptr;
+            }
+            if(!balance &amp;&amp; !eq(evts[j].first, r)){
+                dbl next_x = ptr == evts.size() ? r : evts[ptr].first;
+                ans -= segtype[i] * (k[i] * (next_x + evts[j].first) + 2 * b[i]) * (next_x - evts[j].first);
+            }
+            j = ptr;
+        }
+    }
+    return ans/2;
+}
+</code></pre>
+
+        <h2>Problemas</h2>
+
+        <ul>
+        <li><a href="https://codeforces.com/contest/62/problem/C">Codeforces 62C Inquisition</a></li>
+        <li><a href="https://codeforces.com/contest/107/problem/E">Codeforces 107E Darts</a></li>
+        </ul>
+
+
+
+
+
+			
+
+		</div>
+	</body>
+</html> 
