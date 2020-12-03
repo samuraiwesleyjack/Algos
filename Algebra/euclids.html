@@ -110,7 +110,7 @@ $$d = \ mdc(a, b) \mid \ mdc(b, a \mod b)$$</p>
 
 <p>Se $a > b \geq 1$ e $b &lt; F_n$ para algum $n$, o algoritmo de Euclides executa no máximo $n-2$ chamadas recursivas.</p>
 
-<p>Além disso, é possível mostrar que o limite desse teorema é otimizado. Quando $a = F_n$ e $b = F_{n-1}$, $mdc(a, b)$ will executará exatamente $n-2$ chamadas. Em outras palavras, os números consecutivos de Fibonacci são o pior caso de input para o algoritmo de Euclides.</p>
+<p>Além disso, é possível mostrar que o limite desse teorema é otimizado. Quando $a = F_n$ e $b = F_{n-1}$, $mdc(a, b)$ executará exatamente $n-2$ chamadas. Em outras palavras, os números consecutivos de Fibonacci são o pior caso de input para o algoritmo de Euclides.</p>
 
 <p>Dado que os números de Fibonacci crescem exponencialmente, concluímos que o algoritmo funciona em $O(\log \min(a, b))$.</p>
 
