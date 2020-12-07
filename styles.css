@@ -1,12 +1,11 @@
 body {
     font-family:"Segoe UI",Arial,sans-serif;
-	font-weight:400;
-	margin:10px 0
+	  font-weight:400;
     color: #333;
 }
 @media only screen and (min-width: 400px) {
     body {
-        font-size: 26px;
+        font-size: 16px;
     }
 }
 @media only screen and (min-width: 600px) {
@@ -18,17 +17,17 @@ h1{font-size:36px}h2{font-size:30px}h3{font-size:24px}h4{font-size:20px}h5{font-
 h1,h2,h3,h4,h5,h6{
 	font-family:"Segoe UI",Arial,sans-serif;
 	font-weight:400;
-	margin:10px 0
+	
 	}.w3-wide{letter-spacing:4px}
 #intro {
     font-size: 1.3em;
 }
-
-#c {
-    width: 960px;
-    margin: 10px auto;
-    padding: 20px;
-    border-radius: 7px;
+.container {
+	margin: auto;
+  padding: 0;
+}
+* {
+  box-sizing: border-box;
 }
 code {
     font-weight: bold;
@@ -67,10 +66,10 @@ hr {
         background: #333335;
         color : #d1cdd4;
 }
-.day{
+/*.day{
         background: white;
         color: black;
-}
+}*/
 
 .svg-icon {
 	width: 1em;

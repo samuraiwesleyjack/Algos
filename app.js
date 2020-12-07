@@ -22,12 +22,12 @@ function myFunction(){        /*searchbar*/
 }
 
 function day(){                     /*daynightmode*/
-            c.className='day';        
-            body.className='day';
+            c.className='container';        
+            body.className='container';
         }
 function night(){
-            c.className='night';
-            body.className='night';
+            c.className='night container';
+            body.className='night container';
         }
 
 /* Dark Mode */
