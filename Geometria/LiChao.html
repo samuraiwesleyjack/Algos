@@ -48,7 +48,7 @@
 Na verdade, seria um pouco mais conveniente considerá-las não como funções lineares, mas como pontos $(k;b)$ no plano, de modo que teremos que encontrar o ponto que possui o menor produto com um determinado ponto $(x;1)$, ou seja, onde este ponto $kx+b$ é minimizado.
 Esse mínimo estará necessariamente no convex hull inferior desses pontos, como pode ser visto abaixo:</p>
 
-<p><center> <img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/convex_hull_trick.png" alt="lower convex hull" /> </center></p>
+<img src="https://raw.githubusercontent.com/e-maxx-eng/e-maxx-eng/master/img/convex_hull_trick.png" alt="lower convex hull" />
 
 <p>É necessário manter pontos no convex hull e vetores normais das arestas do convex hull.
 Quando você tem uma query $(x;1)$ você terá que encontrar o vetor normal mais próximo dele em termos de ângulos entre eles, então a função linear otimizada corresponderá a um de seus pontos finais.
