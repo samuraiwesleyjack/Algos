@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Árvore de Fenwick - Programação Competitiva Algoritmos </title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Fenwick Tree, Árvore de Fenwick Implementação, CP Algoritmos, C++, Estruturas de Dados, Competitive Programming pt-br">
+		<meta name="author" content="Weslley Matheus">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+		<link rel="stylesheet" href="../styles.css">
+		<script src="../app.js"></script>
+		<script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+        </script>
+		<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+		
+		<!-- highlightjs for code highlighting -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/xcode.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+        <!-- end highlightjs -->
+	
+	</head>
+	<body id="body">
+		<div class="container">
+		<nav class="nav">
+		    <a class="nav-link active" href="/"><strong>CP Algoritmos</strong></a>
+		</nav>
+		</div>
+		<div class="container" id="c">
+			<div class="dark-mode-toggler">
+				<input type="checkbox" id="toggler" />
+				<label for="toggler" onclick="main()" aria-label="Toggler for Dark Mode"></label>
+			</div>
+		    <h1>Árvore de Fenwick / Árvore de Indexação Binária (BIT)</h1>
+			
+			<p>Vamos deixar com que $ f $ seja alguma função <em>reversível</em> e $A$ seja uma array de números inteiros de comprimento $N$.</p>
+
+			<p>A Árvore de Fenwick é uma estrutura de dados que:</p>
+
+			<ul>
+			<li>calcula o valor da função $f$ no intervalo $[l; r]$ (i.e. $f(A_l, A_{l+1}, \dots, A_r)$) em tempo $O(\log n)$;</li>
+			<li>atualiza o valor de um elemento de $A$ em tempo $O(\log n)$;</li>
+			<li>requer memória $O(N)$, ou em outras palavras, exatamente a mesma memória necessária para $A$;</li>
+			<li>é mais fácil de usar e codificar, especialmente no caso de arrays multidimensionais.</li>
+			</ul>
+
+			<p>Árvore de Fenwick é também chamada de <strong>Árvore de Indexação Binária</strong>, ou apenas <strong>BIT</strong>.</p>
+
+			<p>A aplicação mais comum da árvore Fenwick é <em>calcular a soma de um range</em> (i.e. $f(A_1, A_2, \dots, A_k) = A_1 + A_2 + \dots + A_k$).</p>
+
+			<p>A Árvore de Fenwick foi descrita pela primeira vez em um artigo intitulado "A new data structure for cumulative frequency tables" (Peter M. Fenwick, 1994).</p>
+
+			<h2>Descrição</h2>
+
+			<h3>Visão Geral</h3>
+
+			<p>Por uma questão de simplicidade, assumiremos que a função $f$ é apenas uma <em>função de soma</em>.</p>
+
+			<p>Fornecida uma array $A[0 \dots N-1]$.
+			Uma árvore de Fenwick é apenas uma array $T[0 \dots N-1]$, onde cada um de seus elementos é igual à soma dos elementos de $A$ em um range $[g(i); i]$:
+			$$T_i = \sum_{j = g(i)}^{i}{A_j},$$
+			onde $g$ é uma função que satisfaz $0 \le g(i) \le i$.
+			Definiremos a função nos próximos parágrafos.</p>
+
+			<p>A estrutura de dados é chamada de árvore, porque existe uma boa representação da estrutura de dados como árvore, embora não precisemos modelar uma árvore real com vértices e nós.
+			Só precisamos manter a array $ T $ para lidar com todas as queries.</p>
+
+			<p><strong>Nota:</strong> A Árvore de Fenwick apresentada aqui usa indexação baseada em 0([0,1,2..]).
+			Muitas pessoas realmente usarão uma versão da Árvore de Fenwick que usa indexação baseada em um([1,2,3..]).
+			Ambas as versões são equivalentes em termos de tempo e complexidade de memória.</p>
+
+			<p>Agora podemos escrever um <em>pseudocódigo</em> para as duas operações mencionadas acima - consiga a soma dos elementos de $A$ no range $[0; r]$ e atualizar (incrementar) algum elemento $A_i$:</p>
+
+<pre><code class="python">def sum(int r):
+    res = 0
+    while (r &gt;= 0):
+        res += t[r]
+        r = g(r) - 1
+    return res
+
+def increase(int i, int val):
+    for all j with g(j) &lt;= i &lt;= j:
+        t[j] += val
+</code></pre>
+
+			<p>A função <code>sum</code> funciona da seguinte maneira:</p>
+
+			<ol>
+			<li>primeiro, adiciona a soma do intervalo $[g(r); r]$ (i.e. $T[r]$) para o <code>resultado</code></li>
+			<li>então, "salta" para o intervalo $[g(g(r)-1); g(r)-1]$, e adiciona a soma desse range ao <code>resultado</code></li>
+			<li>e assim por diante, até que "salte" de $[0; g(g( \dots g(r)-1 \dots -1)-1)]$ para $[g(-1); -1]$; é aí que a função <code>sum</code> para de saltar.</li>
+			</ol>
+
+			<p>A função <code>increase</code> funciona na mesma analogia, mas "salta" na direção de aumentar os índices:</p>
+
+			<ol>
+			<li>Somas dos ranges $[g(j); j]$ que satisfaçam a condição $g(j) \le i \le j$ são incrementadas por <code>delta</code> , isto é <code>t[j] += delta</code>. Portanto, atualizamos todos os elementos em $T$ que corresponde a intervalos em que $A_i$ pertence.</li>
+			</ol>
+
+			<p>É óbvio que a complexidade de ambos <code>sum</code> e <code>increase</code> dependem da função $g$.
+			Existem várias maneiras de escolher a função $g$, enquanto $0 \le g(i) \le i$ para todo $i$.
+			Por exemplo, a função $g(i) = i$ funciona, no que resulta $T = A$, e, portanto, as queries de soma são lentas.
+			Também podemos assumir a função $g(i) = 0$.
+			Isso corresponderá ao algoritmo da <a href="https://en.wikipedia.org/wiki/Prefix_sum">soma de prefixos de uma array</a>, portanto achar a soma de um range $[0; i]$ será em tempo constante, mas atualizações serão lentas.
+			Para o algoritmo, é fornecida uma array, você irá criar outra(array de prefixos), onde cada elemento será $pref[i] = pref[i-1] + a[i];$ e a soma do range $[j; i]$ corresponderá $pref[i] - pref[j-1]$, se $j = 0$ teremos soma $[0,i]$ correspondendo à $pref[i]$.
+			A parte inteligente do algoritmo Fenwick é que ele usa uma definição especial da função $g$ que pode lidar com ambas as operações em tempo $O(\log N)$.</p>
+
+			<h3>Definição de $g(i)$</h3>
+
+			<p>O cálculo de $g(i)$ é definido pela operação:
+			nós substituímos todos os $1$ bits à direita na representação binária de $i$ com $0$ bits.</p>
+
+			<p>Em outras palavras, se o dígito menos significativo de $i$ em binário é $0$, então $g(i) = i$.
+			Ao contrário se for $1$, pegamos esse $1$ e todos os outros $1$s entrelados e trocamos eles.</p>
+
+			<p>Por exemplo, temos</p>
+
+			<p>$$\begin{align}
+			g(11) = g(1011_2) = 1000_2 &amp;= 8 &#92;&#92;
+			g(12) = g(1100_2) = 1100_2 &amp;= 12 &#92;&#92;
+			g(13) = g(1101_2) = 1100_2 &amp;= 12 &#92;&#92;
+			g(14) = g(1110_2) = 1110_2 &amp;= 14 &#92;&#92;
+			g(15) = g(1111_2) = 0000_2 &amp;= 0 &#92;&#92;
+			\end{align}$$</p>
+
+			<p>Existe uma implementação simples usando operações bitwise para a operação descrita acima:
+			$$g(i) = i ~\&amp;~ (i+1),$$
+			onde $\&amp;$ é o operador bitwise AND. Esta solução faz a mesma coisa que a operação descrita acima.</p>
+			<p>Para transformar uma string binária em um inteiro, podemos fazer com o seguinte código:</p>
+			<pre><code class="cpp">string s; int x = stoi(s, nullptr, 2); //stoi(string, size_t*, base do número(binário = 2))</pre></code>
+
+			<p>Agora, só precisamos encontrar uma maneira de iterar sobre todos $j$'s, de tal modo que $g(j) \le i \le j$.</p>
+
+			<p>É fácil ver que podemos encontrar todos esses $j$'s começando com $i$ e trocando o último bit que não foi trocado ainda.
+			Vamos chamar essa operação de $h(j)$.
+			Por exemplo, para $i = 10$ teremos:</p>
+
+			<p>$$\begin{align}
+			10 &amp;= 0001010_2 &#92;&#92;
+			h(10) = 11 &amp;= 0001011_2 &#92;&#92;
+			h(11) = 15 &amp;= 0001111_2 &#92;&#92;
+			h(15) = 31 &amp;= 0011111_2 &#92;&#92;
+			h(31) = 63 &amp;= 0111111_2 &#92;&#92;
+			\vdots &amp;
+			\end{align}$$</p>
+
+			<p>Também existe uma forma simples de executar $h$ usando operadores bitwise:
+			$$h(j) = j ~&#124;~ (j+1),$$
+			onde $&#124;$ é o operador bitwise OR.</p>
+
+			<p>A imagem a seguir mostra uma possível interpretação da Árvore Fenwick como uma árvore.
+			Os nós da árvore mostram o range em que eles cobrem.</p>
+
+			<center><p><img src="img/BIT1.png" alt="Example BIT" /></p></center>
+
+			<h2>Implementação</h2>
+
+			<h3>Encontrando a soma em uma array unidimensional</h3>
+
+			<p>Aqui, apresentamos uma implementação da Árvore de Fenwick para queries de soma e atualizações individuais de elementos.</p>
+
+			<p>A Árvore de Fenwick normal só pode responder queries de soma do tipo $[0; r]$ usando <code>sum(int r)</code>, no entanto, também podemos responder a outras queries do tipo $[l; r]$ calculando 2 somas $[0; r]$ e $[0; l-1]$ e subtraindo elas(como no algoritmo do prefixo da soma).
+			Isso é lidado com o método <code>sum(int l, int r)</code>.</p>
+
+			<p>Além disso, esta implementação suporta dois construtores.
+			Você pode criar uma árvore de Fenwick iniciada apenas com zeros, ou você pode converter uma array existente na forma de Fenwick(lembre-se que trabalhar com a árvore de Fenwick, será trabalhar com operações em bits).</p>
+
+<pre><code class="cpp">struct FenwickTree {
+    vector&lt;int&gt; bit;  // arvore de indexaçao binaria
+    int n;
+
+    FenwickTree(int n) {
+        this-&gt;n = n;
+        bit.assign(n, 0);  //{0,0,0,0..}
+    }
+
+    FenwickTree(vector&lt;int&gt; a) : FenwickTree(a.size()) {
+        for (size_t i = 0; i &lt; a.size(); i++)
+            add(i, a[i]);
+    }
+
+    int sum(int r) {
+        int ret = 0;
+        for (; r &gt;= 0; r = (r &amp; (r + 1)) - 1)
+            ret += bit[r];
+        return ret;
+    }
+
+    int sum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
+
+    void add(int idx, int val) {
+        for (; idx &lt; n; idx = idx | (idx + 1))
+            bit[idx] += val;
+    }
+};
+</code></pre>
+
+			<h3>Encontrando o mínimo de $[0; r]$ em uma array unidimensional</h3>
+
+			<p>Não há uma maneira fácil de encontrar o mínimo do range $[l; r]$ usando Árvore de Fenwick, pois ela suporta queries do tipo $[0; r]$.
+			Além disso, sempre que um valor é adicionado (<code>update</code>), o novo valor deve ser menor que o valor atual (porque a função $min$ não é reversível).
+			Essas são limitações significativas.</p>
+
+<pre><code class="cpp">struct FenwickTreeMin {
+    vector&lt;int&gt; bit;     //arvore de fenwick
+    int n;
+    const int INF = (int)1e9;
+
+    FenwickTreeMin(int n) {
+        this-&gt;n = n;
+        bit.assign(n, INF);  //{INF,INF,INF,..}
+    }
+
+    FenwickTreeMin(vector&lt;int&gt; a) : FenwickTreeMin(a.size()) {
+        for (size_t i = 0; i &lt; a.size(); i++)
+            update(i, a[i]);
+    }
+
+    int getmin(int r) {
+        int res = INF;
+        for (; r &gt;= 0; r = (r &amp; (r + 1)) - 1)
+            res = min(res, bit[r]);
+        return ret;
+    }
+
+    void update(int idx, int val) {
+        for (; idx &lt; n; idx = idx | (idx + 1))
+            bit[idx] = min(bit[idx], val);
+    }
+};
+</code></pre>
+
+			<p>Nota: é possível implementar uma árvore de Fenwick que possa lidar com consultas de range mínimo com atualizações(updates).
+			O artigo <a href="http://ioinformatics.org/oi/pdf/v9_2015_39_44.pdf">"Queries de range mínimo eficientes com árvores de indexação binária"</a> descreve essa ideia.
+			No entanto, com essa abordagem, você precisa manter uma segunda árvore de indexação binária, com uma estrutura um pouco diferente, a primeira árvore não é suficiente para armazenar todos os elementos em uma array.
+			The implementation is also a lot harder compared to the normal implementation for sums.</p>
+
+			<h3>Encontrando a soma em uma array bidimensional</h3>
+
+<pre><code class="cpp">struct FenwickTree2D {
+    vector&lt;vector&lt;int&gt;&gt; bit;   //arvore bit 2D
+    int n, m;
+
+    // init(...) { ... }
+
+    int sum(int x, int y) {
+        int ret = 0;
+        for (int i = x; i &gt;= 0; i = (i &amp; (i + 1)) - 1)
+            for (int j = y; j &gt;= 0; j = (j &amp; (j + 1)) - 1)
+                ret += bit[i][j];
+        return ret;
+    }
+
+    void add(int x, int y, int val) {
+        for (int i = x; i &lt; n; i = i | (i + 1))
+            for (int j = y; j &lt; m; j = j | (j + 1))
+                bit[i][j] += val;
+    }
+};
+</code></pre>
+
+			<h3>Abordagem de indexação</h3>
+
+			<p>Para esta abordagem, alteramos os requisitos e a definição para $T[]$ e $g()$ um pouco.
+			Queremos $T[i]$ para armazenar a soma de $[g(i)+1; i]$.
+			Isso muda a implementação um pouco, e permite uma boa definição semelhante para $g(i)$:</p>
+
+<pre><code class="python">def sum(int r):
+    res = 0             
+    while (r &gt; 0):
+        res += t[r]
+        r = g(r)
+    return res
+
+def increase(int i, int val):
+    for all j with g(j) &lt; i &lt;= j:
+        t[j] += val
+</code></pre>
+
+			<p>O calculo para $g(i)$ é definido como:
+			alternando(XOR) o último bit set $1$ na representação binária de $i$.</p>
+
+			<p>$$\begin{align}
+			g(7) = g(111_2) = 110_2 &amp;= 6 &#92;&#92;
+			g(6) = g(110_2) = 100_2 &amp;= 4 &#92;&#92;
+			g(4) = g(100_2) = 000_2 &amp;= 0 &#92;&#92;
+			\end{align}$$</p>
+
+			<p>O último bit set pode ser extraído $i ~\&amp;~ (-i)$, a operação pode ser expressa:
+			$$g(i) = i - (i ~\&amp;~ (-i).$$</p>
+
+			<p>Você precisa alterar todos os valores $T[j]$ na sequência $i,~ h(i),~ h(h(i)),~ \dots$ quando você quiser atualizar $A[j]$, onde $h(i)$ é definido como:
+			$$h(i) = i + (i ~\&amp;~ (-i)).$$</p>
+
+			<p>Como você pode ver, o principal benefício dessa abordagem é que as operações binárias se complementam muito bem.</p>
+
+			<p>A implementação a seguir pode ser usada como as outras implementações, no entanto, usa indexação baseada em um internamente.</p>
+
+<pre><code class="cpp">struct FenwickTreeOneBasedIndexing {
+    vector&lt;int&gt; bit;  // binary indexed tree
+    int n;
+
+    FenwickTreeOneBasedIndexing(int n) {
+        this-&gt;n = n + 1;
+        bit.assign(n + 1, 0);
+    }
+
+    FenwickTreeOneBasedIndexing(vector&lt;int&gt; a)
+        : FenwickTreeOneBasedIndexing(a.size()) {
+        init(a.size());
+        for (size_t i = 0; i &lt; a.size(); i++)
+            add(i, a[i]);
+    }
+
+    int sum(int idx) {
+        int ret = 0;
+        for (++idx; idx &gt; 0; idx -= idx &amp; -idx)
+            ret += bit[idx];
+        return ret;
+    }
+
+    int sum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
+
+    void add(int idx, int val) {
+        for (++idx; idx &lt; n; idx += idx &amp; -idx)
+            bit[idx] += val;
+    }
+};
+</code></pre>
+
+			<h2>Operações em Range</h2>
+
+			<p>A Árvore de Fenwick pode suportar as operações de range:</p>
+
+			<ol>
+			<li>update de um ponto e query de range</li>
+			<li>update de um range e query de um ponto</li>
+			<li>update de um range e query de um range</li>
+			</ol>
+
+			<h3>1. Update de um Ponto e query de Range</h3>
+
+			<p>Árvore de Fenwick tradicional, explicada acima.</p>
+
+			<h3>2. Update de Range e query de Ponto</h3>
+
+			<p>Usando truques simples, também podemos fazer as operações inversas: aumentar ranges e fazer queries por valores individuais.</p>
+
+			<p>Deixe a Árvore Fenwick ser inicializada com zeros.
+			Suponha que desejamos <strong>incrementar o intervalo $[l; r]$ com $x$</strong>.
+			<strong>Fazemos 2 operações de update em pontos na Árvore de Fenwick na qual serão <code>add(l, x)</code> e <code>add(r+1, -x)</code>.</strong></p>
+
+			<p>Se queremos o valor de $A[i]$, só precisamos pegar a soma do prefixo usando o método do range de soma.
+			Esse truque também é possível fazendo uma manipulação de arrays normal.
+			Para ver por que isso é verdade, podemos focar apenas na operação de incremento anterior novamente.
+			Se $i &lt; l$, então as duas operações de update não tem efeito na query e temos a soma $0$.
+			Se $i \in [l; r]$, então temos a resposta da soma $x$ por causa da primeira operação de update.
+			E se $i > r$, a segunda operação (-x) irá cancelar o que a primeira operação fez (+x).</p>
+
+			<p>Implementação:</p>
+
+<pre><code class="cpp">void add(int idx, int x) {
+    for (++idx; idx &lt; n; idx += idx &amp; -idx)
+        bit[idx] += x;
+}
+
+void range_add(int l, int r, int x) {
+    add(l, x);
+    add(r + 1, -x);
+}
+
+int point_query(int idx) {
+    int res = 0;
+    for (++idx; idx &gt; 0; idx -= idx &amp; -idx)
+        res += bit[idx];
+    return res;
+}
+</code></pre>
+
+			<p>Nota: também é possível incrementar um único ponto $A[i]$ com <code>range_add(i, i, x)</code>.</p>
+
+			<h3>3. Updates em Range e query em Range</h3>
+
+			<p>Para suportar ambos updates de range e queries de range usaremos duas BITs: $B_1[]$ e $B_2[]$, incicializadas com zeros.</p>
+
+			<p>Suponha que desejamos incrementar o intervalo $[l; r]$ com o valor $x$.
+			Da mesma forma que no método anterior, realizamos 2 updates de pontos em $B_1$: <code>add(B1, l, x)</code> e <code>add(B1, r+1, -x)</code>.
+			E também fazemos um update em $B_2$.</p>
+
+<pre><code class="python">def range_add(l, r, x):
+    add(B1, l, x)
+    add(B1, r+1, -x)
+    add(B2, l, x*(l-1))
+    add(B2, r+1, -x*r))
+</code></pre>
+
+			<p>Depois do update no range $(l, r, x)$ a query de soma de range deve retornar os valores:
+			$$
+			sum[0; i]=
+			\begin{cases}
+			0 &amp; i &lt; l &#92;&#92;
+			x \cdot (i-(l-1)) &amp; l \le i \le r &#92;&#92;
+			x \cdot (r-l+1) &amp; i > r &#92;&#92;
+			\end{cases}
+			$$</p>
+
+			<p>Podemos escrever a soma do intervalo como a diferença de dois termos, onde usamos $B_1$ para o primeiro termo e $B_2$ para o segundo termo.
+			A diferença entre as queries nos dará o prefxo da soma sobre o range $[0; i]$.
+			$$\begin{align}
+			sum[0; i] &amp;= sum(B_1, i) \cdot i - sum(B_2, i) &#92;&#92;
+			&amp;= \begin{cases}
+			0 \cdot i - 0 &amp; i &lt; l&#92;&#92;
+			x \cdot i - x \cdot (l-1) &amp; l \le i \le r &#92;&#92;
+			0 \cdot i - (x \cdot (l-1) - x \cdot r) &amp; i > r &#92;&#92;
+			\end{cases}
+			\end{align}
+			$$</p>
+
+			<p>Podemos usar $ B_2 $ para eliminar termos extras quando multiplicarmos $B_1[i]\times i$.</p>
+
+			<p>Podemos encontrar somas de intervalo calculando as somas de prefixo para $l-1$ e $r$ e tomando a diferença deles novamente.</p>
+
+<pre><code class="python">def add(b, idx, x):
+    while idx &lt;= N:
+        b[idx] += x
+        idx += idx &amp; -idx
+
+def range_add(l,r,x):
+    add(B1, l, x)
+    add(B1, r+1, -x)
+    add(B2, l, x*(l-1))
+    add(B2, r+1, -x*r)
+
+def sum(b, idx):
+    total = 0
+    while idx &gt; 0:
+        total += b[idx]
+        idx -= idx &amp; -idx
+    return total
+
+def prefix_sum(idx):
+    return sum(B1, idx)*idx -  sum(B2, idx)
+
+def range_sum(l, r):
+    return prefix_sum(r) - prefix_sum(l-1)
+</code></pre>
+
+			<h2>Problemas</h2>
+
+			<ul>
+			<li><a href="https://uva.onlinejudge.org/index.php?option=com_onlinejudge&amp;Itemid=8&amp;category=24&amp;page=show_problem&amp;problem=3238">UVA 12086 - Potentiometers</a></li>
+			<li><a href="http://www.lightoj.com/volume_showproblem.php?problem=1112">LOJ 1112 - Curious Robin Hood</a></li>
+			<li><a href="http://www.lightoj.com/volume_showproblem.php?problem=1266" title="2D Fenwick Tree">LOJ 1266 - Points in Rectangle</a></li>
+			<li><a href="http://www.codechef.com/problems/SPREAD">Codechef - SPREAD</a></li>
+			<li><a href="http://www.spoj.com/problems/CTRICK/">SPOJ - CTRICK</a></li>
+			<li><a href="http://www.spoj.com/problems/MATSUM/">SPOJ - MATSUM</a></li>
+			<li><a href="http://www.spoj.com/problems/DQUERY/">SPOJ - DQUERY</a></li>
+			<li><a href="http://www.spoj.com/problems/NKTEAM/">SPOJ - NKTEAM</a></li>
+			<li><a href="http://www.spoj.com/problems/YODANESS/">SPOJ - YODANESS</a></li>
+			<li><a href="https://community.topcoder.com/stat?c=problem_statement&amp;pm=6551&amp;rd=9990">SRM 310 - FloatingMedian</a></li>
+			<li><a href="http://www.spoj.com/problems/ADABEHIVE/">SPOJ - Ada and Behives</a></li>
+			<li><a href="https://www.hackerearth.com/practice/data-structures/advanced-data-structures/fenwick-binary-indexed-trees/practice-problems/algorithm/counting-in-byteland/">Hackerearth - Counting in Byteland</a></li>
+			<li><a href="https://devskill.com/CodingProblems/ViewProblem/300">DevSkills - Shan and String</a></li>
+			<li><a href="http://codeforces.com/contest/669/problem/E">Codeforces - Little Artem and Time Machine</a></li>
+			<li><a href="http://codeforces.com/contest/777/problem/E">Codeforces - Hanoi Factory</a></li>
+			<li><a href="http://www.spoj.com/problems/TULIPNUM/">SPOJ - Tulip and Numbers</a></li>
+			<li><a href="http://www.spoj.com/problems/SUMSUM/">SPOJ - SUMSUM</a></li>
+			<li><a href="http://www.spoj.com/problems/SGIFT/">SPOJ - Sabir and Gifts</a></li>
+			<li><a href="http://www.spoj.com/problems/TPGA/">SPOJ - The Permutation Game Again</a></li>
+			<li><a href="http://www.spoj.com/problems/ZIGZAG2/">SPOJ - Zig when you Zag</a></li>
+			<li><a href="http://www.spoj.com/problems/CRAYON/">SPOJ - Cryon</a></li>
+			<li><a href="http://www.spoj.com/problems/DCEPC705/">SPOJ - Weird Points</a></li>
+			<li><a href="http://www.spoj.com/problems/DCEPC206/">SPOJ - Its a Murder</a></li>
+			<li><a href="http://www.spoj.com/problems/KOPC12G/">SPOJ - Bored of Suffixes and Prefixes</a></li>
+			<li><a href="http://www.spoj.com/problems/TRIPINV/">SPOJ - Mega Inversions</a></li>
+			<li><a href="http://codeforces.com/contest/597/problem/C">Codeforces - Subsequences</a></li>
+			<li><a href="http://codeforces.com/contest/12/problem/D">Codeforces - Ball</a></li>
+			<li><a href="http://codeforces.com/gym/101047/problem/J">GYM - The Kamphaeng Phet's Chedis</a></li>
+			<li><a href="http://codeforces.com/contest/707/problem/E">Codeforces - Garlands</a></li>
+			<li><a href="http://codeforces.com/contest/749/problem/E">Codeforces - Inversions after Shuffle</a></li>
+			<li><a href="http://codeforces.com/problemset/gymProblem/101055/D">GYM - Cairo Market</a></li>
+			<li><a href="http://codeforces.com/contest/849/problem/E">Codeforces - Goodbye Souvenir</a></li>
+			<li><a href="http://www.spoj.com/problems/ADACABAA/">SPOJ - Ada and Species</a></li>
+			<li><a href="https://codeforces.com/problemset/problem/704/A">Codeforces - Thor</a></li>
+			<li><a href="http://matcomgrader.com/problem/9346/fundraising/">Latin American Regionals 2017 - Fundraising</a></li>
+			</ul>
+
+			<h3>Outros recursos</h3>
+
+			<ul>
+			<li><a href="http://en.wikipedia.org/wiki/Fenwick_tree">Fenwick tree on Wikipedia</a></li>
+			<li><a href="https://www.topcoder.com/community/data-science/data-science-tutorials/binary-indexed-trees/">Binary indexed trees tutorial on TopCoder</a></li>
+			<li><a href="https://programmingcontests.quora.com/Tutorial-Range-Updates-in-Fenwick-Tree">Range updates and queries </a></li>
+			</ul>
+			
+			
+
+
+			
+
+			
+			
+
+		</div>
+	</body>
+</html>                   
